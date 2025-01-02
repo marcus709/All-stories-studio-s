@@ -13,13 +13,11 @@ const Community = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setIsLoading(false);
     });
 
-    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -44,7 +42,9 @@ const Community = () => {
       <div className="container mx-auto px-4 py-8 mt-16">
         <div className="flex gap-8">
           <CommunitySidebar />
-          <CommunityFeed />
+          <div className="flex-1 max-w-3xl">
+            <CommunityFeed />
+          </div>
           <TrendingTopics />
         </div>
       </div>

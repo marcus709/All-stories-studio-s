@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
-import { Heart, MessageSquare } from "lucide-react";
+import { Heart, MessageSquare, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -9,7 +9,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 
 interface PostProps {
-  post: any; // We'll properly type this once we have the Supabase types
+  post: any;
 }
 
 export const Post = ({ post }: PostProps) => {
@@ -125,6 +125,10 @@ export const Post = ({ post }: PostProps) => {
         >
           <MessageSquare className="h-4 w-4" />
           {post.comments.length}
+        </Button>
+        <Button variant="ghost" size="sm" className="gap-2 text-gray-500">
+          <Share2 className="h-4 w-4" />
+          Share
         </Button>
       </div>
 

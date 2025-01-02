@@ -28,15 +28,21 @@ export const TrendingTopics = () => {
     <div className="w-72 shrink-0">
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="font-semibold mb-4">Trending Topics</h2>
-        <div className="space-y-3">
-          {topics?.map(([tag, count]) => (
-            <div key={tag} className="flex items-center gap-2">
-              <Hash className="h-4 w-4 text-purple-500" />
-              <span className="text-sm font-medium">{tag}</span>
-              <span className="text-sm text-gray-500">({count} posts)</span>
-            </div>
-          ))}
-        </div>
+        {topics && topics.length > 0 ? (
+          <div className="space-y-3">
+            {topics.map(([tag, count]) => (
+              <div key={tag} className="flex items-center gap-2">
+                <Hash className="h-4 w-4 text-purple-500" />
+                <span className="text-sm font-medium">{tag}</span>
+                <span className="text-sm text-gray-500">({count} posts)</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500">
+            No trending topics yet. Start posting to see what's popular!
+          </p>
+        )}
       </div>
     </div>
   );
