@@ -5,8 +5,6 @@ import { Button } from "./ui/button";
 import { CreateStoryIdeaDialog } from "./CreateStoryIdeaDialog";
 
 export const StoryIdeasView = () => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-
   return (
     <div className="max-w-5xl mx-auto px-8 py-6">
       <div className="flex items-center justify-between mb-6">
@@ -14,13 +12,7 @@ export const StoryIdeasView = () => {
           <h1 className="text-2xl font-bold">Story Ideas</h1>
           <p className="text-gray-500">Capture and organize your creative ideas</p>
         </div>
-        <Button 
-          className="bg-purple-500 hover:bg-purple-600"
-          onClick={() => setIsDialogOpen(true)}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Idea
-        </Button>
+        <CreateStoryIdeaDialog />
       </div>
 
       <div className="relative mb-6">
@@ -57,11 +49,6 @@ export const StoryIdeasView = () => {
           </div>
         </div>
       </div>
-
-      <CreateStoryIdeaDialog 
-        isOpen={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-      />
     </div>
   );
 };

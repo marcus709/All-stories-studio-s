@@ -6,7 +6,8 @@ import {
   GitBranch, 
   Lightbulb,
   Book,
-  Plus
+  Plus,
+  Wand
 } from "lucide-react";
 import { 
   Select,
@@ -97,7 +98,7 @@ function DashboardContent() {
                 </Select>
 
                 <button className="ml-auto px-6 py-2 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg flex items-center gap-2 transition-colors">
-                  <Wand2 className="h-4 w-4" />
+                  <Wand className="h-4 w-4" />
                   Get AI Suggestions
                 </button>
               </div>
