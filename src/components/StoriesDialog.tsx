@@ -1,7 +1,7 @@
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Book } from "lucide-react";
 import { useStory } from "@/contexts/StoryContext";
 import { useToast } from "./ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -138,27 +138,25 @@ export function StoriesDialog() {
         </DialogContent>
       </Dialog>
 
-      <button 
-        onClick={() => setIsOpen(true)}
-        className={`w-full flex items-center gap-3 text-purple-600 px-4 py-2 rounded-lg hover:bg-purple-50 transition-colors ${
-          selectedStory ? "font-medium" : ""
-        }`}
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-5 w-5"
+      <div className="space-y-2">
+        <button 
+          onClick={() => setIsOpen(true)}
+          className="w-full flex items-center gap-3 px-4 py-2 rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors"
         >
-          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-        </svg>
-        <span>{selectedStory ? selectedStory.title : "View All Stories"}</span>
-      </button>
+          <Book className="h-5 w-5" />
+          <span className="flex-1 text-left">{selectedStory ? selectedStory.title : "View All Stories"}</span>
+          <span className="text-purple-400">→</span>
+        </button>
+
+        <button 
+          onClick={() => setShowNewStory(true)}
+          className="w-full flex items-center gap-3 px-4 py-2 rounded-lg border border-dashed border-gray-300 text-gray-600 hover:border-purple-400 hover:text-purple-600 transition-colors"
+        >
+          <Plus className="h-5 w-5" />
+          <span>Create New Story</span>
+          <span className="text-gray-400">+</span>
+        </button>
+      </div>
     </>
   );
 }
