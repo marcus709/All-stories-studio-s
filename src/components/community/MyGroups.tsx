@@ -61,12 +61,29 @@ export const MyGroups = () => {
 
   const deleteGroupMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
+      // First delete all group members
+      const { error: membersError } = await supabase
+        .from("group_members")
+        .delete()
+        .eq("group_id", selectedGroup.id);
+
+      if (membersError) throw membersError;
+
+      // Then delete all group messages
+      const { error: messagesError } = await supabase
+        .from("group_messages")
+        .delete()
+        .eq("group_id", selectedGroup.id);
+
+      if (messagesError) throw messagesError;
+
+      // Finally delete the group itself
+      const { error: groupError } = await supabase
         .from("groups")
         .delete()
         .eq("id", selectedGroup.id);
 
-      if (error) throw error;
+      if (groupError) throw groupError;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-groups"] });
@@ -75,6 +92,11 @@ export const MyGroups = () => {
         description: "Group deleted successfully",
       });
       setIsDeleteOpen(false);
+      setSelectedGroup(null);
+      // If the deleted group was selected for chat, clear it
+      if (selectedChatGroup?.id === selectedGroup.id) {
+        setSelectedChatGroup(null);
+      }
     },
     onError: (error) => {
       toast({
