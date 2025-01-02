@@ -29,7 +29,9 @@ export const CommunityFeed = () => {
     enabled: !!session?.user?.id,
   });
 
-  if (!session) {
+  console.log("Current session:", session); // Debug log
+
+  if (!session?.user) {
     return (
       <div className="text-center py-8">
         <p>Please sign in to view and create posts.</p>
