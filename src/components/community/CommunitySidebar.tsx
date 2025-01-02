@@ -33,6 +33,30 @@ export const CommunitySidebar = () => {
 
   return (
     <div className="space-y-6">
+      {profile && (
+        <div className="flex items-center gap-3 px-3 py-2">
+          <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-medium text-lg">
+            {profile.avatar_url ? (
+              <img
+                src={profile.avatar_url}
+                alt={profile.username}
+                className="w-full h-full object-cover rounded-full"
+              />
+            ) : (
+              profile.username?.[0]?.toUpperCase() || "U"
+            )}
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="font-medium text-gray-900 truncate">
+              {profile.username || "Anonymous"}
+            </span>
+            <span className="text-sm text-gray-500 truncate">
+              {profile.bio || "Curious Plan"}
+            </span>
+          </div>
+        </div>
+      )}
+
       <nav className="space-y-1">
         {navItems.map(({ icon: Icon, label, href }) => (
           <NavLink
