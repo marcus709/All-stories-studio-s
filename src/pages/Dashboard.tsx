@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Header } from "@/components/Header";
+import { StoriesDialog } from "@/components/StoriesDialog";
 
 export const Dashboard = () => {
   const [wordCount, setWordCount] = useState(1);
@@ -42,10 +43,7 @@ export const Dashboard = () => {
           </div>
 
           <div className="space-y-2 mb-8">
-            <button className="w-full flex items-center gap-3 text-purple-600 px-4 py-2 rounded-lg hover:bg-purple-50 transition-colors">
-              <BookOpen className="h-5 w-5" />
-              <span className="font-medium">View All Stories</span>
-            </button>
+            <StoriesDialog />
 
             <button className="w-full flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
               <span className="text-xl">+</span>
