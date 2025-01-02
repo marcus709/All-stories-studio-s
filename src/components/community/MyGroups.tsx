@@ -1,14 +1,24 @@
 import { useState } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
 import { Button } from "@/components/ui/button";
-import { Trash2, Settings } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { Trash2, Settings, LogOut } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { CreateGroupDialog } from "./CreateGroupDialog";
+import { DeleteGroupDialog } from "./DeleteGroupDialog";
+import { LeaveGroupDialog } from "./LeaveGroupDialog";
+import { GroupSettingsDialog } from "./GroupSettingsDialog";
+import { useToast } from "@/hooks/use-toast";
 
 export const MyGroups = () => {
   const session = useSession();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<any>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isLeaveOpen, setIsLeaveOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const { data: groups, isLoading } = useQuery({
     queryKey: ["my-groups"],
@@ -49,9 +59,81 @@ export const MyGroups = () => {
     enabled: !!session?.user?.id,
   });
 
+  const deleteGroupMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("groups")
+        .delete()
+        .eq("id", selectedGroup.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-groups"] });
+      toast({
+        title: "Success",
+        description: "Group deleted successfully",
+      });
+      setIsDeleteOpen(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to delete group",
+        variant: "destructive",
+      });
+      console.error("Error deleting group:", error);
+    },
+  });
+
+  const leaveGroupMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("group_members")
+        .delete()
+        .eq("group_id", selectedGroup.id)
+        .eq("user_id", session?.user?.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-groups"] });
+      toast({
+        title: "Success",
+        description: "Left group successfully",
+      });
+      setIsLeaveOpen(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to leave group",
+        variant: "destructive",
+      });
+      console.error("Error leaving group:", error);
+    },
+  });
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
+
+  const handleGroupAction = (group: any, action: 'delete' | 'leave' | 'settings') => {
+    setSelectedGroup(group);
+    switch (action) {
+      case 'delete':
+        setIsDeleteOpen(true);
+        break;
+      case 'leave':
+        setIsLeaveOpen(true);
+        break;
+      case 'settings':
+        setIsSettingsOpen(true);
+        break;
+    }
+  };
+
+  const isGroupCreator = (group: any) => group.created_by === session?.user?.id;
 
   return (
     <div className="space-y-6">
@@ -81,10 +163,20 @@ export const MyGroups = () => {
               </div>
             </div>
             <div className="flex justify-end gap-2 mt-4">
-              <Button variant="ghost" size="icon">
-                <Trash2 className="h-4 w-4 text-red-500" />
-              </Button>
-              <Button variant="ghost" size="icon">
+              {isGroupCreator(group) ? (
+                <Button variant="ghost" size="icon" onClick={() => handleGroupAction(group, 'delete')}>
+                  <Trash2 className="h-4 w-4 text-red-500" />
+                </Button>
+              ) : (
+                <Button variant="ghost" size="icon" onClick={() => handleGroupAction(group, 'leave')}>
+                  <LogOut className="h-4 w-4 text-red-500" />
+                </Button>
+              )}
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => handleGroupAction(group, 'settings')}
+              >
                 <Settings className="h-4 w-4" />
               </Button>
             </div>
@@ -96,6 +188,29 @@ export const MyGroups = () => {
         open={isCreateOpen} 
         onOpenChange={setIsCreateOpen}
       />
+
+      {selectedGroup && (
+        <>
+          <DeleteGroupDialog
+            isOpen={isDeleteOpen}
+            onClose={() => setIsDeleteOpen(false)}
+            onConfirm={() => deleteGroupMutation.mutate()}
+          />
+
+          <LeaveGroupDialog
+            isOpen={isLeaveOpen}
+            onClose={() => setIsLeaveOpen(false)}
+            onConfirm={() => leaveGroupMutation.mutate()}
+          />
+
+          <GroupSettingsDialog
+            group={selectedGroup}
+            isCreator={isGroupCreator(selectedGroup)}
+            open={isSettingsOpen}
+            onOpenChange={setIsSettingsOpen}
+          />
+        </>
+      )}
     </div>
   );
 };
