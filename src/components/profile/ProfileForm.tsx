@@ -20,6 +20,7 @@ export function ProfileForm({ profile, onChange }: ProfileFormProps) {
           value={profile.username}
           onChange={(e) => onChange("username", e.target.value)}
           placeholder="Enter your name"
+          className="bg-white"
         />
       </div>
 
@@ -29,7 +30,7 @@ export function ProfileForm({ profile, onChange }: ProfileFormProps) {
           value={profile.bio}
           onChange={(e) => onChange("bio", e.target.value)}
           placeholder="Tell us about yourself"
-          className="min-h-[100px]"
+          className="min-h-[100px] bg-white"
         />
       </div>
 
@@ -39,6 +40,7 @@ export function ProfileForm({ profile, onChange }: ProfileFormProps) {
           value={profile.website}
           onChange={(e) => onChange("website", e.target.value)}
           placeholder="Enter your website URL"
+          className="bg-white"
         />
       </div>
     </>

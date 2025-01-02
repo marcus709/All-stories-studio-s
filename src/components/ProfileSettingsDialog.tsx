@@ -34,7 +34,7 @@ export function ProfileSettingsDialog() {
         .from("profiles")
         .select("username, bio, website, avatar_url")
         .eq("id", session?.user?.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       if (data) {
@@ -67,14 +67,14 @@ export function ProfileSettingsDialog() {
       if (error) throw error;
 
       toast({
-        title: "Profile updated successfully",
+        title: "Success",
         description: "Your profile settings have been saved.",
       });
       setIsOpen(false);
       navigate("/");
     } catch (error) {
       toast({
-        title: "Error updating profile",
+        title: "Error",
         description: "There was an error updating your profile. Please try again.",
         variant: "destructive",
       });
@@ -131,7 +131,11 @@ export function ProfileSettingsDialog() {
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button 
+              type="submit" 
+              disabled={loading}
+              className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600"
+            >
               Save Changes
             </Button>
           </div>

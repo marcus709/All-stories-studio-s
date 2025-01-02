@@ -2,6 +2,7 @@ import React from "react";
 import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Upload } from "lucide-react";
 
 interface AvatarUploadProps {
   avatarUrl: string;
@@ -40,12 +41,12 @@ export function AvatarUpload({ avatarUrl, onAvatarChange }: AvatarUploadProps) {
 
       onAvatarChange(urlData.publicUrl);
       toast({
-        title: "Avatar updated",
-        description: "Your profile picture has been updated successfully.",
+        title: "Success",
+        description: "Your profile picture has been updated.",
       });
     } catch (error) {
       toast({
-        title: "Error uploading avatar",
+        title: "Error",
         description: "There was an error uploading your avatar. Please try again.",
         variant: "destructive",
       });
@@ -56,7 +57,7 @@ export function AvatarUpload({ avatarUrl, onAvatarChange }: AvatarUploadProps) {
     <div className="space-y-2">
       <label className="text-sm font-medium">Profile Picture</label>
       <div className="flex items-center gap-4">
-        <div className="relative h-16 w-16 rounded-full bg-gray-100">
+        <div className="relative h-24 w-24 rounded-full bg-gray-100">
           {avatarUrl && (
             <img
               src={avatarUrl}
@@ -66,9 +67,10 @@ export function AvatarUpload({ avatarUrl, onAvatarChange }: AvatarUploadProps) {
           )}
           <label
             htmlFor="avatar-upload"
-            className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100"
+            className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100"
           >
-            <span className="text-sm text-white">Change Photo</span>
+            <Upload className="h-6 w-6 text-white" />
+            <span className="mt-1 text-sm text-white">Change Photo</span>
           </label>
           <input
             id="avatar-upload"
