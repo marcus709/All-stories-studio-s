@@ -8,29 +8,12 @@ export const useGroupMutations = (onSuccess?: () => void) => {
 
   const deleteGroupMutation = useMutation({
     mutationFn: async (groupId: string) => {
-      // First delete all group members
-      const { error: membersError } = await supabase
-        .from("group_members")
-        .delete()
-        .eq("group_id", groupId);
-
-      if (membersError) throw membersError;
-
-      // Then delete all group messages
-      const { error: messagesError } = await supabase
-        .from("group_messages")
-        .delete()
-        .eq("group_id", groupId);
-
-      if (messagesError) throw messagesError;
-
-      // Finally delete the group itself
-      const { error: groupError } = await supabase
+      const { error } = await supabase
         .from("groups")
         .delete()
         .eq("id", groupId);
 
-      if (groupError) throw groupError;
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-groups"] });

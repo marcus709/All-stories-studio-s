@@ -107,13 +107,21 @@ export const MyGroups = () => {
           <DeleteGroupDialog
             isOpen={isDeleteOpen}
             onClose={() => setIsDeleteOpen(false)}
-            onConfirm={() => deleteGroupMutation.mutate(selectedGroup.id)}
+            onConfirm={() => {
+              if (selectedGroup) {
+                deleteGroupMutation.mutate(selectedGroup.id);
+              }
+            }}
           />
 
           <LeaveGroupDialog
             isOpen={isLeaveOpen}
             onClose={() => setIsLeaveOpen(false)}
-            onConfirm={() => leaveGroupMutation.mutate(selectedGroup.id)}
+            onConfirm={() => {
+              if (selectedGroup) {
+                leaveGroupMutation.mutate(selectedGroup.id);
+              }
+            }}
           />
 
           <GroupSettingsDialog
