@@ -5,8 +5,6 @@ import { Input } from "@/components/ui/input";
 import { useCreatePost } from "@/hooks/useCreatePost";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-const isPreviewEnvironment = window.location.hostname.includes('lovableproject.com');
-
 interface CreatePostFormProps {
   userId: string;
   profile: any;
@@ -22,11 +20,6 @@ export const CreatePostForm = ({ userId, profile }: CreatePostFormProps) => {
     e.preventDefault();
     setError(null);
     if (!newPost.trim()) return;
-
-    if (isPreviewEnvironment) {
-      setError("Creating posts is disabled in preview mode");
-      return;
-    }
 
     createPost.mutate(
       { content: newPost, userId, profile, tags },
@@ -83,10 +76,10 @@ export const CreatePostForm = ({ userId, profile }: CreatePostFormProps) => {
         />
         <Button
           type="submit"
-          disabled={!newPost.trim() || createPost.isPending || isPreviewEnvironment}
+          disabled={!newPost.trim() || createPost.isPending}
           className="w-full bg-purple-600 hover:bg-purple-700"
         >
-          {isPreviewEnvironment ? "Posting disabled in preview" : "Share"}
+          Share
         </Button>
       </form>
     </div>

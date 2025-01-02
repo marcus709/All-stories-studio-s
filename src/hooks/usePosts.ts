@@ -2,25 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-const isPreviewEnvironment = window.location.hostname.includes('lovableproject.com');
-
-// Mock data for preview environment
-const PREVIEW_POSTS = [
-  {
-    id: '1',
-    content: 'Welcome to the preview environment! This is a sample post.',
-    created_at: new Date().toISOString(),
-    user_id: 'preview-user',
-    profiles: {
-      username: 'PreviewUser',
-      avatar_url: null
-    },
-    post_likes: [],
-    comments: [],
-    post_tags: [{ tag: '#preview' }]
-  }
-];
-
 export const usePosts = () => {
   const { toast } = useToast();
 
@@ -29,12 +10,6 @@ export const usePosts = () => {
     queryFn: async () => {
       console.log("Fetching posts...");
       
-      // Return mock data in preview environment
-      if (isPreviewEnvironment) {
-        console.log("Using preview data");
-        return PREVIEW_POSTS;
-      }
-
       try {
         const { data: posts, error } = await supabase
           .from("posts")

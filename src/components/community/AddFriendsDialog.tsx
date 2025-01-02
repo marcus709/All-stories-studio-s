@@ -48,26 +48,6 @@ export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) =>
     enabled: !!session?.user?.id,
   });
 
-  const isPreviewEnvironment = window.location.hostname.includes('lovableproject.com');
-
-  if (isPreviewEnvironment) {
-    return (
-      <Dialog>
-        <DialogTrigger asChild>{children}</DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add Friends</DialogTitle>
-          </DialogHeader>
-          <Alert>
-            <AlertDescription>
-              Friend functionality is limited in preview mode.
-            </AlertDescription>
-          </Alert>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
