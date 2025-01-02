@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useCreatePost } from "@/hooks/useCreatePost";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface CreatePostFormProps {
   userId: string;
@@ -13,16 +14,23 @@ export const CreatePostForm = ({ userId, profile }: CreatePostFormProps) => {
   const [newPost, setNewPost] = useState("");
   const [tags, setTags] = useState("");
   const createPost = useCreatePost();
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     if (!newPost.trim()) return;
+
     createPost.mutate(
       { content: newPost, userId, profile, tags },
       {
         onSuccess: () => {
           setNewPost("");
           setTags("");
+        },
+        onError: (error) => {
+          console.error("Error creating post:", error);
+          setError("Failed to create post. Please try again.");
         },
       }
     );
@@ -44,8 +52,14 @@ export const CreatePostForm = ({ userId, profile }: CreatePostFormProps) => {
             </span>
           )}
         </div>
-        <span className="text-gray-500">@{profile?.username}</span>
+        <span className="text-gray-500">@{profile?.username || "anonymous"}</span>
       </div>
+
+      {error && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <Textarea
