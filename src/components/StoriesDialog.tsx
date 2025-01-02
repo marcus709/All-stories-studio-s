@@ -1,5 +1,5 @@
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Dialog, DialogContent } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Plus, X, Book } from "lucide-react";
 import { useStory } from "@/contexts/StoryContext";
@@ -7,13 +7,14 @@ import { useToast } from "./ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CreateStoryForm } from "./stories/CreateStoryForm";
-import { StoryCard } from "./stories/StoryCard";
+import { StoriesDialogHeader } from "./stories/StoriesDialogHeader";
+import { StoriesGrid } from "./stories/StoriesGrid";
 
 export function StoriesDialog() {
   const [isOpen, setIsOpen] = React.useState(false);
   const [showNewStory, setShowNewStory] = React.useState(false);
   const [newStory, setNewStory] = React.useState({ title: "", description: "" });
-  const { stories, selectedStory, setSelectedStory } = useStory();
+  const { selectedStory, setSelectedStory } = useStory();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -60,11 +61,6 @@ export function StoriesDialog() {
     createStoryMutation.mutate(newStory);
   };
 
-  const handleStorySelect = (story: any) => {
-    setSelectedStory(story);
-    setIsOpen(false);
-  };
-
   const handleNewStoryChange = (field: "title" | "description", value: string) => {
     setNewStory((prev) => ({ ...prev, [field]: value }));
   };
@@ -73,18 +69,7 @@ export function StoriesDialog() {
     <>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="sm:max-w-[800px]">
-          <DialogHeader>
-            <div className="flex justify-between items-center">
-              <DialogTitle className="text-2xl font-bold">Your Stories</DialogTitle>
-              <Button
-                variant="ghost"
-                className="h-8 w-8 p-0"
-                onClick={() => setIsOpen(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </DialogHeader>
+          <StoriesDialogHeader onClose={() => setIsOpen(false)} />
 
           <Button
             onClick={() => {
@@ -98,33 +83,16 @@ export function StoriesDialog() {
             Create New Story
           </Button>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {stories.map((story) => (
-              <StoryCard
-                key={story.id}
-                story={story}
-                isSelected={selectedStory?.id === story.id}
-                onClick={() => handleStorySelect(story)}
-              />
-            ))}
-          </div>
+          <StoriesGrid
+            onStorySelect={setSelectedStory}
+            onClose={() => setIsOpen(false)}
+          />
         </DialogContent>
       </Dialog>
 
       <Dialog open={showNewStory} onOpenChange={setShowNewStory}>
         <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <div className="flex justify-between items-center mb-6">
-              <DialogTitle className="text-2xl font-bold">Create New Story</DialogTitle>
-              <Button
-                variant="ghost"
-                className="h-8 w-8 p-0"
-                onClick={() => setShowNewStory(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </DialogHeader>
+          <StoriesDialogHeader onClose={() => setShowNewStory(false)} />
 
           <CreateStoryForm
             newStory={newStory}
