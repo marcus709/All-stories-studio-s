@@ -25,6 +25,7 @@ interface DashboardContentProps {
 export const DashboardContent = ({ currentView }: DashboardContentProps) => {
   const [wordCount, setWordCount] = useState(1);
   const [storyContent, setStoryContent] = useState("");
+  const [aiSuggestions, setAiSuggestions] = useState("");
   const { selectedStory } = useStory();
   const { generateContent, isLoading } = useAI();
   const { toast } = useToast();
@@ -49,10 +50,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
 
     const suggestions = await generateContent(storyContent, "suggestions");
     if (suggestions) {
-      toast({
-        title: "AI Suggestions",
-        description: suggestions,
-      });
+      setAiSuggestions(suggestions);
     }
   };
 
@@ -120,13 +118,33 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
               </button>
             </div>
 
-            <Textarea
-              placeholder={selectedStory ? "Start writing your story here..." : "Please select or create a story to start writing"}
-              className="min-h-[600px] resize-none text-lg p-6"
-              onChange={handleTextChange}
-              value={storyContent}
-              disabled={!selectedStory}
-            />
+            <div className="grid grid-cols-1 gap-6">
+              <Textarea
+                placeholder={selectedStory ? "Start writing your story here..." : "Please select or create a story to start writing"}
+                className="min-h-[400px] resize-none text-lg p-6"
+                onChange={handleTextChange}
+                value={storyContent}
+                disabled={!selectedStory}
+              />
+
+              {(isLoading || aiSuggestions) && (
+                <div className="bg-purple-50 rounded-lg p-6 relative">
+                  <h3 className="text-xl font-semibold text-purple-900 mb-4">AI Suggestions</h3>
+                  {isLoading ? (
+                    <div className="flex items-center gap-2 text-purple-600">
+                      <Wand className="h-5 w-5 animate-spin" />
+                      <span>Getting AI suggestions...</span>
+                    </div>
+                  ) : (
+                    <div className="prose prose-purple max-w-none">
+                      {aiSuggestions.split('\n').map((paragraph, index) => (
+                        <p key={index} className="text-purple-800">{paragraph}</p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       );
