@@ -42,18 +42,20 @@ const Community = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="container mx-auto px-4 py-8 mt-16">
-        <div className="flex gap-8">
-          <CommunitySidebar />
-          <div className="flex-1 max-w-3xl">
-            <Routes>
-              <Route path="/" element={<CommunityFeed />} />
-              <Route path="/groups" element={<MyGroups />} />
-              <Route path="/topics" element={<Topics />} />
-              <Route path="/saved" element={<SavedPosts />} />
-            </Routes>
+      <div className="pt-16">
+        <div className="container mx-auto px-4">
+          <div className="flex gap-8">
+            <CommunitySidebar />
+            <div className="flex-1 max-w-3xl">
+              <Routes>
+                <Route path="/" element={<CommunityFeed />} />
+                <Route path="/groups" element={<MyGroups />} />
+                <Route path="/topics" element={<Topics />} />
+                <Route path="/saved" element={<SavedPosts />} />
+              </Routes>
+            </div>
+            <TrendingTopics />
           </div>
-          <TrendingTopics />
         </div>
       </div>
     </div>
