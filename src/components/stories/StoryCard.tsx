@@ -1,5 +1,7 @@
 import React from "react";
 import { Card } from "../ui/card";
+import { Trash2 } from "lucide-react";
+import { Button } from "../ui/button";
 
 interface StoryCardProps {
   story: {
@@ -10,16 +12,26 @@ interface StoryCardProps {
   };
   isSelected: boolean;
   onClick: () => void;
+  onDelete: (e: React.MouseEvent) => void;
 }
 
-export function StoryCard({ story, isSelected, onClick }: StoryCardProps) {
+export function StoryCard({ story, isSelected, onClick, onDelete }: StoryCardProps) {
   return (
     <Card 
-      className={`bg-purple-50 p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-purple-100 transition-colors ${
+      className={`relative bg-purple-50 p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-purple-100 transition-colors ${
         isSelected ? "ring-2 ring-purple-500" : ""
       }`}
       onClick={onClick}
     >
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute top-2 right-2 text-gray-500 hover:text-red-500 hover:bg-red-50"
+        onClick={onDelete}
+      >
+        <Trash2 className="h-4 w-4" />
+      </Button>
+      
       <div className="w-12 h-12 mb-4 text-purple-500">
         <svg
           xmlns="http://www.w3.org/2000/svg"
