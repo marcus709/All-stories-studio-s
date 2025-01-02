@@ -10,7 +10,7 @@ export const usePosts = () => {
         .from("posts")
         .select(`
           *,
-          profiles!posts_user_id_fkey (
+          profiles (
             username,
             avatar_url
           ),
@@ -23,7 +23,7 @@ export const usePosts = () => {
             content,
             created_at,
             user_id,
-            profiles!comments_user_id_fkey (
+            profiles (
               username,
               avatar_url
             )
