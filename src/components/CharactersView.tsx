@@ -1,15 +1,18 @@
-import { Plus, UserRound, Calendar, Clock } from "lucide-react";
+import { Plus, UserRound, Calendar, Clock, Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { CreateCharacterDialog } from "./CreateCharacterDialog";
 import { useSession } from "@supabase/auth-helpers-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 export const CharactersView = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const session = useSession();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: characters, isLoading } = useQuery({
     queryKey: ["characters", session?.user?.id],
@@ -24,6 +27,31 @@ export const CharactersView = () => {
     },
     enabled: !!session?.user?.id,
   });
+
+  const handleDeleteCharacter = async (characterId: string) => {
+    try {
+      const { error } = await supabase
+        .from("characters")
+        .delete()
+        .eq("id", characterId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Character deleted successfully",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["characters"] });
+    } catch (error) {
+      console.error("Error deleting character:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete character. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-8 py-6">
@@ -50,8 +78,16 @@ export const CharactersView = () => {
           {characters.map((character) => (
             <div
               key={character.id}
-              className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow"
+              className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow relative group"
             >
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => handleDeleteCharacter(character.id)}
+              >
+                <Trash2 className="h-4 w-4 text-red-500 hover:text-red-700" />
+              </Button>
               <div className="flex items-start gap-4">
                 <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
                   <UserRound className="w-8 h-8 text-purple-500" />
