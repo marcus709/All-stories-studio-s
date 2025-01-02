@@ -22,10 +22,10 @@ export const DashboardSidebar = ({ currentView, setCurrentView }: DashboardSideb
 
   return (
     <div className="fixed left-0 top-16 w-72 h-[calc(100vh-4rem)] border-r bg-white">
-      <div className="p-6 flex flex-col h-full">
+      <div className="p-8 flex flex-col h-full">
         {/* Profile Section */}
-        <div className="flex items-center gap-4 mb-8 px-2">
-          <div className="w-12 h-12 rounded-full bg-purple-500 flex items-center justify-center text-white text-xl font-medium">
+        <div className="flex items-center gap-4 mb-12 px-2 mt-4">
+          <div className="w-14 h-14 rounded-full bg-purple-500 flex items-center justify-center text-white text-xl font-medium">
             M
           </div>
           <div className="flex flex-col">
@@ -35,18 +35,18 @@ export const DashboardSidebar = ({ currentView, setCurrentView }: DashboardSideb
         </div>
 
         {/* Stories Section */}
-        <div className="space-y-3 mb-8">
+        <div className="space-y-4 mb-10">
           <StoriesDialog />
         </div>
 
         {/* Navigation */}
-        <nav className="space-y-2">
+        <nav className="space-y-3">
           {navigationItems.map(({ id, icon: Icon, label }) => (
             <button
               key={id}
               onClick={() => setCurrentView(id)}
               disabled={!selectedStory}
-              className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-colors text-gray-700 text-lg
+              className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-lg transition-colors text-gray-700 text-lg
                 ${currentView === id ? "bg-purple-50 text-purple-600" : "hover:bg-gray-50"}`}
             >
               <Icon className="h-6 w-6" />
