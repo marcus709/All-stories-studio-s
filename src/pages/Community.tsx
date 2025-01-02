@@ -42,11 +42,13 @@ const Community = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="pt-24"> {/* Changed from pt-16 to pt-24 for more spacing */}
-        <div className="container mx-auto px-4">
-          <div className="flex gap-8">
-            <CommunitySidebar />
-            <div className="flex-1 max-w-3xl">
+      <div className="fixed inset-0 pt-24">
+        <div className="container h-full mx-auto px-4">
+          <div className="flex gap-8 h-full">
+            <div className="w-64 shrink-0">
+              <CommunitySidebar />
+            </div>
+            <div className="flex-1 max-w-3xl overflow-y-auto pb-8">
               <Routes>
                 <Route path="/" element={<CommunityFeed />} />
                 <Route path="/groups" element={<MyGroups />} />
@@ -54,7 +56,9 @@ const Community = () => {
                 <Route path="/saved" element={<SavedPosts />} />
               </Routes>
             </div>
-            <TrendingTopics />
+            <div className="w-80 shrink-0">
+              <TrendingTopics />
+            </div>
           </div>
         </div>
       </div>
