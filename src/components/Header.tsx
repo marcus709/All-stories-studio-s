@@ -52,16 +52,21 @@ export const Header = () => {
   }, []);
 
   const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select()
-      .eq("id", userId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select()
+        .eq("id", userId)
+        .maybeSingle();
 
-    if (error) {
-      console.error("Error fetching profile:", error);
-    } else {
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return;
+      }
+      
       setProfile(data);
+    } catch (error) {
+      console.error("Error in fetchProfile:", error);
     }
   };
 
