@@ -4,6 +4,7 @@ import { Header } from "@/components/Header";
 import { CommunitySidebar } from "@/components/community/CommunitySidebar";
 import { CommunityFeed } from "@/components/community/CommunityFeed";
 import { MyGroups } from "@/components/community/MyGroups";
+import { Topics } from "@/components/community/Topics";
 import { TrendingTopics } from "@/components/community/TrendingTopics";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
@@ -47,7 +48,8 @@ const Community = () => {
             <Routes>
               <Route path="/" element={<CommunityFeed />} />
               <Route path="/groups" element={<MyGroups />} />
-              {/* Add more routes for Topics and Saved later */}
+              <Route path="/topics" element={<Topics />} />
+              {/* Add more routes for Saved later */}
             </Routes>
           </div>
           <TrendingTopics />
