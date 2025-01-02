@@ -23,14 +23,17 @@ export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) =>
       const { data: friendships, error } = await supabase
         .from("friendships")
         .select(`
-          *,
-          profiles!friendships_friend_id_fkey (
+          id,
+          status,
+          profiles:friend_id(
             id,
             username,
-            avatar_url
+            avatar_url,
+            bio,
+            website
           )
         `)
-        .or(`user_id.eq.${session?.user?.id},friend_id.eq.${session?.user?.id}`)
+        .eq("user_id", session?.user?.id)
         .eq("status", "accepted");
 
       if (error) throw error;
