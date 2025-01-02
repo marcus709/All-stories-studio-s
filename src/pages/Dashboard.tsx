@@ -139,17 +139,7 @@ function DashboardContent() {
 
           {/* Stories Section */}
           <div className="space-y-2 mb-8">
-            <button className="w-full flex items-center gap-2 px-4 py-2.5 rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors">
-              <Book className="h-5 w-5" />
-              <span className="font-medium">View All Stories</span>
-              <span className="ml-auto">→</span>
-            </button>
-            
-            <button className="w-full flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors">
-              <Plus className="h-5 w-5" />
-              <span className="font-medium">Create New Story</span>
-              <span className="ml-auto">+</span>
-            </button>
+            <StoriesDialog />
           </div>
 
           {/* Navigation */}
