@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
-import { BookOpen, User } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { AuthModals } from "./auth/AuthModals";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./ui/use-toast";
@@ -14,12 +14,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Session } from "@supabase/supabase-js";
 
 export const Header = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [authView, setAuthView] = useState<"signin" | "signup">("signin");
-  const [session, setSession] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<{
+    id: string;
+    username: string | null;
+    avatar_url: string | null;
+  } | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -49,7 +54,7 @@ export const Header = () => {
   const fetchProfile = async (userId: string) => {
     const { data, error } = await supabase
       .from("profiles")
-      .select("*")
+      .select()
       .eq("id", userId)
       .single();
 
@@ -98,7 +103,7 @@ export const Header = () => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={profile?.avatar_url} alt={profile?.username} />
+                      <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.username || undefined} />
                       <AvatarFallback>
                         {profile?.username?.[0]?.toUpperCase() || 
                          session.user.email?.[0]?.toUpperCase()}
