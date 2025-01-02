@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Header } from "@/components/Header";
 
 export const Dashboard = () => {
   const [wordCount, setWordCount] = useState(1);
@@ -27,6 +28,7 @@ export const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Header />
       {/* Sidebar */}
       <div className="fixed left-0 top-16 w-64 h-[calc(100vh-4rem)] border-r bg-white">
         <div className="p-4">
