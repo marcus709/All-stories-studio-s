@@ -6,7 +6,7 @@ import { StoryProvider } from "@/contexts/StoryContext";
 
 type View = "story" | "characters" | "plot" | "flow" | "ideas";
 
-function DashboardContent() {
+function DashboardLayout() {
   const [currentView, setCurrentView] = useState<View>("story");
 
   return (
@@ -23,7 +23,7 @@ function DashboardContent() {
 export const Dashboard = () => {
   return (
     <StoryProvider>
-      <DashboardContent />
+      <DashboardLayout />
     </StoryProvider>
   );
 };
