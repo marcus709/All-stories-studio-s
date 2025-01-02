@@ -108,24 +108,24 @@ export const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center space-x-2">
-            <BookOpen className="h-6 w-6 text-purple-600" />
-            <span className="text-xl font-bold">All Stories Studio</span>
-          </Link>
-          
-          <Navigation 
-            onScrollToSection={scrollToSection}
-            onCommunityClick={handleCommunityClick}
-          />
-
-          <div className="flex items-center space-x-4">
-            <UserMenu
-              session={session}
-              profile={profile}
-              onSignOut={handleSignOut}
-              onShowAuth={handleShowAuth}
+          <div className="flex items-center space-x-8">
+            <Link to="/" className="flex items-center space-x-2">
+              <BookOpen className="h-6 w-6 text-purple-600" />
+              <span className="text-xl font-bold">All Stories Studio</span>
+            </Link>
+            
+            <Navigation 
+              onScrollToSection={scrollToSection}
+              onCommunityClick={handleCommunityClick}
             />
           </div>
+
+          <UserMenu
+            session={session}
+            profile={profile}
+            onSignOut={handleSignOut}
+            onShowAuth={handleShowAuth}
+          />
         </div>
       </div>
 

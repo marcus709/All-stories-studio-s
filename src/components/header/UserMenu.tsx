@@ -25,7 +25,7 @@ interface UserMenuProps {
 export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuProps) => {
   if (!session) {
     return (
-      <>
+      <div className="flex items-center space-x-4">
         <Button 
           variant="ghost"
           onClick={() => onShowAuth("signin")}
@@ -38,14 +38,14 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
         >
           Sign Up
         </Button>
-      </>
+      </div>
     );
   }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+        <Button variant="ghost" className="flex items-center space-x-2 px-2">
           <Avatar className="h-8 w-8">
             <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.username || undefined} />
             <AvatarFallback>
@@ -53,13 +53,16 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
                session.user.email?.[0]?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
+          <span className="text-sm font-medium">
+            {profile?.username || session.user.email?.split('@')[0]}
+          </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
-              {profile?.username || session.user.email.split('@')[0]}
+              {profile?.username || session.user.email?.split('@')[0]}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
               {session.user.email}
