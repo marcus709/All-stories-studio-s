@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Hash, Globe, Users, Lock } from "lucide-react";
 import { CreateTopicDialog } from "./CreateTopicDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { Topic } from "@/integrations/supabase/types";
 
 export const Topics = () => {
   const session = useSession();
@@ -19,12 +20,12 @@ export const Topics = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as Topic[];
     },
     enabled: !!session?.user,
   });
 
-  const getPrivacyIcon = (privacy: string) => {
+  const getPrivacyIcon = (privacy: Topic["privacy"]) => {
     switch (privacy) {
       case "public":
         return <Globe className="h-4 w-4 text-green-500" />;

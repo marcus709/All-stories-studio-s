@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { TopicPrivacy } from "@/integrations/supabase/types";
 
 interface CreateTopicDialogProps {
   open: boolean;
@@ -20,7 +21,7 @@ export const CreateTopicDialog = ({ open, onOpenChange }: CreateTopicDialogProps
   const queryClient = useQueryClient();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [privacy, setPrivacy] = useState<"public" | "private" | "friends">("public");
+  const [privacy, setPrivacy] = useState<TopicPrivacy>("public");
 
   const createTopicMutation = useMutation({
     mutationFn: async () => {
@@ -101,7 +102,7 @@ export const CreateTopicDialog = ({ open, onOpenChange }: CreateTopicDialogProps
             <label htmlFor="privacy" className="text-sm font-medium">
               Privacy Level
             </label>
-            <Select value={privacy} onValueChange={(value: "public" | "private" | "friends") => setPrivacy(value)}>
+            <Select value={privacy} onValueChange={(value: TopicPrivacy) => setPrivacy(value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select privacy level" />
               </SelectTrigger>
