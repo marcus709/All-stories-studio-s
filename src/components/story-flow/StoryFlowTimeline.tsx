@@ -93,7 +93,17 @@ export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
       className="bg-gray-50"
     >
       <Background />
-      <MiniMap />
+      <MiniMap
+        style={{
+          backgroundColor: 'white',
+          border: '2px solid #e2e8f0',
+          borderRadius: '8px',
+          width: 200,
+          height: 120,
+        }}
+        maskColor="rgba(0, 0, 0, 0.1)"
+        nodeColor="#4f46e5"
+      />
     </ReactFlow>
   );
 };
