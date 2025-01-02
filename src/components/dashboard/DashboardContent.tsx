@@ -25,17 +25,10 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
   const { selectedStory } = useStory();
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (!selectedStory) return;
     const words = e.target.value.trim().split(/\s+/);
     setWordCount(e.target.value.trim() === "" ? 0 : words.length);
   };
-
-  if (!selectedStory) {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-4rem)] text-gray-500">
-        Please select or create a story to get started
-      </div>
-    );
-  }
 
   switch (currentView) {
     case "characters":
@@ -66,9 +59,12 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 mt-4">
+          <div className={`bg-white rounded-xl shadow-sm p-6 mt-4 relative ${!selectedStory ? 'opacity-50' : ''}`}>
+            {!selectedStory && (
+              <div className="absolute inset-0 bg-transparent z-10" />
+            )}
             <div className="flex gap-4 mb-6">
-              <Select>
+              <Select disabled={!selectedStory}>
                 <SelectTrigger className="w-[240px]">
                   <SelectValue placeholder="Select Configuration" />
                 </SelectTrigger>
@@ -78,7 +74,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
                 </SelectContent>
               </Select>
 
-              <Select>
+              <Select disabled={!selectedStory}>
                 <SelectTrigger className="w-[240px]">
                   <SelectValue placeholder="Select writing tone" />
                 </SelectTrigger>
@@ -88,16 +84,20 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
                 </SelectContent>
               </Select>
 
-              <button className="ml-auto px-6 py-2 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg flex items-center gap-2 transition-colors">
+              <button 
+                className={`ml-auto px-6 py-2 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg flex items-center gap-2 transition-colors ${!selectedStory ? 'cursor-not-allowed opacity-50' : ''}`}
+                disabled={!selectedStory}
+              >
                 <Wand className="h-4 w-4" />
                 Get AI Suggestions
               </button>
             </div>
 
             <Textarea
-              placeholder="Start writing your story here..."
+              placeholder={selectedStory ? "Start writing your story here..." : "Please select or create a story to start writing"}
               className="min-h-[500px] resize-none text-base p-4"
               onChange={handleTextChange}
+              disabled={!selectedStory}
             />
           </div>
         </div>
