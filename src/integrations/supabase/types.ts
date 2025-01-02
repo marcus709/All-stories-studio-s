@@ -56,6 +56,68 @@ export type Database = {
           },
         ]
       }
+      plot_events: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          order_index: number
+          stage: string
+          story_id: string
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          order_index: number
+          stage: string
+          story_id: string
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          order_index?: number
+          stage?: string
+          story_id?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plot_events_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plot_structures: {
+        Row: {
+          id: string
+          name: string
+          stages: string[]
+        }
+        Insert: {
+          id?: string
+          name: string
+          stages: string[]
+        }
+        Update: {
+          id?: string
+          name?: string
+          stages?: string[]
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

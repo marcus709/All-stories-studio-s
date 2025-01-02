@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Header } from "@/components/Header";
 import { StoriesDialog } from "@/components/StoriesDialog";
 import { CharactersView } from "@/components/CharactersView";
+import { PlotDevelopmentView } from "@/components/PlotDevelopmentView";
 
 type View = "story" | "characters" | "plot" | "flow" | "ideas";
 
@@ -34,6 +35,8 @@ export const Dashboard = () => {
     switch (currentView) {
       case "characters":
         return <CharactersView />;
+      case "plot":
+        return <PlotDevelopmentView />;
       case "story":
         return (
           <div className="max-w-5xl mx-auto px-8 py-6">
