@@ -2,9 +2,11 @@ import { useSession } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const TrendingTopics = () => {
   const session = useSession();
+  const navigate = useNavigate();
 
   const { data: activeGroups } = useQuery({
     queryKey: ["active-groups", session?.user?.id],
@@ -43,6 +45,10 @@ export const TrendingTopics = () => {
 
   const groupsToShow = activeGroups?.length ? activeGroups : recommendedGroups;
 
+  const handleGroupClick = (group: any) => {
+    navigate("/community/groups", { state: { selectedGroup: group } });
+  };
+
   return (
     <div className="w-72 shrink-0 space-y-8 sticky top-24 max-h-[calc(100vh-6rem)] overflow-y-auto pb-8">
       <div className="bg-white rounded-lg shadow p-6 min-h-[200px]">
@@ -59,7 +65,11 @@ export const TrendingTopics = () => {
         {groupsToShow?.length ? (
           <div className="space-y-4">
             {groupsToShow.map((group: any) => (
-              <div key={group.id} className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+              <div 
+                key={group.id} 
+                className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                onClick={() => handleGroupClick(group)}
+              >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
                     <Users className="w-5 h-5 text-purple-600" />

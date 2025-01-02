@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
 import { Button } from "@/components/ui/button";
 import { CreateGroupDialog } from "./CreateGroupDialog";
@@ -9,9 +9,11 @@ import { GroupCard } from "./GroupCard";
 import { GroupChat } from "./GroupChat";
 import { useGroups } from "@/hooks/useGroups";
 import { useGroupMutations } from "@/hooks/useGroupMutations";
+import { useLocation } from "react-router-dom";
 
 export const MyGroups = () => {
   const session = useSession();
+  const location = useLocation();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -20,6 +22,16 @@ export const MyGroups = () => {
   const [selectedChatGroup, setSelectedChatGroup] = useState<any>(null);
 
   const { data: groups, isLoading } = useGroups();
+
+  // Handle group selection from TrendingTopics
+  useEffect(() => {
+    const state = location.state as { selectedGroup?: any };
+    if (state?.selectedGroup) {
+      setSelectedChatGroup(state.selectedGroup);
+      // Clear the location state to prevent reopening on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const handleDeleteSuccess = () => {
     setIsDeleteOpen(false);
