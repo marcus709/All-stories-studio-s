@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { BookOpen } from "lucide-react";
 import { AuthModals } from "./auth/AuthModals";
@@ -26,6 +26,7 @@ export const Header = () => {
     avatar_url: string | null;
   } | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Get initial session
@@ -93,6 +94,19 @@ export const Header = () => {
     }
   };
 
+  const handleCommunityClick = () => {
+    if (!session) {
+      setAuthView("signin");
+      setShowAuth(true);
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to access the community.",
+      });
+      return;
+    }
+    navigate("/community");
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b">
       <div className="container mx-auto px-4">
@@ -116,7 +130,12 @@ export const Header = () => {
               Pricing
             </button>
             <Link to="/dashboard" className="text-gray-600 hover:text-gray-900">Dashboard</Link>
-            <Link to="/community" className="text-gray-600 hover:text-gray-900">Community</Link>
+            <button
+              onClick={handleCommunityClick}
+              className="text-gray-600 hover:text-gray-900"
+            >
+              Community
+            </button>
           </nav>
 
           <div className="flex items-center space-x-4">
