@@ -17,13 +17,86 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Header } from "@/components/Header";
 import { StoriesDialog } from "@/components/StoriesDialog";
+import { CharactersView } from "@/components/CharactersView";
+
+type View = "story" | "characters" | "plot" | "flow" | "ideas";
 
 export const Dashboard = () => {
   const [wordCount, setWordCount] = useState(1);
+  const [currentView, setCurrentView] = useState<View>("story");
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const words = e.target.value.trim().split(/\s+/);
     setWordCount(e.target.value.trim() === "" ? 0 : words.length);
+  };
+
+  const renderMainContent = () => {
+    switch (currentView) {
+      case "characters":
+        return <CharactersView />;
+      case "story":
+        return (
+          <div className="max-w-5xl mx-auto px-8 py-6">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <h1 className="text-2xl font-bold">Your Story</h1>
+                <p className="text-gray-500">Let your creativity flow</p>
+              </div>
+              <div className="flex items-center gap-6 text-sm text-gray-600">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4" />
+                  {wordCount} words
+                </div>
+                <div className="flex items-center gap-2">
+                  <LineChart className="h-4 w-4" />
+                  Readability: N/A
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm p-6 mt-4">
+              <div className="flex gap-4 mb-6">
+                <Select>
+                  <SelectTrigger className="w-[240px]">
+                    <SelectValue placeholder="Select Configuration" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="config1">Configuration 1</SelectItem>
+                    <SelectItem value="config2">Configuration 2</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select>
+                  <SelectTrigger className="w-[240px]">
+                    <SelectValue placeholder="Select writing tone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="formal">Formal</SelectItem>
+                    <SelectItem value="casual">Casual</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <button className="ml-auto px-6 py-2 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg flex items-center gap-2 transition-colors">
+                  <Wand2 className="h-4 w-4" />
+                  Get AI Suggestions
+                </button>
+              </div>
+
+              <Textarea
+                placeholder="Start writing your story here..."
+                className="min-h-[500px] resize-none text-base p-4"
+                onChange={handleTextChange}
+              />
+            </div>
+          </div>
+        );
+      default:
+        return (
+          <div className="flex items-center justify-center h-full text-gray-500">
+            This feature is coming soon!
+          </div>
+        );
+    }
   };
 
   return (
@@ -52,23 +125,38 @@ export const Dashboard = () => {
           </div>
 
           <div className="space-y-1">
-            <button className="w-full flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700">
+            <button 
+              className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 ${currentView === "story" ? "bg-gray-50" : ""}`}
+              onClick={() => setCurrentView("story")}
+            >
               <BookOpen className="h-5 w-5" />
               <span>Story Editor</span>
             </button>
-            <button className="w-full flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700">
+            <button 
+              className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 ${currentView === "characters" ? "bg-gray-50" : ""}`}
+              onClick={() => setCurrentView("characters")}
+            >
               <Users className="h-5 w-5" />
               <span>Characters</span>
             </button>
-            <button className="w-full flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700">
+            <button 
+              className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 ${currentView === "plot" ? "bg-gray-50" : ""}`}
+              onClick={() => setCurrentView("plot")}
+            >
               <LineChart className="h-5 w-5" />
               <span>Plot Development</span>
             </button>
-            <button className="w-full flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700">
+            <button 
+              className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 ${currentView === "flow" ? "bg-gray-50" : ""}`}
+              onClick={() => setCurrentView("flow")}
+            >
               <GitBranch className="h-5 w-5" />
               <span>Story Flow</span>
             </button>
-            <button className="w-full flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700">
+            <button 
+              className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 ${currentView === "ideas" ? "bg-gray-50" : ""}`}
+              onClick={() => setCurrentView("ideas")}
+            >
               <Lightbulb className="h-5 w-5" />
               <span>Story Ideas</span>
             </button>
@@ -78,59 +166,7 @@ export const Dashboard = () => {
 
       {/* Main Content */}
       <div className="ml-72 pt-16">
-        <div className="max-w-5xl mx-auto px-8 py-6">
-          <div className="flex items-center justify-between mb-2">
-            <div>
-              <h1 className="text-2xl font-bold">Your Story</h1>
-              <p className="text-gray-500">Let your creativity flow</p>
-            </div>
-            <div className="flex items-center gap-6 text-sm text-gray-600">
-              <div className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4" />
-                {wordCount} words
-              </div>
-              <div className="flex items-center gap-2">
-                <LineChart className="h-4 w-4" />
-                Readability: N/A
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm p-6 mt-4">
-            <div className="flex gap-4 mb-6">
-              <Select>
-                <SelectTrigger className="w-[240px]">
-                  <SelectValue placeholder="Select Configuration" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="config1">Configuration 1</SelectItem>
-                  <SelectItem value="config2">Configuration 2</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select>
-                <SelectTrigger className="w-[240px]">
-                  <SelectValue placeholder="Select writing tone" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="formal">Formal</SelectItem>
-                  <SelectItem value="casual">Casual</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <button className="ml-auto px-6 py-2 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg flex items-center gap-2 transition-colors">
-                <Wand2 className="h-4 w-4" />
-                Get AI Suggestions
-              </button>
-            </div>
-
-            <Textarea
-              placeholder="Start writing your story here..."
-              className="min-h-[500px] resize-none text-base p-4"
-              onChange={handleTextChange}
-            />
-          </div>
-        </div>
+        {renderMainContent()}
       </div>
     </div>
   );
