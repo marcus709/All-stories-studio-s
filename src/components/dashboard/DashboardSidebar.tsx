@@ -60,7 +60,7 @@ export const DashboardSidebar = ({ currentView, setCurrentView }: DashboardSideb
               {profile?.username || "Anonymous"}
             </h3>
             <p className="text-xs text-gray-500">
-              {profile?.bio || "Curious Plan"}
+              {profile?.bio || "No bio yet"}
             </p>
           </div>
         </div>
