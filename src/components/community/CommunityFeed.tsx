@@ -5,10 +5,11 @@ import { CreatePostForm } from "./CreatePostForm";
 import { PostsList } from "./PostsList";
 import { usePosts } from "@/hooks/usePosts";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const isPreviewEnvironment = window.location.hostname.includes('lovableproject.com');
+const isDebugMode = process.env.NODE_ENV === 'development' || isPreviewEnvironment;
 
 export const CommunityFeed = () => {
   const session = useSession();
@@ -19,6 +20,14 @@ export const CommunityFeed = () => {
     queryFn: async () => {
       if (!session?.user?.id) return null;
       
+      if (isPreviewEnvironment) {
+        return {
+          id: 'preview-user',
+          username: 'PreviewUser',
+          avatar_url: null
+        };
+      }
+
       try {
         const { data, error } = await supabase
           .from("profiles")
@@ -59,12 +68,14 @@ export const CommunityFeed = () => {
 
   return (
     <div className="space-y-6">
-      {isPreviewEnvironment && (
+      {isDebugMode && (
         <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Preview Environment</AlertTitle>
+          <Info className="h-4 w-4" />
+          <AlertTitle>Debug Mode Active</AlertTitle>
           <AlertDescription>
-            You are currently in the preview environment. Some features may be limited and data is simulated.
+            {isPreviewEnvironment 
+              ? "You are currently in the preview environment. Some features are limited and data is simulated."
+              : "Debug mode is active. Some features might behave differently than in production."}
           </AlertDescription>
         </Alert>
       )}
