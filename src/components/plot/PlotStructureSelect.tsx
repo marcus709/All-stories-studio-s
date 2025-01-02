@@ -19,22 +19,20 @@ export const PlotStructureSelect = ({
   onStructureChange,
 }: PlotStructureSelectProps) => {
   return (
-    <div className="mb-6">
-      <Select
-        value={selectedStructure || ""}
-        onValueChange={(value) => onStructureChange(value)}
-      >
-        <SelectTrigger className="w-[300px]">
-          <SelectValue placeholder="Select a plot structure" />
-        </SelectTrigger>
-        <SelectContent>
-          {plotStructures?.map((structure) => (
-            <SelectItem key={structure.id} value={structure.id}>
-              {structure.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+    <Select
+      value={selectedStructure || ""}
+      onValueChange={(value) => onStructureChange(value)}
+    >
+      <SelectTrigger className="w-full border-violet-200 focus:ring-violet-500">
+        <SelectValue placeholder="Select plot structure" />
+      </SelectTrigger>
+      <SelectContent>
+        {plotStructures?.map((structure) => (
+          <SelectItem key={structure.id} value={structure.id}>
+            {structure.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 };

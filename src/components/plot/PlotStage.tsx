@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { PlotEvent } from "./PlotEvent";
 import { AddEventForm } from "./AddEventForm";
 import { PlotEventType } from "./types";
 
 interface PlotStageProps {
   stage: string;
+  stageNumber: number;
   events: PlotEventType[];
   activeStage: string | null;
   newEvent: {
@@ -20,6 +20,7 @@ interface PlotStageProps {
 
 export const PlotStage = ({
   stage,
+  stageNumber,
   events,
   activeStage,
   newEvent,
@@ -29,13 +30,21 @@ export const PlotStage = ({
   onAddEvent,
 }: PlotStageProps) => {
   return (
-    <div className="border rounded-lg p-4 bg-white shadow-sm">
-      <h3 className="font-semibold mb-4 text-lg">{stage}</h3>
+    <div className="bg-violet-50/50 rounded-lg p-4">
+      <h3 className="font-semibold mb-2 text-violet-700">
+        {stageNumber}. {stage}
+      </h3>
       
-      <div className="space-y-4">
+      <div className="space-y-4 min-h-[100px]">
         {events.map((event) => (
           <PlotEvent key={event.id} event={event} />
         ))}
+
+        {events.length === 0 && (
+          <p className="text-violet-400 text-sm text-center py-4">
+            Drop plot events here
+          </p>
+        )}
 
         {activeStage === stage ? (
           <AddEventForm
@@ -44,16 +53,7 @@ export const PlotStage = ({
             onCancel={onCancel}
             onSubmit={onAddEvent}
           />
-        ) : (
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => onStageClick(stage)}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Event
-          </Button>
-        )}
+        ) : null}
       </div>
     </div>
   );

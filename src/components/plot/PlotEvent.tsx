@@ -8,10 +8,10 @@ interface PlotEventProps {
 
 export const PlotEvent = ({ event }: PlotEventProps) => {
   return (
-    <div className="bg-gray-50 p-3 rounded-md space-y-2">
+    <div className="bg-white p-3 rounded-md shadow-sm space-y-2">
       <div className="flex items-center justify-between">
         <h4 className="font-medium">{event.title}</h4>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Button variant="ghost" size="icon" className="h-8 w-8">
             <ArrowUp className="h-4 w-4" />
           </Button>
