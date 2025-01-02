@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { User, Lock, Mail, BookOpen, Wand2, Users } from "lucide-react";
@@ -17,10 +17,12 @@ export const AuthModals = ({ isOpen, onClose, defaultView = "signin" }: AuthModa
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -33,16 +35,23 @@ export const AuthModals = ({ isOpen, onClose, defaultView = "signin" }: AuthModa
       });
       onClose();
     } catch (error: any) {
+      let message = "An error occurred during sign in";
+      if (error.message) {
+        message = error.message;
+      }
       toast({
         title: "Error",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const { error } = await supabase.auth.signUp({
         email,
@@ -53,19 +62,42 @@ export const AuthModals = ({ isOpen, onClose, defaultView = "signin" }: AuthModa
           },
         },
       });
-      if (error) throw error;
+      if (error) {
+        // Handle specific error cases
+        if (error.message.includes("user_already_exists")) {
+          throw new Error("This email is already registered. Please sign in instead.");
+        }
+        throw error;
+      }
       toast({
         title: "Success",
         description: "Please check your email to verify your account!",
       });
       onClose();
     } catch (error: any) {
+      let message = "An error occurred during sign up";
+      if (error.message) {
+        message = error.message;
+      }
       toast({
         title: "Error",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const resetForm = () => {
+    setEmail("");
+    setPassword("");
+    setName("");
+  };
+
+  const switchView = (newView: "signin" | "signup") => {
+    setView(newView);
+    resetForm();
   };
 
   return (
@@ -76,7 +108,9 @@ export const AuthModals = ({ isOpen, onClose, defaultView = "signin" }: AuthModa
           <div className="hidden md:block bg-gradient-to-br from-purple-600 to-pink-500 p-8 text-white">
             <div className="mb-8">
               <BookOpen className="w-12 h-12 text-white" />
-              <h2 className="text-2xl font-bold mt-4">All Stories Studio</h2>
+              <DialogTitle className="text-2xl font-bold mt-4 text-white">
+                All Stories Studio
+              </DialogTitle>
               <p className="mt-2 text-white/80">
                 Unleash your creativity with AI-powered storytelling
               </p>
@@ -109,7 +143,7 @@ export const AuthModals = ({ isOpen, onClose, defaultView = "signin" }: AuthModa
           <div className="p-8">
             {view === "signin" ? (
               <div>
-                <h2 className="text-2xl font-bold">Welcome Back!</h2>
+                <DialogTitle className="text-2xl font-bold">Welcome Back!</DialogTitle>
                 <p className="text-gray-500 mt-2">
                   Sign in to continue your creative journey
                 </p>
@@ -148,15 +182,16 @@ export const AuthModals = ({ isOpen, onClose, defaultView = "signin" }: AuthModa
                   <Button
                     type="submit"
                     className="w-full bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600"
+                    disabled={isLoading}
                   >
-                    Sign In
+                    {isLoading ? "Signing in..." : "Sign In"}
                   </Button>
                 </form>
 
                 <p className="text-center mt-6 text-sm text-gray-500">
                   Don't have an account?{" "}
                   <button
-                    onClick={() => setView("signup")}
+                    onClick={() => switchView("signup")}
                     className="text-purple-600 hover:underline font-medium"
                   >
                     Sign up
@@ -165,7 +200,7 @@ export const AuthModals = ({ isOpen, onClose, defaultView = "signin" }: AuthModa
               </div>
             ) : (
               <div>
-                <h2 className="text-2xl font-bold">Create Your Account</h2>
+                <DialogTitle className="text-2xl font-bold">Create Your Account</DialogTitle>
                 <p className="text-gray-500 mt-2">
                   Join our community of storytellers
                 </p>
@@ -212,6 +247,7 @@ export const AuthModals = ({ isOpen, onClose, defaultView = "signin" }: AuthModa
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
+                        minLength={6}
                       />
                     </div>
                   </div>
@@ -219,15 +255,16 @@ export const AuthModals = ({ isOpen, onClose, defaultView = "signin" }: AuthModa
                   <Button
                     type="submit"
                     className="w-full bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600"
+                    disabled={isLoading}
                   >
-                    Create Account
+                    {isLoading ? "Creating account..." : "Create Account"}
                   </Button>
                 </form>
 
                 <p className="text-center mt-6 text-sm text-gray-500">
                   Already have an account?{" "}
                   <button
-                    onClick={() => setView("signin")}
+                    onClick={() => switchView("signin")}
                     className="text-purple-600 hover:underline font-medium"
                   >
                     Sign in
