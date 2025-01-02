@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { RealtimeChannel } from "@supabase/supabase-js";
+import { GroupHeader } from "./chat/GroupHeader";
+import { MessageList } from "./chat/MessageList";
+import { MessageInput } from "./chat/MessageInput";
 
 interface GroupChatProps {
   group: any;
@@ -16,7 +15,6 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
   const session = useSession();
   const { toast } = useToast();
   const [messages, setMessages] = useState<any[]>([]);
-  const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -75,19 +73,15 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
     return channel;
   };
 
-  const sendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim()) return;
-
+  const handleSendMessage = async (content: string) => {
     try {
       const { error } = await supabase.from("group_messages").insert({
-        content: newMessage,
+        content,
         group_id: group.id,
         user_id: session?.user?.id,
       });
 
       if (error) throw error;
-      setNewMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
       toast({
@@ -100,57 +94,9 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-12rem)]">
-      <div className="flex items-center gap-4 mb-6">
-        <Button variant="ghost" onClick={onBack}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Groups
-        </Button>
-        <h2 className="text-2xl font-semibold">{group.name}</h2>
-      </div>
-
-      <div className="flex-1 overflow-y-auto mb-4 space-y-4 p-4 bg-gray-50 rounded-lg">
-        {isLoading ? (
-          <div>Loading messages...</div>
-        ) : messages.length === 0 ? (
-          <div className="text-center text-gray-500">No messages yet</div>
-        ) : (
-          messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${
-                message.user_id === session?.user?.id
-                  ? "justify-end"
-                  : "justify-start"
-              }`}
-            >
-              <div
-                className={`max-w-[70%] p-3 rounded-lg ${
-                  message.user_id === session?.user?.id
-                    ? "bg-purple-600 text-white"
-                    : "bg-white"
-                }`}
-              >
-                <div className="text-sm font-medium mb-1">
-                  {message.profiles?.username || "Unknown User"}
-                </div>
-                <div>{message.content}</div>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-
-      <form onSubmit={sendMessage} className="flex gap-2">
-        <Input
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Type a message..."
-          className="flex-1"
-        />
-        <Button type="submit" disabled={!newMessage.trim()}>
-          Send
-        </Button>
-      </form>
+      <GroupHeader groupName={group.name} onBack={onBack} />
+      <MessageList messages={messages} isLoading={isLoading} />
+      <MessageInput onSendMessage={handleSendMessage} />
     </div>
   );
 };
