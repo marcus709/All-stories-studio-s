@@ -5,7 +5,7 @@ import { Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-import { Profile } from "@/integrations/supabase/types";
+import { Profile } from "@/integrations/supabase/types/tables.types";
 
 interface FriendshipWithProfile {
   id: string;
