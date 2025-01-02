@@ -7,9 +7,20 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog";
 
 export const CharactersView = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [characterToDelete, setCharacterToDelete] = useState<string | null>(null);
   const session = useSession();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -50,6 +61,8 @@ export const CharactersView = () => {
         description: "Failed to delete character. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setCharacterToDelete(null);
     }
   };
 
@@ -84,7 +97,7 @@ export const CharactersView = () => {
                 variant="ghost"
                 size="icon"
                 className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={() => handleDeleteCharacter(character.id)}
+                onClick={() => setCharacterToDelete(character.id)}
               >
                 <Trash2 className="h-4 w-4 text-red-500 hover:text-red-700" />
               </Button>
@@ -136,6 +149,26 @@ export const CharactersView = () => {
         isOpen={showCreateDialog}
         onOpenChange={setShowCreateDialog}
       />
+
+      <AlertDialog open={!!characterToDelete} onOpenChange={() => setCharacterToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the character.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-500 hover:bg-red-600"
+              onClick={() => characterToDelete && handleDeleteCharacter(characterToDelete)}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
