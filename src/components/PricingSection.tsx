@@ -1,6 +1,8 @@
 import { Check } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader } from "./ui/card";
+import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useToast } from "@/hooks/use-toast";
 
 const plans = [
   {
@@ -13,7 +15,8 @@ const plans = [
       "Basic story enhancement"
     ],
     buttonText: "Try for Free",
-    buttonVariant: "outline" as const
+    buttonVariant: "outline" as const,
+    priceId: null
   },
   {
     name: "Creator",
@@ -28,7 +31,8 @@ const plans = [
     ],
     popular: true,
     buttonText: "Choose Creator",
-    buttonVariant: "default" as const
+    buttonVariant: "default" as const,
+    priceId: "price_1QcuXCEYIZGXbokupYo0Y6j2"
   },
   {
     name: "Professional",
@@ -42,11 +46,48 @@ const plans = [
       "Priority feature access"
     ],
     buttonText: "Choose Professional",
-    buttonVariant: "outline" as const
+    buttonVariant: "outline" as const,
+    priceId: "price_1QcuYKEYIZGXbokuvrWFAB9u"
   }
 ];
 
 export const PricingSection = () => {
+  const session = useSession();
+  const supabase = useSupabaseClient();
+  const { toast } = useToast();
+
+  const handleSubscription = async (priceId: string | null) => {
+    if (!priceId) return; // Free plan
+    
+    if (!session) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to subscribe to a plan.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+        body: { priceId }
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to start checkout process",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <section id="pricing" className="py-20 px-4 bg-white scroll-mt-16">
       <div className="container mx-auto">
@@ -85,6 +126,7 @@ export const PricingSection = () => {
                 <Button 
                   variant={plan.buttonVariant}
                   className="w-full mt-8"
+                  onClick={() => handleSubscription(plan.priceId)}
                 >
                   {plan.buttonText}
                 </Button>
