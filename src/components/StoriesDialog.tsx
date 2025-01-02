@@ -2,13 +2,12 @@ import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Plus, X } from "lucide-react";
-import { Card } from "./ui/card";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
 import { useStory } from "@/contexts/StoryContext";
 import { useToast } from "./ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { CreateStoryForm } from "./stories/CreateStoryForm";
+import { StoryCard } from "./stories/StoryCard";
 
 export function StoriesDialog() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -20,9 +19,18 @@ export function StoriesDialog() {
 
   const createStoryMutation = useMutation({
     mutationFn: async (story: { title: string; description: string }) => {
+      const session = await supabase.auth.getSession();
+      if (!session.data.session?.user) {
+        throw new Error("User must be logged in to create a story");
+      }
+
       const { data, error } = await supabase
         .from("stories")
-        .insert([story])
+        .insert({
+          title: story.title,
+          description: story.description,
+          user_id: session.data.session.user.id,
+        })
         .select()
         .single();
 
@@ -39,6 +47,13 @@ export function StoriesDialog() {
       setShowNewStory(false);
       setNewStory({ title: "", description: "" });
     },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create story",
+        variant: "destructive",
+      });
+    },
   });
 
   const handleCreateStory = () => {
@@ -48,6 +63,10 @@ export function StoriesDialog() {
   const handleStorySelect = (story: any) => {
     setSelectedStory(story);
     setIsOpen(false);
+  };
+
+  const handleNewStoryChange = (field: "title" | "description", value: string) => {
+    setNewStory((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -81,33 +100,12 @@ export function StoriesDialog() {
 
           <div className="grid grid-cols-3 gap-4">
             {stories.map((story) => (
-              <Card 
-                key={story.id} 
-                className={`bg-purple-50 p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-purple-100 transition-colors ${
-                  selectedStory?.id === story.id ? "ring-2 ring-purple-500" : ""
-                }`}
+              <StoryCard
+                key={story.id}
+                story={story}
+                isSelected={selectedStory?.id === story.id}
                 onClick={() => handleStorySelect(story)}
-              >
-                <div className="w-12 h-12 mb-4 text-purple-500">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-                  </svg>
-                </div>
-                <h3 className="font-semibold mb-1">{story.title}</h3>
-                <p className="text-sm text-gray-600 mb-2">{story.description}</p>
-                <div className="text-xs text-gray-500">
-                  Last edited {new Date(story.updated_at).toLocaleDateString()}
-                </div>
-              </Card>
+              />
             ))}
           </div>
         </DialogContent>
@@ -128,51 +126,15 @@ export function StoriesDialog() {
             </div>
           </DialogHeader>
 
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <label htmlFor="title" className="text-sm font-medium">
-                Title
-              </label>
-              <Input
-                id="title"
-                placeholder="Enter story title"
-                value={newStory.title}
-                onChange={(e) => setNewStory({ ...newStory, title: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="description" className="text-sm font-medium">
-                Description
-              </label>
-              <Textarea
-                id="description"
-                placeholder="Enter story description"
-                className="min-h-[120px]"
-                value={newStory.description}
-                onChange={(e) => setNewStory({ ...newStory, description: e.target.value })}
-              />
-            </div>
-
-            <div className="flex justify-end gap-3">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowNewStory(false);
-                  setNewStory({ title: "", description: "" });
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                className="bg-purple-500 hover:bg-purple-600"
-                onClick={handleCreateStory}
-                disabled={!newStory.title.trim()}
-              >
-                Create Story
-              </Button>
-            </div>
-          </div>
+          <CreateStoryForm
+            newStory={newStory}
+            onClose={() => {
+              setShowNewStory(false);
+              setNewStory({ title: "", description: "" });
+            }}
+            onChange={handleNewStoryChange}
+            onSubmit={handleCreateStory}
+          />
         </DialogContent>
       </Dialog>
 
