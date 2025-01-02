@@ -13,6 +13,8 @@ import { PlotDevelopmentView } from "@/components/PlotDevelopmentView";
 import { StoryFlow } from "@/components/story-flow/StoryFlow";
 import { StoryIdeasView } from "@/components/StoryIdeasView";
 import { useStory } from "@/contexts/StoryContext";
+import { useAI } from "@/hooks/useAI";
+import { useToast } from "@/components/ui/use-toast";
 
 type View = "story" | "characters" | "plot" | "flow" | "ideas";
 
@@ -22,12 +24,36 @@ interface DashboardContentProps {
 
 export const DashboardContent = ({ currentView }: DashboardContentProps) => {
   const [wordCount, setWordCount] = useState(1);
+  const [storyContent, setStoryContent] = useState("");
   const { selectedStory } = useStory();
+  const { generateContent, isLoading } = useAI();
+  const { toast } = useToast();
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (!selectedStory) return;
-    const words = e.target.value.trim().split(/\s+/);
-    setWordCount(e.target.value.trim() === "" ? 0 : words.length);
+    const content = e.target.value;
+    setStoryContent(content);
+    const words = content.trim().split(/\s+/);
+    setWordCount(content.trim() === "" ? 0 : words.length);
+  };
+
+  const handleGetSuggestions = async () => {
+    if (!storyContent) {
+      toast({
+        title: "No content",
+        description: "Please write some content first to get AI suggestions.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const suggestions = await generateContent(storyContent, "suggestions");
+    if (suggestions) {
+      toast({
+        title: "AI Suggestions",
+        description: suggestions,
+      });
+    }
   };
 
   switch (currentView) {
@@ -85,11 +111,12 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
               </Select>
 
               <button 
-                className={`ml-auto px-8 py-2.5 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg flex items-center gap-2 transition-colors ${!selectedStory ? 'cursor-not-allowed opacity-50' : ''}`}
-                disabled={!selectedStory}
+                className={`ml-auto px-8 py-2.5 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg flex items-center gap-2 transition-colors ${!selectedStory || isLoading ? 'cursor-not-allowed opacity-50' : ''}`}
+                onClick={handleGetSuggestions}
+                disabled={!selectedStory || isLoading}
               >
                 <Wand className="h-5 w-5" />
-                Get AI Suggestions
+                {isLoading ? "Getting suggestions..." : "Get AI Suggestions"}
               </button>
             </div>
 
@@ -97,6 +124,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
               placeholder={selectedStory ? "Start writing your story here..." : "Please select or create a story to start writing"}
               className="min-h-[600px] resize-none text-lg p-6"
               onChange={handleTextChange}
+              value={storyContent}
               disabled={!selectedStory}
             />
           </div>
