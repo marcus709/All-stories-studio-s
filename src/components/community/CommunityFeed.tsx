@@ -1,19 +1,13 @@
-import { useState } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Post } from "./Post";
-import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { CreatePostForm } from "./CreatePostForm";
+import { PostsList } from "./PostsList";
+import { usePosts } from "@/hooks/usePosts";
 
 export const CommunityFeed = () => {
   const session = useSession();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [newPost, setNewPost] = useState("");
-  const [tags, setTags] = useState("");
+  const { data: posts = [], isLoading } = usePosts();
 
   const { data: profile } = useQuery({
     queryKey: ["profile"],
@@ -30,184 +24,12 @@ export const CommunityFeed = () => {
     enabled: !!session?.user?.id,
   });
 
-  const { data: posts = [], isLoading } = useQuery({
-    queryKey: ["posts"],
-    queryFn: async () => {
-      // First get all posts
-      const { data: postsData, error: postsError } = await supabase
-        .from("posts")
-        .select(`
-          *,
-          post_likes (
-            id,
-            user_id
-          ),
-          comments (
-            id,
-            content,
-            created_at,
-            user_id
-          )
-        `)
-        .order("created_at", { ascending: false });
-
-      if (postsError) throw postsError;
-
-      // Then get all unique user IDs from posts and comments
-      const userIds = new Set([
-        ...postsData.map((post) => post.user_id),
-        ...postsData.flatMap((post) => 
-          post.comments.map((comment) => comment.user_id)
-        ),
-      ]);
-
-      // Fetch profiles for all these users
-      const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("id, username, avatar_url")
-        .in("id", Array.from(userIds));
-
-      if (profilesError) throw profilesError;
-
-      // Create a map of user IDs to profiles for easy lookup
-      const profileMap = new Map(
-        profiles.map((profile) => [profile.id, profile])
-      );
-
-      // Combine the data
-      const postsWithProfiles = postsData.map((post) => ({
-        ...post,
-        profiles: profileMap.get(post.user_id),
-        comments: post.comments.map((comment) => ({
-          ...comment,
-          profiles: profileMap.get(comment.user_id),
-        })),
-      }));
-
-      return postsWithProfiles;
-    },
-    staleTime: 1000 * 60, // Consider data fresh for 1 minute
-    placeholderData: [], // Show empty array while loading
-    refetchOnMount: false, // Don't refetch on mount
-    refetchOnWindowFocus: true, // Refetch when window gains focus
-  });
-
-  const createPost = useMutation({
-    mutationFn: async (content: string) => {
-      const newPostData = {
-        content,
-        user_id: session?.user?.id,
-        profiles: {
-          username: profile?.username,
-          avatar_url: profile?.avatar_url,
-        },
-        post_likes: [],
-        comments: [],
-        created_at: new Date().toISOString(),
-      };
-
-      // Optimistically update the UI
-      queryClient.setQueryData(["posts"], (old: any) => [newPostData, ...(old || [])]);
-
-      const { error: postError, data: createdPost } = await supabase
-        .from("posts")
-        .insert({ content, user_id: session?.user?.id })
-        .select()
-        .single();
-
-      if (postError) throw postError;
-
-      // If there are tags, add them
-      if (tags) {
-        const tagArray = tags.split(",").map((tag) => tag.trim());
-        const tagData = tagArray.map((tag) => ({
-          post_id: createdPost.id,
-          tag: tag.startsWith("#") ? tag : `#${tag}`,
-        }));
-
-        const { error: tagError } = await supabase
-          .from("post_tags")
-          .insert(tagData);
-
-        if (tagError) throw tagError;
-      }
-
-      return createdPost;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
-      setNewPost("");
-      setTags("");
-      toast({
-        title: "Success",
-        description: "Your post has been published.",
-      });
-    },
-    onError: () => {
-      // Rollback optimistic update on error
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
-      toast({
-        title: "Error",
-        description: "Failed to create post. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newPost.trim()) return;
-    createPost.mutate(newPost);
-  };
-
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-            {profile?.avatar_url ? (
-              <img
-                src={profile.avatar_url}
-                alt={profile.username}
-                className="w-full h-full rounded-full object-cover"
-              />
-            ) : (
-              <span className="text-purple-600 font-medium">
-                {profile?.username?.[0]?.toUpperCase() || "U"}
-              </span>
-            )}
-          </div>
-          <span className="text-gray-500">@{profile?.username}</span>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Textarea
-            value={newPost}
-            onChange={(e) => setNewPost(e.target.value)}
-            placeholder="Share your thoughts with the community..."
-            className="min-h-[100px]"
-          />
-          <Input
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-            placeholder="Add tags (comma-separated)..."
-            className="mb-4"
-          />
-          <Button
-            type="submit"
-            disabled={!newPost.trim() || createPost.isPending}
-            className="w-full bg-purple-600 hover:bg-purple-700"
-          >
-            Share
-          </Button>
-        </form>
-      </div>
-
-      <div className="space-y-6">
-        {posts?.map((post) => (
-          <Post key={post.id} post={post} />
-        ))}
-      </div>
+      {session?.user?.id && (
+        <CreatePostForm userId={session.user.id} profile={profile} />
+      )}
+      <PostsList posts={posts} />
     </div>
   );
 };
