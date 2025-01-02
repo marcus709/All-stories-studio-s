@@ -10,11 +10,9 @@ export const usePosts = () => {
         .from("posts")
         .select(`
           *,
-          user:user_id (
-            profile:profiles!users_id_fkey (
-              username,
-              avatar_url
-            )
+          profiles!posts_user_id_fkey (
+            username,
+            avatar_url
           ),
           post_likes (
             id,
