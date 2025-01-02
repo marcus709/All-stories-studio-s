@@ -25,7 +25,7 @@ const features = [
 
 export const FeaturesSection = () => {
   return (
-    <section className="py-20 px-4 bg-white">
+    <section id="features" className="py-20 px-4 bg-white scroll-mt-16">
       <div className="container mx-auto">
         <h2 className="text-4xl font-bold text-center mb-16">
           Powerful Features for Every Writer

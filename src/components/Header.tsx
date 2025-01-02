@@ -86,6 +86,13 @@ export const Header = () => {
     }
   };
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b">
       <div className="container mx-auto px-4">
@@ -96,8 +103,18 @@ export const Header = () => {
           </Link>
           
           <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/features" className="text-gray-600 hover:text-gray-900">Features</Link>
-            <Link to="/pricing" className="text-gray-600 hover:text-gray-900">Pricing</Link>
+            <button 
+              onClick={() => scrollToSection('features')} 
+              className="text-gray-600 hover:text-gray-900"
+            >
+              Features
+            </button>
+            <button 
+              onClick={() => scrollToSection('pricing')} 
+              className="text-gray-600 hover:text-gray-900"
+            >
+              Pricing
+            </button>
             <Link to="/dashboard" className="text-gray-600 hover:text-gray-900">Dashboard</Link>
             <Link to="/community" className="text-gray-600 hover:text-gray-900">Community</Link>
           </nav>
