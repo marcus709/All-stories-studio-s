@@ -95,7 +95,7 @@ export function ProfileSettingsDialog() {
         if (!open) navigate("/");
       }}
     >
-      <DialogContent className="sm:max-w-[425px] bg-background">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Profile Settings</DialogTitle>
           <Button
