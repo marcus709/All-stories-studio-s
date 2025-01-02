@@ -103,10 +103,14 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-12rem)]">
+    <div className="flex flex-col h-[calc(100vh-12rem)] bg-white rounded-lg shadow-sm">
       <GroupHeader groupName={group.name} onBack={onBack} />
-      <MessageList messages={messages} isLoading={isLoading} />
-      <MessageInput onSendMessage={handleSendMessage} />
+      <div className="flex-1 overflow-hidden">
+        <MessageList messages={messages} isLoading={isLoading} />
+      </div>
+      <div className="p-4 border-t">
+        <MessageInput onSendMessage={handleSendMessage} />
+      </div>
     </div>
   );
 };

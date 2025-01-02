@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Send } from "lucide-react";
 
 interface MessageInputProps {
   onSendMessage: (content: string) => Promise<void>;
@@ -25,8 +26,13 @@ export const MessageInput = ({ onSendMessage }: MessageInputProps) => {
         placeholder="Type a message..."
         className="flex-1"
       />
-      <Button type="submit" disabled={!newMessage.trim()}>
-        Send
+      <Button 
+        type="submit" 
+        size="icon"
+        disabled={!newMessage.trim()}
+        className="bg-purple-600 hover:bg-purple-700"
+      >
+        <Send className="h-4 w-4" />
       </Button>
     </form>
   );
