@@ -64,8 +64,18 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
           table: "group_messages",
           filter: `group_id=eq.${group.id}`,
         },
-        (payload) => {
-          setMessages((current) => [...current, payload.new]);
+        async (payload) => {
+          // Fetch the profile information for the new message
+          const { data: profileData } = await supabase
+            .from("profiles")
+            .select("username, avatar_url")
+            .eq("id", payload.new.user_id)
+            .single();
+
+          setMessages((current) => [
+            ...current,
+            { ...payload.new, profiles: profileData },
+          ]);
         }
       )
       .subscribe();

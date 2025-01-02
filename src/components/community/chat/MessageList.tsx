@@ -19,11 +19,11 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
   const session = useSession();
 
   if (isLoading) {
-    return <div>Loading messages...</div>;
+    return <div className="text-center py-4">Loading messages...</div>;
   }
 
   if (messages.length === 0) {
-    return <div className="text-center text-gray-500">No messages yet</div>;
+    return <div className="text-center py-4 text-gray-500">No messages yet</div>;
   }
 
   return (
