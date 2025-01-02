@@ -2,12 +2,12 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
 import { X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
+import { AvatarUpload } from "./profile/AvatarUpload";
+import { ProfileForm } from "./profile/ProfileForm";
 
 export function ProfileSettingsDialog() {
   const navigate = useNavigate();
@@ -83,51 +83,18 @@ export function ProfileSettingsDialog() {
     }
   }
 
-  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    try {
-      if (!e.target.files || e.target.files.length === 0) {
-        return;
-      }
-      const file = e.target.files[0];
-      const fileExt = file.name.split(".").pop();
-      const filePath = `${session?.user?.id}-${Math.random()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage
-        .from("avatars")
-        .getPublicUrl(filePath);
-
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ avatar_url: urlData.publicUrl })
-        .eq("id", session?.user?.id);
-
-      if (updateError) throw updateError;
-
-      setProfile({ ...profile, avatar_url: urlData.publicUrl });
-      toast({
-        title: "Avatar updated",
-        description: "Your profile picture has been updated successfully.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error uploading avatar",
-        description: "There was an error uploading your avatar. Please try again.",
-        variant: "destructive",
-      });
-    }
-  }
+  const handleProfileChange = (field: string, value: string) => {
+    setProfile((prev) => ({ ...prev, [field]: value }));
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => {
-      setIsOpen(open);
-      if (!open) navigate("/");
-    }}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        setIsOpen(open);
+        if (!open) navigate("/");
+      }}
+    >
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Profile Settings</DialogTitle>
@@ -144,65 +111,14 @@ export function ProfileSettingsDialog() {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Profile Picture</label>
-            <div className="flex items-center gap-4">
-              <div className="relative h-16 w-16 rounded-full bg-gray-100">
-                {profile.avatar_url && (
-                  <img
-                    src={profile.avatar_url}
-                    alt="Profile"
-                    className="h-full w-full rounded-full object-cover"
-                  />
-                )}
-                <label
-                  htmlFor="avatar-upload"
-                  className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100"
-                >
-                  <span className="text-sm text-white">Change Photo</span>
-                </label>
-                <input
-                  id="avatar-upload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleAvatarUpload}
-                />
-              </div>
-            </div>
-          </div>
+          <AvatarUpload
+            avatarUrl={profile.avatar_url}
+            onAvatarChange={(url) =>
+              setProfile((prev) => ({ ...prev, avatar_url: url }))
+            }
+          />
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Name</label>
-            <Input
-              value={profile.username}
-              onChange={(e) =>
-                setProfile({ ...profile, username: e.target.value })
-              }
-              placeholder="Enter your name"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Bio</label>
-            <Textarea
-              value={profile.bio}
-              onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-              placeholder="Tell us about yourself"
-              className="min-h-[100px]"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Website</label>
-            <Input
-              value={profile.website}
-              onChange={(e) =>
-                setProfile({ ...profile, website: e.target.value })
-              }
-              placeholder="Enter your website URL"
-            />
-          </div>
+          <ProfileForm profile={profile} onChange={handleProfileChange} />
 
           <div className="flex justify-end gap-4">
             <Button
