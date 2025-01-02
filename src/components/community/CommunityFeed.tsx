@@ -37,9 +37,9 @@ export const CommunityFeed = () => {
         .from("posts")
         .select(`
           *,
-          user:user_id (
-            username:profiles(username),
-            avatar_url:profiles(avatar_url)
+          profiles!posts_user_id_fkey (
+            username,
+            avatar_url
           ),
           post_likes (
             id,
@@ -49,9 +49,9 @@ export const CommunityFeed = () => {
             id,
             content,
             created_at,
-            user:user_id (
-              username:profiles(username),
-              avatar_url:profiles(avatar_url)
+            profiles!comments_user_id_fkey (
+              username,
+              avatar_url
             )
           )
         `)
