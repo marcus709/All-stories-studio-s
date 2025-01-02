@@ -30,15 +30,23 @@ export function CreateCharacterDialog({ isOpen, onOpenChange }: CreateCharacterD
 
   // Effect to check authentication status when dialog opens
   useEffect(() => {
-    if (isOpen && !session) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to create a character",
-        variant: "destructive",
-      });
-      onOpenChange(false);
+    const checkSession = async () => {
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      
+      if (!currentSession) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to create a character",
+          variant: "destructive",
+        });
+        onOpenChange(false);
+      }
+    };
+
+    if (isOpen) {
+      checkSession();
     }
-  }, [isOpen, session, toast, onOpenChange]);
+  }, [isOpen, toast, onOpenChange, supabase.auth]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -48,7 +56,10 @@ export function CreateCharacterDialog({ isOpen, onOpenChange }: CreateCharacterD
   };
 
   const handleCreateCharacter = async () => {
-    if (!session?.user?.id) {
+    // Double check session before submitting
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    
+    if (!currentSession?.user?.id) {
       toast({
         title: "Authentication Required",
         description: "Please sign in to create a character",
@@ -76,7 +87,7 @@ export function CreateCharacterDialog({ isOpen, onOpenChange }: CreateCharacterD
         traits: formData.traits.split(",").map((trait) => trait.trim()),
         goals: formData.goals,
         backstory: formData.backstory,
-        user_id: session.user.id
+        user_id: currentSession.user.id
       });
 
       if (error) throw error;
