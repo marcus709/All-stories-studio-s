@@ -3,13 +3,13 @@ import { useSession } from "@supabase/auth-helpers-react";
 import { MessageSquare, Users, Hash, Bookmark, Settings, UserPlus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { AddFriendsDialog } from "./AddFriendsDialog";
 
 const navItems = [
   { icon: MessageSquare, label: "Feed", href: "/community" },
   { icon: Users, label: "My Groups", href: "/community/groups" },
   { icon: Hash, label: "Topics", href: "/community/topics" },
   { icon: Bookmark, label: "Saved", href: "/community/saved" },
-  { icon: UserPlus, label: "Add Friends", href: "/community/friends" },
   { icon: Settings, label: "Settings", href: "/settings" },
 ];
 
@@ -72,6 +72,12 @@ export const CommunitySidebar = () => {
             <span className="font-medium">{label}</span>
           </NavLink>
         ))}
+        <AddFriendsDialog>
+          <button className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-gray-600 hover:bg-gray-50">
+            <UserPlus className="h-5 w-5" />
+            <span className="font-medium">Add Friends</span>
+          </button>
+        </AddFriendsDialog>
       </nav>
 
       <div className="mt-8">
