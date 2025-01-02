@@ -34,13 +34,13 @@ export const CommunitySidebar = () => {
   return (
     <div className="w-64 shrink-0">
       {profile && (
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+        <div className="flex items-center gap-3 mb-8 p-4 bg-white rounded-lg shadow-sm">
+          <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center overflow-hidden">
             {profile.avatar_url ? (
               <img
                 src={profile.avatar_url}
                 alt={profile.username}
-                className="w-full h-full rounded-full object-cover"
+                className="w-full h-full object-cover"
               />
             ) : (
               <span className="text-purple-600 text-xl font-medium">
@@ -48,8 +48,15 @@ export const CommunitySidebar = () => {
               </span>
             )}
           </div>
-          <div>
-            <h3 className="font-medium">@{profile.username}</h3>
+          <div className="flex flex-col">
+            <h3 className="font-medium text-gray-900">
+              {profile.username || "Anonymous"}
+            </h3>
+            {profile.bio && (
+              <p className="text-sm text-gray-500 truncate max-w-[160px]">
+                {profile.bio}
+              </p>
+            )}
           </div>
         </div>
       )}
