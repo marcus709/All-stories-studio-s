@@ -115,8 +115,12 @@ export const Header = () => {
             >
               Pricing
             </button>
-            <Link to="/dashboard" className="text-gray-600 hover:text-gray-900">Dashboard</Link>
-            <Link to="/community" className="text-gray-600 hover:text-gray-900">Community</Link>
+            <Link to="/dashboard" className="text-gray-600 hover:text-gray-900">
+              Dashboard
+            </Link>
+            <Link to="/community" className="text-gray-600 hover:text-gray-900">
+              Community
+            </Link>
           </nav>
 
           <div className="flex items-center space-x-4">
