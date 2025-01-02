@@ -27,20 +27,39 @@ export const TrendingTopics = () => {
         .order("created_at", { ascending: false })
         .limit(3);
 
-      return memberGroups?.map(mg => mg.groups) || [];
+      // Filter out any null groups (deleted groups)
+      return memberGroups?.filter(mg => mg.groups !== null).map(mg => mg.groups) || [];
     },
-    enabled: !!session?.user?.id
+    enabled: !!session?.user?.id,
+    // Refetch when groups are modified
+    refetchOnWindowFocus: true,
+    staleTime: 1000 * 60 // Consider data stale after 1 minute
   });
 
   const { data: recommendedGroups } = useQuery({
     queryKey: ["recommended-groups"],
     queryFn: async () => {
+      // First get the groups the user is already a member of
+      const { data: memberGroups } = await supabase
+        .from("group_members")
+        .select("group_id")
+        .eq("user_id", session?.user?.id);
+
+      const memberGroupIds = memberGroups?.map(mg => mg.group_id) || [];
+
+      // Then get groups the user is not a member of
       const { data: groups } = await supabase
         .from("groups")
         .select("*")
+        .not("id", "in", `(${memberGroupIds.length ? memberGroupIds.join(",") : "00000000-0000-0000-0000-000000000000"})`)
         .limit(3);
+
       return groups || [];
-    }
+    },
+    enabled: !!session?.user?.id,
+    // Refetch when groups are modified
+    refetchOnWindowFocus: true,
+    staleTime: 1000 * 60 // Consider data stale after 1 minute
   });
 
   const groupsToShow = activeGroups?.length ? activeGroups : recommendedGroups;
