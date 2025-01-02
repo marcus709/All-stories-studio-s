@@ -34,7 +34,7 @@ export const CommunitySidebar = () => {
   return (
     <div className="space-y-6">
       {profile && (
-        <div className="flex items-center gap-3 mb-4 bg-gray-50 rounded-lg p-3">
+        <div className="flex items-center gap-3 mb-4">
           <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center overflow-hidden shrink-0">
             {profile.avatar_url ? (
               <img
