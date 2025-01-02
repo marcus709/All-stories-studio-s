@@ -41,31 +41,31 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
       return <StoryIdeasView />;
     case "story":
       return (
-        <div className="max-w-5xl mx-auto px-8 py-6">
-          <div className="flex items-center justify-between mb-2">
+        <div className="max-w-7xl mx-auto px-8 py-8">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold">Your Story</h1>
-              <p className="text-gray-500">Let your creativity flow</p>
+              <h1 className="text-3xl font-bold">Your Story</h1>
+              <p className="text-gray-500 text-lg">Let your creativity flow</p>
             </div>
-            <div className="flex items-center gap-6 text-sm text-gray-600">
+            <div className="flex items-center gap-8 text-base text-gray-600">
               <div className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4" />
+                <BookOpen className="h-5 w-5" />
                 {wordCount} words
               </div>
               <div className="flex items-center gap-2">
-                <LineChart className="h-4 w-4" />
+                <LineChart className="h-5 w-5" />
                 Readability: N/A
               </div>
             </div>
           </div>
 
-          <div className={`bg-white rounded-xl shadow-sm p-6 mt-4 relative ${!selectedStory ? 'opacity-50' : ''}`}>
+          <div className={`bg-white rounded-xl shadow-sm p-8 mt-6 relative ${!selectedStory ? 'opacity-50' : ''}`}>
             {!selectedStory && (
               <div className="absolute inset-0 bg-transparent z-10" />
             )}
-            <div className="flex gap-4 mb-6">
+            <div className="flex gap-6 mb-8">
               <Select disabled={!selectedStory}>
-                <SelectTrigger className="w-[240px]">
+                <SelectTrigger className="w-[280px]">
                   <SelectValue placeholder="Select Configuration" />
                 </SelectTrigger>
                 <SelectContent>
@@ -75,7 +75,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
               </Select>
 
               <Select disabled={!selectedStory}>
-                <SelectTrigger className="w-[240px]">
+                <SelectTrigger className="w-[280px]">
                   <SelectValue placeholder="Select writing tone" />
                 </SelectTrigger>
                 <SelectContent>
@@ -85,17 +85,17 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
               </Select>
 
               <button 
-                className={`ml-auto px-6 py-2 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg flex items-center gap-2 transition-colors ${!selectedStory ? 'cursor-not-allowed opacity-50' : ''}`}
+                className={`ml-auto px-8 py-2.5 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg flex items-center gap-2 transition-colors ${!selectedStory ? 'cursor-not-allowed opacity-50' : ''}`}
                 disabled={!selectedStory}
               >
-                <Wand className="h-4 w-4" />
+                <Wand className="h-5 w-5" />
                 Get AI Suggestions
               </button>
             </div>
 
             <Textarea
               placeholder={selectedStory ? "Start writing your story here..." : "Please select or create a story to start writing"}
-              className="min-h-[500px] resize-none text-base p-4"
+              className="min-h-[600px] resize-none text-lg p-6"
               onChange={handleTextChange}
               disabled={!selectedStory}
             />
