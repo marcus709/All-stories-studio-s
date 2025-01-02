@@ -13,31 +13,23 @@ export const useCreatePost = () => {
       profile: any;
       tags?: string;
     }) => {
-      const newPostData = {
-        content,
-        user_id: userId,
-        profiles: {
-          username: profile?.username,
-          avatar_url: profile?.avatar_url,
-        },
-        post_likes: [],
-        comments: [],
-        created_at: new Date().toISOString(),
-      };
-
-      // Optimistically update the UI
-      queryClient.setQueryData(["posts"], (old: any) => [newPostData, ...(old || [])]);
-
+      // First create the post
       const { error: postError, data: createdPost } = await supabase
         .from("posts")
-        .insert({ content, user_id: userId })
+        .insert({ 
+          content, 
+          user_id: userId  // Ensure this matches the RLS policy
+        })
         .select()
         .single();
 
-      if (postError) throw postError;
+      if (postError) {
+        console.error("Error creating post:", postError);
+        throw postError;
+      }
 
       // If there are tags, add them
-      if (tags) {
+      if (tags && createdPost) {
         const tagArray = tags.split(",").map((tag) => tag.trim());
         const tagData = tagArray.map((tag) => ({
           post_id: createdPost.id,
@@ -48,7 +40,10 @@ export const useCreatePost = () => {
           .from("post_tags")
           .insert(tagData);
 
-        if (tagError) throw tagError;
+        if (tagError) {
+          console.error("Error adding tags:", tagError);
+          throw tagError;
+        }
       }
 
       return createdPost;
@@ -60,9 +55,8 @@ export const useCreatePost = () => {
         description: "Your post has been published.",
       });
     },
-    onError: () => {
-      // Rollback optimistic update on error
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    onError: (error) => {
+      console.error("Error in useCreatePost:", error);
       toast({
         title: "Error",
         description: "Failed to create post. Please try again.",
