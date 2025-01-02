@@ -4,7 +4,7 @@ import {
   BookOpen, 
   Users, 
   LineChart, 
-  GitFlow, 
+  GitBranch, 
   Lightbulb,
   Wand2
 } from "lucide-react";
@@ -66,7 +66,7 @@ export const Dashboard = () => {
               Plot Development
             </Button>
             <Button variant="ghost" className="w-full justify-start gap-2">
-              <GitFlow className="h-5 w-5" />
+              <GitBranch className="h-5 w-5" />
               Story Flow
             </Button>
             <Button variant="ghost" className="w-full justify-start gap-2">
