@@ -30,7 +30,7 @@ export const MessageInput = ({ onSendMessage }: MessageInputProps) => {
         type="submit" 
         size="icon"
         disabled={!newMessage.trim()}
-        className="bg-purple-600 hover:bg-purple-700"
+        className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white"
       >
         <Send className="h-4 w-4" />
       </Button>

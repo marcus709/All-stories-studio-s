@@ -108,7 +108,7 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
       <div className="flex-1 overflow-hidden">
         <MessageList messages={messages} isLoading={isLoading} />
       </div>
-      <div className="p-4 border-t">
+      <div className="sticky bottom-0 bg-white border-t p-4">
         <MessageInput onSendMessage={handleSendMessage} />
       </div>
     </div>
