@@ -69,7 +69,7 @@ export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) =>
                         <p className="font-medium">@{friend.username}</p>
                       </div>
                     </div>
-                  ));
+                  );
                 })}
               </div>
             )}
