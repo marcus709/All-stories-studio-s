@@ -1,22 +1,13 @@
-import { Plus, UserRound, Calendar, Clock, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { CreateCharacterDialog } from "./CreateCharacterDialog";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "./ui/alert-dialog";
+import { CharacterCard } from "./characters/CharacterCard";
+import { DeleteCharacterDialog } from "./characters/DeleteCharacterDialog";
 
 export const CharactersView = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -89,54 +80,11 @@ export const CharactersView = () => {
       ) : characters && characters.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {characters.map((character) => (
-            <div
+            <CharacterCard
               key={character.id}
-              className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow relative group"
-            >
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={() => setCharacterToDelete(character.id)}
-              >
-                <Trash2 className="h-4 w-4 text-red-500 hover:text-red-700" />
-              </Button>
-              <div className="flex items-start gap-4">
-                <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                  <UserRound className="w-8 h-8 text-purple-500" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-semibold truncate">{character.name}</h3>
-                  <p className="text-gray-500 text-sm line-clamp-2 mb-2">
-                    {character.role || "No role specified"}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {character.traits?.map((trait, index) => (
-                      <span
-                        key={index}
-                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
-                      >
-                        {trait}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between text-sm text-gray-500">
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  <span>
-                    Created {formatDistanceToNow(new Date(character.created_at || ''), { addSuffix: true })}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  <span>
-                    Updated {formatDistanceToNow(new Date(character.updated_at || ''), { addSuffix: true })}
-                  </span>
-                </div>
-              </div>
-            </div>
+              character={character}
+              onDeleteClick={(id) => setCharacterToDelete(id)}
+            />
           ))}
         </div>
       ) : (
@@ -150,25 +98,11 @@ export const CharactersView = () => {
         onOpenChange={setShowCreateDialog}
       />
 
-      <AlertDialog open={!!characterToDelete} onOpenChange={() => setCharacterToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the character.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-red-500 hover:bg-red-600"
-              onClick={() => characterToDelete && handleDeleteCharacter(characterToDelete)}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteCharacterDialog
+        isOpen={!!characterToDelete}
+        onClose={() => setCharacterToDelete(null)}
+        onConfirm={() => characterToDelete && handleDeleteCharacter(characterToDelete)}
+      />
     </div>
   );
 };
