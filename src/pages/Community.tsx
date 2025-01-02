@@ -42,7 +42,7 @@ const Community = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="fixed inset-0 pt-36">
+      <div className="fixed inset-0 pt-30">
         <div className="container h-full mx-auto px-4">
           <div className="flex gap-8 h-full">
             <div className="w-64 shrink-0">
