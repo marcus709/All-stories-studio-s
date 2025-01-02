@@ -5,7 +5,6 @@ import {
   LineChart, 
   GitBranch, 
   Lightbulb,
-  Wand2,
   Book,
   Plus
 } from "lucide-react";
@@ -125,21 +124,31 @@ function DashboardContent() {
       <Header />
       {/* Sidebar */}
       <div className="fixed left-0 top-16 w-64 h-[calc(100vh-4rem)] border-r bg-white">
-        <div className="p-4">
+        <div className="p-4 flex flex-col h-full">
           {/* Profile Section */}
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-8 px-2">
             <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white text-lg font-medium">
               M
             </div>
-            <div>
+            <div className="flex flex-col">
               <h3 className="font-medium text-gray-900">Marcus</h3>
               <p className="text-sm text-gray-500">Curious Plan</p>
             </div>
           </div>
 
           {/* Stories Section */}
-          <div className="space-y-2 mb-6">
-            <StoriesDialog />
+          <div className="space-y-2 mb-8">
+            <button className="w-full flex items-center gap-2 px-4 py-2.5 rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors">
+              <Book className="h-5 w-5" />
+              <span className="font-medium">View All Stories</span>
+              <span className="ml-auto">→</span>
+            </button>
+            
+            <button className="w-full flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors">
+              <Plus className="h-5 w-5" />
+              <span className="font-medium">Create New Story</span>
+              <span className="ml-auto">+</span>
+            </button>
           </div>
 
           {/* Navigation */}
@@ -147,51 +156,51 @@ function DashboardContent() {
             <button 
               onClick={() => setCurrentView("story")}
               disabled={!selectedStory}
-              className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-gray-700
-                ${currentView === "story" ? "bg-purple-50 text-purple-700" : "hover:bg-gray-50"}`}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-gray-700
+                ${currentView === "story" ? "text-purple-600" : "hover:bg-gray-50"}`}
             >
               <BookOpen className="h-5 w-5" />
-              <span>Story Editor</span>
+              <span className="font-medium">Story Editor</span>
             </button>
             
             <button 
               onClick={() => setCurrentView("characters")}
               disabled={!selectedStory}
-              className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-gray-700
-                ${currentView === "characters" ? "bg-purple-50 text-purple-700" : "hover:bg-gray-50"}`}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-gray-700
+                ${currentView === "characters" ? "text-purple-600" : "hover:bg-gray-50"}`}
             >
               <Users className="h-5 w-5" />
-              <span>Characters</span>
+              <span className="font-medium">Characters</span>
             </button>
             
             <button 
               onClick={() => setCurrentView("plot")}
               disabled={!selectedStory}
-              className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-gray-700
-                ${currentView === "plot" ? "bg-purple-50 text-purple-700" : "hover:bg-gray-50"}`}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-gray-700
+                ${currentView === "plot" ? "text-purple-600" : "hover:bg-gray-50"}`}
             >
               <LineChart className="h-5 w-5" />
-              <span>Plot Development</span>
+              <span className="font-medium">Plot Development</span>
             </button>
             
             <button 
               onClick={() => setCurrentView("flow")}
               disabled={!selectedStory}
-              className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-gray-700
-                ${currentView === "flow" ? "bg-purple-50 text-purple-700" : "hover:bg-gray-50"}`}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-gray-700
+                ${currentView === "flow" ? "text-purple-600" : "hover:bg-gray-50"}`}
             >
               <GitBranch className="h-5 w-5" />
-              <span>Story Flow</span>
+              <span className="font-medium">Story Flow</span>
             </button>
             
             <button 
               onClick={() => setCurrentView("ideas")}
               disabled={!selectedStory}
-              className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-gray-700
-                ${currentView === "ideas" ? "bg-purple-50 text-purple-700" : "hover:bg-gray-50"}`}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-gray-700
+                ${currentView === "ideas" ? "text-purple-600" : "hover:bg-gray-50"}`}
             >
               <Lightbulb className="h-5 w-5" />
-              <span>Story Ideas</span>
+              <span className="font-medium">Story Ideas</span>
             </button>
           </nav>
         </div>
