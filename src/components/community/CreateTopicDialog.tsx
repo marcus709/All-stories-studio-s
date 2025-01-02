@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { TopicPrivacy } from "@/integrations/supabase/types";
+import { TopicPrivacy } from "@/integrations/supabase/types/enums.types";
 
 interface CreateTopicDialogProps {
   open: boolean;

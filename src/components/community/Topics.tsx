@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { CreateTopicDialog } from "./CreateTopicDialog";
 import { useState } from "react";
-import { Topic } from "@/integrations/supabase/types";
+import { Topic } from "@/integrations/supabase/types/tables.types";
 
 export const Topics = () => {
   const session = useSession();

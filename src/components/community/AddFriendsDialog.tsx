@@ -5,6 +5,13 @@ import { Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { Profile } from "@/integrations/supabase/types";
+
+interface FriendshipWithProfile {
+  id: string;
+  status: string;
+  profiles: Profile;
+}
 
 export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) => {
   const session = useSession();
@@ -15,12 +22,19 @@ export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) =>
     queryFn: async () => {
       const { data: friendships, error } = await supabase
         .from("friendships")
-        .select("*, friend:friend_id(id, username, avatar_url)")
+        .select(`
+          *,
+          profiles!friendships_friend_id_fkey (
+            id,
+            username,
+            avatar_url
+          )
+        `)
         .or(`user_id.eq.${session?.user?.id},friend_id.eq.${session?.user?.id}`)
         .eq("status", "accepted");
 
       if (error) throw error;
-      return friendships;
+      return friendships as FriendshipWithProfile[];
     },
     enabled: !!session?.user?.id,
   });
@@ -49,14 +63,14 @@ export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) =>
             ) : (
               <div className="space-y-2">
                 {friends?.map((friendship) => {
-                  const friend = friendship.friend;
+                  const friend = friendship.profiles;
                   return (
                     <div key={friend.id} className="flex items-center gap-3 rounded-lg border p-3">
                       <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
                         {friend.avatar_url ? (
                           <img
                             src={friend.avatar_url}
-                            alt={friend.username}
+                            alt={friend.username || ''}
                             className="h-full w-full rounded-full object-cover"
                           />
                         ) : (
