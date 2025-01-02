@@ -10,26 +10,41 @@ export const CommunityFeed = () => {
   const { data: posts = [], isLoading } = usePosts();
 
   const { data: profile } = useQuery({
-    queryKey: ["profile"],
+    queryKey: ["profile", session?.user?.id],
     queryFn: async () => {
+      if (!session?.user?.id) return null;
+      
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
-        .eq("id", session?.user?.id)
+        .eq("id", session.user.id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching profile:", error);
+        throw error;
+      }
       return data;
     },
     enabled: !!session?.user?.id,
   });
 
+  if (!session) {
+    return (
+      <div className="text-center py-8">
+        <p>Please sign in to view and create posts.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {session?.user?.id && (
-        <CreatePostForm userId={session.user.id} profile={profile} />
+      <CreatePostForm userId={session.user.id} profile={profile} />
+      {isLoading ? (
+        <div className="text-center py-8">Loading posts...</div>
+      ) : (
+        <PostsList posts={posts} />
       )}
-      <PostsList posts={posts} />
     </div>
   );
 };
