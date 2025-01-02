@@ -19,6 +19,7 @@ import { Header } from "@/components/Header";
 import { StoriesDialog } from "@/components/StoriesDialog";
 import { CharactersView } from "@/components/CharactersView";
 import { PlotDevelopmentView } from "@/components/PlotDevelopmentView";
+import { StoryFlow } from "@/components/story-flow/StoryFlow";
 
 type View = "story" | "characters" | "plot" | "flow" | "ideas";
 
@@ -37,6 +38,8 @@ export const Dashboard = () => {
         return <CharactersView />;
       case "plot":
         return <PlotDevelopmentView />;
+      case "flow":
+        return <StoryFlow />;
       case "story":
         return (
           <div className="max-w-5xl mx-auto px-8 py-6">
