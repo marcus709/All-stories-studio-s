@@ -123,8 +123,16 @@ export const Header = () => {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut}>
-                    Log out
+                  <Link to="/settings">
+                    <DropdownMenuItem className="cursor-pointer">
+                      Profile Settings
+                    </DropdownMenuItem>
+                  </Link>
+                  <DropdownMenuItem 
+                    onClick={handleSignOut}
+                    className="text-red-500 hover:text-red-600 cursor-pointer"
+                  >
+                    Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
