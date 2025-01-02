@@ -20,12 +20,14 @@ import { StoriesDialog } from "@/components/StoriesDialog";
 import { CharactersView } from "@/components/CharactersView";
 import { PlotDevelopmentView } from "@/components/PlotDevelopmentView";
 import { StoryFlow } from "@/components/story-flow/StoryFlow";
+import { StoryProvider, useStory } from "@/contexts/StoryContext";
 
 type View = "story" | "characters" | "plot" | "flow" | "ideas";
 
-export const Dashboard = () => {
+function DashboardContent() {
   const [wordCount, setWordCount] = useState(1);
   const [currentView, setCurrentView] = useState<View>("story");
+  const { selectedStory } = useStory();
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const words = e.target.value.trim().split(/\s+/);
@@ -33,6 +35,14 @@ export const Dashboard = () => {
   };
 
   const renderMainContent = () => {
+    if (!selectedStory) {
+      return (
+        <div className="flex items-center justify-center h-[calc(100vh-4rem)] text-gray-500">
+          Please select or create a story to get started
+        </div>
+      );
+    }
+
     switch (currentView) {
       case "characters":
         return <CharactersView />;
@@ -123,17 +133,13 @@ export const Dashboard = () => {
 
           <div className="space-y-2 mb-8">
             <StoriesDialog />
-
-            <button className="w-full flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-              <span className="text-xl">+</span>
-              <span>Create New Story</span>
-            </button>
           </div>
 
           <div className="space-y-1">
             <button 
               className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 ${currentView === "story" ? "bg-gray-50" : ""}`}
               onClick={() => setCurrentView("story")}
+              disabled={!selectedStory}
             >
               <BookOpen className="h-5 w-5" />
               <span>Story Editor</span>
@@ -141,6 +147,7 @@ export const Dashboard = () => {
             <button 
               className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 ${currentView === "characters" ? "bg-gray-50" : ""}`}
               onClick={() => setCurrentView("characters")}
+              disabled={!selectedStory}
             >
               <Users className="h-5 w-5" />
               <span>Characters</span>
@@ -148,6 +155,7 @@ export const Dashboard = () => {
             <button 
               className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 ${currentView === "plot" ? "bg-gray-50" : ""}`}
               onClick={() => setCurrentView("plot")}
+              disabled={!selectedStory}
             >
               <LineChart className="h-5 w-5" />
               <span>Plot Development</span>
@@ -155,6 +163,7 @@ export const Dashboard = () => {
             <button 
               className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 ${currentView === "flow" ? "bg-gray-50" : ""}`}
               onClick={() => setCurrentView("flow")}
+              disabled={!selectedStory}
             >
               <GitBranch className="h-5 w-5" />
               <span>Story Flow</span>
@@ -162,6 +171,7 @@ export const Dashboard = () => {
             <button 
               className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 ${currentView === "ideas" ? "bg-gray-50" : ""}`}
               onClick={() => setCurrentView("ideas")}
+              disabled={!selectedStory}
             >
               <Lightbulb className="h-5 w-5" />
               <span>Story Ideas</span>
@@ -175,6 +185,14 @@ export const Dashboard = () => {
         {renderMainContent()}
       </div>
     </div>
+  );
+}
+
+export const Dashboard = () => {
+  return (
+    <StoryProvider>
+      <DashboardContent />
+    </StoryProvider>
   );
 };
 

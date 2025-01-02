@@ -5,41 +5,49 @@ import { Plus, X } from "lucide-react";
 import { Card } from "./ui/card";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
-
-interface Story {
-  title: string;
-  description: string;
-  lastEdited: string;
-}
-
-const stories: Story[] = [
-  {
-    title: "fsfsf",
-    description: "sfsf",
-    lastEdited: "4d ago"
-  },
-  {
-    title: "test nr 2",
-    description: "qeqe",
-    lastEdited: "4d ago"
-  },
-  {
-    title: "test historie",
-    description: "wdawdaw",
-    lastEdited: "4d ago"
-  }
-];
+import { useStory } from "@/contexts/StoryContext";
+import { useToast } from "./ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function StoriesDialog() {
   const [isOpen, setIsOpen] = React.useState(false);
   const [showNewStory, setShowNewStory] = React.useState(false);
   const [newStory, setNewStory] = React.useState({ title: "", description: "" });
+  const { stories, selectedStory, setSelectedStory } = useStory();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const createStoryMutation = useMutation({
+    mutationFn: async (story: { title: string; description: string }) => {
+      const { data, error } = await supabase
+        .from("stories")
+        .insert([story])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["stories"] });
+      setSelectedStory(data);
+      toast({
+        title: "Story created",
+        description: "Your new story has been created successfully.",
+      });
+      setShowNewStory(false);
+      setNewStory({ title: "", description: "" });
+    },
+  });
 
   const handleCreateStory = () => {
-    // Here you would typically save the story to your backend
-    console.log("Creating story:", newStory);
-    setShowNewStory(false);
-    setNewStory({ title: "", description: "" });
+    createStoryMutation.mutate(newStory);
+  };
+
+  const handleStorySelect = (story: any) => {
+    setSelectedStory(story);
+    setIsOpen(false);
   };
 
   return (
@@ -73,7 +81,13 @@ export function StoriesDialog() {
 
           <div className="grid grid-cols-3 gap-4">
             {stories.map((story) => (
-              <Card key={story.title} className="bg-purple-50 p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-purple-100 transition-colors">
+              <Card 
+                key={story.id} 
+                className={`bg-purple-50 p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-purple-100 transition-colors ${
+                  selectedStory?.id === story.id ? "ring-2 ring-purple-500" : ""
+                }`}
+                onClick={() => handleStorySelect(story)}
+              >
                 <div className="w-12 h-12 mb-4 text-purple-500">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -91,7 +105,7 @@ export function StoriesDialog() {
                 <h3 className="font-semibold mb-1">{story.title}</h3>
                 <p className="text-sm text-gray-600 mb-2">{story.description}</p>
                 <div className="text-xs text-gray-500">
-                  Last edited {story.lastEdited}
+                  Last edited {new Date(story.updated_at).toLocaleDateString()}
                 </div>
               </Card>
             ))}
@@ -153,6 +167,7 @@ export function StoriesDialog() {
               <Button
                 className="bg-purple-500 hover:bg-purple-600"
                 onClick={handleCreateStory}
+                disabled={!newStory.title.trim()}
               >
                 Create Story
               </Button>
@@ -163,7 +178,9 @@ export function StoriesDialog() {
 
       <button 
         onClick={() => setIsOpen(true)}
-        className="w-full flex items-center gap-3 text-purple-600 px-4 py-2 rounded-lg hover:bg-purple-50 transition-colors"
+        className={`w-full flex items-center gap-3 text-purple-600 px-4 py-2 rounded-lg hover:bg-purple-50 transition-colors ${
+          selectedStory ? "font-medium" : ""
+        }`}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -178,7 +195,7 @@ export function StoriesDialog() {
           <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
           <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
         </svg>
-        <span className="font-medium">View All Stories</span>
+        <span>{selectedStory ? selectedStory.title : "View All Stories"}</span>
       </button>
     </>
   );
