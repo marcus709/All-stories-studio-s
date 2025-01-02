@@ -88,8 +88,10 @@ export function ProfileSettingsDialog() {
     <Dialog
       open={isOpen}
       onOpenChange={(open) => {
-        setIsOpen(open);
-        if (!open) navigate(-1);
+        if (!open) {
+          setIsOpen(false);
+          navigate(-1);
+        }
       }}
     >
       <DialogContent className="sm:max-w-[425px] bg-background">
