@@ -20,6 +20,7 @@ import { StoriesDialog } from "@/components/StoriesDialog";
 import { CharactersView } from "@/components/CharactersView";
 import { PlotDevelopmentView } from "@/components/PlotDevelopmentView";
 import { StoryFlow } from "@/components/story-flow/StoryFlow";
+import { StoryIdeasView } from "@/components/StoryIdeasView";
 import { StoryProvider, useStory } from "@/contexts/StoryContext";
 
 type View = "story" | "characters" | "plot" | "flow" | "ideas";
@@ -50,6 +51,8 @@ function DashboardContent() {
         return <PlotDevelopmentView />;
       case "flow":
         return <StoryFlow />;
+      case "ideas":
+        return <StoryIdeasView />;
       case "story":
         return (
           <div className="max-w-5xl mx-auto px-8 py-6">
