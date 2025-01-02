@@ -8,19 +8,19 @@ import { CommunitySidebar } from "@/components/community/CommunitySidebar";
 
 export default function Community() {
   return (
-    <div className="flex min-h-screen pt-16 relative"> {/* Added relative positioning */}
+    <div className="flex min-h-screen bg-background">
       {/* Left Sidebar */}
       <CommunitySidebar />
 
       {/* Main Content */}
-      <main className="flex-1 border-x min-h-[calc(100vh-64px)]">
-        <div className="max-w-3xl mx-auto py-6 px-4">
+      <main className="flex-1 border-x">
+        <div className="max-w-3xl mx-auto py-6 px-4 mt-16">
           <CommunityFeed />
         </div>
       </main>
 
       {/* Right Sidebar */}
-      <div className="w-80 p-6">
+      <div className="w-80 p-6 mt-16">
         <CommunityTrendingTopics />
       </div>
     </div>
