@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Routes, Route } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { CommunitySidebar } from "@/components/community/CommunitySidebar";
 import { CommunityFeed } from "@/components/community/CommunityFeed";
+import { MyGroups } from "@/components/community/MyGroups";
 import { TrendingTopics } from "@/components/community/TrendingTopics";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
@@ -43,7 +44,11 @@ const Community = () => {
         <div className="flex gap-8">
           <CommunitySidebar />
           <div className="flex-1 max-w-3xl">
-            <CommunityFeed />
+            <Routes>
+              <Route path="/" element={<CommunityFeed />} />
+              <Route path="/groups" element={<MyGroups />} />
+              {/* Add more routes for Topics and Saved later */}
+            </Routes>
           </div>
           <TrendingTopics />
         </div>

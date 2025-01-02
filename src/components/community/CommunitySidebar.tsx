@@ -58,6 +58,7 @@ export const CommunitySidebar = () => {
           <NavLink
             key={href}
             to={href}
+            end={href === "/community"}
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
                 isActive
