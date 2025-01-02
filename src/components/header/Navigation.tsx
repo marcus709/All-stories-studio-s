@@ -7,7 +7,7 @@ interface NavigationProps {
 
 export const Navigation = ({ onScrollToSection, onCommunityClick }: NavigationProps) => {
   return (
-    <nav className="hidden md:flex items-center ml-auto space-x-8">
+    <nav className="flex items-center space-x-6">
       <button 
         onClick={() => onScrollToSection('features')} 
         className="text-gray-600 hover:text-gray-900"
