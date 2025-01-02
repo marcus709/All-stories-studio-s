@@ -5,7 +5,6 @@ import {
   LineChart, 
   GitBranch, 
   Lightbulb,
-  Wand2
 } from "lucide-react";
 import { 
   Select,
@@ -14,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { Header } from "@/components/Header";
 import { StoriesDialog } from "@/components/StoriesDialog";
 import { CharactersView } from "@/components/CharactersView";
@@ -47,7 +45,7 @@ const Dashboard = () => {
     <StoryProvider>
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8 pt-20">
           <div className="mb-6">
             <Select value={selectedView} onValueChange={setSelectedView}>
               <SelectTrigger className="w-[200px]">
