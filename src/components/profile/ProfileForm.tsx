@@ -66,7 +66,6 @@ export function ProfileForm({ profile, onChange }: ProfileFormProps) {
     }
 
     await refetchSelected();
-    setShowAchievements(false);
     setSelectedSlot(null);
   };
 
