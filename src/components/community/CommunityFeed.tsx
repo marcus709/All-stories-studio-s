@@ -20,7 +20,7 @@ export const CommunityFeed = () => {
         .from("posts")
         .select(`
           *,
-          profiles:user_id (username, avatar_url),
+          profiles (username, avatar_url),
           post_likes (id, user_id),
           comments (
             id,
