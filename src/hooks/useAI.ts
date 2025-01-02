@@ -6,11 +6,19 @@ export const useAI = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const generateContent = async (prompt: string, type: 'suggestions' | 'traits' | 'goals') => {
+  const generateContent = async (
+    prompt: string, 
+    type: 'suggestions' | 'traits' | 'goals',
+    context?: {
+      storyDescription?: string;
+      characters?: string;
+      traits?: string;
+    }
+  ) => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-ai-content', {
-        body: { prompt, type },
+        body: { prompt, type, context },
       });
 
       if (error) throw error;

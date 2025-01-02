@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Wand2 } from "lucide-react";
+import { useAI } from "@/hooks/useAI";
+import { useStory } from "@/contexts/StoryContext";
 
 interface CharacterFormProps {
   formData: {
@@ -25,6 +27,26 @@ export function CharacterForm({
   onCancel,
   onSubmit
 }: CharacterFormProps) {
+  const { generateContent, isLoading } = useAI();
+  const { selectedStory } = useStory();
+  const [aiSuggestions, setAiSuggestions] = useState("");
+
+  const handleGetSuggestions = async (type: 'traits' | 'goals') => {
+    const context = {
+      storyDescription: selectedStory?.description || '',
+      traits: formData.traits,
+    };
+
+    const prompt = type === 'traits' 
+      ? `Generate character traits for a character named ${formData.name} with the role of ${formData.role}`
+      : `Generate goals and motivations for a character named ${formData.name} who is ${formData.traits}`;
+
+    const suggestions = await generateContent(prompt, type, context);
+    if (suggestions) {
+      setAiSuggestions(suggestions);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -64,8 +86,10 @@ export function CharacterForm({
         <Button 
           variant="link" 
           className="p-0 h-auto text-purple-500 hover:text-purple-600 flex items-center gap-2"
+          onClick={() => handleGetSuggestions('traits')}
+          disabled={isLoading}
         >
-          <Wand2 className="h-4 w-4" />
+          <Wand2 className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           Get AI Suggestions
         </Button>
       </div>
@@ -81,6 +105,15 @@ export function CharacterForm({
           value={formData.goals}
           onChange={handleInputChange}
         />
+        <Button 
+          variant="link" 
+          className="p-0 h-auto text-purple-500 hover:text-purple-600 flex items-center gap-2"
+          onClick={() => handleGetSuggestions('goals')}
+          disabled={isLoading}
+        >
+          <Wand2 className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          Get Goal Suggestions
+        </Button>
       </div>
 
       <div className="space-y-2">
@@ -95,6 +128,24 @@ export function CharacterForm({
           onChange={handleInputChange}
         />
       </div>
+
+      {(isLoading || aiSuggestions) && (
+        <div className="bg-purple-50 rounded-lg p-6 relative">
+          <h3 className="text-xl font-semibold text-purple-900 mb-4">AI Suggestions</h3>
+          {isLoading ? (
+            <div className="flex items-center gap-2 text-purple-600">
+              <Wand2 className="h-5 w-5 animate-spin" />
+              <span>Getting AI suggestions...</span>
+            </div>
+          ) : (
+            <div className="prose prose-purple max-w-none">
+              {aiSuggestions.split('\n').map((paragraph, index) => (
+                <p key={index} className="text-purple-800">{paragraph}</p>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="flex justify-end gap-3">
         <Button

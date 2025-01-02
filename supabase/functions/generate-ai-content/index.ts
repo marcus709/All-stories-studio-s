@@ -14,12 +14,48 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, type } = await req.json();
+    const { prompt, type, context } = await req.json();
 
     const systemPrompts = {
-      suggestions: "You are a creative writing assistant. Provide helpful suggestions for improving the story while maintaining the author's voice.",
-      traits: "You are a character development expert. Suggest unique and compelling character traits that would enrich the story.",
-      goals: "You are a story planning assistant. Suggest meaningful character goals and motivations that drive the narrative forward.",
+      suggestions: `You are a creative writing assistant. Consider the following context about the story and its characters:
+        ${context?.storyDescription || ''}
+        ${context?.characters ? `Characters in the story: ${context.characters}` : ''}
+        
+        Provide helpful suggestions for improving the story while maintaining the author's voice. Format your response in clear sections:
+
+        PLOT SUGGESTIONS:
+        [Your plot-related suggestions]
+
+        CHARACTER DEVELOPMENT:
+        [Your character-related suggestions]
+
+        WRITING STYLE:
+        [Your style-related suggestions]`,
+
+      traits: `You are a character development expert. Consider the following story context:
+        ${context?.storyDescription || ''}
+        
+        Suggest 5 unique and compelling character traits that would enrich the story and create interesting dynamics with existing characters.
+        Format your response as a bullet-pointed list.`,
+
+      goals: `You are a story planning assistant. Consider the following context:
+        Story: ${context?.storyDescription || ''}
+        Character traits: ${context?.traits || ''}
+        
+        Suggest meaningful character goals and motivations that align with their traits and would drive the narrative forward.
+        Format your response in sections:
+
+        SHORT-TERM GOALS:
+        - [Goal 1]
+        - [Goal 2]
+
+        LONG-TERM GOALS:
+        - [Goal 1]
+        - [Goal 2]
+
+        INTERNAL MOTIVATIONS:
+        - [Motivation 1]
+        - [Motivation 2]`,
     };
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {

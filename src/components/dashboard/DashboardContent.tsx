@@ -15,6 +15,7 @@ import { StoryIdeasView } from "@/components/StoryIdeasView";
 import { useStory } from "@/contexts/StoryContext";
 import { useAI } from "@/hooks/useAI";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 type View = "story" | "characters" | "plot" | "flow" | "ideas";
 
@@ -48,7 +49,21 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
       return;
     }
 
-    const suggestions = await generateContent(storyContent, "suggestions");
+    const { data: characters } = await supabase
+      .from("characters")
+      .select("name, role, traits")
+      .eq("story_id", selectedStory?.id);
+
+    const characterContext = characters?.map(char => 
+      `${char.name} (${char.role}): ${Array.isArray(char.traits) ? char.traits.join(', ') : char.traits}`
+    ).join('\n');
+
+    const context = {
+      storyDescription: selectedStory?.description || '',
+      characters: characterContext,
+    };
+
+    const suggestions = await generateContent(storyContent, "suggestions", context);
     if (suggestions) {
       setAiSuggestions(suggestions);
     }
