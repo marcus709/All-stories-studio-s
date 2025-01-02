@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { UserPlus, Calendar, StickyNote, Wand2, ArrowRight, GitBranch, Network } from "lucide-react";
 import { StoryFlowTimeline } from "./StoryFlowTimeline";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const StoryFlow = () => {
   const [viewMode, setViewMode] = useState<"linear" | "branching" | "network">("linear");
@@ -35,47 +36,54 @@ export const StoryFlow = () => {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="border-b border-gray-100">
-          <div className="p-4">
-            <div className="flex flex-col gap-2">
-              <button
-                onClick={() => setViewMode("linear")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm ${
-                  viewMode === "linear"
-                    ? "bg-violet-50 text-violet-600"
-                    : "text-gray-600 hover:bg-gray-50"
-                }`}
-              >
-                <ArrowRight className="w-4 h-4" />
-                Linear
-              </button>
-              <button
-                onClick={() => setViewMode("branching")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm ${
-                  viewMode === "branching"
-                    ? "bg-violet-50 text-violet-600"
-                    : "text-gray-600 hover:bg-gray-50"
-                }`}
-              >
-                <GitBranch className="w-4 h-4" />
-                Branching
-              </button>
-              <button
-                onClick={() => setViewMode("network")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm ${
-                  viewMode === "network"
-                    ? "bg-violet-50 text-violet-600"
-                    : "text-gray-600 hover:bg-gray-50"
-                }`}
-              >
-                <Network className="w-4 h-4" />
-                Network
-              </button>
-            </div>
-          </div>
-        </div>
-        
         <div className="relative">
+          <div className="absolute left-4 top-4 z-10">
+            <Select value={viewMode} onValueChange={(value: "linear" | "branching" | "network") => setViewMode(value)}>
+              <SelectTrigger className="w-[180px] bg-white">
+                <SelectValue>
+                  {viewMode === "linear" && (
+                    <div className="flex items-center gap-2">
+                      <ArrowRight className="w-4 h-4" />
+                      Linear
+                    </div>
+                  )}
+                  {viewMode === "branching" && (
+                    <div className="flex items-center gap-2">
+                      <GitBranch className="w-4 h-4" />
+                      Branching
+                    </div>
+                  )}
+                  {viewMode === "network" && (
+                    <div className="flex items-center gap-2">
+                      <Network className="w-4 h-4" />
+                      Network
+                    </div>
+                  )}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="linear">
+                  <div className="flex items-center gap-2">
+                    <ArrowRight className="w-4 h-4" />
+                    Linear
+                  </div>
+                </SelectItem>
+                <SelectItem value="branching">
+                  <div className="flex items-center gap-2">
+                    <GitBranch className="w-4 h-4" />
+                    Branching
+                  </div>
+                </SelectItem>
+                <SelectItem value="network">
+                  <div className="flex items-center gap-2">
+                    <Network className="w-4 h-4" />
+                    Network
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
           <div className="absolute right-4 top-4 flex flex-col gap-2 z-10">
             <Button variant="outline" size="icon" className="bg-white">
               <svg
