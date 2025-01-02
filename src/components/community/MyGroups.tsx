@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
 import { Button } from "@/components/ui/button";
 import { Trash2, Settings } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { CreateGroupDialog } from "./CreateGroupDialog";
 
 export const MyGroups = () => {
   const session = useSession();
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const { data: groups, isLoading } = useQuery({
     queryKey: ["my-groups"],
@@ -16,7 +18,8 @@ export const MyGroups = () => {
         .select(`
           *,
           group_members!inner (
-            user_id
+            user_id,
+            role
           )
         `)
         .eq("group_members.user_id", session?.user?.id);
@@ -35,7 +38,10 @@ export const MyGroups = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">My Groups</h1>
-        <Button className="bg-purple-600 hover:bg-purple-700">
+        <Button 
+          className="bg-purple-600 hover:bg-purple-700"
+          onClick={() => setIsCreateOpen(true)}
+        >
           + Create Group
         </Button>
       </div>
@@ -48,9 +54,11 @@ export const MyGroups = () => {
           >
             <div>
               <h3 className="font-medium">{group.name}</h3>
-              <p className="text-sm text-gray-500">123123123</p>
+              <p className="text-sm text-gray-500">{group.description}</p>
               <div className="flex items-center gap-1 mt-2">
-                <span className="text-sm text-gray-500">1 members</span>
+                <span className="text-sm text-gray-500">
+                  {group.group_members?.length || 1} member{group.group_members?.length !== 1 ? 's' : ''}
+                </span>
               </div>
             </div>
             <div className="flex gap-2">
@@ -64,6 +72,11 @@ export const MyGroups = () => {
           </div>
         ))}
       </div>
+
+      <CreateGroupDialog 
+        open={isCreateOpen} 
+        onOpenChange={setIsCreateOpen}
+      />
     </div>
   );
 };
