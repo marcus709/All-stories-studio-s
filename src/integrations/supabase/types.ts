@@ -9,6 +9,33 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          condition_type: string
+          condition_value: number
+          description: string
+          icon: string
+          id: string
+          name: string
+        }
+        Insert: {
+          condition_type: string
+          condition_value: number
+          description: string
+          icon: string
+          id?: string
+          name: string
+        }
+        Update: {
+          condition_type?: string
+          condition_value?: number
+          description?: string
+          icon?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       characters: {
         Row: {
           backstory: string | null
@@ -362,21 +389,18 @@ export type Database = {
           bio: string | null
           id: string
           username: string | null
-          website: string | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
           id: string
           username?: string | null
-          website?: string | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
           id?: string
           username?: string | null
-          website?: string | null
         }
         Relationships: []
       }
@@ -405,6 +429,35 @@ export type Database = {
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      selected_achievements: {
+        Row: {
+          achievement_id: string | null
+          id: string
+          slot_number: number
+          user_id: string | null
+        }
+        Insert: {
+          achievement_id?: string | null
+          id?: string
+          slot_number: number
+          user_id?: string | null
+        }
+        Update: {
+          achievement_id?: string | null
+          id?: string
+          slot_number?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "selected_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
             referencedColumns: ["id"]
           },
         ]
@@ -506,6 +559,35 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string | null
+          id: string
+          unlocked_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          achievement_id?: string | null
+          id?: string
+          unlocked_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          achievement_id?: string | null
+          id?: string
+          unlocked_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

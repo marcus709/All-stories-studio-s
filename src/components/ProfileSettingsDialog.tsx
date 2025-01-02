@@ -18,7 +18,6 @@ export function ProfileSettingsDialog() {
   const [profile, setProfile] = React.useState({
     username: "",
     bio: "",
-    website: "",
     avatar_url: "",
   });
 
@@ -32,7 +31,7 @@ export function ProfileSettingsDialog() {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("username, bio, website, avatar_url")
+        .select("username, bio, avatar_url")
         .eq("id", session?.user?.id)
         .maybeSingle();
 
@@ -41,7 +40,6 @@ export function ProfileSettingsDialog() {
         setProfile({
           username: data.username || "",
           bio: data.bio || "",
-          website: data.website || "",
           avatar_url: data.avatar_url || "",
         });
       }
@@ -60,7 +58,6 @@ export function ProfileSettingsDialog() {
         .update({
           username: profile.username,
           bio: profile.bio,
-          website: profile.website,
         })
         .eq("id", session?.user?.id);
 
@@ -92,7 +89,7 @@ export function ProfileSettingsDialog() {
       open={isOpen}
       onOpenChange={(open) => {
         setIsOpen(open);
-        if (!open) navigate("/");
+        if (!open) navigate(-1);
       }}
     >
       <DialogContent className="sm:max-w-[425px] bg-background">
@@ -103,7 +100,7 @@ export function ProfileSettingsDialog() {
             className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
             onClick={() => {
               setIsOpen(false);
-              navigate("/");
+              navigate(-1);
             }}
           >
             <X className="h-4 w-4" />
@@ -126,7 +123,7 @@ export function ProfileSettingsDialog() {
               variant="outline"
               onClick={() => {
                 setIsOpen(false);
-                navigate("/");
+                navigate(-1);
               }}
             >
               Cancel
