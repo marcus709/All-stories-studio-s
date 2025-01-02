@@ -25,19 +25,13 @@ export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) =>
         .select(`
           id,
           status,
-          profiles:friend_id(
-            id,
-            username,
-            avatar_url,
-            bio,
-            website
-          )
+          profiles:friend_id(*)
         `)
         .eq("user_id", session?.user?.id)
         .eq("status", "accepted");
 
       if (error) throw error;
-      return friendships as FriendshipWithProfile[];
+      return friendships as unknown as FriendshipWithProfile[];
     },
     enabled: !!session?.user?.id,
   });

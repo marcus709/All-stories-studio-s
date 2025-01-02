@@ -30,7 +30,7 @@ export const CommunityFeed = () => {
     enabled: !!session?.user?.id,
   });
 
-  const { data: posts, isLoading } = useQuery({
+  const { data: posts = [], isLoading } = useQuery({
     queryKey: ["posts"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -60,13 +60,34 @@ export const CommunityFeed = () => {
       if (error) throw error;
       return data;
     },
+    staleTime: 1000 * 60, // Consider data fresh for 1 minute
+    placeholderData: [], // Show empty array while loading
+    refetchOnMount: false, // Don't refetch on mount
+    refetchOnWindowFocus: true, // Refetch when window gains focus
   });
 
   const createPost = useMutation({
     mutationFn: async (content: string) => {
-      const { error: postError } = await supabase
+      const newPostData = {
+        content,
+        user_id: session?.user?.id,
+        profiles: {
+          username: profile?.username,
+          avatar_url: profile?.avatar_url,
+        },
+        post_likes: [],
+        comments: [],
+        created_at: new Date().toISOString(),
+      };
+
+      // Optimistically update the UI
+      queryClient.setQueryData(["posts"], (old: any) => [newPostData, ...(old || [])]);
+
+      const { error: postError, data: createdPost } = await supabase
         .from("posts")
-        .insert({ content, user_id: session?.user?.id });
+        .insert({ content, user_id: session?.user?.id })
+        .select()
+        .single();
 
       if (postError) throw postError;
 
@@ -74,7 +95,7 @@ export const CommunityFeed = () => {
       if (tags) {
         const tagArray = tags.split(",").map((tag) => tag.trim());
         const tagData = tagArray.map((tag) => ({
-          post_id: posts?.[0]?.id,
+          post_id: createdPost.id,
           tag: tag.startsWith("#") ? tag : `#${tag}`,
         }));
 
@@ -84,6 +105,8 @@ export const CommunityFeed = () => {
 
         if (tagError) throw tagError;
       }
+
+      return createdPost;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
@@ -95,6 +118,8 @@ export const CommunityFeed = () => {
       });
     },
     onError: () => {
+      // Rollback optimistic update on error
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
       toast({
         title: "Error",
         description: "Failed to create post. Please try again.",
@@ -108,10 +133,6 @@ export const CommunityFeed = () => {
     if (!newPost.trim()) return;
     createPost.mutate(newPost);
   };
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="space-y-6">
