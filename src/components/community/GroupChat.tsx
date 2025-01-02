@@ -33,7 +33,7 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
         .from("group_messages")
         .select(`
           *,
-          profiles:user_id (
+          profiles:profiles!group_messages_user_id_fkey (
             username,
             avatar_url
           )
