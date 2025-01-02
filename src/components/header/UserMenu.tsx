@@ -1,80 +1,87 @@
-import { useNavigate, useLocation } from "react-router-dom";
-import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Settings, LogOut } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { Session } from "@supabase/supabase-js";
 
-export function UserMenu() {
-  const session = useSession();
-  const supabaseClient = useSupabaseClient();
-  const navigate = useNavigate();
-  const location = useLocation();
+interface UserMenuProps {
+  session: Session | null;
+  profile: {
+    id: string;
+    username: string | null;
+    avatar_url: string | null;
+  } | null;
+  onSignOut: () => Promise<void>;
+  onShowAuth: (view: "signin" | "signup") => void;
+}
 
-  const { data: profile } = useQuery({
-    queryKey: ["profile", session?.user?.id],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", session?.user?.id)
-        .single();
-      return data;
-    },
-    enabled: !!session?.user?.id,
-  });
-
-  const handleSignOut = async () => {
-    await supabaseClient.auth.signOut();
-    navigate("/");
-  };
-
-  const handleSettingsClick = () => {
-    navigate("/settings", { 
-      state: { previousPath: location.pathname }
-    });
-  };
-
-  if (!session) return null;
+export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuProps) => {
+  if (!session) {
+    return (
+      <div className="flex items-center space-x-4">
+        <Button 
+          variant="ghost"
+          onClick={() => onShowAuth("signin")}
+        >
+          Sign In
+        </Button>
+        <Button 
+          className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600"
+          onClick={() => onShowAuth("signup")}
+        >
+          Sign Up
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="focus:outline-none">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={profile?.avatar_url} />
-          <AvatarFallback>
-            {profile?.username?.[0]?.toUpperCase() || session.user.email?.[0]?.toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="flex items-center space-x-2 px-2">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.username || undefined} />
+            <AvatarFallback>
+              {profile?.username?.[0]?.toUpperCase() || 
+               session.user.email?.[0]?.toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-sm font-medium">
+            {profile?.username || "Marcus"}
+          </span>
+        </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <div className="flex items-center justify-start gap-2 p-2">
-          <div className="flex flex-col space-y-1 leading-none">
-            {profile?.username && (
-              <p className="font-medium">{profile.username}</p>
-            )}
-            <p className="w-[200px] truncate text-sm text-muted-foreground">
+      <DropdownMenuContent className="w-56" align="end" forceMount>
+        <DropdownMenuLabel className="font-normal">
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">
+              {profile?.username || "Marcus"}
+            </p>
+            <p className="text-xs leading-none text-muted-foreground">
               {session.user.email}
             </p>
           </div>
-        </div>
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSettingsClick}>
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Settings</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleSignOut}>
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
+        <Link to="/settings">
+          <DropdownMenuItem className="cursor-pointer">
+            Profile Settings
+          </DropdownMenuItem>
+        </Link>
+        <DropdownMenuItem 
+          onClick={onSignOut}
+          className="text-red-500 hover:text-red-600 cursor-pointer"
+        >
+          Sign Out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+};
