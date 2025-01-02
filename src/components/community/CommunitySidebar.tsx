@@ -33,7 +33,7 @@ export function CommunitySidebar() {
   ];
 
   return (
-    <div className="w-72 p-6 flex flex-col h-screen">
+    <div className="w-72 p-6 flex flex-col h-[calc(100vh-64px)] border-r"> {/* Adjusted height and added border */}
       {/* User Profile */}
       <div className="flex items-center gap-3 mb-8">
         <Avatar className="w-10 h-10 bg-purple-500">
