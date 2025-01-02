@@ -20,19 +20,38 @@ export const CommunityFeed = () => {
         .from("posts")
         .select(`
           *,
-          profiles!inner (username, avatar_url),
+          user:user_id (
+            profile:profiles (
+              username,
+              avatar_url
+            )
+          ),
           post_likes (id, user_id),
           comments (
             id,
             content,
             created_at,
-            profiles!inner (username, avatar_url)
+            user:user_id (
+              profile:profiles (
+                username,
+                avatar_url
+              )
+            )
           )
         `)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data;
+
+      // Transform the data to match the expected format
+      return data.map((post) => ({
+        ...post,
+        profiles: post.user.profile,
+        comments: post.comments.map((comment) => ({
+          ...comment,
+          profiles: comment.user.profile,
+        })),
+      }));
     },
   });
 
