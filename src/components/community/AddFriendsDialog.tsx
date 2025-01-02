@@ -5,36 +5,68 @@ import { Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-import { Profile } from "@/integrations/supabase/types/tables.types";
+import { Profile } from "@/integrations/supabase/types";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface FriendshipWithProfile {
   id: string;
   status: string;
-  profiles: Profile;
+  friend: Profile;
 }
 
 export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) => {
   const session = useSession();
   const [searchQuery, setSearchQuery] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
-  const { data: friends } = useQuery({
+  const { data: friends, isError } = useQuery({
     queryKey: ["friends", session?.user?.id],
     queryFn: async () => {
-      const { data: friendships, error } = await supabase
-        .from("friendships")
-        .select(`
-          id,
-          status,
-          profiles:friend_id(*)
-        `)
-        .eq("user_id", session?.user?.id)
-        .eq("status", "accepted");
+      try {
+        const { data: friendships, error } = await supabase
+          .from("friendships")
+          .select(`
+            id,
+            status,
+            friend:profiles!friendships_friend_id_fkey(*)
+          `)
+          .eq("user_id", session?.user?.id)
+          .eq("status", "accepted");
 
-      if (error) throw error;
-      return friendships as unknown as FriendshipWithProfile[];
+        if (error) {
+          console.error("Error fetching friends:", error);
+          throw error;
+        }
+
+        return friendships as unknown as FriendshipWithProfile[];
+      } catch (error) {
+        console.error("Error in friends query:", error);
+        setError("Unable to load friends at this time");
+        return [];
+      }
     },
     enabled: !!session?.user?.id,
   });
+
+  const isPreviewEnvironment = window.location.hostname.includes('lovableproject.com');
+
+  if (isPreviewEnvironment) {
+    return (
+      <Dialog>
+        <DialogTrigger asChild>{children}</DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add Friends</DialogTitle>
+          </DialogHeader>
+          <Alert>
+            <AlertDescription>
+              Friend functionality is limited in preview mode.
+            </AlertDescription>
+          </Alert>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog>
@@ -55,12 +87,18 @@ export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) =>
           </div>
           <div className="space-y-4">
             <h4 className="text-sm font-medium text-gray-500">Your Friends</h4>
-            {friends?.length === 0 ? (
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            {!error && friends?.length === 0 && (
               <p className="text-sm text-gray-500">No friends yet. Start adding some!</p>
-            ) : (
+            )}
+            {!error && friends && friends.length > 0 && (
               <div className="space-y-2">
-                {friends?.map((friendship) => {
-                  const friend = friendship.profiles;
+                {friends.map((friendship) => {
+                  const friend = friendship.friend;
                   return (
                     <div key={friend.id} className="flex items-center gap-3 rounded-lg border p-3">
                       <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
