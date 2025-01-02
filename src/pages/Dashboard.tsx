@@ -21,7 +21,7 @@ import { StoryFlow } from "@/components/story-flow/StoryFlow";
 import { StoryIdeasView } from "@/components/StoryIdeasView";
 import { StoryProvider } from "@/contexts/StoryContext";
 
-const Dashboard = () => {
+export const Dashboard = () => {
   const [selectedView, setSelectedView] = useState("stories");
 
   const renderView = () => {
@@ -45,7 +45,7 @@ const Dashboard = () => {
     <StoryProvider>
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <main className="container mx-auto px-4 py-8 pt-20">
+        <main className="container mx-auto px-4 py-8">
           <div className="mb-6">
             <Select value={selectedView} onValueChange={setSelectedView}>
               <SelectTrigger className="w-[200px]">
