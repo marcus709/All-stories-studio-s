@@ -20,16 +20,15 @@ export const GroupCard = ({
 }: GroupCardProps) => {
   return (
     <div
-      className="bg-white rounded-lg shadow hover:shadow-md transition-shadow duration-200 p-4 flex flex-col justify-between cursor-pointer"
+      className="bg-gray-50 rounded-lg p-4 flex flex-col justify-between hover:bg-gray-100 transition-colors cursor-pointer"
       onClick={(e) => {
-        // Prevent clicking the card if clicking on a button
         if ((e.target as HTMLElement).closest("button")) return;
         onClick();
       }}
     >
       <div>
-        <h3 className="font-medium text-lg mb-2">{group.name}</h3>
-        <p className="text-sm text-gray-500 mb-4 line-clamp-2">
+        <h3 className="font-medium text-gray-900 text-lg mb-2">{group.name}</h3>
+        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
           {group.description}
         </p>
         <div className="flex items-center gap-1">
@@ -41,16 +40,16 @@ export const GroupCard = ({
       </div>
       <div className="flex justify-end gap-2 mt-4">
         {isCreator ? (
-          <Button variant="ghost" size="icon" onClick={onDelete}>
+          <Button variant="ghost" size="icon" onClick={onDelete} className="hover:bg-red-50 hover:text-red-600">
             <Trash2 className="h-4 w-4 text-red-500" />
           </Button>
         ) : (
-          <Button variant="ghost" size="icon" onClick={onLeave}>
+          <Button variant="ghost" size="icon" onClick={onLeave} className="hover:bg-red-50 hover:text-red-600">
             <LogOut className="h-4 w-4 text-red-500" />
           </Button>
         )}
-        <Button variant="ghost" size="icon" onClick={onSettings}>
-          <Settings className="h-4 w-4" />
+        <Button variant="ghost" size="icon" onClick={onSettings} className="hover:bg-gray-200">
+          <Settings className="h-4 w-4 text-gray-600" />
         </Button>
       </div>
     </div>

@@ -24,7 +24,6 @@ export const MyGroups = () => {
   const handleDeleteSuccess = () => {
     setIsDeleteOpen(false);
     setSelectedGroup(null);
-    // If the deleted group was selected for chat, clear it
     if (selectedChatGroup?.id === selectedGroup?.id) {
       setSelectedChatGroup(null);
     }
@@ -35,7 +34,7 @@ export const MyGroups = () => {
   );
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div className="flex items-center justify-center py-8">Loading...</div>;
   }
 
   const handleGroupAction = (
@@ -70,28 +69,36 @@ export const MyGroups = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">My Groups</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">My Groups</h1>
         <Button
-          className="bg-purple-600 hover:bg-purple-700"
           onClick={() => setIsCreateOpen(true)}
+          className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white border-0"
         >
           + Create Group
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {groups?.map((group) => (
-          <GroupCard
-            key={group.id}
-            group={group}
-            isCreator={isGroupCreator(group)}
-            onDelete={() => handleGroupAction(group, "delete")}
-            onLeave={() => handleGroupAction(group, "leave")}
-            onSettings={() => handleGroupAction(group, "settings")}
-            onClick={() => setSelectedChatGroup(group)}
-          />
-        ))}
-      </div>
+      {groups?.length === 0 ? (
+        <div className="text-center py-8 bg-gray-50 rounded-lg">
+          <p className="text-gray-600">
+            No groups yet. Create or join a group to get started!
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {groups?.map((group) => (
+            <GroupCard
+              key={group.id}
+              group={group}
+              isCreator={isGroupCreator(group)}
+              onDelete={() => handleGroupAction(group, "delete")}
+              onLeave={() => handleGroupAction(group, "leave")}
+              onSettings={() => handleGroupAction(group, "settings")}
+              onClick={() => setSelectedChatGroup(group)}
+            />
+          ))}
+        </div>
+      )}
 
       <CreateGroupDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />
 

@@ -32,10 +32,10 @@ export const CommunitySidebar = () => {
   });
 
   return (
-    <div className="w-64 shrink-0">
+    <div className="space-y-6">
       {profile && (
-        <div className="flex items-center gap-3 mb-8 p-4 bg-white rounded-lg shadow-sm">
-          <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center overflow-hidden">
+        <div className="flex items-center gap-3 mb-4 bg-gray-50 rounded-lg p-3">
+          <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center overflow-hidden shrink-0">
             {profile.avatar_url ? (
               <img
                 src={profile.avatar_url}
@@ -48,12 +48,12 @@ export const CommunitySidebar = () => {
               </span>
             )}
           </div>
-          <div className="flex flex-col">
-            <h3 className="font-medium text-gray-900">
+          <div className="flex flex-col min-w-0">
+            <h3 className="font-medium text-gray-900 truncate">
               {profile.username || "Anonymous"}
             </h3>
             {profile.bio && (
-              <p className="text-sm text-gray-500 truncate max-w-[160px]">
+              <p className="text-sm text-gray-500 truncate">
                 {profile.bio}
               </p>
             )}
@@ -68,27 +68,27 @@ export const CommunitySidebar = () => {
             to={href}
             end={href === "/community"}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
+              `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                 isActive
-                  ? "bg-purple-50 text-purple-600"
-                  : "text-gray-600 hover:bg-gray-50"
+                  ? "bg-purple-100 text-purple-900 font-medium"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
               }`
             }
           >
             <Icon className="h-5 w-5" />
-            <span className="font-medium">{label}</span>
+            <span>{label}</span>
           </NavLink>
         ))}
         <AddFriendsDialog>
-          <button className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-gray-600 hover:bg-gray-50">
+          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
             <UserPlus className="h-5 w-5" />
-            <span className="font-medium">Add Friends</span>
+            <span>Add Friends</span>
           </button>
         </AddFriendsDialog>
       </nav>
 
-      <div className="mt-8">
-        <h3 className="text-sm font-semibold text-gray-500 mb-4">Friends</h3>
+      <div className="pt-4 border-t border-gray-100">
+        <h3 className="text-sm font-medium text-gray-900 mb-3">Friends</h3>
         <p className="text-sm text-gray-500">
           No friends yet. Add some friends to chat!
         </p>
