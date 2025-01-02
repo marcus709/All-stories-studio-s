@@ -5,6 +5,7 @@ import { CommunitySidebar } from "@/components/community/CommunitySidebar";
 import { CommunityFeed } from "@/components/community/CommunityFeed";
 import { MyGroups } from "@/components/community/MyGroups";
 import { Topics } from "@/components/community/Topics";
+import { SavedPosts } from "@/components/community/SavedPosts";
 import { TrendingTopics } from "@/components/community/TrendingTopics";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
@@ -49,7 +50,7 @@ const Community = () => {
               <Route path="/" element={<CommunityFeed />} />
               <Route path="/groups" element={<MyGroups />} />
               <Route path="/topics" element={<Topics />} />
-              {/* Add more routes for Saved later */}
+              <Route path="/saved" element={<SavedPosts />} />
             </Routes>
           </div>
           <TrendingTopics />
