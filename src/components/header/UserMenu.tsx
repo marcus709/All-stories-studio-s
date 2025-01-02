@@ -54,7 +54,7 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
             </AvatarFallback>
           </Avatar>
           <span className="text-sm font-medium">
-            {profile?.username || session.user.email?.split('@')[0]}
+            {profile?.username || "Marcus"}
           </span>
         </Button>
       </DropdownMenuTrigger>
@@ -62,7 +62,7 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
-              {profile?.username || session.user.email?.split('@')[0]}
+              {profile?.username || "Marcus"}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
               {session.user.email}
