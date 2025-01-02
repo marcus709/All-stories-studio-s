@@ -13,7 +13,8 @@ export const MyGroups = () => {
   const { data: groups, isLoading } = useQuery({
     queryKey: ["my-groups"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Query for groups where user is either creator or member
+      const { data: memberGroups, error: memberError } = await supabase
         .from("groups")
         .select(`
           *,
@@ -24,8 +25,26 @@ export const MyGroups = () => {
         `)
         .eq("group_members.user_id", session?.user?.id);
 
-      if (error) throw error;
-      return data;
+      if (memberError) throw memberError;
+
+      const { data: createdGroups, error: creatorError } = await supabase
+        .from("groups")
+        .select(`
+          *,
+          group_members (
+            user_id,
+            role
+          )
+        `)
+        .eq("created_by", session?.user?.id);
+
+      if (creatorError) throw creatorError;
+
+      // Combine and deduplicate groups
+      const allGroups = [...(memberGroups || []), ...(createdGroups || [])];
+      const uniqueGroups = Array.from(new Map(allGroups.map(group => [group.id, group])).values());
+      
+      return uniqueGroups;
     },
     enabled: !!session?.user?.id,
   });
@@ -46,22 +65,22 @@ export const MyGroups = () => {
         </Button>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {groups?.map((group) => (
           <div
             key={group.id}
-            className="bg-white rounded-lg shadow p-4 flex items-center justify-between"
+            className="bg-white rounded-lg shadow hover:shadow-md transition-shadow duration-200 p-4 flex flex-col justify-between"
           >
             <div>
-              <h3 className="font-medium">{group.name}</h3>
-              <p className="text-sm text-gray-500">{group.description}</p>
-              <div className="flex items-center gap-1 mt-2">
+              <h3 className="font-medium text-lg mb-2">{group.name}</h3>
+              <p className="text-sm text-gray-500 mb-4 line-clamp-2">{group.description}</p>
+              <div className="flex items-center gap-1">
                 <span className="text-sm text-gray-500">
                   {group.group_members?.length || 1} member{group.group_members?.length !== 1 ? 's' : ''}
                 </span>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex justify-end gap-2 mt-4">
               <Button variant="ghost" size="icon">
                 <Trash2 className="h-4 w-4 text-red-500" />
               </Button>
