@@ -42,7 +42,7 @@ const Community = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="pt-16">
+      <div className="pt-24"> {/* Changed from pt-16 to pt-24 for more spacing */}
         <div className="container mx-auto px-4">
           <div className="flex gap-8">
             <CommunitySidebar />
