@@ -9,6 +9,53 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      characters: {
+        Row: {
+          backstory: string | null
+          created_at: string | null
+          goals: string | null
+          id: string
+          name: string
+          role: string | null
+          story_id: string | null
+          traits: string[] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          backstory?: string | null
+          created_at?: string | null
+          goals?: string | null
+          id?: string
+          name: string
+          role?: string | null
+          story_id?: string | null
+          traits?: string[] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          backstory?: string | null
+          created_at?: string | null
+          goals?: string | null
+          id?: string
+          name?: string
+          role?: string | null
+          story_id?: string | null
+          traits?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "characters_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -30,6 +77,33 @@ export type Database = {
           id?: string
           username?: string | null
           website?: string | null
+        }
+        Relationships: []
+      }
+      stories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
