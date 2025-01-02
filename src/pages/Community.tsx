@@ -42,13 +42,11 @@ const Community = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="fixed inset-0 pt-[30px]">
-        <div className="container h-full mx-auto px-4">
-          <div className="flex gap-8 h-full">
-            <div className="w-64 shrink-0">
-              <CommunitySidebar />
-            </div>
-            <div className="flex-1 max-w-3xl overflow-y-auto pb-8">
+      <div className="fixed inset-0 pt-16">
+        <div className="container h-full mx-auto">
+          <div className="flex gap-8 h-full pl-72">
+            <CommunitySidebar />
+            <div className="flex-1 max-w-3xl overflow-y-auto py-8">
               <Routes>
                 <Route path="/" element={<CommunityFeed />} />
                 <Route path="/groups" element={<MyGroups />} />
