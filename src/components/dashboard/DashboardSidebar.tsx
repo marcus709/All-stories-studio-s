@@ -24,13 +24,13 @@ export const DashboardSidebar = ({ currentView, setCurrentView }: DashboardSideb
     <div className="fixed left-0 top-16 w-72 h-[calc(100vh-4rem)] border-r bg-white">
       <div className="p-8 flex flex-col h-full">
         {/* Profile Section */}
-        <div className="flex items-center gap-4 mb-12 px-2 mt-4">
-          <div className="w-14 h-14 rounded-full bg-purple-500 flex items-center justify-center text-white text-xl font-medium">
+        <div className="flex items-center gap-3 mb-12 px-2 mt-4">
+          <div className="w-11 h-11 rounded-full bg-purple-500 flex items-center justify-center text-white text-lg font-medium">
             M
           </div>
           <div className="flex flex-col">
-            <h3 className="font-medium text-lg text-gray-900">Marcus</h3>
-            <p className="text-sm text-gray-500">Curious Plan</p>
+            <h3 className="font-medium text-base text-gray-900">Marcus</h3>
+            <p className="text-xs text-gray-500">Curious Plan</p>
           </div>
         </div>
 
