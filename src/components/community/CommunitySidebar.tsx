@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
-import { MessageSquare, Users, Hash, Bookmark, Settings } from "lucide-react";
+import { MessageSquare, Users, Hash, Bookmark, Settings, UserPlus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -9,6 +9,7 @@ const navItems = [
   { icon: Users, label: "My Groups", href: "/community/groups" },
   { icon: Hash, label: "Topics", href: "/community/topics" },
   { icon: Bookmark, label: "Saved", href: "/community/saved" },
+  { icon: UserPlus, label: "Add Friends", href: "/community/friends" },
   { icon: Settings, label: "Settings", href: "/settings" },
 ];
 
