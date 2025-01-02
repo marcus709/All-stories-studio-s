@@ -1,6 +1,33 @@
+import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
+import { useSession } from "@supabase/auth-helpers-react";
+import { useToast } from "./ui/use-toast";
 
-export const HeroSection = () => {
+interface HeroSectionProps {
+  onShowAuth?: (view: "signin" | "signup") => void;
+}
+
+export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
+  const session = useSession();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleStartWriting = () => {
+    if (session) {
+      navigate("/dashboard");
+    } else {
+      if (onShowAuth) {
+        onShowAuth("signup");
+      } else {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign up to start writing.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   return (
     <section className="pt-32 pb-16 px-4 bg-gradient-to-br from-pink-50 to-purple-50">
       <div className="container mx-auto text-center">
@@ -17,6 +44,7 @@ export const HeroSection = () => {
         <Button 
           size="lg"
           className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 text-white px-8"
+          onClick={handleStartWriting}
         >
           Start Writing Now →
         </Button>
