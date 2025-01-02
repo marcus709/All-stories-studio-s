@@ -1,13 +1,11 @@
-import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
-import { X, Wand2 } from "lucide-react";
-import { useSession } from "@supabase/auth-helpers-react";
-import { supabase } from "@/integrations/supabase/client";
+import { X } from "lucide-react";
+import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { CharacterForm } from "./character/CharacterForm";
 
 interface CreateCharacterDialogProps {
   isOpen: boolean;
@@ -16,6 +14,7 @@ interface CreateCharacterDialogProps {
 
 export function CreateCharacterDialog({ isOpen, onOpenChange }: CreateCharacterDialogProps) {
   const session = useSession();
+  const supabase = useSupabaseClient();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
@@ -29,6 +28,18 @@ export function CreateCharacterDialog({ isOpen, onOpenChange }: CreateCharacterD
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Effect to check authentication status when dialog opens
+  useEffect(() => {
+    if (isOpen && !session) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to create a character",
+        variant: "destructive",
+      });
+      onOpenChange(false);
+    }
+  }, [isOpen, session, toast, onOpenChange]);
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -39,10 +50,11 @@ export function CreateCharacterDialog({ isOpen, onOpenChange }: CreateCharacterD
   const handleCreateCharacter = async () => {
     if (!session?.user?.id) {
       toast({
-        title: "Error",
-        description: "You must be logged in to create a character",
+        title: "Authentication Required",
+        description: "Please sign in to create a character",
         variant: "destructive",
       });
+      onOpenChange(false);
       return;
     }
 
@@ -74,7 +86,6 @@ export function CreateCharacterDialog({ isOpen, onOpenChange }: CreateCharacterD
         description: "Character created successfully",
       });
 
-      // Reset form and close dialog
       setFormData({
         name: "",
         role: "",
@@ -83,9 +94,7 @@ export function CreateCharacterDialog({ isOpen, onOpenChange }: CreateCharacterD
         backstory: ""
       });
       
-      // Invalidate the characters query to refresh the list
       queryClient.invalidateQueries({ queryKey: ["characters"] });
-      
       onOpenChange(false);
     } catch (error) {
       console.error("Error creating character:", error);
@@ -113,95 +122,18 @@ export function CreateCharacterDialog({ isOpen, onOpenChange }: CreateCharacterD
               <X className="h-4 w-4" />
             </Button>
           </div>
+          <DialogDescription>
+            Fill out the form below to create a new character.
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <label htmlFor="name" className="text-sm font-medium">
-              Name
-            </label>
-            <Input 
-              id="name" 
-              placeholder="Enter character name" 
-              value={formData.name}
-              onChange={handleInputChange}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="role" className="text-sm font-medium">
-              Role
-            </label>
-            <Input 
-              id="role" 
-              placeholder="Enter character role" 
-              value={formData.role}
-              onChange={handleInputChange}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="traits" className="text-sm font-medium">
-              Traits (comma-separated)
-            </label>
-            <Input 
-              id="traits" 
-              placeholder="brave, loyal, intelligent"
-              value={formData.traits}
-              onChange={handleInputChange}
-            />
-            <Button 
-              variant="link" 
-              className="p-0 h-auto text-purple-500 hover:text-purple-600 flex items-center gap-2"
-            >
-              <Wand2 className="h-4 w-4" />
-              Get AI Suggestions
-            </Button>
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="goals" className="text-sm font-medium">
-              Goals
-            </label>
-            <Textarea
-              id="goals"
-              placeholder="Enter character goals"
-              className="min-h-[80px]"
-              value={formData.goals}
-              onChange={handleInputChange}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="backstory" className="text-sm font-medium">
-              Backstory
-            </label>
-            <Textarea
-              id="backstory"
-              placeholder="Enter character backstory"
-              className="min-h-[120px]"
-              value={formData.backstory}
-              onChange={handleInputChange}
-            />
-          </div>
-
-          <div className="flex justify-end gap-3">
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button
-              className="bg-purple-500 hover:bg-purple-600"
-              onClick={handleCreateCharacter}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Creating..." : "Create Character"}
-            </Button>
-          </div>
-        </div>
+        <CharacterForm
+          formData={formData}
+          handleInputChange={handleInputChange}
+          isSubmitting={isSubmitting}
+          onCancel={() => onOpenChange(false)}
+          onSubmit={handleCreateCharacter}
+        />
       </DialogContent>
     </Dialog>
   );
