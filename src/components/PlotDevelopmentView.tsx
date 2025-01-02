@@ -36,6 +36,16 @@ export const PlotDevelopmentView = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Get current user
+  const { data: user } = useQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) throw error;
+      return user;
+    },
+  });
+
   // Fetch plot structures
   const { data: plotStructures } = useQuery({
     queryKey: ["plotStructures"],
@@ -65,17 +75,18 @@ export const PlotDevelopmentView = () => {
   // Add new plot event
   const addEventMutation = useMutation({
     mutationFn: async (newEvent: { title: string; description: string; stage: string }) => {
+      if (!user) throw new Error("User not authenticated");
+      
       const { data, error } = await supabase
         .from("plot_events")
-        .insert([
-          {
-            title: newEvent.title,
-            description: newEvent.description,
-            stage: newEvent.stage,
-            order_index: plotEvents?.length || 0,
-            story_id: "current-story-id", // You'll need to get this from your app's state
-          },
-        ])
+        .insert({
+          title: newEvent.title,
+          description: newEvent.description,
+          stage: newEvent.stage,
+          order_index: plotEvents?.length || 0,
+          story_id: "current-story-id", // You'll need to get this from your app's state
+          user_id: user.id,
+        })
         .select()
         .single();
 
