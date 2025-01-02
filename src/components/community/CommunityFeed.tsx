@@ -20,13 +20,13 @@ export const CommunityFeed = () => {
         .from("posts")
         .select(`
           *,
-          profiles!posts_user_id_fkey (username, avatar_url),
+          profiles!inner (username, avatar_url),
           post_likes (id, user_id),
           comments (
             id,
             content,
             created_at,
-            profiles!comments_user_id_fkey (username, avatar_url)
+            profiles!inner (username, avatar_url)
           )
         `)
         .order("created_at", { ascending: false });
