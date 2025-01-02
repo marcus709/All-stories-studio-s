@@ -7,7 +7,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface CreatePostFormProps {
   userId: string;
-  profile: any;
+  profile: {
+    username?: string;
+    avatar_url?: string;
+  };
 }
 
 export const CreatePostForm = ({ userId, profile }: CreatePostFormProps) => {
@@ -36,23 +39,24 @@ export const CreatePostForm = ({ userId, profile }: CreatePostFormProps) => {
     );
   };
 
+  const displayName = profile?.username || "anonymous";
+  const firstLetter = displayName.charAt(0).toUpperCase();
+
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center overflow-hidden">
           {profile?.avatar_url ? (
             <img
               src={profile.avatar_url}
-              alt={profile.username}
-              className="w-full h-full rounded-full object-cover"
+              alt={displayName}
+              className="w-full h-full object-cover"
             />
           ) : (
-            <span className="text-purple-600 font-medium">
-              {profile?.username?.[0]?.toUpperCase() || "U"}
-            </span>
+            <span className="text-purple-600 font-medium">{firstLetter}</span>
           )}
         </div>
-        <span className="text-gray-500">@{profile?.username || "anonymous"}</span>
+        <span className="text-gray-500">@{displayName}</span>
       </div>
 
       {error && (
