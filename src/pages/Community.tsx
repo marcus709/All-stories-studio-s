@@ -46,15 +46,19 @@ const Community = () => {
         <div className="container h-full mx-auto px-4">
           <div className="flex gap-8 h-full">
             <div className="w-64 shrink-0">
-              <CommunitySidebar />
+              <div className="bg-white rounded-lg shadow p-6">
+                <CommunitySidebar />
+              </div>
             </div>
             <div className="flex-1 max-w-3xl overflow-y-auto pb-8">
-              <Routes>
-                <Route path="/" element={<CommunityFeed />} />
-                <Route path="/groups" element={<MyGroups />} />
-                <Route path="/topics" element={<Topics />} />
-                <Route path="/saved" element={<SavedPosts />} />
-              </Routes>
+              <div className="bg-white rounded-lg shadow p-6">
+                <Routes>
+                  <Route path="/" element={<CommunityFeed />} />
+                  <Route path="/groups" element={<MyGroups />} />
+                  <Route path="/topics" element={<Topics />} />
+                  <Route path="/saved" element={<SavedPosts />} />
+                </Routes>
+              </div>
             </div>
             <div className="w-80 shrink-0">
               <TrendingTopics />
