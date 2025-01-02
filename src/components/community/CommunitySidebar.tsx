@@ -34,29 +34,31 @@ export const CommunitySidebar = () => {
   return (
     <div className="space-y-6">
       {profile && (
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center overflow-hidden shrink-0">
-            {profile.avatar_url ? (
-              <img
-                src={profile.avatar_url}
-                alt={profile.username}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span className="text-purple-600 text-xl font-medium">
-                {profile.username?.[0]?.toUpperCase() || "U"}
-              </span>
-            )}
-          </div>
-          <div className="flex flex-col min-w-0">
-            <h3 className="font-medium text-gray-900 truncate">
-              {profile.username || "Anonymous"}
-            </h3>
-            {profile.bio && (
-              <p className="text-sm text-gray-500 truncate">
-                {profile.bio}
-              </p>
-            )}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center overflow-hidden shrink-0">
+              {profile.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt={profile.username}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-purple-600 text-xl font-medium">
+                  {profile.username?.[0]?.toUpperCase() || "U"}
+                </span>
+              )}
+            </div>
+            <div className="flex flex-col min-w-0">
+              <h3 className="font-medium text-gray-900 truncate">
+                {profile.username || "Anonymous"}
+              </h3>
+              {profile.bio && (
+                <p className="text-sm text-gray-500 truncate">
+                  {profile.bio}
+                </p>
+              )}
+            </div>
           </div>
         </div>
       )}
