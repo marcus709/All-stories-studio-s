@@ -1,28 +1,63 @@
-import { MessageSquare, Users, Hash, Bookmark, Settings } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { CommunityFeed } from "@/components/community/CommunityFeed";
-import { CommunityPost } from "@/components/community/CommunityPost";
-import { CommunityTrendingTopics } from "@/components/community/CommunityTrendingTopics";
+import { useEffect, useState } from "react";
+import { useNavigate, Routes, Route } from "react-router-dom";
+import { Header } from "@/components/Header";
 import { CommunitySidebar } from "@/components/community/CommunitySidebar";
+import { CommunityFeed } from "@/components/community/CommunityFeed";
+import { MyGroups } from "@/components/community/MyGroups";
+import { Topics } from "@/components/community/Topics";
+import { SavedPosts } from "@/components/community/SavedPosts";
+import { TrendingTopics } from "@/components/community/TrendingTopics";
+import { supabase } from "@/integrations/supabase/client";
+import { Session } from "@supabase/supabase-js";
 
-export default function Community() {
+const Community = () => {
+  const navigate = useNavigate();
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setIsLoading(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!isLoading && !session) {
+      navigate("/");
+    }
+  }, [session, isLoading, navigate]);
+
+  if (isLoading || !session) return null;
+
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Left Sidebar */}
-      <CommunitySidebar />
-
-      {/* Main Content */}
-      <main className="flex-1 border-x">
-        <div className="max-w-3xl mx-auto py-6 px-4 mt-16">
-          <CommunityFeed />
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="container mx-auto px-4 py-8 mt-16">
+        <div className="flex gap-8">
+          <CommunitySidebar />
+          <div className="flex-1 max-w-3xl">
+            <Routes>
+              <Route path="/" element={<CommunityFeed />} />
+              <Route path="/groups" element={<MyGroups />} />
+              <Route path="/topics" element={<Topics />} />
+              <Route path="/saved" element={<SavedPosts />} />
+            </Routes>
+          </div>
+          <TrendingTopics />
         </div>
-      </main>
-
-      {/* Right Sidebar */}
-      <div className="w-80 p-6 mt-16">
-        <CommunityTrendingTopics />
       </div>
     </div>
   );
-}
+};
+
+export default Community;
