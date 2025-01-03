@@ -33,12 +33,11 @@ export const TimelineNodeFields = ({
 }: TimelineNodeFieldsProps) => {
   if (isEditing) {
     return (
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
         <input
           type="text"
           value={editedLabel}
           onChange={(e) => setEditedLabel(e.target.value)}
-          onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           className="font-medium text-gray-900 border border-gray-300 rounded px-2 py-1"
           autoFocus
@@ -47,7 +46,6 @@ export const TimelineNodeFields = ({
           type="text"
           value={editedSubtitle}
           onChange={(e) => setEditedSubtitle(e.target.value)}
-          onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           className="text-sm text-gray-500 border border-gray-300 rounded px-2 py-1"
         />
@@ -55,7 +53,6 @@ export const TimelineNodeFields = ({
           type="text"
           value={editedYear}
           onChange={(e) => setEditedYear(e.target.value)}
-          onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           className="text-xs text-gray-400 border border-gray-300 rounded px-2 py-1"
         />
