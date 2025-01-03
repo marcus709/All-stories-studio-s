@@ -1,109 +1,175 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useCallback } from 'react';
 import {
   ReactFlow,
   MiniMap,
   Background,
-  Controls,
-  Panel,
+  useNodesState,
+  useEdgesState,
+  addEdge,
 } from '@xyflow/react';
+import { Settings } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
 import '@xyflow/react/dist/style.css';
-import { Plus } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { TimelineNode } from './TimelineNode';
-import { AddEventDialog } from './AddEventDialog';
-import { useFlowState } from './hooks/useFlowState';
-import { useToast } from '@/hooks/use-toast';
+
+const TimelineNode = ({ data }: { data: any }) => {
+  const { toast } = useToast();
+
+  const handleEdit = () => {
+    toast({
+      title: "Edit Event",
+      description: `Editing event: ${data.label}`,
+    });
+  };
+
+  const handleDelete = () => {
+    toast({
+      title: "Delete Event",
+      description: `Deleting event: ${data.label}`,
+    });
+  };
+
+  const handleAddConnection = () => {
+    toast({
+      title: "Add Connection",
+      description: `Adding connection from: ${data.label}`,
+    });
+  };
+
+  return (
+    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 min-w-[200px]">
+      <div className="flex justify-between items-start mb-2">
+        <div>
+          <h3 className="font-medium text-gray-900">{data.label}</h3>
+          <p className="text-sm text-gray-500">{data.subtitle}</p>
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="p-1 hover:bg-gray-100 rounded">
+            <Settings className="h-4 w-4 text-gray-500" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={handleEdit}>
+              Edit Event
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleAddConnection}>
+              Add Connection
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleDelete} className="text-red-600">
+              Delete Event
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <div className="text-xs text-gray-400">{data.year}</div>
+    </div>
+  );
+};
+
+const initialNodes = [
+  {
+    id: '1',
+    type: 'timeline',
+    position: { x: 100, y: 100 },
+    data: { 
+      label: 'Story Beginning',
+      subtitle: 'The journey begins...',
+      year: '2018'
+    },
+  },
+  {
+    id: '2',
+    type: 'timeline',
+    position: { x: 300, y: 100 },
+    data: { 
+      label: 'First Challenge',
+      subtitle: 'Our hero faces...',
+      year: '2019'
+    },
+  },
+  {
+    id: '3',
+    type: 'timeline',
+    position: { x: 500, y: 100 },
+    data: { 
+      label: 'Major Conflict',
+      subtitle: 'The stakes rise...',
+      year: '2020'
+    },
+  },
+  {
+    id: '4',
+    type: 'timeline',
+    position: { x: 700, y: 100 },
+    data: { 
+      label: 'Plot Twist',
+      subtitle: 'Everything changes...',
+      year: '2021'
+    },
+  },
+  {
+    id: '5',
+    type: 'timeline',
+    position: { x: 900, y: 100 },
+    data: { 
+      label: 'Resolution',
+      subtitle: 'Peace at last...',
+      year: '2022'
+    },
+  },
+];
+
+const initialEdges = [
+  { id: 'e1-2', source: '1', target: '2', type: 'smoothstep' },
+  { id: 'e2-3', source: '2', target: '3', type: 'smoothstep' },
+  { id: 'e3-4', source: '3', target: '4', type: 'smoothstep' },
+  { id: 'e4-5', source: '4', target: '5', type: 'smoothstep' },
+];
 
 interface StoryFlowTimelineProps {
   viewMode: 'linear' | 'branching' | 'network';
 }
 
 export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
-  const [isAddingNode, setIsAddingNode] = useState(false);
-  const { toast } = useToast();
-  const {
-    nodes,
-    edges,
-    onNodesChange,
-    onEdgesChange,
-    handleConnect,
-    handleAddNode,
-    handleDeleteNode,
-    applyLayout,
-  } = useFlowState(viewMode);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
-  useEffect(() => {
-    applyLayout();
-  }, [viewMode, applyLayout]);
+  const onConnect = useCallback(
+    (params: any) => setEdges((eds) => addEdge(params, eds)),
+    [setEdges],
+  );
 
-  const handleEditNode = (id: string) => {
-    toast({
-      title: "Edit Event",
-      description: `Editing event with ID: ${id}`,
-    });
+  const nodeTypes = {
+    timeline: TimelineNode,
   };
-
-  const handleAddConnection = (id: string) => {
-    toast({
-      title: "Add Connection",
-      description: `Click another node to connect with node ${id}`,
-    });
-  };
-
-  // Memoize nodeTypes to prevent unnecessary re-renders
-  const nodeTypes = useMemo(() => ({
-    timeline: (props: any) => (
-      <TimelineNode
-        {...props}
-        onEdit={handleEditNode}
-        onDelete={handleDeleteNode}
-        onAddConnection={handleAddConnection}
-      />
-    ),
-  }), [handleDeleteNode]);
 
   return (
-    <div className="h-[600px] bg-gray-50 rounded-xl relative">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={handleConnect}
-        nodeTypes={nodeTypes}
-        fitView
-        snapToGrid
-        snapGrid={[15, 15]}
-      >
-        <Panel position="top-right" className="bg-white p-2 rounded-lg shadow-sm">
-          <Button 
-            onClick={() => setIsAddingNode(true)}
-            className="gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Add Event
-          </Button>
-        </Panel>
-        <Background />
-        <Controls />
-        <MiniMap
-          style={{
-            backgroundColor: 'white',
-            border: '2px solid #e2e8f0',
-            borderRadius: '8px',
-            width: 200,
-            height: 120,
-          }}
-          maskColor="rgba(0, 0, 0, 0.1)"
-          nodeColor="#4f46e5"
-        />
-      </ReactFlow>
-
-      <AddEventDialog
-        isOpen={isAddingNode}
-        onClose={() => setIsAddingNode(false)}
-        onSubmit={handleAddNode}
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      onConnect={onConnect}
+      nodeTypes={nodeTypes}
+      fitView
+      className="bg-gray-50"
+    >
+      <Background />
+      <MiniMap
+        style={{
+          backgroundColor: 'white',
+          border: '2px solid #e2e8f0',
+          borderRadius: '8px',
+          width: 200,
+          height: 120,
+        }}
+        maskColor="rgba(0, 0, 0, 0.1)"
+        nodeColor="#4f46e5"
       />
-    </div>
+    </ReactFlow>
   );
 };
