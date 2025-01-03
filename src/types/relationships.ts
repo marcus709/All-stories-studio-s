@@ -1,4 +1,4 @@
-export type RelationshipType = 'ALLY' | 'RIVAL' | 'FAMILY' | 'FRIEND' | 'ENEMY' | 'MENTOR' | 'STUDENT';
+export type RelationshipType = 'ally' | 'rival' | 'family' | 'friend' | 'enemy' | 'mentor' | 'student';
 
 export interface Relationship {
   id: string;

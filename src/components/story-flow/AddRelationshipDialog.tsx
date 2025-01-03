@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Slider } from '../ui/slider';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { RelationshipType } from '@/types/relationships';
@@ -16,7 +16,6 @@ interface Character {
 interface AddRelationshipDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  characters: Character[];
   storyId: string;
 }
 
@@ -32,8 +31,7 @@ const RELATIONSHIP_TYPES: RelationshipType[] = [
 
 export const AddRelationshipDialog = ({ 
   isOpen, 
-  onClose, 
-  characters,
+  onClose,
   storyId,
 }: AddRelationshipDialogProps) => {
   const [character1, setCharacter1] = useState<string>('');
@@ -45,6 +43,22 @@ export const AddRelationshipDialog = ({
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Fetch characters for the current story
+  const { data: characters = [] } = useQuery({
+    queryKey: ['characters', storyId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('characters')
+        .select('id, name')
+        .eq('story_id', storyId)
+        .order('name');
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!storyId,
+  });
+
   const createRelationshipMutation = useMutation({
     mutationFn: async () => {
       const { error } = await supabase
@@ -53,7 +67,7 @@ export const AddRelationshipDialog = ({
           story_id: storyId,
           character1_id: character1,
           character2_id: character2,
-          relationship_type: relationshipType,
+          relationship_type: relationshipType.toLowerCase() as RelationshipType,
           strength,
           description,
         });
