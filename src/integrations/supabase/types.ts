@@ -36,6 +36,42 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_configurations: {
+        Row: {
+          created_at: string | null
+          id: string
+          max_tokens: number
+          model_type: Database["public"]["Enums"]["ai_model_type"]
+          name: string
+          system_prompt: string | null
+          temperature: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          max_tokens?: number
+          model_type?: Database["public"]["Enums"]["ai_model_type"]
+          name: string
+          system_prompt?: string | null
+          temperature?: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          max_tokens?: number
+          model_type?: Database["public"]["Enums"]["ai_model_type"]
+          name?: string
+          system_prompt?: string | null
+          temperature?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       character_relationships: {
         Row: {
           character1_id: string
@@ -655,6 +691,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      ai_model_type: "gpt-4o" | "gpt-4o-mini"
       relationship_type:
         | "friend"
         | "enemy"

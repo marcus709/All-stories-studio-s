@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { BookOpen, LineChart, Wand } from "lucide-react";
+import { BookOpen, LineChart, Wand, Settings, Trash2, Edit } from "lucide-react";
 import { 
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectGroup,
+  SelectLabel,
+  SelectSeparator,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { CharactersView } from "@/components/CharactersView";
@@ -14,8 +17,17 @@ import { StoryFlow } from "@/components/story-flow/StoryFlow";
 import { StoryIdeasView } from "@/components/StoryIdeasView";
 import { useStory } from "@/contexts/StoryContext";
 import { useAI } from "@/hooks/useAI";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { AIConfigurationDialog } from "@/components/ai/AIConfigurationDialog";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 type View = "story" | "characters" | "plot" | "flow" | "ideas";
 
@@ -27,9 +39,26 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
   const [wordCount, setWordCount] = useState(1);
   const [storyContent, setStoryContent] = useState("");
   const [aiSuggestions, setAiSuggestions] = useState("");
+  const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false);
+  const [selectedConfig, setSelectedConfig] = useState<string>("");
+  const [configToEdit, setConfigToEdit] = useState<any>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [configToDelete, setConfigToDelete] = useState<string>("");
   const { selectedStory } = useStory();
   const { generateContent, isLoading } = useAI();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: aiConfigs = [] } = useQuery({
+    queryKey: ['aiConfigurations'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('ai_configurations')
+        .select('*')
+        .order('created_at', { ascending: true });
+      return data || [];
+    },
+  });
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (!selectedStory) return;
@@ -49,6 +78,8 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
       return;
     }
 
+    const selectedAIConfig = aiConfigs.find(config => config.id === selectedConfig);
+
     const { data: characters } = await supabase
       .from("characters")
       .select("name, role, traits")
@@ -61,11 +92,38 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
     const context = {
       storyDescription: selectedStory?.description || '',
       characters: characterContext,
+      aiConfig: selectedAIConfig,
     };
 
     const suggestions = await generateContent(storyContent, "suggestions", context);
     if (suggestions) {
       setAiSuggestions(suggestions);
+    }
+  };
+
+  const handleDeleteConfig = async () => {
+    if (!configToDelete) return;
+
+    try {
+      await supabase
+        .from('ai_configurations')
+        .delete()
+        .eq('id', configToDelete);
+
+      toast({
+        title: "Success",
+        description: "AI configuration deleted successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['aiConfigurations'] });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete AI configuration.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setConfigToDelete("");
     }
   };
 
@@ -103,30 +161,71 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
               <div className="absolute inset-0 bg-transparent z-10" />
             )}
             <div className="flex gap-6 mb-8">
-              <Select disabled={!selectedStory}>
+              <Select
+                value={selectedConfig}
+                onValueChange={setSelectedConfig}
+                disabled={!selectedStory}
+              >
                 <SelectTrigger className="w-[280px]">
-                  <SelectValue placeholder="Select Configuration" />
+                  <SelectValue placeholder="Select AI Configuration" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="config1">Configuration 1</SelectItem>
-                  <SelectItem value="config2">Configuration 2</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select disabled={!selectedStory}>
-                <SelectTrigger className="w-[280px]">
-                  <SelectValue placeholder="Select writing tone" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="formal">Formal</SelectItem>
-                  <SelectItem value="casual">Casual</SelectItem>
+                  <SelectGroup>
+                    <SelectLabel>Your Configurations</SelectLabel>
+                    {aiConfigs.map((config) => (
+                      <SelectItem key={config.id} value={config.id}>
+                        <div className="flex items-center justify-between w-full">
+                          <span>{config.name}</span>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
+                              <Settings className="h-4 w-4 ml-2" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setConfigToEdit(config);
+                                  setIsConfigDialogOpen(true);
+                                }}
+                              >
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setConfigToDelete(config.id);
+                                  setIsDeleteDialogOpen(true);
+                                }}
+                                className="text-red-600"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </SelectItem>
+                    ))}
+                    <SelectSeparator />
+                    <SelectItem
+                      value="new"
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        setConfigToEdit(null);
+                        setIsConfigDialogOpen(true);
+                      }}
+                    >
+                      <span className="text-blue-600">+ Configure New AI</span>
+                    </SelectItem>
+                  </SelectGroup>
                 </SelectContent>
               </Select>
 
               <button 
-                className={`ml-auto px-8 py-2.5 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg flex items-center gap-2 transition-colors ${!selectedStory || isLoading ? 'cursor-not-allowed opacity-50' : ''}`}
+                className={`ml-auto px-8 py-2.5 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg flex items-center gap-2 transition-colors ${!selectedStory || isLoading || !selectedConfig ? 'cursor-not-allowed opacity-50' : ''}`}
                 onClick={handleGetSuggestions}
-                disabled={!selectedStory || isLoading}
+                disabled={!selectedStory || isLoading || !selectedConfig}
               >
                 <Wand className="h-5 w-5" />
                 {isLoading ? "Getting suggestions..." : "Get AI Suggestions"}
@@ -161,6 +260,35 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
               )}
             </div>
           </div>
+
+          <AIConfigurationDialog
+            isOpen={isConfigDialogOpen}
+            onClose={() => {
+              setIsConfigDialogOpen(false);
+              setConfigToEdit(null);
+            }}
+            configToEdit={configToEdit}
+            onConfigSaved={() => {
+              queryClient.invalidateQueries({ queryKey: ['aiConfigurations'] });
+            }}
+          />
+
+          <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete AI Configuration</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete this AI configuration? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteConfig} className="bg-red-600 hover:bg-red-700">
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       );
     default:

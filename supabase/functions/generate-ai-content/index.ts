@@ -14,12 +14,13 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, type, context } = await req.json();
+    const { prompt, type, context, aiConfig } = await req.json();
 
     const systemPrompts = {
       suggestions: `You are a creative writing assistant. Consider the following context about the story and its characters:
         ${context?.storyDescription || ''}
         ${context?.characters ? `Characters in the story: ${context.characters}` : ''}
+        ${context?.aiConfig?.system_prompt || ''}
         
         Provide helpful suggestions for improving the story while maintaining the author's voice. Format your response in clear sections:
 
@@ -34,6 +35,7 @@ serve(async (req) => {
 
       traits: `You are a character development expert. Consider the following story context:
         ${context?.storyDescription || ''}
+        ${context?.aiConfig?.system_prompt || ''}
         
         Suggest 5 unique and compelling character traits that would enrich the story and create interesting dynamics with existing characters.
         Format your response as a bullet-pointed list.`,
@@ -41,6 +43,7 @@ serve(async (req) => {
       goals: `You are a story planning assistant. Consider the following context:
         Story: ${context?.storyDescription || ''}
         Character traits: ${context?.traits || ''}
+        ${context?.aiConfig?.system_prompt || ''}
         
         Suggest meaningful character goals and motivations that align with their traits and would drive the narrative forward.
         Format your response in sections:
@@ -65,7 +68,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: context?.aiConfig?.model_type || 'gpt-4o-mini',
         messages: [
           { 
             role: 'system', 
@@ -76,6 +79,8 @@ serve(async (req) => {
             content: prompt 
           }
         ],
+        temperature: context?.aiConfig?.temperature || 0.7,
+        max_tokens: context?.aiConfig?.max_tokens || 1000,
       }),
     });
 
