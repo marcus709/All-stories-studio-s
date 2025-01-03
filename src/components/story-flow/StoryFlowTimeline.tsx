@@ -17,75 +17,73 @@ import { Button } from "@/components/ui/button";
 import { TimelineNode } from './TimelineNode';
 import { AddEventDialog } from './AddEventDialog';
 
-const initialNodes = [
-  {
-    id: '1',
-    type: 'timeline',
-    position: { x: 100, y: 100 },
-    data: { 
-      label: 'Story Beginning',
-      subtitle: 'The journey begins...',
-      year: '2018'
-    },
-  },
-  {
-    id: '2',
-    type: 'timeline',
-    position: { x: 300, y: 100 },
-    data: { 
-      label: 'First Challenge',
-      subtitle: 'Our hero faces...',
-      year: '2019'
-    },
-  },
-  {
-    id: '3',
-    type: 'timeline',
-    position: { x: 500, y: 100 },
-    data: { 
-      label: 'Major Conflict',
-      subtitle: 'The stakes rise...',
-      year: '2020'
-    },
-  },
-  {
-    id: '4',
-    type: 'timeline',
-    position: { x: 700, y: 100 },
-    data: { 
-      label: 'Plot Twist',
-      subtitle: 'Everything changes...',
-      year: '2021'
-    },
-  },
-  {
-    id: '5',
-    type: 'timeline',
-    position: { x: 900, y: 100 },
-    data: { 
-      label: 'Resolution',
-      subtitle: 'Peace at last...',
-      year: '2022'
-    },
-  },
-];
-
-const initialEdges = [
-  { id: 'e1-2', source: '1', target: '2', type: 'smoothstep' },
-  { id: 'e2-3', source: '2', target: '3', type: 'smoothstep' },
-  { id: 'e3-4', source: '3', target: '4', type: 'smoothstep' },
-  { id: 'e4-5', source: '4', target: '5', type: 'smoothstep' },
-];
+const getLayoutedElements = (nodes: any[], edges: any[], type: 'linear' | 'branching' | 'network') => {
+  const spacing = 100;
+  
+  if (type === 'linear') {
+    // Linear layout: events in a straight line
+    return {
+      nodes: nodes.map((node, index) => ({
+        ...node,
+        position: { x: index * 250, y: 100 },
+      })),
+      edges,
+    };
+  } else if (type === 'branching') {
+    // Branching layout: tree-like structure
+    return {
+      nodes: nodes.map((node, index) => {
+        const level = Math.floor(index / 2);
+        const offset = index % 2 === 0 ? -150 : 150;
+        return {
+          ...node,
+          position: { 
+            x: level * 300,
+            y: 100 + offset
+          },
+        };
+      }),
+      edges,
+    };
+  } else {
+    // Network layout: circular arrangement
+    const radius = 200;
+    const angleStep = (2 * Math.PI) / nodes.length;
+    
+    return {
+      nodes: nodes.map((node, index) => ({
+        ...node,
+        position: {
+          x: 300 + radius * Math.cos(index * angleStep),
+          y: 300 + radius * Math.sin(index * angleStep),
+        },
+      })),
+      edges,
+    };
+  }
+};
 
 interface StoryFlowTimelineProps {
   viewMode: 'linear' | 'branching' | 'network';
 }
 
 export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [isAddingNode, setIsAddingNode] = useState(false);
   const { toast } = useToast();
+
+  // Apply layout when viewMode changes
+  const applyLayout = useCallback(() => {
+    const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(nodes, edges, viewMode);
+    setNodes([...layoutedNodes]);
+    setEdges([...layoutedEdges]);
+  }, [nodes, edges, viewMode, setNodes, setEdges]);
+
+  // Update layout when viewMode changes
+  React.useEffect(() => {
+    applyLayout();
+  }, [viewMode, applyLayout]);
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -102,10 +100,16 @@ export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
     const newNode = {
       id: `node-${nodes.length + 1}`,
       type: 'timeline',
-      position: { x: 100, y: 100 },
+      position: { x: 0, y: 0 },
       data,
     };
-    setNodes((nds) => [...nds, newNode]);
+    
+    setNodes((nds) => {
+      const updatedNodes = [...nds, newNode];
+      const { nodes: layoutedNodes } = getLayoutedElements(updatedNodes, edges, viewMode);
+      return layoutedNodes;
+    });
+    
     toast({
       title: "Event Added",
       description: "New event has been created",
@@ -120,8 +124,14 @@ export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
   };
 
   const handleDeleteNode = (id: string) => {
-    setNodes((nds) => nds.filter((node) => node.id !== id));
+    setNodes((nds) => {
+      const remainingNodes = nds.filter((node) => node.id !== id);
+      const { nodes: layoutedNodes } = getLayoutedElements(remainingNodes, edges, viewMode);
+      return layoutedNodes;
+    });
+    
     setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+    
     toast({
       title: "Event Deleted",
       description: "Event has been removed",
