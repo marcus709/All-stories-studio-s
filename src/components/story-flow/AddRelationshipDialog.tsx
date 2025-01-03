@@ -20,13 +20,13 @@ interface AddRelationshipDialogProps {
 }
 
 const RELATIONSHIP_TYPES: RelationshipType[] = [
-  'ALLY',
-  'RIVAL',
-  'FAMILY',
-  'FRIEND',
-  'ENEMY',
-  'MENTOR',
-  'STUDENT',
+  'ally',
+  'rival',
+  'family',
+  'friend',
+  'enemy',
+  'mentor',
+  'student',
 ];
 
 export const AddRelationshipDialog = ({ 
@@ -36,7 +36,7 @@ export const AddRelationshipDialog = ({
 }: AddRelationshipDialogProps) => {
   const [character1, setCharacter1] = useState<string>('');
   const [character2, setCharacter2] = useState<string>('');
-  const [relationshipType, setRelationshipType] = useState<RelationshipType>('ALLY');
+  const [relationshipType, setRelationshipType] = useState<RelationshipType>('ally');
   const [strength, setStrength] = useState<number>(50);
   const [description, setDescription] = useState<string>('');
   
@@ -67,7 +67,7 @@ export const AddRelationshipDialog = ({
           story_id: storyId,
           character1_id: character1,
           character2_id: character2,
-          relationship_type: relationshipType.toLowerCase() as RelationshipType,
+          relationship_type: relationshipType,
           strength,
           description,
         });
@@ -87,7 +87,7 @@ export const AddRelationshipDialog = ({
   const resetForm = () => {
     setCharacter1('');
     setCharacter2('');
-    setRelationshipType('ALLY');
+    setRelationshipType('ally');
     setStrength(50);
     setDescription('');
   };
@@ -170,7 +170,7 @@ export const AddRelationshipDialog = ({
               <SelectContent>
                 {RELATIONSHIP_TYPES.map((type) => (
                   <SelectItem key={type} value={type}>
-                    {type}
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
                   </SelectItem>
                 ))}
               </SelectContent>

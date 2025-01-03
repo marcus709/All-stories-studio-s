@@ -11,13 +11,13 @@ import { useToast } from '@/hooks/use-toast';
 import { RelationshipType } from '@/types/relationships';
 
 const relationshipColors: Record<RelationshipType, string> = {
-  'ALLY': '#22c55e',
-  'RIVAL': '#ef4444',
-  'FAMILY': '#8b5cf6',
-  'FRIEND': '#3b82f6',
-  'ENEMY': '#dc2626',
-  'MENTOR': '#f59e0b',
-  'STUDENT': '#6366f1',
+  'ally': '#22c55e',
+  'rival': '#ef4444',
+  'family': '#8b5cf6',
+  'friend': '#3b82f6',
+  'enemy': '#dc2626',
+  'mentor': '#f59e0b',
+  'student': '#6366f1',
 };
 
 export const CharacterRelationshipMap = () => {
@@ -148,7 +148,6 @@ export const CharacterRelationshipMap = () => {
       <AddRelationshipDialog
         isOpen={showAddDialog}
         onClose={() => setShowAddDialog(false)}
-        characters={characters || []}
         storyId={selectedStory.id}
       />
     </div>
