@@ -36,6 +36,64 @@ export type Database = {
         }
         Relationships: []
       }
+      character_relationships: {
+        Row: {
+          character1_id: string
+          character2_id: string
+          created_at: string | null
+          description: string | null
+          id: string
+          relationship_type: Database["public"]["Enums"]["relationship_type"]
+          story_id: string
+          strength: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          character1_id: string
+          character2_id: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          relationship_type: Database["public"]["Enums"]["relationship_type"]
+          story_id: string
+          strength?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          character1_id?: string
+          character2_id?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          relationship_type?: Database["public"]["Enums"]["relationship_type"]
+          story_id?: string
+          strength?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "character_relationships_character1_id_fkey"
+            columns: ["character1_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "character_relationships_character2_id_fkey"
+            columns: ["character2_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "character_relationships_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       characters: {
         Row: {
           backstory: string | null
@@ -597,6 +655,16 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      relationship_type:
+        | "friend"
+        | "enemy"
+        | "family"
+        | "mentor"
+        | "student"
+        | "rival"
+        | "lover"
+        | "ally"
+        | "neutral"
       topic_privacy: "public" | "private" | "friends"
     }
     CompositeTypes: {
