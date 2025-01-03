@@ -127,6 +127,15 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
     }
   };
 
+  const handleConfigurationSelect = (value: string) => {
+    if (value === "new") {
+      setConfigToEdit(null);
+      setIsConfigDialogOpen(true);
+    } else {
+      setSelectedConfig(value);
+    }
+  };
+
   switch (currentView) {
     case "characters":
       return <CharactersView />;
@@ -163,7 +172,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
             <div className="flex gap-6 mb-8">
               <Select
                 value={selectedConfig}
-                onValueChange={setSelectedConfig}
+                onValueChange={handleConfigurationSelect}
                 disabled={!selectedStory}
               >
                 <SelectTrigger className="w-[280px]">
@@ -208,14 +217,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
                       </SelectItem>
                     ))}
                     <SelectSeparator />
-                    <SelectItem
-                      value="new"
-                      onSelect={(e) => {
-                        e.preventDefault();
-                        setConfigToEdit(null);
-                        setIsConfigDialogOpen(true);
-                      }}
-                    >
+                    <SelectItem value="new">
                       <span className="text-blue-600">+ Configure New AI</span>
                     </SelectItem>
                   </SelectGroup>
