@@ -7,65 +7,42 @@ import {
   useEdgesState,
   addEdge,
 } from '@xyflow/react';
-import { Settings } from 'lucide-react';
+import '@xyflow/react/dist/style.css';
+import { Settings, Edit, Trash2, Link } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useToast } from "@/hooks/use-toast";
-import '@xyflow/react/dist/style.css';
 
-const TimelineNode = ({ data }: { data: any }) => {
-  const { toast } = useToast();
-
-  const handleEdit = () => {
-    toast({
-      title: "Edit Event",
-      description: `Editing event: ${data.label}`,
-    });
-  };
-
-  const handleDelete = () => {
-    toast({
-      title: "Delete Event",
-      description: `Deleting event: ${data.label}`,
-    });
-  };
-
-  const handleAddConnection = () => {
-    toast({
-      title: "Add Connection",
-      description: `Adding connection from: ${data.label}`,
-    });
-  };
-
+const TimelineNode = ({ data }: { data: { label: string; subtitle: string; year: string } }) => {
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 min-w-[200px]">
-      <div className="flex justify-between items-start mb-2">
-        <div>
-          <h3 className="font-medium text-gray-900">{data.label}</h3>
-          <p className="text-sm text-gray-500">{data.subtitle}</p>
-        </div>
+    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 min-w-[200px]">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="font-medium text-gray-900">{data.label}</h3>
         <DropdownMenu>
-          <DropdownMenuTrigger className="p-1 hover:bg-gray-100 rounded">
-            <Settings className="h-4 w-4 text-gray-500" />
+          <DropdownMenuTrigger className="h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100">
+            <Settings className="h-4 w-4 text-gray-600" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem onClick={handleEdit}>
-              Edit Event
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem className="flex items-center gap-2">
+              <Edit className="h-4 w-4" />
+              <span>Edit Event</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleAddConnection}>
-              Add Connection
+            <DropdownMenuItem className="flex items-center gap-2">
+              <Link className="h-4 w-4" />
+              <span>Add Connection</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleDelete} className="text-red-600">
-              Delete Event
+            <DropdownMenuItem className="flex items-center gap-2 text-red-600">
+              <Trash2 className="h-4 w-4" />
+              <span>Delete Event</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="text-xs text-gray-400">{data.year}</div>
+      <p className="text-sm text-gray-600 mb-1">{data.subtitle}</p>
+      <span className="text-xs text-violet-600 font-medium">{data.year}</span>
     </div>
   );
 };
