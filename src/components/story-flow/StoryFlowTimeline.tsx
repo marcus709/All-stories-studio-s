@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -17,10 +17,12 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import '@xyflow/react/dist/style.css';
 
-const TimelineNode = ({ data }: { data: any }) => {
+const TimelineNode = ({ data, id }: { data: any; id: string }) => {
   const { toast } = useToast();
+  const [nodes, setNodes] = useNodesState([]);
 
   const handleEdit = () => {
+    // For now just show a toast - you can expand this to open a modal/form
     toast({
       title: "Edit Event",
       description: `Editing event: ${data.label}`,
@@ -28,9 +30,10 @@ const TimelineNode = ({ data }: { data: any }) => {
   };
 
   const handleDelete = () => {
+    setNodes((nds) => nds.filter((node) => node.id !== id));
     toast({
       title: "Delete Event",
-      description: `Deleting event: ${data.label}`,
+      description: `Deleted event: ${data.label}`,
     });
   };
 
@@ -143,9 +146,12 @@ export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
     [setEdges],
   );
 
-  const nodeTypes = {
-    timeline: TimelineNode,
-  };
+  const nodeTypes = useMemo(
+    () => ({
+      timeline: TimelineNode,
+    }),
+    []
+  );
 
   return (
     <ReactFlow
