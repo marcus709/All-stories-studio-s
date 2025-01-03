@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Connection, useNodesState, useEdgesState } from '@xyflow/react';
+import { Connection, Edge, Node, useNodesState, useEdgesState, addEdge } from '@xyflow/react';
 import { useToast } from '@/components/ui/use-toast';
 import { getLayoutedElements } from '../utils/layoutUtils';
 
@@ -31,6 +31,7 @@ export const useFlowState = (viewMode: 'linear' | 'branching' | 'network') => {
       type: 'timeline',
       position: { x: 0, y: 0 },
       data,
+      draggable: true, // Ensure nodes are draggable
     };
     
     setNodes((nds) => {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -50,7 +50,8 @@ export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
     });
   };
 
-  const nodeTypes = {
+  // Memoize nodeTypes to prevent unnecessary re-renders
+  const nodeTypes = useMemo(() => ({
     timeline: (props: any) => (
       <TimelineNode
         {...props}
@@ -59,7 +60,7 @@ export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
         onAddConnection={handleAddConnection}
       />
     ),
-  };
+  }), [handleDeleteNode]);
 
   return (
     <div className="h-[600px] bg-gray-50 rounded-xl relative">
@@ -71,6 +72,8 @@ export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
         onConnect={handleConnect}
         nodeTypes={nodeTypes}
         fitView
+        snapToGrid
+        snapGrid={[15, 15]}
       >
         <Panel position="top-right" className="bg-white p-2 rounded-lg shadow-sm">
           <Button 
