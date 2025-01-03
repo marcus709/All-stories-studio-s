@@ -4,12 +4,88 @@ import { UserPlus, Calendar, StickyNote, Wand2, ArrowRight, GitBranch, Network }
 import { StoryFlowTimeline } from "./StoryFlowTimeline";
 import { CharacterRelationshipMap } from "./CharacterRelationshipMap";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useStory } from "@/contexts/StoryContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 type ViewMode = "timeline" | "relationships";
 
 export const StoryFlow = () => {
   const [viewMode, setViewMode] = useState<"linear" | "branching" | "network">("linear");
   const [activeView, setActiveView] = useState<ViewMode>("timeline");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const { selectedStory } = useStory();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const handleGetSuggestions = async () => {
+    if (!selectedStory) {
+      toast({
+        title: "No story selected",
+        description: "Please select a story first to get AI suggestions.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-story-flow-suggestions', {
+        body: { 
+          storyId: selectedStory.id,
+          type: activeView
+        },
+      });
+
+      if (error) throw error;
+
+      if (activeView === 'timeline') {
+        // Add suggested plot events
+        for (const suggestion of data.suggestions) {
+          await supabase
+            .from('plot_events')
+            .insert({
+              story_id: selectedStory.id,
+              title: suggestion.title,
+              description: suggestion.description,
+              stage: suggestion.stage,
+              user_id: (await supabase.auth.getUser()).data.user?.id,
+              order_index: 0, // You might want to calculate this based on existing events
+            });
+        }
+        queryClient.invalidateQueries({ queryKey: ['plotEvents', selectedStory.id] });
+      } else {
+        // Add suggested relationships
+        for (const suggestion of data.suggestions) {
+          await supabase
+            .from('character_relationships')
+            .insert({
+              story_id: selectedStory.id,
+              character1_id: suggestion.character1,
+              character2_id: suggestion.character2,
+              relationship_type: suggestion.relationshipType,
+              description: suggestion.description,
+            });
+        }
+        queryClient.invalidateQueries({ queryKey: ['relationships', selectedStory.id] });
+      }
+
+      toast({
+        title: "Success",
+        description: `Generated new ${activeView === 'timeline' ? 'plot events' : 'character relationships'} suggestions!`,
+      });
+    } catch (error) {
+      console.error('Error generating suggestions:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate suggestions. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-8 py-6">
@@ -41,9 +117,13 @@ export const StoryFlow = () => {
           <StickyNote className="w-4 h-4" />
           Add Note
         </Button>
-        <Button className="bg-violet-500 hover:bg-violet-600 gap-2 ml-auto">
-          <Wand2 className="w-4 h-4" />
-          AI Suggestions
+        <Button 
+          className="bg-violet-500 hover:bg-violet-600 gap-2 ml-auto"
+          onClick={handleGetSuggestions}
+          disabled={isGenerating || !selectedStory}
+        >
+          <Wand2 className={`w-4 h-4 ${isGenerating ? 'animate-spin' : ''}`} />
+          {isGenerating ? 'Generating...' : 'AI Suggestions'}
         </Button>
       </div>
 
