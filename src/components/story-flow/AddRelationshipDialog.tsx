@@ -6,6 +6,7 @@ import { Slider } from '../ui/slider';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { RelationshipType } from '@/types/relationships';
 
 interface Character {
   id: string;
@@ -19,7 +20,7 @@ interface AddRelationshipDialogProps {
   storyId: string;
 }
 
-const RELATIONSHIP_TYPES = [
+const RELATIONSHIP_TYPES: RelationshipType[] = [
   'ALLY',
   'RIVAL',
   'FAMILY',
@@ -37,7 +38,7 @@ export const AddRelationshipDialog = ({
 }: AddRelationshipDialogProps) => {
   const [character1, setCharacter1] = useState<string>('');
   const [character2, setCharacter2] = useState<string>('');
-  const [relationshipType, setRelationshipType] = useState<string>('');
+  const [relationshipType, setRelationshipType] = useState<RelationshipType>('ALLY');
   const [strength, setStrength] = useState<number>(50);
   const [description, setDescription] = useState<string>('');
   
@@ -48,16 +49,14 @@ export const AddRelationshipDialog = ({
     mutationFn: async () => {
       const { error } = await supabase
         .from('character_relationships')
-        .insert([
-          {
-            story_id: storyId,
-            character1_id: character1,
-            character2_id: character2,
-            relationship_type: relationshipType,
-            strength,
-            description,
-          },
-        ]);
+        .insert({
+          story_id: storyId,
+          character1_id: character1,
+          character2_id: character2,
+          relationship_type: relationshipType,
+          strength,
+          description,
+        });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -74,7 +73,7 @@ export const AddRelationshipDialog = ({
   const resetForm = () => {
     setCharacter1('');
     setCharacter2('');
-    setRelationshipType('');
+    setRelationshipType('ALLY');
     setStrength(50);
     setDescription('');
   };
@@ -149,7 +148,7 @@ export const AddRelationshipDialog = ({
             </label>
             <Select
               value={relationshipType}
-              onValueChange={setRelationshipType}
+              onValueChange={(value: RelationshipType) => setRelationshipType(value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select type" />

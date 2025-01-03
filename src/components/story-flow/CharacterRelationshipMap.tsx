@@ -1,14 +1,6 @@
 import { useCallback, useState } from 'react';
-import ReactFlow, { 
-  Background, 
-  Controls, 
-  MiniMap,
-  Node,
-  Edge,
-  useNodesState,
-  useEdgesState,
-  addEdge,
-} from '@xyflow/react';
+import { ReactFlow, Background, Controls, MiniMap, Node, Edge, useNodesState, useEdgesState, addEdge } from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useStory } from '@/contexts/StoryContext';
@@ -16,8 +8,9 @@ import { Button } from '../ui/button';
 import { Plus } from 'lucide-react';
 import { AddRelationshipDialog } from './AddRelationshipDialog';
 import { useToast } from '@/hooks/use-toast';
+import { RelationshipType } from '@/types/relationships';
 
-const relationshipColors = {
+const relationshipColors: Record<RelationshipType, string> = {
   'ALLY': '#22c55e',
   'RIVAL': '#ef4444',
   'FAMILY': '#8b5cf6',
@@ -99,7 +92,7 @@ export const CharacterRelationshipMap = () => {
       label: rel.relationship_type,
       type: 'smoothstep',
       style: { 
-        stroke: relationshipColors[rel.relationship_type as keyof typeof relationshipColors] || '#94a3b8',
+        stroke: relationshipColors[rel.relationship_type as RelationshipType] || '#94a3b8',
         strokeWidth: rel.strength ? Math.max(1, Math.min(rel.strength / 20, 5)) : 1,
       },
       data: { strength: rel.strength },
