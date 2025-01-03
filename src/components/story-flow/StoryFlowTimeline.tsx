@@ -1,4 +1,4 @@
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -7,116 +7,8 @@ import {
   useEdgesState,
   addEdge,
 } from '@xyflow/react';
-import { Settings } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useToast } from "@/hooks/use-toast";
 import '@xyflow/react/dist/style.css';
-
-const TimelineNode = ({ data, id }: { data: any; id: string }) => {
-  const { toast } = useToast();
-  const [nodes, setNodes] = useNodesState([]);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedLabel, setEditedLabel] = useState(data.label);
-  const [editedSubtitle, setEditedSubtitle] = useState(data.subtitle);
-
-  const handleEdit = () => {
-    toast({
-      title: "Edit Event",
-      description: `Editing event: ${data.label}`,
-    });
-  };
-
-  const handleDelete = () => {
-    setNodes((nds) => nds.filter((node) => node.id !== id));
-    toast({
-      title: "Delete Event",
-      description: `Deleted event: ${data.label}`,
-    });
-  };
-
-  const handleAddConnection = () => {
-    toast({
-      title: "Add Connection",
-      description: `Adding connection from: ${data.label}`,
-    });
-  };
-
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsEditing(true);
-  };
-
-  const handleBlur = () => {
-    setIsEditing(false);
-    // Here you would typically update the node data in your state management
-    data.label = editedLabel;
-    data.subtitle = editedSubtitle;
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      setIsEditing(false);
-      handleBlur();
-    }
-  };
-
-  return (
-    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 min-w-[200px]">
-      <div className="flex justify-between items-start mb-2">
-        <div>
-          {isEditing ? (
-            <div className="flex flex-col gap-2">
-              <input
-                type="text"
-                value={editedLabel}
-                onChange={(e) => setEditedLabel(e.target.value)}
-                onBlur={handleBlur}
-                onKeyDown={handleKeyDown}
-                className="font-medium text-gray-900 border border-gray-300 rounded px-2 py-1"
-                autoFocus
-              />
-              <input
-                type="text"
-                value={editedSubtitle}
-                onChange={(e) => setEditedSubtitle(e.target.value)}
-                onBlur={handleBlur}
-                onKeyDown={handleKeyDown}
-                className="text-sm text-gray-500 border border-gray-300 rounded px-2 py-1"
-              />
-            </div>
-          ) : (
-            <div onDoubleClick={handleDoubleClick}>
-              <h3 className="font-medium text-gray-900">{data.label}</h3>
-              <p className="text-sm text-gray-500">{data.subtitle}</p>
-            </div>
-          )}
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger className="p-1 hover:bg-gray-100 rounded">
-            <Settings className="h-4 w-4 text-gray-500" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem onClick={handleEdit}>
-              Edit Event
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleAddConnection}>
-              Add Connection
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleDelete} className="text-red-600">
-              Delete Event
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <div className="text-xs text-gray-400">{data.year}</div>
-    </div>
-  );
-};
+import { TimelineNode } from './TimelineNode';
 
 const initialNodes = [
   {
