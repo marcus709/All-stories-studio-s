@@ -8,7 +8,11 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useStory } from "@/contexts/StoryContext";
 
-export function CreateStoryIdeaDialog() {
+interface CreateStoryIdeaDialogProps {
+  onIdeaCreated?: () => void;
+}
+
+export function CreateStoryIdeaDialog({ onIdeaCreated }: CreateStoryIdeaDialogProps) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -67,6 +71,7 @@ export function CreateStoryIdeaDialog() {
     setTitle("");
     setDescription("");
     setTag("");
+    onIdeaCreated?.();
   };
 
   return (
