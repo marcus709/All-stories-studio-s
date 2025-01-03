@@ -131,9 +131,16 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
     if (value === "new") {
       setConfigToEdit(null);
       setIsConfigDialogOpen(true);
-    } else {
-      setSelectedConfig(value);
+      return;
     }
+    setSelectedConfig(value);
+  };
+
+  const handleNewConfigClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setConfigToEdit(null);
+    setIsConfigDialogOpen(true);
   };
 
   switch (currentView) {
@@ -217,7 +224,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
                       </SelectItem>
                     ))}
                     <SelectSeparator />
-                    <SelectItem value="new">
+                    <SelectItem value="new" onSelect={handleNewConfigClick}>
                       <span className="text-blue-600">+ Configure New AI</span>
                     </SelectItem>
                   </SelectGroup>
