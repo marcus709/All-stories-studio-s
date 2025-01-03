@@ -136,7 +136,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
     setSelectedConfig(value);
   };
 
-  const handleNewConfigClick = (e: React.MouseEvent) => {
+  const handleNewConfigClick = (e: React.SyntheticEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setConfigToEdit(null);
@@ -224,7 +224,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
                       </SelectItem>
                     ))}
                     <SelectSeparator />
-                    <SelectItem value="new" onSelect={handleNewConfigClick}>
+                    <SelectItem value="new" onClick={handleNewConfigClick}>
                       <span className="text-blue-600">+ Configure New AI</span>
                     </SelectItem>
                   </SelectGroup>
