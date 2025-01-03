@@ -8,44 +8,6 @@ import {
   addEdge,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { Settings, Edit, Trash2, Link } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-const TimelineNode = ({ data }: { data: { label: string; subtitle: string; year: string } }) => {
-  return (
-    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 min-w-[200px]">
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="font-medium text-gray-900">{data.label}</h3>
-        <DropdownMenu>
-          <DropdownMenuTrigger className="h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100">
-            <Settings className="h-4 w-4 text-gray-600" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem className="flex items-center gap-2">
-              <Edit className="h-4 w-4" />
-              <span>Edit Event</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex items-center gap-2">
-              <Link className="h-4 w-4" />
-              <span>Add Connection</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex items-center gap-2 text-red-600">
-              <Trash2 className="h-4 w-4" />
-              <span>Delete Event</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <p className="text-sm text-gray-600 mb-1">{data.subtitle}</p>
-      <span className="text-xs text-violet-600 font-medium">{data.year}</span>
-    </div>
-  );
-};
 
 const initialNodes = [
   {
@@ -120,10 +82,6 @@ export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
     [setEdges],
   );
 
-  const nodeTypes = {
-    timeline: TimelineNode,
-  };
-
   return (
     <ReactFlow
       nodes={nodes}
@@ -131,7 +89,6 @@ export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
-      nodeTypes={nodeTypes}
       fitView
       className="bg-gray-50"
     >
