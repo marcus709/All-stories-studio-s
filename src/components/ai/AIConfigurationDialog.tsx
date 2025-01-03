@@ -11,13 +11,23 @@ import { useToast } from "@/hooks/use-toast";
 import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 
+type AIModelType = 'gpt-4o' | 'gpt-4o-mini';
+
+interface AIConfiguration {
+  name: string;
+  model_type: AIModelType;
+  system_prompt: string;
+  temperature: number;
+  max_tokens: number;
+}
+
 interface AIConfigurationDialogProps {
   isOpen: boolean;
   onClose: () => void;
   configToEdit?: {
     id: string;
     name: string;
-    model_type: 'gpt-4o' | 'gpt-4o-mini';
+    model_type: AIModelType;
     system_prompt?: string;
     temperature: number;
     max_tokens: number;
@@ -29,9 +39,9 @@ export function AIConfigurationDialog({ isOpen, onClose, configToEdit, onConfigS
   const session = useSession();
   const { toast } = useToast();
   const [loading, setLoading] = React.useState(false);
-  const [config, setConfig] = React.useState({
+  const [config, setConfig] = React.useState<AIConfiguration>({
     name: "",
-    model_type: "gpt-4o-mini" as const,
+    model_type: "gpt-4o-mini",
     system_prompt: "",
     temperature: 0.7,
     max_tokens: 1000,
@@ -132,7 +142,7 @@ export function AIConfigurationDialog({ isOpen, onClose, configToEdit, onConfigS
             <Label htmlFor="model">Model</Label>
             <Select
               value={config.model_type}
-              onValueChange={(value: 'gpt-4o' | 'gpt-4o-mini') =>
+              onValueChange={(value: AIModelType) =>
                 setConfig((prev) => ({ ...prev, model_type: value }))
               }
             >
