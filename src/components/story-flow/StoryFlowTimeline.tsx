@@ -7,7 +7,68 @@ import {
   useEdgesState,
   addEdge,
 } from '@xyflow/react';
+import { Settings } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
 import '@xyflow/react/dist/style.css';
+
+const TimelineNode = ({ data }: { data: any }) => {
+  const { toast } = useToast();
+
+  const handleEdit = () => {
+    toast({
+      title: "Edit Event",
+      description: `Editing event: ${data.label}`,
+    });
+  };
+
+  const handleDelete = () => {
+    toast({
+      title: "Delete Event",
+      description: `Deleting event: ${data.label}`,
+    });
+  };
+
+  const handleAddConnection = () => {
+    toast({
+      title: "Add Connection",
+      description: `Adding connection from: ${data.label}`,
+    });
+  };
+
+  return (
+    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 min-w-[200px]">
+      <div className="flex justify-between items-start mb-2">
+        <div>
+          <h3 className="font-medium text-gray-900">{data.label}</h3>
+          <p className="text-sm text-gray-500">{data.subtitle}</p>
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="p-1 hover:bg-gray-100 rounded">
+            <Settings className="h-4 w-4 text-gray-500" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={handleEdit}>
+              Edit Event
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleAddConnection}>
+              Add Connection
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleDelete} className="text-red-600">
+              Delete Event
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <div className="text-xs text-gray-400">{data.year}</div>
+    </div>
+  );
+};
 
 const initialNodes = [
   {
@@ -82,6 +143,10 @@ export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
     [setEdges],
   );
 
+  const nodeTypes = {
+    timeline: TimelineNode,
+  };
+
   return (
     <ReactFlow
       nodes={nodes}
@@ -89,6 +154,7 @@ export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
+      nodeTypes={nodeTypes}
       fitView
       className="bg-gray-50"
     >
