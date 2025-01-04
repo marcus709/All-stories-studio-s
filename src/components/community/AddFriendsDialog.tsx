@@ -68,6 +68,18 @@ export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) =>
     enabled: !!searchQuery.trim() && !!session?.user?.id,
   });
 
+  const handleUserSelect = (user: Profile) => {
+    // Create a complete Profile object with optional website field
+    const completeUser: Profile = {
+      id: user.id,
+      username: user.username,
+      avatar_url: user.avatar_url,
+      bio: user.bio,
+      website: user.website || null, // Handle the optional website field
+    };
+    setSelectedUser(completeUser);
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -93,7 +105,7 @@ export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) =>
                 <div
                   key={user.id}
                   className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-gray-50"
-                  onClick={() => setSelectedUser(user)}
+                  onClick={() => handleUserSelect(user)}
                 >
                   <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
                     {user.avatar_url ? (
