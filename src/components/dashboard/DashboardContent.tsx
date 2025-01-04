@@ -150,6 +150,11 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
     setIsConfigDialogOpen(true);
   };
 
+  const handleSettingsClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   switch (currentView) {
     case "characters":
       return <CharactersView />;
@@ -199,9 +204,12 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
                       <SelectItem key={config.id} value={config.id}>
                         <div className="flex items-center justify-between w-full">
                           <span>{config.name}</span>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
-                              <Settings className="h-4 w-4 ml-2" />
+                          <DropdownMenu modal={false}>
+                            <DropdownMenuTrigger 
+                              onClick={handleSettingsClick}
+                              className="ml-2 focus:outline-none"
+                            >
+                              <Settings className="h-4 w-4" />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
                               <DropdownMenuItem
@@ -212,6 +220,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={(e) => {
+                                  e.preventDefault();
                                   e.stopPropagation();
                                   setConfigToDelete(config.id);
                                   setIsDeleteDialogOpen(true);
