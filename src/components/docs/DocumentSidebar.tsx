@@ -55,83 +55,94 @@ export const DocumentSidebar = ({ onContentDrop }: { onContentDrop: (content: Co
   };
 
   return (
-    <div className="w-64 bg-white border-l border-gray-200 p-4 overflow-y-auto">
-      <Tabs defaultValue="characters">
-        <TabsList className="w-full mb-4">
-          <TabsTrigger value="characters" className="flex items-center gap-2">
+    <div className="w-64 bg-sidebar border-r border-sidebar-border overflow-y-auto">
+      <Tabs defaultValue="characters" className="w-full">
+        <TabsList className="w-full justify-start border-b border-sidebar-border rounded-none bg-transparent p-0 h-auto">
+          <TabsTrigger 
+            value="characters" 
+            className="flex items-center gap-2 px-4 py-3 rounded-none data-[state=active]:bg-sidebar-accent data-[state=active]:text-sidebar-accent-foreground"
+          >
             <Users className="w-4 h-4" />
             Characters
           </TabsTrigger>
-          <TabsTrigger value="plot" className="flex items-center gap-2">
+          <TabsTrigger 
+            value="plot" 
+            className="flex items-center gap-2 px-4 py-3 rounded-none data-[state=active]:bg-sidebar-accent data-[state=active]:text-sidebar-accent-foreground"
+          >
             <LineChart className="w-4 h-4" />
             Plot
           </TabsTrigger>
-          <TabsTrigger value="ideas" className="flex items-center gap-2">
+          <TabsTrigger 
+            value="ideas" 
+            className="flex items-center gap-2 px-4 py-3 rounded-none data-[state=active]:bg-sidebar-accent data-[state=active]:text-sidebar-accent-foreground"
+          >
             <Lightbulb className="w-4 h-4" />
             Ideas
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="characters" className="space-y-2">
-          {characters?.map((char) => (
-            <div
-              key={char.id}
-              draggable
-              onDragStart={(e) => handleDragStart(e, {
-                id: char.id,
-                title: char.name,
-                description: char.backstory || '',
-                type: 'character'
-              })}
-              className="p-3 bg-gray-50 rounded-lg cursor-move hover:bg-gray-100"
-            >
-              <h4 className="font-medium">{char.name}</h4>
-              <p className="text-sm text-gray-500">{char.role}</p>
-            </div>
-          ))}
-        </TabsContent>
+        <div className="p-4">
+          <TabsContent value="characters" className="m-0 space-y-2">
+            {characters?.map((char) => (
+              <div
+                key={char.id}
+                draggable
+                onDragStart={(e) => handleDragStart(e, {
+                  id: char.id,
+                  title: char.name,
+                  description: char.backstory || '',
+                  type: 'character'
+                })}
+                className="p-3 bg-sidebar-accent rounded-lg cursor-move hover:bg-sidebar-accent/80 transition-colors"
+              >
+                <h4 className="font-medium text-sidebar-accent-foreground">{char.name}</h4>
+                <p className="text-sm text-sidebar-foreground/80">{char.role}</p>
+              </div>
+            ))}
+          </TabsContent>
 
-        <TabsContent value="plot" className="space-y-2">
-          {plotEvents?.map((event) => (
-            <div
-              key={event.id}
-              draggable
-              onDragStart={(e) => handleDragStart(e, {
-                id: event.id,
-                title: event.title,
-                description: event.description || '',
-                type: 'plot'
-              })}
-              className="p-3 bg-gray-50 rounded-lg cursor-move hover:bg-gray-100"
-            >
-              <h4 className="font-medium">{event.title}</h4>
-              <p className="text-sm text-gray-500">{event.stage}</p>
-            </div>
-          ))}
-        </TabsContent>
+          <TabsContent value="plot" className="m-0 space-y-2">
+            {plotEvents?.map((event) => (
+              <div
+                key={event.id}
+                draggable
+                onDragStart={(e) => handleDragStart(e, {
+                  id: event.id,
+                  title: event.title,
+                  description: event.description || '',
+                  type: 'plot'
+                })}
+                className="p-3 bg-sidebar-accent rounded-lg cursor-move hover:bg-sidebar-accent/80 transition-colors"
+              >
+                <h4 className="font-medium text-sidebar-accent-foreground">{event.title}</h4>
+                <p className="text-sm text-sidebar-foreground/80">{event.stage}</p>
+              </div>
+            ))}
+          </TabsContent>
 
-        <TabsContent value="ideas" className="space-y-2">
-          {storyIdeas?.map((idea) => (
-            <div
-              key={idea.id}
-              draggable
-              onDragStart={(e) => handleDragStart(e, {
-                id: idea.id,
-                title: idea.title,
-                description: idea.description || '',
-                type: 'idea'
-              })}
-              className="p-3 bg-gray-50 rounded-lg cursor-move hover:bg-gray-100"
-            >
-              <h4 className="font-medium">{idea.title}</h4>
-              {idea.tag && (
-                <span className="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">
-                  {idea.tag}
-                </span>
-              )}
-            </div>
-          ))}
-        </TabsContent>
+          <TabsContent value="ideas" className="m-0 space-y-2">
+            {storyIdeas?.map((idea) => (
+              <div
+                key={idea.id}
+                draggable
+                onDragStart={(e) => handleDragStart(e, {
+                  id: idea.id,
+                  title: idea.title,
+                  description: idea.description || '',
+                  type: 'idea'
+                })}
+                className="p-3 bg-sidebar-accent rounded-lg cursor-move hover:bg-sidebar-accent/80 transition-colors"
+              >
+                <h4 className="font-medium text-sidebar-accent-foreground">{idea.title}</h4>
+                {idea.tag && (
+                  <span className="text-xs bg-sidebar-primary/10 text-sidebar-primary px-2 py-0.5 rounded-full">
+                    {idea.tag}
+                  </span>
+                )}
+              </div>
+            ))}
+          </TabsContent>
+        </div>
       </Tabs>
     </div>
   );

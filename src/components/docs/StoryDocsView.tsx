@@ -54,8 +54,8 @@ export const StoryDocsView = () => {
   }
 
   return (
-    <div className="max-w-full mx-auto px-8 py-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="h-[calc(100vh-4rem)] overflow-hidden">
+      <div className="flex items-center justify-between px-8 py-4 border-b">
         <div>
           <h1 className="text-2xl font-bold">Story Documents</h1>
           <p className="text-gray-500">Write and organize your story content</p>
@@ -66,25 +66,15 @@ export const StoryDocsView = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-12 gap-6">
-        <div className="col-span-2">
-          <DocumentsList
-            documents={documents}
-            selectedDocId={selectedDocId}
-            onSelectDocument={setSelectedDocId}
-            onRefresh={refetchDocs}
-          />
-        </div>
-        <div className="col-span-10">
-          {selectedDocId ? (
-            <DocumentEditor documentId={selectedDocId} onRefresh={refetchDocs} />
-          ) : (
-            <div className="flex flex-col items-center justify-center h-[500px] bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 text-gray-500">
-              <FileText className="w-12 h-12 mb-4" />
-              <p>Select a document to start editing</p>
-            </div>
-          )}
-        </div>
+      <div className="flex h-[calc(100vh-12rem)]">
+        {selectedDocId ? (
+          <DocumentEditor documentId={selectedDocId} onRefresh={refetchDocs} />
+        ) : (
+          <div className="flex flex-col items-center justify-center flex-1 bg-gray-50 text-gray-500">
+            <FileText className="w-12 h-12 mb-4" />
+            <p>Select a document to start editing</p>
+          </div>
+        )}
       </div>
 
       <CreateDocumentDialog

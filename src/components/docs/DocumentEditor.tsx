@@ -81,7 +81,7 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
         document_id: documentId,
         reference_type: item.type,
         reference_id: item.id,
-        section_id: document.id, // Using document id as the default section
+        section_id: document.id,
       });
 
       // Insert the content at cursor position or at the end
@@ -106,9 +106,14 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
   };
 
   return (
-    <div className="flex h-full">
+    <div className="flex flex-1 h-full">
+      <DocumentSidebar onContentDrop={(content) => {
+        const insertText = `\n\n[${content.type.toUpperCase()}: ${content.title}]\n${content.description || ''}\n\n`;
+        setContent(prev => prev + insertText);
+      }} />
+      
       <div 
-        className="flex-1 bg-white rounded-lg shadow-sm p-6 space-y-4"
+        className="flex-1 bg-white p-6 space-y-4 overflow-y-auto"
         onDrop={handleDrop}
         onDragOver={handleDragOver}
       >
@@ -135,10 +140,6 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
           placeholder="Start writing your story..."
         />
       </div>
-      <DocumentSidebar onContentDrop={(content) => {
-        const insertText = `\n\n[${content.type.toUpperCase()}: ${content.title}]\n${content.description || ''}\n\n`;
-        setContent(prev => prev + insertText);
-      }} />
     </div>
   );
 };
