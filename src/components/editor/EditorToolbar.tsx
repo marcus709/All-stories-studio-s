@@ -103,7 +103,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
             if (value === 'p') {
               editor.chain().focus().setParagraph().run()
             } else {
-              editor.chain().focus().toggleHeading({ level: Number(value.charAt(1)) }).run()
+              editor.chain().focus().toggleHeading({ level: parseInt(value.charAt(1)) as 1 | 2 | 3 }).run()
             }
           }}
         >

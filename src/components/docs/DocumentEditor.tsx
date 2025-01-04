@@ -83,7 +83,8 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
         section_id: document.id,
       });
 
-      const insertText = `\n\n[${item.type.toUpperCase()}: ${item.title}]\n${item.backstory || ''}\n\n`;
+      // Create insert text based on item type and available properties
+      const insertText = `\n\n[${item.type.toUpperCase()}: ${item.title}]\n${item.description || ''}\n\n`;
       setContent(prev => prev + insertText);
       
       toast({
@@ -106,7 +107,7 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
   return (
     <div className="flex flex-1 h-full">
       <DocumentSidebar onContentDrop={(content) => {
-        const insertText = `\n\n[${content.type.toUpperCase()}: ${content.title}]\n${content.backstory || ''}\n\n`;
+        const insertText = `\n\n[${content.type.toUpperCase()}: ${content.title}]\n${content.description || ''}\n\n`;
         setContent(prev => prev + insertText);
       }} />
       
