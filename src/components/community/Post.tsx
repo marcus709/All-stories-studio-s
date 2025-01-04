@@ -81,24 +81,28 @@ export const Post = ({ post }: PostProps) => {
     addComment.mutate(newComment);
   };
 
+  // Get the username from the get_post_profiles function result
+  const postUsername = post.get_post_profiles?.[0]?.username || "Anonymous";
+  const postAvatarUrl = post.get_post_profiles?.[0]?.avatar_url;
+
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex items-center gap-3 mb-4">
         <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-          {post.profiles?.avatar_url ? (
+          {postAvatarUrl ? (
             <img
-              src={post.profiles.avatar_url}
-              alt={post.profiles.username}
+              src={postAvatarUrl}
+              alt={postUsername}
               className="w-full h-full rounded-full object-cover"
             />
           ) : (
             <span className="text-purple-600 font-medium">
-              {post.profiles?.username?.[0]?.toUpperCase() || "U"}
+              {postUsername[0]?.toUpperCase() || "A"}
             </span>
           )}
         </div>
         <div>
-          <h3 className="font-medium">{post.profiles?.username || "Anonymous"}</h3>
+          <h3 className="font-medium">@{postUsername}</h3>
           <p className="text-sm text-gray-500">
             {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
           </p>
@@ -151,36 +155,40 @@ export const Post = ({ post }: PostProps) => {
           </form>
 
           <div className="space-y-4 mt-4">
-            {post.comments.map((comment: any) => (
-              <div key={comment.id} className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
-                  {comment.profiles?.avatar_url ? (
-                    <img
-                      src={comment.profiles.avatar_url}
-                      alt={comment.profiles.username}
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-purple-600 text-sm font-medium">
-                      {comment.profiles?.username?.[0]?.toUpperCase() || "U"}
-                    </span>
-                  )}
-                </div>
-                <div>
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <p className="font-medium text-sm">
-                      {comment.profiles?.username || "Anonymous"}
-                    </p>
-                    <p className="text-sm">{comment.content}</p>
+            {post.comments.map((comment: any) => {
+              // Get the username from the get_comment_profiles function result
+              const commentUsername = comment.get_comment_profiles?.[0]?.username || "Anonymous";
+              const commentAvatarUrl = comment.get_comment_profiles?.[0]?.avatar_url;
+
+              return (
+                <div key={comment.id} className="flex gap-3">
+                  <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
+                    {commentAvatarUrl ? (
+                      <img
+                        src={commentAvatarUrl}
+                        alt={commentUsername}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-purple-600 text-sm font-medium">
+                        {commentUsername[0]?.toUpperCase() || "A"}
+                      </span>
+                    )}
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {formatDistanceToNow(new Date(comment.created_at), {
-                      addSuffix: true,
-                    })}
-                  </p>
+                  <div>
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <p className="font-medium text-sm">@{commentUsername}</p>
+                      <p className="text-sm">{comment.content}</p>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {formatDistanceToNow(new Date(comment.created_at), {
+                        addSuffix: true,
+                      })}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

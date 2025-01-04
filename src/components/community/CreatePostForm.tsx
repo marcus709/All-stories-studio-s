@@ -39,7 +39,7 @@ export const CreatePostForm = ({ userId, profile }: CreatePostFormProps) => {
     );
   };
 
-  const displayName = profile?.username || "anonymous";
+  const displayName = profile?.username || "Anonymous";
   const firstLetter = displayName.charAt(0).toUpperCase();
 
   return (
