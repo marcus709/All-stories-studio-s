@@ -2,13 +2,17 @@ import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AvatarUpload } from "./profile/AvatarUpload";
 import { ProfileForm } from "./profile/ProfileForm";
 import { CreditCard } from "lucide-react";
 
-export function ProfileSettingsDialog() {
+interface ProfileSettingsDialogProps {
+  onClose?: () => void;
+}
+
+export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
   const session = useSession();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = React.useState(true);
@@ -24,6 +28,11 @@ export function ProfileSettingsDialog() {
       getProfile();
     }
   }, [session?.user?.id]);
+
+  const handleDialogClose = () => {
+    setIsOpen(false);
+    onClose?.();
+  };
 
   async function getProfile() {
     try {
@@ -65,7 +74,7 @@ export function ProfileSettingsDialog() {
         title: "Success",
         description: "Your profile settings have been saved.",
       });
-      setIsOpen(false);
+      handleDialogClose();
     } catch (error) {
       toast({
         title: "Error",
@@ -101,7 +110,7 @@ export function ProfileSettingsDialog() {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleDialogClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Profile Settings</DialogTitle>
@@ -131,7 +140,7 @@ export function ProfileSettingsDialog() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsOpen(false)}
+              onClick={handleDialogClose}
             >
               Cancel
             </Button>
