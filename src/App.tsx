@@ -7,10 +7,8 @@ import { SubscriptionProvider } from "./contexts/SubscriptionContext";
 import { Toaster } from "@/components/ui/toaster";
 import { Routes } from "./Routes";
 
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL || '',
-  import.meta.env.VITE_SUPABASE_ANON_KEY || ''
-);
+// Initialize Supabase client with the URL from the client file
+import { supabase } from "@/integrations/supabase/client";
 
 const queryClient = new QueryClient();
 
