@@ -40,7 +40,7 @@ export function FriendsManagement() {
         .select(`
           id,
           status,
-          friend:profiles!friendships_friend_id_fkey(
+          friend:profiles!friendships_friend_id_fkey_profiles(
             id,
             username,
             avatar_url
