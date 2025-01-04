@@ -1,6 +1,9 @@
+import { useState, useEffect } from "react";
 import { Book, Users, LineChart, GitBranch, Lightbulb, FileText } from "lucide-react";
 import { StoriesDialog } from "../StoriesDialog";
 import { useStory } from "@/contexts/StoryContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Profile } from "@/integrations/supabase/types/tables.types";
 
 const navigationItems = [
   { id: "story", icon: Book, label: "Story Editor" },
@@ -20,18 +23,36 @@ interface DashboardSidebarProps {
 
 export const DashboardSidebar = ({ currentView, setCurrentView }: DashboardSidebarProps) => {
   const { selectedStory } = useStory();
+  const [profile, setProfile] = useState<Profile | null>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+        setProfile(data);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   return (
     <div className="fixed left-0 top-16 w-72 h-[calc(100vh-4rem)] border-r bg-white">
       <div className="p-8 flex flex-col h-full">
         {/* Profile Section */}
         <div className="flex items-center gap-3 mb-12 px-2 mt-4">
-          <div className="w-11 h-11 rounded-full bg-purple-500 flex items-center justify-center text-white text-lg font-medium">
-            M
+          <div className="w-11 h-11 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-lg font-medium">
+            {profile?.username?.[0]?.toUpperCase() || "?"}
           </div>
           <div className="flex flex-col">
-            <h3 className="font-medium text-base text-gray-900">Marcus</h3>
-            <p className="text-xs text-gray-500">Curious Plan</p>
+            <h3 className="font-medium text-base text-gray-900">
+              {profile?.username || "Loading..."}
+            </h3>
           </div>
         </div>
 
