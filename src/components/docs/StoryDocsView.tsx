@@ -39,7 +39,6 @@ export const StoryDocsView = () => {
         return [];
       }
 
-      // Auto-select the first document if none is selected
       if (data.length > 0 && !selectedDocId) {
         setSelectedDocId(data[0].id);
       }
@@ -72,7 +71,11 @@ export const StoryDocsView = () => {
 
       <ResizablePanelGroup direction="horizontal" className="h-[calc(100vh-12rem)]">
         <ResizablePanel defaultSize={20} minSize={15} maxSize={40}>
-          <DocumentSidebar onContentDrop={(content) => {}} />
+          <DocumentSidebar 
+            onContentDrop={(content) => {}} 
+            selectedDocId={selectedDocId}
+            onSelectDocument={setSelectedDocId}
+          />
         </ResizablePanel>
         
         <ResizablePanel defaultSize={80}>

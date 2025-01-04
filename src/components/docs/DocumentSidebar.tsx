@@ -1,8 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useStory } from "@/contexts/StoryContext";
-import { Button } from "@/components/ui/button";
-import { PanelLeftClose } from "lucide-react";
 
 interface ContentItem {
   id: string;
@@ -11,7 +9,17 @@ interface ContentItem {
   type: 'character' | 'plot' | 'idea';
 }
 
-export const DocumentSidebar = ({ onContentDrop }: { onContentDrop: (content: ContentItem) => void }) => {
+interface DocumentSidebarProps {
+  onContentDrop: (content: ContentItem) => void;
+  selectedDocId?: string | null;
+  onSelectDocument: (id: string) => void;
+}
+
+export const DocumentSidebar = ({ 
+  onContentDrop, 
+  selectedDocId,
+  onSelectDocument 
+}: DocumentSidebarProps) => {
   const { selectedStory } = useStory();
 
   const { data: documents } = useQuery({
@@ -27,7 +35,7 @@ export const DocumentSidebar = ({ onContentDrop }: { onContentDrop: (content: Co
   });
 
   return (
-    <div className="w-64 bg-sidebar border-r border-sidebar-border overflow-y-auto">
+    <div className="w-full h-full bg-sidebar border-r border-sidebar-border overflow-y-auto">
       <div className="flex justify-between items-center p-4 border-b">
         <h2 className="font-semibold">Documents</h2>
       </div>
@@ -35,7 +43,12 @@ export const DocumentSidebar = ({ onContentDrop }: { onContentDrop: (content: Co
         {documents?.map((doc) => (
           <div
             key={doc.id}
-            className="p-3 bg-sidebar-accent rounded-lg mb-2 cursor-pointer hover:bg-sidebar-accent/80 transition-colors"
+            onClick={() => onSelectDocument(doc.id)}
+            className={`p-3 rounded-lg mb-2 cursor-pointer transition-colors ${
+              selectedDocId === doc.id 
+                ? 'bg-sidebar-accent/80' 
+                : 'bg-sidebar-accent hover:bg-sidebar-accent/80'
+            }`}
           >
             <h4 className="font-medium text-sidebar-accent-foreground">{doc.title}</h4>
             <p className="text-sm text-sidebar-foreground/80">
