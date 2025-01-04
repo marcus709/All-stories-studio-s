@@ -2,6 +2,7 @@ import { DialogHeader as UIDialogHeader, DialogTitle, DialogDescription } from "
 
 interface DialogHeaderProps {
   isEditing: boolean;
+  onClose?: () => void;
 }
 
 export function ConfigDialogHeader({ isEditing }: DialogHeaderProps) {
