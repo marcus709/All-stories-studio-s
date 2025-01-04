@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { Profile } from "@/integrations/supabase/types/tables.types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { UserProfileDialog } from "./UserProfileDialog";
 
 interface FriendshipWithProfile {
   id: string;
@@ -18,6 +19,7 @@ export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) =>
   const session = useSession();
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
 
   const { data: friends, isError } = useQuery({
     queryKey: ["friends", session?.user?.id],
@@ -28,7 +30,7 @@ export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) =>
           .select(`
             id,
             status,
-            friend:profiles!friendships_friend_id_fkey(*)
+            friend:profiles!friendships_friend_id_fkey_profiles(*)
           `)
           .eq("user_id", session?.user?.id)
           .eq("status", "accepted");
@@ -48,6 +50,24 @@ export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) =>
     enabled: !!session?.user?.id,
   });
 
+  const { data: searchResults } = useQuery({
+    queryKey: ["search-users", searchQuery],
+    queryFn: async () => {
+      if (!searchQuery.trim()) return [];
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .neq("id", session?.user?.id)
+        .ilike("username", `%${searchQuery}%`)
+        .limit(5);
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!searchQuery.trim() && !!session?.user?.id,
+  });
+
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -65,6 +85,40 @@ export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) =>
               className="pl-9"
             />
           </div>
+          
+          {searchQuery.trim() && searchResults && searchResults.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium text-gray-500">Search Results</h4>
+              {searchResults.map((user) => (
+                <div
+                  key={user.id}
+                  className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-gray-50"
+                  onClick={() => setSelectedUser(user)}
+                >
+                  <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
+                    {user.avatar_url ? (
+                      <img
+                        src={user.avatar_url}
+                        alt={user.username || ''}
+                        className="h-full w-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-purple-600 text-lg font-medium">
+                        {user.username?.[0]?.toUpperCase() || "U"}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-medium">@{user.username}</p>
+                    {user.bio && (
+                      <p className="text-sm text-gray-500 line-clamp-1">{user.bio}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="space-y-4">
             <h4 className="text-sm font-medium text-gray-500">Your Friends</h4>
             {error && (
@@ -105,6 +159,14 @@ export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) =>
           </div>
         </div>
       </DialogContent>
+      
+      {selectedUser && (
+        <UserProfileDialog
+          user={selectedUser}
+          isOpen={!!selectedUser}
+          onClose={() => setSelectedUser(null)}
+        />
+      )}
     </Dialog>
   );
 };
