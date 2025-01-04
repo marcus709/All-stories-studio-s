@@ -223,7 +223,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
                       <SelectItem key={config.id} value={config.id}>
                         <div className="flex items-center justify-between w-full">
                           <span>{config.name}</span>
-                          <DropdownMenu modal={false}>
+                          <DropdownMenu>
                             <DropdownMenuTrigger 
                               onClick={handleSettingsClick}
                               className="ml-2 focus:outline-none"
@@ -234,7 +234,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
                               onClick={handleDropdownClick}
                               side="right"
                               align="start"
-                              className="bg-white"
+                              className="bg-white z-50"
                               sideOffset={5}
                             >
                               <DropdownMenuItem
