@@ -71,7 +71,7 @@ export const StoryDocsView = () => {
           <DocumentsList 
             documents={documents}
             selectedDocId={selectedDocId}
-            onDocumentSelect={setSelectedDocId}
+            onSelectDocument={setSelectedDocId}
           />
         </div>
         
