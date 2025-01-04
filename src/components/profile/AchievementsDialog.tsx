@@ -4,6 +4,7 @@ import { Award, Trophy, Star, Medal, BookmarkCheck, Check, ThumbsUp } from "luci
 import { useSession } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 
 interface Achievement {
   id: string;
@@ -55,6 +56,16 @@ export function AchievementsDialog({ isOpen, onClose, onSelect, selectedSlot }: 
     enabled: !!session?.user?.id,
   });
 
+  const { data: allAchievements } = useQuery({
+    queryKey: ["allAchievements"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("achievements")
+        .select("*");
+      return data as Achievement[] || [];
+    },
+  });
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[600px] bg-background">
@@ -70,24 +81,44 @@ export function AchievementsDialog({ isOpen, onClose, onSelect, selectedSlot }: 
               : "Achievements are special badges you can earn by participating in the community. Complete different actions to unlock more achievements and showcase them on your profile!"
             }
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {unlockedAchievements?.map((achievement) => (
-              <div
-                key={achievement.id}
-                className={`p-4 border rounded-lg ${onSelect ? "cursor-pointer hover:border-primary hover:bg-accent/50 transition-colors" : ""}`}
-                onClick={() => onSelect?.(achievement)}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-full">
-                    {iconMap[achievement.icon] || <Award className="w-6 h-6" />}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">{achievement.name}</h3>
-                    <p className="text-sm text-muted-foreground">{achievement.description}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto">
+            {allAchievements?.map((achievement) => {
+              const isUnlocked = unlockedAchievements?.some(ua => ua.id === achievement.id);
+              return (
+                <div
+                  key={achievement.id}
+                  className={cn(
+                    "p-4 border rounded-lg transition-colors",
+                    isUnlocked ? (
+                      onSelect 
+                        ? "cursor-pointer hover:border-primary hover:bg-accent/50" 
+                        : "border-primary/50"
+                    ) : (
+                      "opacity-50 border-dashed"
+                    )
+                  )}
+                  onClick={() => isUnlocked && onSelect?.(achievement)}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "p-2 rounded-full",
+                      isUnlocked ? "bg-primary/10" : "bg-muted"
+                    )}>
+                      {iconMap[achievement.icon] || <Award className="w-6 h-6" />}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">{achievement.name}</h3>
+                      <p className="text-sm text-muted-foreground">{achievement.description}</p>
+                      {!isUnlocked && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Complete {achievement.condition_value} {achievement.condition_type.replace(/_/g, ' ')} to unlock
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </DialogContent>
