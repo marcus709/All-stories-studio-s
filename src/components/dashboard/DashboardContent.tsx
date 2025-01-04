@@ -169,6 +169,11 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
     setIsDeleteDialogOpen(true);
   };
 
+  const handleDropdownClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   switch (currentView) {
     case "characters":
       return <CharactersView />;
@@ -226,19 +231,22 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
                               <Settings className="h-4 w-4" />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
-                              onClick={(e) => e.stopPropagation()}
+                              onClick={handleDropdownClick}
                               side="right"
                               align="start"
+                              className="bg-white"
+                              sideOffset={5}
                             >
                               <DropdownMenuItem
                                 onClick={(e) => handleEditClick(e, config)}
+                                className="cursor-pointer"
                               >
                                 <Edit className="h-4 w-4 mr-2" />
                                 Edit
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={(e) => handleDeleteClick(e, config.id)}
-                                className="text-red-600"
+                                className="text-red-600 cursor-pointer"
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Delete
