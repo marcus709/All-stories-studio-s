@@ -6,7 +6,7 @@ import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AvatarUpload } from "./profile/AvatarUpload";
 import { ProfileForm } from "./profile/ProfileForm";
-import { CreditCard, Users } from "lucide-react";
+import { CreditCard } from "lucide-react";
 import { FriendsManagement } from "./profile/FriendsManagement";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
@@ -44,16 +44,41 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
         .eq("id", session?.user?.id)
         .maybeSingle();
 
-      if (error) throw error;
-      if (data) {
-        setProfile({
-          username: data.username || "",
-          bio: data.bio || "",
-          avatar_url: data.avatar_url || "",
-        });
+      if (error) {
+        throw error;
       }
+
+      // If no profile exists, we'll create one
+      if (!data) {
+        const { error: insertError } = await supabase
+          .from("profiles")
+          .insert({
+            id: session?.user?.id,
+            username: session?.user?.email?.split("@")[0] || "",
+          });
+
+        if (insertError) throw insertError;
+
+        setProfile({
+          username: session?.user?.email?.split("@")[0] || "",
+          bio: "",
+          avatar_url: "",
+        });
+        return;
+      }
+
+      setProfile({
+        username: data.username || "",
+        bio: data.bio || "",
+        avatar_url: data.avatar_url || "",
+      });
     } catch (error) {
       console.error("Error loading profile:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load profile. Please try again.",
+        variant: "destructive",
+      });
     }
   }
 
@@ -64,11 +89,11 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({
+        .upsert({
+          id: session?.user?.id,
           username: profile.username,
           bio: profile.bio,
-        })
-        .eq("id", session?.user?.id);
+        });
 
       if (error) throw error;
 
