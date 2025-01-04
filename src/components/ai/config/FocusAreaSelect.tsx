@@ -1,5 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
 
 interface FocusAreaSelectProps {
   value: string;
@@ -7,6 +9,9 @@ interface FocusAreaSelectProps {
 }
 
 export function FocusAreaSelect({ value, onChange }: FocusAreaSelectProps) {
+  const [customFocusArea, setCustomFocusArea] = useState("");
+  const isCustom = value === "custom";
+
   return (
     <div className="space-y-2">
       <Label>Focus Area</Label>
@@ -21,8 +26,20 @@ export function FocusAreaSelect({ value, onChange }: FocusAreaSelectProps) {
           <SelectItem value="world_building">World-Building</SelectItem>
           <SelectItem value="conflict_resolution">Conflict Resolution</SelectItem>
           <SelectItem value="timeline">Timeline/Structure</SelectItem>
+          <SelectItem value="custom">Custom Focus Area</SelectItem>
         </SelectContent>
       </Select>
+      {isCustom && (
+        <Input
+          placeholder="Describe your custom focus area..."
+          value={customFocusArea}
+          onChange={(e) => {
+            setCustomFocusArea(e.target.value);
+            onChange(e.target.value);
+          }}
+          className="mt-2"
+        />
+      )}
       <p className="text-sm text-gray-500">Select which aspect of the story the AI should focus on</p>
     </div>
   );

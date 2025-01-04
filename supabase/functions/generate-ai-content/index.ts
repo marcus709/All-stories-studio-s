@@ -16,11 +16,62 @@ serve(async (req) => {
   try {
     const { prompt, type, context, aiConfig } = await req.json();
 
+    // Build a dynamic system prompt based on AI configuration
+    const buildSystemPrompt = (type: string, context: any) => {
+      const basePrompt = systemPrompts[type] || systemPrompts.suggestions;
+      
+      // Add configuration-specific instructions
+      const configInstructions = [];
+      
+      if (context?.aiConfig?.focus_area) {
+        configInstructions.push(`Focus specifically on ${context.aiConfig.focus_area}.`);
+      }
+      
+      if (context?.aiConfig?.tone) {
+        configInstructions.push(`Maintain a ${context.aiConfig.tone} tone in your responses.`);
+      }
+      
+      if (context?.aiConfig?.point_of_view) {
+        configInstructions.push(`Frame suggestions from ${context.aiConfig.point_of_view}.`);
+      }
+      
+      if (context?.aiConfig?.genre) {
+        configInstructions.push(`Consider the ${context.aiConfig.genre} genre conventions.`);
+      }
+
+      // Add rules and keywords
+      if (context?.aiConfig?.character_rules?.length > 0) {
+        configInstructions.push("Character rules to follow:\n" + 
+          context.aiConfig.character_rules.map((rule: string) => `- ${rule}`).join("\n"));
+      }
+
+      if (context?.aiConfig?.plot_rules?.length > 0) {
+        configInstructions.push("Plot rules to follow:\n" + 
+          context.aiConfig.plot_rules.map((rule: string) => `- ${rule}`).join("\n"));
+      }
+
+      if (context?.aiConfig?.keywords_include?.length > 0) {
+        configInstructions.push("Try to incorporate these elements:\n" + 
+          context.aiConfig.keywords_include.join(", "));
+      }
+
+      if (context?.aiConfig?.keywords_avoid?.length > 0) {
+        configInstructions.push("Avoid using these elements:\n" + 
+          context.aiConfig.keywords_avoid.join(", "));
+      }
+
+      // Add custom prompt if provided
+      if (context?.aiConfig?.custom_prompt) {
+        configInstructions.push(`Additional instructions: ${context.aiConfig.custom_prompt}`);
+      }
+
+      return `${basePrompt}\n\n${configInstructions.join("\n\n")}`;
+    };
+
     const systemPrompts = {
       suggestions: `You are a creative writing assistant. Consider the following context about the story and its characters:
         ${context?.storyDescription || ''}
         ${context?.characters ? `Characters in the story: ${context.characters}` : ''}
-        ${context?.aiConfig?.system_prompt || ''}
         
         Provide helpful suggestions for improving the story while maintaining the author's voice. Format your response in clear sections:
 
@@ -68,19 +119,19 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: context?.aiConfig?.model_type || 'gpt-4o-mini',
+        model: 'gpt-4o-mini',
         messages: [
           { 
             role: 'system', 
-            content: systemPrompts[type] || systemPrompts.suggestions 
+            content: buildSystemPrompt(type, context)
           },
           { 
             role: 'user', 
             content: prompt 
           }
         ],
-        temperature: context?.aiConfig?.temperature || 0.7,
-        max_tokens: context?.aiConfig?.max_tokens || 1000,
+        temperature: context?.aiConfig?.creativity_level ? context.aiConfig.creativity_level / 10 : 0.7,
+        max_tokens: 1000,
       }),
     });
 
