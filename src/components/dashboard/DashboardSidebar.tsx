@@ -41,7 +41,7 @@ export const DashboardSidebar = ({ currentView, setCurrentView }: DashboardSideb
             username: data.username,
             avatar_url: data.avatar_url,
             bio: data.bio,
-            website: data.website || null,
+            website: null // Set a default value for the website field
           });
         }
       }
