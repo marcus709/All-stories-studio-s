@@ -1,34 +1,34 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { createClient } from "@supabase/supabase-js";
 import { SessionContextProvider } from "@supabase/auth-helpers-react";
-import { supabase } from "@/integrations/supabase/client";
-import Index from "./pages/Index";
-import Settings from "./pages/Settings";
-import Dashboard from "./pages/Dashboard";
-import Community from "./pages/Community";
+import { StoryProvider } from "./contexts/StoryContext";
+import { SubscriptionProvider } from "./contexts/SubscriptionContext";
+import { Toaster } from "@/components/ui/toaster";
+import { Routes } from "./Routes";
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL || '',
+  import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+);
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <SessionContextProvider supabaseClient={supabase}>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/community/*" element={<Community />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </SessionContextProvider>
-);
+function App() {
+  return (
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <SessionContextProvider supabaseClient={supabase}>
+          <SubscriptionProvider>
+            <StoryProvider>
+              <Routes />
+              <Toaster />
+            </StoryProvider>
+          </SubscriptionProvider>
+        </SessionContextProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
+  );
+}
 
 export default App;
