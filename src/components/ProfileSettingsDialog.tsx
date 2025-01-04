@@ -1,5 +1,4 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -9,7 +8,6 @@ import { AvatarUpload } from "./profile/AvatarUpload";
 import { ProfileForm } from "./profile/ProfileForm";
 
 export function ProfileSettingsDialog() {
-  const navigate = useNavigate();
   const session = useSession();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = React.useState(true);
@@ -67,7 +65,6 @@ export function ProfileSettingsDialog() {
         description: "Your profile settings have been saved.",
       });
       setIsOpen(false);
-      navigate("/");
     } catch (error) {
       toast({
         title: "Error",
@@ -84,15 +81,7 @@ export function ProfileSettingsDialog() {
   };
 
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open) {
-          setIsOpen(false);
-          navigate(-1);
-        }
-      }}
-    >
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Profile Settings</DialogTitle>
@@ -112,10 +101,7 @@ export function ProfileSettingsDialog() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => {
-                setIsOpen(false);
-                navigate(-1);
-              }}
+              onClick={() => setIsOpen(false)}
             >
               Cancel
             </Button>
