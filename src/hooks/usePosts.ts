@@ -11,11 +11,11 @@ export const usePosts = () => {
         .from("posts")
         .select(`
           *,
-          profiles:user_id (*),
+          profiles (username, avatar_url),
           post_likes (*),
           comments (
             *,
-            profiles:user_id (*)
+            profiles (username, avatar_url)
           ),
           post_tags (*)
         `)

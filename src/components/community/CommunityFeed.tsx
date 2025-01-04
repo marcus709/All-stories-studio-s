@@ -7,9 +7,11 @@ import { usePosts } from "@/hooks/usePosts";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
 
 export const CommunityFeed = () => {
   const session = useSession();
+  const { toast } = useToast();
   const { data: posts = [], isLoading: isPostsLoading, error: postsError } = usePosts();
 
   const { data: profile, isLoading: isProfileLoading } = useQuery({
@@ -27,6 +29,30 @@ export const CommunityFeed = () => {
         if (error) {
           console.error("Error fetching profile:", error);
           throw error;
+        }
+
+        if (!data) {
+          // Create a new profile if one doesn't exist
+          const { data: newProfile, error: createError } = await supabase
+            .from("profiles")
+            .insert({
+              id: session.user.id,
+              username: session.user.email?.split("@")[0] || "user",
+            })
+            .select()
+            .single();
+
+          if (createError) {
+            console.error("Error creating profile:", createError);
+            toast({
+              title: "Error",
+              description: "Failed to create profile. Please try again.",
+              variant: "destructive",
+            });
+            throw createError;
+          }
+
+          return newProfile;
         }
         
         return data;
