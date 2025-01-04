@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { Check, XCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
@@ -12,7 +12,8 @@ const plans = [
       "2 AI prompts to try",
       "1 story maximum",
       "5 characters maximum",
-      "Basic story enhancement"
+      "Basic story enhancement",
+      { text: "Community Access", available: false }
     ],
     buttonText: "Try for Free",
     buttonVariant: "outline" as const,
@@ -116,12 +117,26 @@ export const PricingSection = () => {
               </CardHeader>
               <CardContent className="p-6">
                 <ul className="space-y-4">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-center space-x-3">
-                      <Check className="h-5 w-5 text-green-500" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
+                  {plan.features.map((feature) => {
+                    const isObject = typeof feature === 'object';
+                    return (
+                      <li 
+                        key={isObject ? feature.text : feature} 
+                        className="flex items-center space-x-3"
+                      >
+                        {isObject ? (
+                          feature.available ? (
+                            <Check className="h-5 w-5 text-green-500" />
+                          ) : (
+                            <XCircle className="h-5 w-5 text-red-500" />
+                          )
+                        ) : (
+                          <Check className="h-5 w-5 text-green-500" />
+                        )}
+                        <span>{isObject ? feature.text : feature}</span>
+                      </li>
+                    );
+                  })}
                 </ul>
                 <Button 
                   variant={plan.buttonVariant}
