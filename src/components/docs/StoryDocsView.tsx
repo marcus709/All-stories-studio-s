@@ -4,14 +4,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { useStory } from "@/contexts/StoryContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Plus, FileText } from "lucide-react";
+import { Plus, FileText, PanelLeftClose, PanelLeft } from "lucide-react";
 import { CreateDocumentDialog } from "./CreateDocumentDialog";
 import { DocumentEditor } from "./DocumentEditor";
 import { DocumentsList } from "./DocumentsList";
+import {
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 
 export const StoryDocsView = () => {
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(true);
   const { selectedStory } = useStory();
   const { toast } = useToast();
 
@@ -56,27 +61,59 @@ export const StoryDocsView = () => {
   return (
     <div className="h-[calc(100vh-4rem)] overflow-hidden">
       <div className="flex items-center justify-between px-8 py-4 border-b">
-        <div>
+        <div className="flex items-center gap-4">
           <h1 className="text-2xl font-bold">Story Documents</h1>
           <p className="text-gray-500">Write and organize your story content</p>
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
-          <Plus className="w-4 h-4" />
-          New Document
-        </Button>
+        <div className="flex items-center gap-2">
+          {!showSidebar && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSidebar(true)}
+              className="h-9 w-9"
+            >
+              <PanelLeft className="h-5 w-5" />
+            </Button>
+          )}
+          <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
+            <Plus className="w-4 h-4" />
+            New Document
+          </Button>
+        </div>
       </div>
 
-      <div className="flex h-[calc(100vh-12rem)]">
-        <div className="w-64 border-r p-4 overflow-y-auto">
-          <DocumentsList 
-            documents={documents}
-            selectedDocId={selectedDocId}
-            onSelectDocument={setSelectedDocId}
-            onRefresh={refetchDocs}
-          />
-        </div>
+      <ResizablePanelGroup direction="horizontal" className="h-[calc(100vh-12rem)]">
+        {showSidebar && (
+          <ResizablePanel 
+            defaultSize={20} 
+            minSize={15} 
+            maxSize={40}
+            className="border-r"
+          >
+            <div className="flex justify-between items-center p-4 border-b">
+              <h2 className="font-semibold">Documents</h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowSidebar(false)}
+                className="h-8 w-8"
+              >
+                <PanelLeftClose className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="p-4 overflow-y-auto h-[calc(100%-4rem)]">
+              <DocumentsList 
+                documents={documents}
+                selectedDocId={selectedDocId}
+                onSelectDocument={setSelectedDocId}
+                onRefresh={refetchDocs}
+              />
+            </div>
+          </ResizablePanel>
+        )}
         
-        <div className="flex-1">
+        <ResizablePanel defaultSize={80}>
           {selectedDocId ? (
             <DocumentEditor documentId={selectedDocId} onRefresh={refetchDocs} />
           ) : (
@@ -85,8 +122,8 @@ export const StoryDocsView = () => {
               <p>Select a document to start editing</p>
             </div>
           )}
-        </div>
-      </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
 
       <CreateDocumentDialog
         isOpen={isCreateDialogOpen}
