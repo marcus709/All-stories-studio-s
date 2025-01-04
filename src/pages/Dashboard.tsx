@@ -12,10 +12,8 @@ function DashboardLayout() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      {currentView !== "docs" && (
-        <DashboardSidebar currentView={currentView} setCurrentView={setCurrentView} />
-      )}
-      <div className={currentView === "docs" ? "pt-16" : "ml-72 pt-16"}>
+      <DashboardSidebar currentView={currentView} setCurrentView={setCurrentView} />
+      <div className="ml-72 pt-16">
         <DashboardContent currentView={currentView} />
       </div>
     </div>
