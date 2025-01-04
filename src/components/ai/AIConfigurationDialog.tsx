@@ -1,5 +1,5 @@
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -144,15 +144,24 @@ export function AIConfigurationDialog({
     }
   };
 
+  const handleClose = () => {
+    setLoading(false);
+    onClose();
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{configToEdit ? "Edit" : "Create"} AI Configuration</DialogTitle>
+          <DialogDescription>
+            Configure how the AI assistant will help with your writing.
+          </DialogDescription>
           <Button
+            type="button"
             variant="ghost"
             className="absolute right-4 top-4"
-            onClick={onClose}
+            onClick={handleClose}
           >
             <X className="h-4 w-4" />
           </Button>
