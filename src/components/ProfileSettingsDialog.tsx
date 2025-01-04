@@ -113,25 +113,27 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleDialogClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">Profile Settings</DialogTitle>
+          <DialogTitle className="text-lg font-semibold">Profile Settings</DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="friends">Friends</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <AvatarUpload
-                avatarUrl={profile.avatar_url}
-                onAvatarChange={(url) =>
-                  setProfile((prev) => ({ ...prev, avatar_url: url }))
-                }
-              />
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="flex justify-center">
+                <AvatarUpload
+                  avatarUrl={profile.avatar_url}
+                  onAvatarChange={(url) =>
+                    setProfile((prev) => ({ ...prev, avatar_url: url }))
+                  }
+                />
+              </div>
 
               <ProfileForm profile={profile} onChange={handleProfileChange} />
 
@@ -145,18 +147,19 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
                 Manage Subscription
               </Button>
 
-              <div className="flex justify-end gap-4">
+              <div className="flex justify-end gap-2">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleDialogClose}
+                  className="px-3 py-1"
                 >
                   Cancel
                 </Button>
                 <Button 
                   type="submit" 
                   disabled={loading}
-                  className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600"
+                  className="px-3 py-1 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600"
                 >
                   Save Changes
                 </Button>
