@@ -34,7 +34,16 @@ export const DashboardSidebar = ({ currentView, setCurrentView }: DashboardSideb
           .select("*")
           .eq("id", user.id)
           .single();
-        setProfile(data);
+        
+        if (data) {
+          setProfile({
+            id: data.id,
+            username: data.username,
+            avatar_url: data.avatar_url,
+            bio: data.bio,
+            website: data.website || null,
+          });
+        }
       }
     };
 

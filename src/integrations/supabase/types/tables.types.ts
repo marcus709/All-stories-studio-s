@@ -12,7 +12,13 @@ export type PlotStructure = Tables["plot_structures"]["Row"];
 export type PostLike = Tables["post_likes"]["Row"];
 export type PostTag = Tables["post_tags"]["Row"];
 export type Post = Tables["posts"]["Row"];
-export type Profile = Tables["profiles"]["Row"];
+export type Profile = {
+  id: string;
+  username: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  website?: string | null;
+};
 export type SavedPost = Tables["saved_posts"]["Row"];
 export type Story = Tables["stories"]["Row"];
 export type StoryIdea = Tables["story_ideas"]["Row"];
