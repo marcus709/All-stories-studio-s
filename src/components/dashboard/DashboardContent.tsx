@@ -155,6 +155,20 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
     e.stopPropagation();
   };
 
+  const handleEditClick = (e: React.MouseEvent, config: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setConfigToEdit(config);
+    setIsConfigDialogOpen(true);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, configId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setConfigToDelete(configId);
+    setIsDeleteDialogOpen(true);
+  };
+
   switch (currentView) {
     case "characters":
       return <CharactersView />;
@@ -211,20 +225,19 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
                             >
                               <Settings className="h-4 w-4" />
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent>
+                            <DropdownMenuContent
+                              onClick={(e) => e.stopPropagation()}
+                              side="right"
+                              align="start"
+                            >
                               <DropdownMenuItem
-                                onClick={(e) => handleConfigEdit(e, config)}
+                                onClick={(e) => handleEditClick(e, config)}
                               >
                                 <Edit className="h-4 w-4 mr-2" />
                                 Edit
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  setConfigToDelete(config.id);
-                                  setIsDeleteDialogOpen(true);
-                                }}
+                                onClick={(e) => handleDeleteClick(e, config.id)}
                                 className="text-red-600"
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
