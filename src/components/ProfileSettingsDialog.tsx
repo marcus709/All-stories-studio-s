@@ -1,15 +1,14 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useSession } from "@supabase/auth-helpers-react";
+import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AvatarUpload } from "./profile/AvatarUpload";
 import { ProfileForm } from "./profile/ProfileForm";
+import { CreditCard } from "lucide-react";
 
 export function ProfileSettingsDialog() {
-  const navigate = useNavigate();
   const session = useSession();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = React.useState(true);
@@ -67,7 +66,6 @@ export function ProfileSettingsDialog() {
         description: "Your profile settings have been saved.",
       });
       setIsOpen(false);
-      navigate("/");
     } catch (error) {
       toast({
         title: "Error",
@@ -83,16 +81,27 @@ export function ProfileSettingsDialog() {
     setProfile((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleManageSubscription = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('create-portal-session');
+      
+      if (error) throw error;
+      
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to open subscription management portal",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open) {
-          setIsOpen(false);
-          navigate(-1);
-        }
-      }}
-    >
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Profile Settings</DialogTitle>
@@ -108,14 +117,21 @@ export function ProfileSettingsDialog() {
 
           <ProfileForm profile={profile} onChange={handleProfileChange} />
 
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={handleManageSubscription}
+          >
+            <CreditCard className="mr-2 h-4 w-4" />
+            Manage Subscription
+          </Button>
+
           <div className="flex justify-end gap-4">
             <Button
               type="button"
               variant="outline"
-              onClick={() => {
-                setIsOpen(false);
-                navigate(-1);
-              }}
+              onClick={() => setIsOpen(false)}
             >
               Cancel
             </Button>
