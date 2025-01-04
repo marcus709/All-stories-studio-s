@@ -866,7 +866,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_comment_profiles: {
+        Args: {
+          comment_row: unknown
+        }
+        Returns: {
+          avatar_url: string | null
+          bio: string | null
+          id: string
+          username: string | null
+        }[]
+      }
+      get_post_profiles: {
+        Args: {
+          post_row: unknown
+        }
+        Returns: {
+          avatar_url: string | null
+          bio: string | null
+          id: string
+          username: string | null
+        }[]
+      }
     }
     Enums: {
       ai_model_type: "gpt-4o" | "gpt-4o-mini"
