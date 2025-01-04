@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Save } from "lucide-react";
 import { DocumentSidebar } from "./DocumentSidebar";
+import { RichTextEditor } from "@/components/editor/RichTextEditor";
 
 interface DocumentEditorProps {
   documentId: string;
@@ -76,7 +76,6 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
     try {
       const item = JSON.parse(e.dataTransfer.getData("application/json"));
       
-      // Create a reference to the dropped content
       await supabase.from("document_references").insert({
         document_id: documentId,
         reference_type: item.type,
@@ -84,8 +83,7 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
         section_id: document.id,
       });
 
-      // Insert the content at cursor position or at the end
-      const insertText = `\n\n[${item.type.toUpperCase()}: ${item.title}]\n${item.description || ''}\n\n`;
+      const insertText = `\n\n[${item.type.toUpperCase()}: ${item.title}]\n${item.backstory || ''}\n\n`;
       setContent(prev => prev + insertText);
       
       toast({
@@ -108,7 +106,7 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
   return (
     <div className="flex flex-1 h-full">
       <DocumentSidebar onContentDrop={(content) => {
-        const insertText = `\n\n[${content.type.toUpperCase()}: ${content.title}]\n${content.description || ''}\n\n`;
+        const insertText = `\n\n[${content.type.toUpperCase()}: ${content.title}]\n${content.backstory || ''}\n\n`;
         setContent(prev => prev + insertText);
       }} />
       
@@ -133,11 +131,10 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
           </Button>
         </div>
         
-        <Textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          className="min-h-[500px] resize-none p-4"
-          placeholder="Start writing your story..."
+        <RichTextEditor
+          content={content}
+          onChange={setContent}
+          className="min-h-[500px]"
         />
       </div>
     </div>
