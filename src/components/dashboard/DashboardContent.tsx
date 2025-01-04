@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { calculateReadability } from "@/utils/readability";
 
 type View = "story" | "characters" | "plot" | "flow" | "ideas";
 
@@ -37,6 +38,7 @@ interface DashboardContentProps {
 
 export const DashboardContent = ({ currentView }: DashboardContentProps) => {
   const [wordCount, setWordCount] = useState(1);
+  const [readabilityScore, setReadabilityScore] = useState(0);
   const [storyContent, setStoryContent] = useState("");
   const [aiSuggestions, setAiSuggestions] = useState("");
   const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false);
@@ -66,6 +68,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
     setStoryContent(content);
     const words = content.trim().split(/\s+/);
     setWordCount(content.trim() === "" ? 0 : words.length);
+    setReadabilityScore(calculateReadability(content));
   };
 
   const handleGetSuggestions = async () => {
@@ -198,7 +201,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
               </div>
               <div className="flex items-center gap-2">
                 <LineChart className="h-5 w-5" />
-                Readability: N/A
+                Readability: {readabilityScore}
               </div>
             </div>
           </div>
