@@ -72,6 +72,7 @@ export const StoryDocsView = () => {
             documents={documents}
             selectedDocId={selectedDocId}
             onSelectDocument={setSelectedDocId}
+            onRefresh={refetchDocs}
           />
         </div>
         
