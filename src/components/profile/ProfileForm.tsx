@@ -69,6 +69,17 @@ export function ProfileForm({ profile, onChange }: ProfileFormProps) {
     setSelectedSlot(null);
   };
 
+  const handleAchievementClick = (slotNumber: number) => {
+    setSelectedSlot(slotNumber);
+    setShowAchievements(true);
+  };
+
+  const handleHelpClick = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission
+    setSelectedSlot(null);
+    setShowAchievements(true);
+  };
+
   return (
     <>
       <div className="space-y-2">
@@ -97,10 +108,8 @@ export function ProfileForm({ profile, onChange }: ProfileFormProps) {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => {
-              setSelectedSlot(null);
-              setShowAchievements(true);
-            }}
+            onClick={handleHelpClick}
+            type="button"
           >
             <HelpCircle className="w-4 h-4 mr-2" />
             What are achievements?
@@ -115,12 +124,10 @@ export function ProfileForm({ profile, onChange }: ProfileFormProps) {
             return (
               <Button
                 key={index}
+                type="button"
                 variant="outline"
                 className="h-20 flex flex-col items-center justify-center gap-2"
-                onClick={() => {
-                  setSelectedSlot(index + 1);
-                  setShowAchievements(true);
-                }}
+                onClick={() => handleAchievementClick(index + 1)}
               >
                 {achievement ? (
                   <>
