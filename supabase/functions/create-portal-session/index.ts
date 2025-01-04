@@ -29,11 +29,18 @@ serve(async (req) => {
       throw new Error('No email found')
     }
 
+    const stripeKey = Deno.env.get('STRIPE_SECRET_KEY')
+    if (!stripeKey) {
+      console.error('Stripe secret key is not set')
+      throw new Error('Stripe configuration error')
+    }
+
     // Initialize Stripe
-    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
+    const stripe = new Stripe(stripeKey, {
       apiVersion: '2023-10-16',
     })
 
+    console.log('Looking up customer for email:', email)
     // Get or create customer
     const customers = await stripe.customers.list({
       email: email,
@@ -43,16 +50,20 @@ serve(async (req) => {
     let customer
     if (customers.data.length > 0) {
       customer = customers.data[0]
+      console.log('Found existing customer:', customer.id)
     } else {
+      console.error('No customer found for email:', email)
       throw new Error('No Stripe customer found')
     }
 
+    console.log('Creating portal session for customer:', customer.id)
     // Create portal session
     const session = await stripe.billingPortal.sessions.create({
       customer: customer.id,
       return_url: `${req.headers.get('origin')}/settings`,
     })
 
+    console.log('Portal session created successfully')
     return new Response(
       JSON.stringify({ url: session.url }),
       { 
@@ -61,6 +72,7 @@ serve(async (req) => {
       }
     )
   } catch (error) {
+    console.error('Error in create-portal-session:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
