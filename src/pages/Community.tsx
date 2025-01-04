@@ -53,10 +53,10 @@ const Community = () => {
             <div className="flex-1 max-w-3xl overflow-y-auto pb-8">
               <div className="bg-white rounded-lg shadow p-6">
                 <Routes>
-                  <Route path="/" element={<CommunityFeed />} />
-                  <Route path="/groups" element={<MyGroups />} />
-                  <Route path="/topics" element={<Topics />} />
-                  <Route path="/saved" element={<SavedPosts />} />
+                  <Route index element={<CommunityFeed />} />
+                  <Route path="groups/*" element={<MyGroups />} />
+                  <Route path="topics" element={<Topics />} />
+                  <Route path="saved" element={<SavedPosts />} />
                 </Routes>
               </div>
             </div>

@@ -10,7 +10,7 @@ export const Routes = () => {
       <Route path="/" element={<Index />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/settings" element={<Settings />} />
-      <Route path="/community" element={<Community />} />
+      <Route path="/community/*" element={<Community />} />
     </RouterRoutes>
   );
 };
