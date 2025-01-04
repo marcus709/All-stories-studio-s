@@ -88,6 +88,11 @@ export const DocumentSidebar = ({
     }
   };
 
+  const handleDropdownClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   return (
     <div className="w-full h-full bg-sidebar border-r border-sidebar-border overflow-y-auto">
       <div className="flex justify-between items-center p-4 border-b">
@@ -113,14 +118,26 @@ export const DocumentSidebar = ({
                   {new Date(doc.created_at).toLocaleDateString()}
                 </p>
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger className="focus:outline-none">
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger 
+                  onClick={handleDropdownClick}
+                  className="focus:outline-none"
+                >
                   <MoreVertical className="w-4 h-4 text-sidebar-foreground/60" />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent
+                  onClick={handleDropdownClick}
+                  side="right"
+                  align="start"
+                  className="bg-white"
+                  sideOffset={5}
+                >
                   <DropdownMenuItem
                     className="text-red-600"
-                    onClick={() => setDocumentToDelete(doc.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDocumentToDelete(doc.id);
+                    }}
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
                     Delete
