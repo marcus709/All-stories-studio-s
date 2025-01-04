@@ -6,7 +6,9 @@ import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AvatarUpload } from "./profile/AvatarUpload";
 import { ProfileForm } from "./profile/ProfileForm";
-import { CreditCard } from "lucide-react";
+import { CreditCard, Users } from "lucide-react";
+import { FriendsManagement } from "./profile/FriendsManagement";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 interface ProfileSettingsDialogProps {
   onClose?: () => void;
@@ -111,48 +113,61 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleDialogClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Profile Settings</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <AvatarUpload
-            avatarUrl={profile.avatar_url}
-            onAvatarChange={(url) =>
-              setProfile((prev) => ({ ...prev, avatar_url: url }))
-            }
-          />
+        <Tabs defaultValue="profile" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="friends">Friends</TabsTrigger>
+          </TabsList>
 
-          <ProfileForm profile={profile} onChange={handleProfileChange} />
+          <TabsContent value="profile">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <AvatarUpload
+                avatarUrl={profile.avatar_url}
+                onAvatarChange={(url) =>
+                  setProfile((prev) => ({ ...prev, avatar_url: url }))
+                }
+              />
 
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={handleManageSubscription}
-          >
-            <CreditCard className="mr-2 h-4 w-4" />
-            Manage Subscription
-          </Button>
+              <ProfileForm profile={profile} onChange={handleProfileChange} />
 
-          <div className="flex justify-end gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleDialogClose}
-            >
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={loading}
-              className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600"
-            >
-              Save Changes
-            </Button>
-          </div>
-        </form>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={handleManageSubscription}
+              >
+                <CreditCard className="mr-2 h-4 w-4" />
+                Manage Subscription
+              </Button>
+
+              <div className="flex justify-end gap-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleDialogClose}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={loading}
+                  className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600"
+                >
+                  Save Changes
+                </Button>
+              </div>
+            </form>
+          </TabsContent>
+
+          <TabsContent value="friends">
+            <FriendsManagement />
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
