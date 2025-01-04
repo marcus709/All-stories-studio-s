@@ -25,12 +25,12 @@ export function ToneAndVoiceConfig({ tone, pointOfView, onToneChange, onPovChang
             <SelectValue placeholder="Select tone" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="custom">Custom Tone</SelectItem>
             <SelectItem value="formal">Formal</SelectItem>
             <SelectItem value="casual">Casual</SelectItem>
             <SelectItem value="dramatic">Dramatic</SelectItem>
             <SelectItem value="whimsical">Whimsical</SelectItem>
             <SelectItem value="dark">Dark/Serious</SelectItem>
-            <SelectItem value="custom">Custom Tone</SelectItem>
           </SelectContent>
         </Select>
         {isCustomTone && (
@@ -52,11 +52,11 @@ export function ToneAndVoiceConfig({ tone, pointOfView, onToneChange, onPovChang
             <SelectValue placeholder="Select point of view" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="custom">Custom Point of View</SelectItem>
             <SelectItem value="neutral">Neutral</SelectItem>
             <SelectItem value="protagonist">Protagonist's Perspective</SelectItem>
             <SelectItem value="antagonist">Antagonist's Perspective</SelectItem>
             <SelectItem value="omniscient">Omniscient Narrator</SelectItem>
-            <SelectItem value="custom">Custom Point of View</SelectItem>
           </SelectContent>
         </Select>
         {isCustomPov && (

@@ -20,13 +20,13 @@ export function GenreSelect({ value, onChange }: GenreSelectProps) {
           <SelectValue placeholder="Select genre" />
         </SelectTrigger>
         <SelectContent>
+          <SelectItem value="custom">Custom Genre</SelectItem>
           <SelectItem value="fantasy">Fantasy</SelectItem>
           <SelectItem value="scifi">Sci-Fi</SelectItem>
           <SelectItem value="mystery">Mystery</SelectItem>
           <SelectItem value="romance">Romance</SelectItem>
           <SelectItem value="horror">Horror</SelectItem>
           <SelectItem value="historical">Historical Fiction</SelectItem>
-          <SelectItem value="custom">Custom Genre</SelectItem>
         </SelectContent>
       </Select>
       {isCustom && (

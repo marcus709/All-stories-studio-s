@@ -20,13 +20,13 @@ export function FocusAreaSelect({ value, onChange }: FocusAreaSelectProps) {
           <SelectValue placeholder="Select focus area" />
         </SelectTrigger>
         <SelectContent>
+          <SelectItem value="custom">Custom Focus Area</SelectItem>
           <SelectItem value="character_development">Character Development</SelectItem>
           <SelectItem value="plot_twists">Plot Twists</SelectItem>
           <SelectItem value="dialogue">Dialogue</SelectItem>
           <SelectItem value="world_building">World-Building</SelectItem>
           <SelectItem value="conflict_resolution">Conflict Resolution</SelectItem>
           <SelectItem value="timeline">Timeline/Structure</SelectItem>
-          <SelectItem value="custom">Custom Focus Area</SelectItem>
         </SelectContent>
       </Select>
       {isCustom && (
