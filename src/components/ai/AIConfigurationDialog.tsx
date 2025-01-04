@@ -139,6 +139,7 @@ export function AIConfigurationDialog({
         description: "Failed to save AI configuration. Please try again.",
         variant: "destructive",
       });
+    } finally {
       setLoading(false);
     }
   };
@@ -166,8 +167,24 @@ export function AIConfigurationDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+    <Dialog 
+      open={isOpen} 
+      onOpenChange={(open) => {
+        if (!open) {
+          handleClose();
+        }
+      }}
+    >
+      <DialogContent 
+        className="max-w-3xl max-h-[90vh] overflow-y-auto"
+        onInteractOutside={(e) => {
+          e.preventDefault();
+        }}
+        onEscapeKeyDown={(e) => {
+          e.preventDefault();
+          handleClose();
+        }}
+      >
         <ConfigDialogHeader isEditing={!!configToEdit} onClose={handleClose} />
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">

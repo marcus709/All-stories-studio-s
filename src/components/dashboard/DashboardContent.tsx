@@ -143,6 +143,13 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
     setIsConfigDialogOpen(true);
   };
 
+  const handleConfigEdit = (e: React.MouseEvent, config: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setConfigToEdit(config);
+    setIsConfigDialogOpen(true);
+  };
+
   switch (currentView) {
     case "characters":
       return <CharactersView />;
@@ -198,11 +205,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
                               <DropdownMenuItem
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setConfigToEdit(config);
-                                  setIsConfigDialogOpen(true);
-                                }}
+                                onClick={(e) => handleConfigEdit(e, config)}
                               >
                                 <Edit className="h-4 w-4 mr-2" />
                                 Edit
