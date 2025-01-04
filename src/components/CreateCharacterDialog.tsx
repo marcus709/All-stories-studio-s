@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
-import { Button } from "./ui/button";
-import { X } from "lucide-react";
 import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -112,16 +110,7 @@ export function CreateCharacterDialog({ isOpen, onOpenChange }: CreateCharacterD
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex justify-between items-center">
-            <DialogTitle className="text-2xl font-bold">Create Character</DialogTitle>
-            <Button
-              variant="ghost"
-              className="h-8 w-8 p-0"
-              onClick={() => onOpenChange(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+          <DialogTitle className="text-2xl font-bold">Create Character</DialogTitle>
           <DialogDescription>
             Fill out the form below to create a new character.
           </DialogDescription>
