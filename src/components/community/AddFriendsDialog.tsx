@@ -69,13 +69,12 @@ export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) =>
   });
 
   const handleUserSelect = (user: Profile) => {
-    // Create a complete Profile object with optional website field
     const completeUser: Profile = {
       id: user.id,
       username: user.username,
       avatar_url: user.avatar_url,
       bio: user.bio,
-      website: user.website || null, // Handle the optional website field
+      website: user.website || null,
     };
     setSelectedUser(completeUser);
   };
