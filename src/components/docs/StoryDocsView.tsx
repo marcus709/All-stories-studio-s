@@ -67,14 +67,24 @@ export const StoryDocsView = () => {
       </div>
 
       <div className="flex h-[calc(100vh-12rem)]">
-        {selectedDocId ? (
-          <DocumentEditor documentId={selectedDocId} onRefresh={refetchDocs} />
-        ) : (
-          <div className="flex flex-col items-center justify-center flex-1 bg-gray-50 text-gray-500">
-            <FileText className="w-12 h-12 mb-4" />
-            <p>Select a document to start editing</p>
-          </div>
-        )}
+        <div className="w-64 border-r p-4 overflow-y-auto">
+          <DocumentsList 
+            documents={documents}
+            selectedDocId={selectedDocId}
+            onDocumentSelect={setSelectedDocId}
+          />
+        </div>
+        
+        <div className="flex-1">
+          {selectedDocId ? (
+            <DocumentEditor documentId={selectedDocId} onRefresh={refetchDocs} />
+          ) : (
+            <div className="flex flex-col items-center justify-center flex-1 bg-gray-50 text-gray-500">
+              <FileText className="w-12 h-12 mb-4" />
+              <p>Select a document to start editing</p>
+            </div>
+          )}
+        </div>
       </div>
 
       <CreateDocumentDialog
