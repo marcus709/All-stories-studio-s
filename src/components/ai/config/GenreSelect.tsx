@@ -1,7 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface GenreSelectProps {
   value: string;
@@ -12,10 +12,30 @@ export function GenreSelect({ value, onChange }: GenreSelectProps) {
   const [customGenre, setCustomGenre] = useState("");
   const isCustom = value === "custom";
 
+  // Update parent only when user stops typing
+  useEffect(() => {
+    if (isCustom && customGenre) {
+      const timeoutId = setTimeout(() => {
+        onChange(customGenre);
+      }, 500);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [customGenre, isCustom, onChange]);
+
   return (
     <div className="space-y-2">
       <Label>Genre</Label>
-      <Select value={value} onValueChange={onChange}>
+      <Select 
+        value={isCustom ? "custom" : value} 
+        onValueChange={(val) => {
+          if (val !== "custom") {
+            setCustomGenre("");
+            onChange(val);
+          } else {
+            onChange("custom");
+          }
+        }}
+      >
         <SelectTrigger>
           <SelectValue placeholder="Select genre" />
         </SelectTrigger>
@@ -33,10 +53,7 @@ export function GenreSelect({ value, onChange }: GenreSelectProps) {
         <Input
           placeholder="Enter custom genre"
           value={customGenre}
-          onChange={(e) => {
-            setCustomGenre(e.target.value);
-            onChange(e.target.value);
-          }}
+          onChange={(e) => setCustomGenre(e.target.value)}
           className="mt-2"
         />
       )}

@@ -1,7 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface FocusAreaSelectProps {
   value: string;
@@ -12,10 +12,30 @@ export function FocusAreaSelect({ value, onChange }: FocusAreaSelectProps) {
   const [customFocusArea, setCustomFocusArea] = useState("");
   const isCustom = value === "custom";
 
+  // Update parent only when user stops typing
+  useEffect(() => {
+    if (isCustom && customFocusArea) {
+      const timeoutId = setTimeout(() => {
+        onChange(customFocusArea);
+      }, 500);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [customFocusArea, isCustom, onChange]);
+
   return (
     <div className="space-y-2">
       <Label>Focus Area</Label>
-      <Select value={value} onValueChange={onChange}>
+      <Select 
+        value={isCustom ? "custom" : value} 
+        onValueChange={(val) => {
+          if (val !== "custom") {
+            setCustomFocusArea("");
+            onChange(val);
+          } else {
+            onChange("custom");
+          }
+        }}
+      >
         <SelectTrigger>
           <SelectValue placeholder="Select focus area" />
         </SelectTrigger>
@@ -33,10 +53,7 @@ export function FocusAreaSelect({ value, onChange }: FocusAreaSelectProps) {
         <Input
           placeholder="Describe your custom focus area..."
           value={customFocusArea}
-          onChange={(e) => {
-            setCustomFocusArea(e.target.value);
-            onChange(e.target.value);
-          }}
+          onChange={(e) => setCustomFocusArea(e.target.value)}
           className="mt-2"
         />
       )}

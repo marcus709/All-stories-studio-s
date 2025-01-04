@@ -1,7 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface ToneAndVoiceConfigProps {
   tone: string;
@@ -16,11 +16,41 @@ export function ToneAndVoiceConfig({ tone, pointOfView, onToneChange, onPovChang
   const isCustomTone = tone === "custom";
   const isCustomPov = pointOfView === "custom";
 
+  // Update parent only when user stops typing for tone
+  useEffect(() => {
+    if (isCustomTone && customTone) {
+      const timeoutId = setTimeout(() => {
+        onToneChange(customTone);
+      }, 500);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [customTone, isCustomTone, onToneChange]);
+
+  // Update parent only when user stops typing for POV
+  useEffect(() => {
+    if (isCustomPov && customPov) {
+      const timeoutId = setTimeout(() => {
+        onPovChange(customPov);
+      }, 500);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [customPov, isCustomPov, onPovChange]);
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>Tone</Label>
-        <Select value={tone} onValueChange={onToneChange}>
+        <Select 
+          value={isCustomTone ? "custom" : tone} 
+          onValueChange={(val) => {
+            if (val !== "custom") {
+              setCustomTone("");
+              onToneChange(val);
+            } else {
+              onToneChange("custom");
+            }
+          }}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Select tone" />
           </SelectTrigger>
@@ -37,17 +67,24 @@ export function ToneAndVoiceConfig({ tone, pointOfView, onToneChange, onPovChang
           <Input
             placeholder="Describe your custom tone..."
             value={customTone}
-            onChange={(e) => {
-              setCustomTone(e.target.value);
-              onToneChange(e.target.value);
-            }}
+            onChange={(e) => setCustomTone(e.target.value)}
             className="mt-2"
           />
         )}
       </div>
       <div className="space-y-2">
         <Label>Point of View</Label>
-        <Select value={pointOfView} onValueChange={onPovChange}>
+        <Select 
+          value={isCustomPov ? "custom" : pointOfView} 
+          onValueChange={(val) => {
+            if (val !== "custom") {
+              setCustomPov("");
+              onPovChange(val);
+            } else {
+              onPovChange("custom");
+            }
+          }}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Select point of view" />
           </SelectTrigger>
@@ -63,10 +100,7 @@ export function ToneAndVoiceConfig({ tone, pointOfView, onToneChange, onPovChang
           <Input
             placeholder="Describe your custom point of view..."
             value={customPov}
-            onChange={(e) => {
-              setCustomPov(e.target.value);
-              onPovChange(e.target.value);
-            }}
+            onChange={(e) => setCustomPov(e.target.value)}
             className="mt-2"
           />
         )}
