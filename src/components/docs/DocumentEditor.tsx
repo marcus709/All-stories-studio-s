@@ -83,7 +83,6 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
         section_id: document.id,
       });
 
-      // Create insert text based on item type and available properties
       const insertText = `\n\n[${item.type.toUpperCase()}: ${item.title}]\n${item.description || ''}\n\n`;
       setContent(prev => prev + insertText);
       
@@ -106,10 +105,14 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
 
   return (
     <div className="flex flex-1 h-full">
-      <DocumentSidebar onContentDrop={(content) => {
-        const insertText = `\n\n[${content.type.toUpperCase()}: ${content.title}]\n${content.description || ''}\n\n`;
-        setContent(prev => prev + insertText);
-      }} />
+      <DocumentSidebar 
+        onContentDrop={(content) => {
+          const insertText = `\n\n[${content.type.toUpperCase()}: ${content.title}]\n${content.description || ''}\n\n`;
+          setContent(prev => prev + insertText);
+        }}
+        selectedDocId={documentId}
+        onSelectDocument={() => {}} // This component doesn't need to handle document selection
+      />
       
       <div 
         className="flex-1 flex flex-col h-full p-6 space-y-4 overflow-hidden"
