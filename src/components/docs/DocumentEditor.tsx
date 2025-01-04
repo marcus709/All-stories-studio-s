@@ -79,9 +79,9 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
       // Create a reference to the dropped content
       await supabase.from("document_references").insert({
         document_id: documentId,
-        section_id: document.sections?.[0]?.id,
         reference_type: item.type,
         reference_id: item.id,
+        section_id: document.id, // Using document id as the default section
       });
 
       // Insert the content at cursor position or at the end

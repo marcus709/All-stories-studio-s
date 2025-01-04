@@ -80,7 +80,7 @@ export const DocumentSidebar = ({ onContentDrop }: { onContentDrop: (content: Co
               onDragStart={(e) => handleDragStart(e, {
                 id: char.id,
                 title: char.name,
-                description: char.description,
+                description: char.backstory || '',
                 type: 'character'
               })}
               className="p-3 bg-gray-50 rounded-lg cursor-move hover:bg-gray-100"
@@ -99,7 +99,7 @@ export const DocumentSidebar = ({ onContentDrop }: { onContentDrop: (content: Co
               onDragStart={(e) => handleDragStart(e, {
                 id: event.id,
                 title: event.title,
-                description: event.description,
+                description: event.description || '',
                 type: 'plot'
               })}
               className="p-3 bg-gray-50 rounded-lg cursor-move hover:bg-gray-100"
@@ -118,7 +118,7 @@ export const DocumentSidebar = ({ onContentDrop }: { onContentDrop: (content: Co
               onDragStart={(e) => handleDragStart(e, {
                 id: idea.id,
                 title: idea.title,
-                description: idea.description,
+                description: idea.description || '',
                 type: 'idea'
               })}
               className="p-3 bg-gray-50 rounded-lg cursor-move hover:bg-gray-100"
