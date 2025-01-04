@@ -254,6 +254,127 @@ export type Database = {
           },
         ]
       }
+      document_references: {
+        Row: {
+          created_at: string | null
+          document_id: string
+          id: string
+          reference_id: string
+          reference_type: string
+          section_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          document_id: string
+          id?: string
+          reference_id: string
+          reference_type: string
+          section_id: string
+        }
+        Update: {
+          created_at?: string | null
+          document_id?: string
+          id?: string
+          reference_id?: string
+          reference_type?: string
+          section_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_references_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_references_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "document_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_sections: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          document_id: string
+          id: string
+          order_index: number
+          title: string
+          type: Database["public"]["Enums"]["document_section_type"]
+          updated_at: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          document_id: string
+          id?: string
+          order_index: number
+          title: string
+          type: Database["public"]["Enums"]["document_section_type"]
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          document_id?: string
+          id?: string
+          order_index?: number
+          title?: string
+          type?: Database["public"]["Enums"]["document_section_type"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_sections_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          content: Json
+          created_at: string | null
+          id: string
+          story_id: string
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string | null
+          id?: string
+          story_id: string
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string | null
+          id?: string
+          story_id?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       friendships: {
         Row: {
           created_at: string | null
@@ -734,6 +855,7 @@ export type Database = {
     }
     Enums: {
       ai_model_type: "gpt-4o" | "gpt-4o-mini"
+      document_section_type: "chapter" | "scene" | "note"
       relationship_type:
         | "friend"
         | "enemy"

@@ -15,22 +15,16 @@ import { CharactersView } from "@/components/CharactersView";
 import { PlotDevelopmentView } from "@/components/PlotDevelopmentView";
 import { StoryFlow } from "@/components/story-flow/StoryFlow";
 import { StoryIdeasView } from "@/components/StoryIdeasView";
+import { StoryDocsView } from "@/components/docs/StoryDocsView";
 import { useStory } from "@/contexts/StoryContext";
 import { useAI } from "@/hooks/useAI";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { AIConfigurationDialog } from "@/components/ai/AIConfigurationDialog";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { calculateReadability } from "@/utils/readability";
 
-type View = "story" | "characters" | "plot" | "flow" | "ideas";
+type View = "story" | "characters" | "plot" | "flow" | "ideas" | "docs";
 
 interface DashboardContentProps {
   currentView: View;
@@ -186,6 +180,8 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
       return <StoryFlow />;
     case "ideas":
       return <StoryIdeasView />;
+    case "docs":
+      return <StoryDocsView />;
     case "story":
       return (
         <div className="max-w-7xl mx-auto px-8 py-8">

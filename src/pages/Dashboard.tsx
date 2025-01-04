@@ -4,7 +4,7 @@ import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
 import { StoryProvider } from "@/contexts/StoryContext";
 
-type View = "story" | "characters" | "plot" | "flow" | "ideas";
+type View = "story" | "characters" | "plot" | "flow" | "ideas" | "docs";
 
 function DashboardLayout() {
   const [currentView, setCurrentView] = useState<View>("story");

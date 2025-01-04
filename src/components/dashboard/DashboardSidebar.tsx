@@ -1,4 +1,4 @@
-import { Book, Users, LineChart, GitBranch, Lightbulb } from "lucide-react";
+import { Book, Users, LineChart, GitBranch, Lightbulb, FileText } from "lucide-react";
 import { StoriesDialog } from "../StoriesDialog";
 import { useStory } from "@/contexts/StoryContext";
 
@@ -8,6 +8,7 @@ const navigationItems = [
   { id: "plot", icon: LineChart, label: "Plot Development" },
   { id: "flow", icon: GitBranch, label: "Story Flow" },
   { id: "ideas", icon: Lightbulb, label: "Story Ideas" },
+  { id: "docs", icon: FileText, label: "Story Docs" },
 ] as const;
 
 type View = (typeof navigationItems)[number]["id"];
