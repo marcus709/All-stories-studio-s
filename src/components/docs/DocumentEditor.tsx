@@ -112,7 +112,7 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
       }} />
       
       <div 
-        className="flex-1 bg-white p-6 space-y-4 overflow-y-auto"
+        className="flex-1 flex flex-col h-full p-6 space-y-4 overflow-hidden"
         onDrop={handleDrop}
         onDragOver={handleDragOver}
       >
@@ -135,7 +135,7 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
         <RichTextEditor
           content={content}
           onChange={setContent}
-          className="min-h-[500px]"
+          className="flex-1"
         />
       </div>
     </div>
