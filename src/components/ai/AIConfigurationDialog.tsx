@@ -1,10 +1,8 @@
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +13,8 @@ import { GenreSelect } from "./config/GenreSelect";
 import { RulesConfig } from "./config/RulesConfig";
 import { KeywordsConfig } from "./config/KeywordsConfig";
 import { AdvancedConfig } from "./config/AdvancedConfig";
+import { ConfigDialogHeader } from "./config/DialogHeader";
+import { FormActions } from "./config/FormActions";
 
 interface AIConfiguration {
   name: string;
@@ -132,41 +132,43 @@ export function AIConfigurationDialog({
         description: `AI configuration ${configToEdit ? "updated" : "created"} successfully.`,
       });
       onConfigSaved();
-      onClose();
+      handleClose();
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to save AI configuration. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setLoading(false);
     }
   };
 
   const handleClose = () => {
     setLoading(false);
+    setConfig({
+      name: "",
+      response_style: "descriptive",
+      focus_area: "character_development",
+      tone: "neutral",
+      point_of_view: "neutral",
+      genre: "fantasy",
+      character_rules: [],
+      plot_rules: [],
+      custom_prompt: "",
+      keywords_include: [],
+      keywords_avoid: [],
+      creativity_level: 5,
+      suggestion_complexity: "medium",
+      feedback_cycle: "suggest_and_wait",
+      feedback_format: "bulleted_list",
+    });
     onClose();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{configToEdit ? "Edit" : "Create"} AI Configuration</DialogTitle>
-          <DialogDescription>
-            Configure how the AI assistant will help with your writing.
-          </DialogDescription>
-          <Button
-            type="button"
-            variant="ghost"
-            className="absolute right-4 top-4"
-            onClick={handleClose}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </DialogHeader>
-
+        <ConfigDialogHeader isEditing={!!configToEdit} onClose={handleClose} />
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="name">Configuration Name</Label>
@@ -242,14 +244,7 @@ export function AIConfigurationDialog({
             onFeedbackFormatChange={(value) => setConfig((prev) => ({ ...prev, feedback_format: value }))}
           />
 
-          <div className="flex justify-end gap-4">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? "Saving..." : "Save Configuration"}
-            </Button>
-          </div>
+          <FormActions loading={loading} onClose={handleClose} />
         </form>
       </DialogContent>
     </Dialog>
