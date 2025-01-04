@@ -59,19 +59,22 @@ export function AchievementsDialog({ isOpen, onClose, onSelect, selectedSlot }: 
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[600px] bg-background">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">Achievements</DialogTitle>
+          <DialogTitle className="text-xl font-bold">
+            {selectedSlot ? `Select Achievement for Slot ${selectedSlot}` : 'Achievements'}
+          </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Achievements are special badges you can earn by participating in the community.
-            Complete different actions to unlock more achievements and showcase them on your profile!
+            {selectedSlot 
+              ? "Click on an achievement to display it in the selected slot."
+              : "Achievements are special badges you can earn by participating in the community. Complete different actions to unlock more achievements and showcase them on your profile!"
+            }
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {unlockedAchievements?.map((achievement) => (
               <div
                 key={achievement.id}
-                className={`p-4 border rounded-lg cursor-pointer hover:border-primary transition-colors
-                  ${onSelect ? "hover:bg-accent" : ""}`}
+                className={`p-4 border rounded-lg ${onSelect ? "cursor-pointer hover:border-primary hover:bg-accent/50 transition-colors" : ""}`}
                 onClick={() => onSelect?.(achievement)}
               >
                 <div className="flex items-center gap-3">
