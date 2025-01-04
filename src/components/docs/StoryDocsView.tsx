@@ -49,7 +49,7 @@ export const StoryDocsView = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-8 py-6">
+    <div className="max-w-full mx-auto px-8 py-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Story Documents</h1>
@@ -62,7 +62,7 @@ export const StoryDocsView = () => {
       </div>
 
       <div className="grid grid-cols-12 gap-6">
-        <div className="col-span-3">
+        <div className="col-span-2">
           <DocumentsList
             documents={documents}
             selectedDocId={selectedDocId}
@@ -70,7 +70,7 @@ export const StoryDocsView = () => {
             onRefresh={refetchDocs}
           />
         </div>
-        <div className="col-span-9">
+        <div className="col-span-10">
           {selectedDocId ? (
             <DocumentEditor documentId={selectedDocId} onRefresh={refetchDocs} />
           ) : (
