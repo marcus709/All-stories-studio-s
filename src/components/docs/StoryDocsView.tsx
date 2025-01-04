@@ -35,6 +35,11 @@ export const StoryDocsView = () => {
         return [];
       }
 
+      // Auto-select the first document if none is selected
+      if (data.length > 0 && !selectedDocId) {
+        setSelectedDocId(data[0].id);
+      }
+
       return data;
     },
     enabled: !!selectedStory?.id,
