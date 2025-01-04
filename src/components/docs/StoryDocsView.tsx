@@ -11,6 +11,7 @@ import { DocumentSidebar } from "./DocumentSidebar";
 import {
   ResizablePanel,
   ResizablePanelGroup,
+  ResizableHandle,
 } from "@/components/ui/resizable";
 
 export const StoryDocsView = () => {
@@ -72,15 +73,20 @@ export const StoryDocsView = () => {
       <ResizablePanelGroup direction="horizontal" className="h-[calc(100vh-12rem)]">
         <ResizablePanel defaultSize={20} minSize={15} maxSize={40}>
           <DocumentSidebar 
-            onContentDrop={(content) => {}} 
+            onContentDrop={() => {}} 
             selectedDocId={selectedDocId}
             onSelectDocument={setSelectedDocId}
           />
         </ResizablePanel>
         
+        <ResizableHandle withHandle />
+        
         <ResizablePanel defaultSize={80}>
           {selectedDocId ? (
-            <DocumentEditor documentId={selectedDocId} onRefresh={refetchDocs} />
+            <DocumentEditor 
+              documentId={selectedDocId} 
+              onRefresh={refetchDocs}
+            />
           ) : (
             <div className="flex flex-col items-center justify-center flex-1 bg-gray-50 text-gray-500">
               <FileText className="w-12 h-12 mb-4" />

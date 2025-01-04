@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Save } from "lucide-react";
-import { DocumentSidebar } from "./DocumentSidebar";
 import { RichTextEditor } from "@/components/editor/RichTextEditor";
 
 interface DocumentEditorProps {
@@ -104,43 +103,32 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
   };
 
   return (
-    <div className="flex flex-1 h-full">
-      <DocumentSidebar 
-        onContentDrop={(content) => {
-          const insertText = `\n\n[${content.type.toUpperCase()}: ${content.title}]\n${content.description || ''}\n\n`;
-          setContent(prev => prev + insertText);
-        }}
-        selectedDocId={documentId}
-        onSelectDocument={() => {}} // This component doesn't need to handle document selection
-      />
-      
-      <div 
-        className="flex-1 flex flex-col h-full p-6 space-y-4 overflow-hidden"
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex-1 mr-4">
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="text-lg font-medium"
-            />
-          </div>
-          <Button onClick={handleSave} disabled={isSaving} className="gap-2">
-            <Save className="w-4 h-4" />
-            {isSaving ? "Saving..." : "Save"}
-          </Button>
+    <div 
+      className="flex-1 flex flex-col h-full p-6 space-y-4 overflow-hidden"
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex-1 mr-4">
+          <Label htmlFor="title">Title</Label>
+          <Input
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="text-lg font-medium"
+          />
         </div>
-        
-        <RichTextEditor
-          content={content}
-          onChange={setContent}
-          className="flex-1"
-        />
+        <Button onClick={handleSave} disabled={isSaving} className="gap-2">
+          <Save className="w-4 h-4" />
+          {isSaving ? "Saving..." : "Save"}
+        </Button>
       </div>
+      
+      <RichTextEditor
+        content={content}
+        onChange={setContent}
+        className="flex-1"
+      />
     </div>
   );
 };
