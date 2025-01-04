@@ -4,21 +4,34 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
 import { X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
-
-type AIModelType = 'gpt-4o' | 'gpt-4o-mini';
+import { ResponseStyleSelect } from "./config/ResponseStyleSelect";
+import { FocusAreaSelect } from "./config/FocusAreaSelect";
+import { ToneAndVoiceConfig } from "./config/ToneAndVoiceConfig";
+import { GenreSelect } from "./config/GenreSelect";
+import { RulesConfig } from "./config/RulesConfig";
+import { KeywordsConfig } from "./config/KeywordsConfig";
+import { AdvancedConfig } from "./config/AdvancedConfig";
 
 interface AIConfiguration {
   name: string;
-  model_type: AIModelType;
-  system_prompt: string;
-  temperature: number;
-  max_tokens: number;
+  response_style: string;
+  focus_area: string;
+  tone: string;
+  point_of_view: string;
+  genre: string;
+  character_rules: string[];
+  plot_rules: string[];
+  custom_prompt: string;
+  keywords_include: string[];
+  keywords_avoid: string[];
+  creativity_level: number;
+  suggestion_complexity: string;
+  feedback_cycle: string;
+  feedback_format: string;
 }
 
 interface AIConfigurationDialogProps {
@@ -27,42 +40,71 @@ interface AIConfigurationDialogProps {
   configToEdit?: {
     id: string;
     name: string;
-    model_type: AIModelType;
-    system_prompt?: string;
-    temperature: number;
-    max_tokens: number;
+    response_style: string;
+    focus_area: string;
+    tone: string;
+    point_of_view: string;
+    genre: string;
+    character_rules: string[];
+    plot_rules: string[];
+    custom_prompt: string;
+    keywords_include: string[];
+    keywords_avoid: string[];
+    creativity_level: number;
+    suggestion_complexity: string;
+    feedback_cycle: string;
+    feedback_format: string;
   };
   onConfigSaved: () => void;
 }
 
-export function AIConfigurationDialog({ isOpen, onClose, configToEdit, onConfigSaved }: AIConfigurationDialogProps) {
+export function AIConfigurationDialog({
+  isOpen,
+  onClose,
+  configToEdit,
+  onConfigSaved,
+}: AIConfigurationDialogProps) {
   const session = useSession();
   const { toast } = useToast();
   const [loading, setLoading] = React.useState(false);
   const [config, setConfig] = React.useState<AIConfiguration>({
     name: "",
-    model_type: "gpt-4o-mini",
-    system_prompt: "",
-    temperature: 0.7,
-    max_tokens: 1000,
+    response_style: "descriptive",
+    focus_area: "character_development",
+    tone: "neutral",
+    point_of_view: "neutral",
+    genre: "fantasy",
+    character_rules: [],
+    plot_rules: [],
+    custom_prompt: "",
+    keywords_include: [],
+    keywords_avoid: [],
+    creativity_level: 5,
+    suggestion_complexity: "medium",
+    feedback_cycle: "suggest_and_wait",
+    feedback_format: "bulleted_list",
   });
 
   React.useEffect(() => {
     if (configToEdit) {
-      setConfig({
-        name: configToEdit.name,
-        model_type: configToEdit.model_type,
-        system_prompt: configToEdit.system_prompt || "",
-        temperature: configToEdit.temperature,
-        max_tokens: configToEdit.max_tokens,
-      });
+      setConfig(configToEdit);
     } else {
       setConfig({
         name: "",
-        model_type: "gpt-4o-mini",
-        system_prompt: "",
-        temperature: 0.7,
-        max_tokens: 1000,
+        response_style: "descriptive",
+        focus_area: "character_development",
+        tone: "neutral",
+        point_of_view: "neutral",
+        genre: "fantasy",
+        character_rules: [],
+        plot_rules: [],
+        custom_prompt: "",
+        keywords_include: [],
+        keywords_avoid: [],
+        creativity_level: 5,
+        suggestion_complexity: "medium",
+        feedback_cycle: "suggest_and_wait",
+        feedback_format: "bulleted_list",
       });
     }
   }, [configToEdit]);
@@ -70,28 +112,18 @@ export function AIConfigurationDialog({ isOpen, onClose, configToEdit, onConfigS
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!session?.user?.id) return;
-    
+
     setLoading(true);
     try {
       if (configToEdit) {
         await supabase
           .from("ai_configurations")
-          .update({
-            name: config.name,
-            model_type: config.model_type,
-            system_prompt: config.system_prompt,
-            temperature: config.temperature,
-            max_tokens: config.max_tokens,
-          })
+          .update(config)
           .eq("id", configToEdit.id);
       } else {
         await supabase.from("ai_configurations").insert({
+          ...config,
           user_id: session.user.id,
-          name: config.name,
-          model_type: config.model_type,
-          system_prompt: config.system_prompt,
-          temperature: config.temperature,
-          max_tokens: config.max_tokens,
         });
       }
 
@@ -114,7 +146,7 @@ export function AIConfigurationDialog({ isOpen, onClose, configToEdit, onConfigS
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{configToEdit ? "Edit" : "Create"} AI Configuration</DialogTitle>
           <Button
@@ -138,65 +170,68 @@ export function AIConfigurationDialog({ isOpen, onClose, configToEdit, onConfigS
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="model">Model</Label>
-            <Select
-              value={config.model_type}
-              onValueChange={(value: AIModelType) =>
-                setConfig((prev) => ({ ...prev, model_type: value }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select model" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="gpt-4o-mini">GPT-4 Mini (Faster)</SelectItem>
-                <SelectItem value="gpt-4o">GPT-4 (More Powerful)</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-6">
+              <ResponseStyleSelect
+                value={config.response_style}
+                onChange={(value) => setConfig((prev) => ({ ...prev, response_style: value }))}
+              />
+
+              <FocusAreaSelect
+                value={config.focus_area}
+                onChange={(value) => setConfig((prev) => ({ ...prev, focus_area: value }))}
+              />
+
+              <ToneAndVoiceConfig
+                tone={config.tone}
+                pointOfView={config.point_of_view}
+                onToneChange={(value) => setConfig((prev) => ({ ...prev, tone: value }))}
+                onPovChange={(value) => setConfig((prev) => ({ ...prev, point_of_view: value }))}
+              />
+
+              <GenreSelect
+                value={config.genre}
+                onChange={(value) => setConfig((prev) => ({ ...prev, genre: value }))}
+              />
+            </div>
+
+            <div className="space-y-6">
+              <RulesConfig
+                characterRules={config.character_rules}
+                plotRules={config.plot_rules}
+                onCharacterRulesChange={(rules) => setConfig((prev) => ({ ...prev, character_rules: rules }))}
+                onPlotRulesChange={(rules) => setConfig((prev) => ({ ...prev, plot_rules: rules }))}
+              />
+
+              <KeywordsConfig
+                includeKeywords={config.keywords_include}
+                avoidKeywords={config.keywords_avoid}
+                onIncludeKeywordsChange={(keywords) => setConfig((prev) => ({ ...prev, keywords_include: keywords }))}
+                onAvoidKeywordsChange={(keywords) => setConfig((prev) => ({ ...prev, keywords_avoid: keywords }))}
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="system_prompt">System Prompt</Label>
+            <Label>Custom Prompt</Label>
             <Textarea
-              id="system_prompt"
-              value={config.system_prompt}
-              onChange={(e) =>
-                setConfig((prev) => ({ ...prev, system_prompt: e.target.value }))
-              }
-              placeholder="You are a creative writing assistant..."
+              value={config.custom_prompt}
+              onChange={(e) => setConfig((prev) => ({ ...prev, custom_prompt: e.target.value }))}
+              placeholder="Enter any specific instructions for the AI..."
               className="min-h-[100px]"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Temperature ({config.temperature})</Label>
-            <Slider
-              value={[config.temperature]}
-              onValueChange={(value) =>
-                setConfig((prev) => ({ ...prev, temperature: value[0] }))
-              }
-              max={1}
-              step={0.1}
-              className="py-4"
-            />
-            <p className="text-sm text-gray-500">
-              Higher values make the output more creative but less predictable
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Max Tokens ({config.max_tokens})</Label>
-            <Slider
-              value={[config.max_tokens]}
-              onValueChange={(value) =>
-                setConfig((prev) => ({ ...prev, max_tokens: Math.round(value[0]) }))
-              }
-              max={2000}
-              step={100}
-              className="py-4"
-            />
-          </div>
+          <AdvancedConfig
+            creativityLevel={config.creativity_level}
+            suggestionComplexity={config.suggestion_complexity}
+            feedbackCycle={config.feedback_cycle}
+            feedbackFormat={config.feedback_format}
+            onCreativityLevelChange={(value) => setConfig((prev) => ({ ...prev, creativity_level: value }))}
+            onSuggestionComplexityChange={(value) => setConfig((prev) => ({ ...prev, suggestion_complexity: value }))}
+            onFeedbackCycleChange={(value) => setConfig((prev) => ({ ...prev, feedback_cycle: value }))}
+            onFeedbackFormatChange={(value) => setConfig((prev) => ({ ...prev, feedback_format: value }))}
+          />
 
           <div className="flex justify-end gap-4">
             <Button type="button" variant="outline" onClick={onClose}>

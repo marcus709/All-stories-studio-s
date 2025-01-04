@@ -38,35 +38,77 @@ export type Database = {
       }
       ai_configurations: {
         Row: {
+          character_rules: string[] | null
           created_at: string | null
+          creativity_level: number | null
+          custom_prompt: string | null
+          feedback_cycle: string | null
+          feedback_format: string | null
+          focus_area: string | null
+          genre: string | null
           id: string
+          keywords_avoid: string[] | null
+          keywords_include: string[] | null
           max_tokens: number
           model_type: Database["public"]["Enums"]["ai_model_type"]
           name: string
+          plot_rules: string[] | null
+          point_of_view: string | null
+          response_style: string | null
+          suggestion_complexity: string | null
           system_prompt: string | null
           temperature: number
+          tone: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          character_rules?: string[] | null
           created_at?: string | null
+          creativity_level?: number | null
+          custom_prompt?: string | null
+          feedback_cycle?: string | null
+          feedback_format?: string | null
+          focus_area?: string | null
+          genre?: string | null
           id?: string
+          keywords_avoid?: string[] | null
+          keywords_include?: string[] | null
           max_tokens?: number
           model_type?: Database["public"]["Enums"]["ai_model_type"]
           name: string
+          plot_rules?: string[] | null
+          point_of_view?: string | null
+          response_style?: string | null
+          suggestion_complexity?: string | null
           system_prompt?: string | null
           temperature?: number
+          tone?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          character_rules?: string[] | null
           created_at?: string | null
+          creativity_level?: number | null
+          custom_prompt?: string | null
+          feedback_cycle?: string | null
+          feedback_format?: string | null
+          focus_area?: string | null
+          genre?: string | null
           id?: string
+          keywords_avoid?: string[] | null
+          keywords_include?: string[] | null
           max_tokens?: number
           model_type?: Database["public"]["Enums"]["ai_model_type"]
           name?: string
+          plot_rules?: string[] | null
+          point_of_view?: string | null
+          response_style?: string | null
+          suggestion_complexity?: string | null
           system_prompt?: string | null
           temperature?: number
+          tone?: string | null
           updated_at?: string | null
           user_id?: string
         }
