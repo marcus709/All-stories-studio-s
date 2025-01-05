@@ -27,6 +27,7 @@ interface PostData {
   id: string;
   content: string;
   created_at: string;
+  updated_at: string;
   user_id: string;
   get_post_profiles: PostProfile[];
   post_likes: Array<{
@@ -41,7 +42,7 @@ interface PostData {
 export const SavedPosts = () => {
   const session = useSession();
 
-  const { data: savedPosts } = useQuery({
+  const { data: savedPosts } = useQuery<PostData[]>({
     queryKey: ["saved-posts"],
     queryFn: async () => {
       const { data: savedPostsData, error: savedPostsError } = await supabase
