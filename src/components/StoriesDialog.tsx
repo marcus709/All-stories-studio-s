@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "./ui/dialog";
 import { Button } from "./ui/button";
-import { Plus, Book } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useStory } from "@/contexts/StoryContext";
 import { useToast } from "./ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +12,7 @@ import { StoriesGrid } from "./stories/StoriesGrid";
 import { ScrollArea } from "./ui/scroll-area";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
+import { StoryButtons } from "./stories/StoryButtons";
 
 export function StoriesDialog() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -21,7 +22,6 @@ export function StoriesDialog() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Enhanced stories query with proper error handling
   const { data: stories, error: storiesError, isLoading } = useQuery({
     queryKey: ["stories"],
     queryFn: async () => {
@@ -43,12 +43,11 @@ export function StoriesDialog() {
 
       return data;
     },
-    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+    staleTime: 1000 * 60 * 5,
     retry: 2,
     refetchOnWindowFocus: true,
   });
 
-  // Refetch stories when dialog opens
   useEffect(() => {
     if (isOpen) {
       queryClient.invalidateQueries({ queryKey: ["stories"] });
@@ -72,7 +71,7 @@ export function StoriesDialog() {
           title: story.title.trim(),
           description: story.description.trim(),
           user_id: session.data.session.user.id,
-          updated_at: new Date().toISOString(), // Explicitly set updated_at
+          updated_at: new Date().toISOString(),
         })
         .select()
         .single();
@@ -186,29 +185,13 @@ export function StoriesDialog() {
         </DialogContent>
       </Dialog>
 
-      <div className="space-y-2">
-        <button 
-          onClick={() => setIsOpen(true)}
-          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors"
-          disabled={isLoading}
-        >
-          <Book className="h-5 w-5" />
-          <span className="flex-1 text-left font-medium">
-            {isLoading ? "Loading..." : selectedStory ? selectedStory.title : "View All Stories"}
-          </span>
-          <span className="text-purple-400">→</span>
-        </button>
-
-        <button 
-          onClick={() => setShowNewStory(true)}
-          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg border border-dashed border-gray-200 text-gray-700 hover:border-purple-400 hover:text-purple-600 transition-colors"
-          disabled={createStoryMutation.isPending}
-        >
-          <Plus className="h-5 w-5" />
-          <span className="font-medium">Create New Story</span>
-          <span className="ml-auto">+</span>
-        </button>
-      </div>
+      <StoryButtons
+        selectedStory={selectedStory}
+        isLoading={isLoading}
+        onOpenStories={() => setIsOpen(true)}
+        onNewStory={() => setShowNewStory(true)}
+        createMutationPending={createStoryMutation.isPending}
+      />
     </>
   );
 }
