@@ -8,6 +8,7 @@ import { Routes } from "./Routes";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
+import { useToast } from "@/components/ui/use-toast";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,10 +23,19 @@ const queryClient = new QueryClient({
 function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error("Error fetching session:", error);
+        toast({
+          title: "Session Error",
+          description: "There was an error loading your session. Please try signing in again.",
+          variant: "destructive",
+        });
+      }
       setSession(session);
       setIsLoading(false);
     });
@@ -33,13 +43,25 @@ function App() {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (_event === 'TOKEN_REFRESHED') {
+        console.log('Token refreshed successfully');
+      }
+      
+      if (_event === 'SIGNED_OUT') {
+        // Clear any local storage data
+        queryClient.clear();
+        localStorage.removeItem('supabase.auth.token');
+      }
+
       setSession(session);
       setIsLoading(false);
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [toast]);
 
   if (isLoading) {
     return <div>Loading...</div>;
