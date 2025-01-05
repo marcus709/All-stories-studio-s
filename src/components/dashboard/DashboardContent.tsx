@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CharactersView } from "@/components/CharactersView";
 import { PlotDevelopmentView } from "@/components/PlotDevelopmentView";
 import { StoryFlow } from "@/components/story-flow/StoryFlow";
@@ -25,6 +25,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
   const { checkFeatureAccess, getRequiredPlan } = useFeatureAccess();
   const { selectedStory } = useStory();
   const [error, setError] = useState<Error | null>(null);
+  const [currentComponent, setCurrentComponent] = useState<React.ReactNode | null>(null);
 
   const handleFeatureAccess = (feature: string, requiredFeature: FeatureKey) => {
     if (!checkFeatureAccess(requiredFeature)) {
@@ -37,6 +38,50 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
     }
     return true;
   };
+
+  useEffect(() => {
+    try {
+      let component: React.ReactNode = null;
+      
+      switch (currentView) {
+        case "characters":
+          component = <CharactersView />;
+          break;
+        case "plot":
+          if (handleFeatureAccess("Plot Development", "backward_planning")) {
+            component = <PlotDevelopmentView />;
+          }
+          break;
+        case "flow":
+          if (handleFeatureAccess("Story Flow", "backward_planning")) {
+            component = <StoryFlow />;
+          }
+          break;
+        case "ideas":
+          component = <StoryIdeasView />;
+          break;
+        case "docs":
+          if (handleFeatureAccess("Story Documentation", "backward_planning")) {
+            component = <StoryDocsView />;
+          }
+          break;
+        case "story":
+          component = <StoryView />;
+          break;
+        default:
+          component = (
+            <div className="flex items-center justify-center h-full text-gray-500">
+              This feature is coming soon!
+            </div>
+          );
+      }
+      
+      setCurrentComponent(component);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('An unexpected error occurred'));
+    }
+  }, [currentView, handleFeatureAccess]);
 
   if (error) {
     return (
@@ -71,43 +116,9 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
     );
   }
 
-  const renderView = () => {
-    try {
-      switch (currentView) {
-        case "characters":
-          return <CharactersView />;
-        case "plot":
-          return handleFeatureAccess("Plot Development", "backward_planning") ? (
-            <PlotDevelopmentView />
-          ) : null;
-        case "flow":
-          return handleFeatureAccess("Story Flow", "backward_planning") ? (
-            <StoryFlow />
-          ) : null;
-        case "ideas":
-          return <StoryIdeasView />;
-        case "docs":
-          return handleFeatureAccess("Story Documentation", "backward_planning") ? (
-            <StoryDocsView />
-          ) : null;
-        case "story":
-          return <StoryView />;
-        default:
-          return (
-            <div className="flex items-center justify-center h-full text-gray-500">
-              This feature is coming soon!
-            </div>
-          );
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('An unexpected error occurred'));
-      return null;
-    }
-  };
-
   return (
     <>
-      {renderView()}
+      {currentComponent}
       
       <PaywallAlert
         isOpen={showPaywallAlert}
