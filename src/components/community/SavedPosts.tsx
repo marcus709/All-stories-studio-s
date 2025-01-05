@@ -42,8 +42,6 @@ export const SavedPosts = () => {
   const { data: savedPosts } = useQuery<PostData[]>({
     queryKey: ["saved-posts"],
     queryFn: async () => {
-      console.log("Fetching posts...");
-      
       const { data: savedPostsData, error: savedPostsError } = await supabase
         .from("saved_posts")
         .select("post_id")
