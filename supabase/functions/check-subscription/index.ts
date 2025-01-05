@@ -8,30 +8,53 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
-  const supabaseClient = createClient(
-    Deno.env.get('SUPABASE_URL') ?? '',
-    Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-  )
-
   try {
-    const authHeader = req.headers.get('Authorization')!
-    const token = authHeader.replace('Bearer ', '')
-    const { data } = await supabaseClient.auth.getUser(token)
-    const user = data.user
-    const email = user?.email
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    )
 
+    // Get the user from the authorization header
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      throw new Error('No authorization header')
+    }
+
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token)
+    
+    if (userError) {
+      console.error('Error getting user:', userError)
+      throw userError
+    }
+
+    if (!user) {
+      console.error('No user found')
+      return new Response(
+        JSON.stringify({ plan: 'free' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const email = user.email
     if (!email) {
-      throw new Error('No email found')
+      console.error('No email found for user:', user.id)
+      return new Response(
+        JSON.stringify({ plan: 'free' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
     })
 
+    // Get customer by email
     const customers = await stripe.customers.list({
       email: email,
       limit: 1
@@ -44,6 +67,7 @@ serve(async (req) => {
       )
     }
 
+    // Get active subscriptions
     const subscriptions = await stripe.subscriptions.list({
       customer: customers.data[0].id,
       status: 'active',
@@ -71,11 +95,18 @@ serve(async (req) => {
       JSON.stringify({ plan }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
+
   } catch (error) {
     console.error('Error checking subscription:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      JSON.stringify({ 
+        plan: 'free',
+        error: error instanceof Error ? error.message : 'Unknown error occurred'
+      }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200 // Return 200 even on error, but with free plan
+      }
     )
   }
 })
