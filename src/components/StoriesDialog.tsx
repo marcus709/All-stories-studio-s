@@ -54,7 +54,7 @@ export function StoriesDialog() {
       title: newStory.title,
       description: newStory.description,
       user_id: user.id,
-    });
+    } as Story);
   };
 
   const handleNewStoryChange = (field: "title" | "description", value: string) => {

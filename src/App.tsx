@@ -30,10 +30,13 @@ function App() {
     const initializeSession = async () => {
       try {
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
-        if (error) throw error;
+        if (error) {
+          console.error("Error fetching session:", error);
+          throw error;
+        }
         setSession(initialSession);
       } catch (error) {
-        console.error("Error fetching session:", error);
+        console.error("Error initializing session:", error);
         toast({
           title: "Session Error",
           description: "There was an error loading your session. Please try signing in again.",
@@ -55,7 +58,7 @@ function App() {
       if (_event === 'SIGNED_OUT') {
         // Clear any local storage data
         queryClient.clear();
-        localStorage.clear(); // Clear all localStorage data
+        localStorage.clear();
       }
 
       setSession(session);
