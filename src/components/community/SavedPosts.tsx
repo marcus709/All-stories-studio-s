@@ -17,10 +17,7 @@ interface Comment {
   id: string;
   content: string;
   created_at: string;
-  get_comment_profiles: Array<{
-    username: string;
-    avatar_url: string | null;
-  }>;
+  get_comment_profiles: PostProfile[];
 }
 
 interface PostData {
@@ -45,7 +42,8 @@ export const SavedPosts = () => {
   const { data: savedPosts } = useQuery<PostData[]>({
     queryKey: ["saved-posts"],
     queryFn: async () => {
-      // First get the saved post IDs
+      console.log("Fetching posts...");
+      
       const { data: savedPostsData, error: savedPostsError } = await supabase
         .from("saved_posts")
         .select("post_id")
@@ -57,12 +55,11 @@ export const SavedPosts = () => {
 
       const postIds = savedPostsData.map((sp: SavedPost) => sp.post_id);
 
-      // Then fetch the full post data with all related information
       const { data: posts, error: postsError } = await supabase
         .from("posts")
         .select(`
           *,
-          get_post_profiles:profiles(username, avatar_url),
+          get_post_profiles:profiles!posts_user_id_fkey(username, avatar_url),
           post_likes (*),
           comments (
             *,

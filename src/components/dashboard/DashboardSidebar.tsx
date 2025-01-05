@@ -4,7 +4,7 @@ import {
   BookOpen,
   Users,
   GitBranch,
-  Flow,
+  GitFlow,
   Lightbulb,
   FileText,
   Bug,
@@ -13,7 +13,7 @@ import { useStory } from "@/contexts/StoryContext";
 import { StoriesDialog } from "../StoriesDialog";
 import { useState } from "react";
 
-type View = "story" | "characters" | "plot" | "flow" | "ideas" | "docs" | "logic";
+export type View = "story" | "characters" | "plot" | "flow" | "ideas" | "docs" | "logic";
 
 interface DashboardSidebarProps {
   currentView: View;
@@ -45,7 +45,7 @@ export const DashboardSidebar = ({
     },
     {
       name: "Story Flow",
-      icon: Flow,
+      icon: GitFlow,
       view: "flow" as const,
     },
     {
@@ -107,7 +107,7 @@ export const DashboardSidebar = ({
       </div>
 
       <StoriesDialog
-        open={isStoriesOpen}
+        isOpen={isStoriesOpen}
         onOpenChange={setIsStoriesOpen}
       />
     </>

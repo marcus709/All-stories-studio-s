@@ -10,8 +10,12 @@ import { CreateStoryForm } from "./stories/CreateStoryForm";
 import { StoriesDialogHeader } from "./stories/StoriesDialogHeader";
 import { StoriesGrid } from "./stories/StoriesGrid";
 
-export function StoriesDialog() {
-  const [isOpen, setIsOpen] = React.useState(false);
+interface StoriesDialogProps {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function StoriesDialog({ isOpen, onOpenChange }: StoriesDialogProps) {
   const [showNewStory, setShowNewStory] = React.useState(false);
   const [newStory, setNewStory] = React.useState({ title: "", description: "" });
   const { selectedStory, setSelectedStory } = useStory();
@@ -67,13 +71,13 @@ export function StoriesDialog() {
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[800px]">
-          <StoriesDialogHeader onClose={() => setIsOpen(false)} />
+          <StoriesDialogHeader onClose={() => onOpenChange(false)} />
 
           <Button
             onClick={() => {
-              setIsOpen(false);
+              onOpenChange(false);
               setShowNewStory(true);
             }}
             variant="outline"
@@ -85,7 +89,7 @@ export function StoriesDialog() {
 
           <StoriesGrid
             onStorySelect={setSelectedStory}
-            onClose={() => setIsOpen(false)}
+            onClose={() => onOpenChange(false)}
           />
         </DialogContent>
       </Dialog>
@@ -108,7 +112,7 @@ export function StoriesDialog() {
 
       <div className="space-y-2">
         <button 
-          onClick={() => setIsOpen(true)}
+          onClick={() => onOpenChange(true)}
           className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors"
         >
           <Book className="h-5 w-5" />

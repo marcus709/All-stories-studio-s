@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
-import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
+import { DashboardSidebar, View } from "@/components/dashboard/DashboardSidebar";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
 import { StoryProvider } from "@/contexts/StoryContext";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useToast } from "@/components/ui/use-toast";
-
-type View = "story" | "characters" | "plot" | "flow" | "ideas" | "docs";
 
 function DashboardLayout() {
   const [currentView, setCurrentView] = useState<View>("story");
@@ -25,7 +23,10 @@ function DashboardLayout() {
     }
   }, [session, navigate, toast]);
 
-  // Don't render anything while checking session
+  const handleViewChange = (view: View) => {
+    setCurrentView(view);
+  };
+
   if (!session) {
     return null;
   }
@@ -33,7 +34,7 @@ function DashboardLayout() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <DashboardSidebar currentView={currentView} setCurrentView={setCurrentView} />
+      <DashboardSidebar currentView={currentView} setCurrentView={handleViewChange} />
       <div className="ml-72 pt-16">
         <DashboardContent currentView={currentView} />
       </div>
