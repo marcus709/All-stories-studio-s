@@ -66,7 +66,7 @@ export function StoriesDialog() {
         throw new Error("Story title cannot be empty");
       }
 
-      const newStory = {
+      const newStory: Omit<Story, 'id' | 'created_at'> = {
         title: story.title.trim(),
         description: story.description.trim(),
         user_id: session.data.session.user.id,
