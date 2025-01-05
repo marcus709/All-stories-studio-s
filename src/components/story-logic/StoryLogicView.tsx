@@ -2,12 +2,12 @@ import { useState } from "react";
 import { useStory } from "@/contexts/StoryContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertTriangle, Check, Clock, Users, Upload } from "lucide-react";
+import { AlertTriangle, Check, Clock, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { UploadDialog } from "./UploadDialog";
 
 type StoryIssueType = "plot_hole" | "timeline_inconsistency" | "pov_confusion" | "character_inconsistency";
 
@@ -62,6 +62,16 @@ export const StoryLogicView = () => {
     doc.content && JSON.parse(doc.content as string).length > 100
   );
 
+  const handleFileSelect = async (file: File) => {
+    // Here you would implement the file upload logic
+    toast({
+      title: "File selected",
+      description: "Processing your document...",
+    });
+    setShowUploadDialog(false);
+    // Implement file upload logic here
+  };
+
   const analyzeStory = async () => {
     if (!hasDocuments) {
       setShowUploadDialog(true);
@@ -74,7 +84,6 @@ export const StoryLogicView = () => {
     });
 
     // Here we would integrate with an AI service to analyze the story
-    // For now, we'll just show a success message
     setTimeout(() => {
       toast({
         title: "Analysis Complete",
@@ -134,7 +143,7 @@ export const StoryLogicView = () => {
       )}
 
       {hasDocuments && !hasMinimalContent && (
-        <Alert variant="warning" className="mb-6">
+        <Alert className="mb-6">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Limited Content</AlertTitle>
           <AlertDescription>
@@ -185,32 +194,11 @@ export const StoryLogicView = () => {
         ))}
       </Tabs>
 
-      <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Upload Document Required</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p>To use the Story Logic feature, you need to either:</p>
-            <ul className="list-disc pl-6 space-y-2">
-              <li>Upload a document with your story content</li>
-              <li>Use the Story Docs feature to write your story</li>
-            </ul>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowUploadDialog(false)}>
-                Cancel
-              </Button>
-              <Button onClick={() => {
-                setShowUploadDialog(false);
-                // Navigate to docs view
-                // This would be handled by the parent component
-              }}>
-                Go to Story Docs
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <UploadDialog
+        open={showUploadDialog}
+        onOpenChange={setShowUploadDialog}
+        onFileSelect={handleFileSelect}
+      />
     </div>
   );
 };
