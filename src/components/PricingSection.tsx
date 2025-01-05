@@ -3,6 +3,8 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { Input } from "./ui/input";
 
 const plans = [
   {
@@ -56,6 +58,7 @@ export const PricingSection = () => {
   const session = useSession();
   const supabase = useSupabaseClient();
   const { toast } = useToast();
+  const [promotionCode, setPromotionCode] = useState("");
 
   const handleSubscription = async (priceId: string | null) => {
     if (!priceId) return; // Free plan
@@ -71,7 +74,10 @@ export const PricingSection = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-        body: { priceId }
+        body: { 
+          priceId,
+          promotionCode: promotionCode.trim() || undefined
+        }
       });
 
       if (error) throw error;
@@ -95,6 +101,15 @@ export const PricingSection = () => {
         <h2 className="text-4xl font-bold text-center mb-16">
           Choose Your Creative Journey
         </h2>
+        <div className="max-w-sm mx-auto mb-8">
+          <Input
+            type="text"
+            placeholder="Have a coupon code?"
+            value={promotionCode}
+            onChange={(e) => setPromotionCode(e.target.value)}
+            className="w-full"
+          />
+        </div>
         <div className="grid md:grid-cols-3 gap-8">
           {plans.map((plan) => (
             <Card 

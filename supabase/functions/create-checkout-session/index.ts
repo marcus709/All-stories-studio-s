@@ -19,8 +19,10 @@ serve(async (req) => {
   )
 
   try {
-    // Get the price ID from the request body
-    const { priceId } = await req.json()
+    // Get the price ID and promotion code from the request body
+    const { priceId, promotionCode } = await req.json()
+    
+    if (!priceId) return; // Free plan
     
     // Get the session or user object
     const authHeader = req.headers.get('Authorization')!
@@ -59,7 +61,7 @@ serve(async (req) => {
     }
 
     console.log('Creating payment session...')
-    const session = await stripe.checkout.sessions.create({
+    const sessionConfig: any = {
       customer: customer_id,
       customer_email: customer_id ? undefined : email,
       line_items: [
@@ -71,7 +73,29 @@ serve(async (req) => {
       mode: 'subscription',
       success_url: `${req.headers.get('origin')}/dashboard`,
       cancel_url: `${req.headers.get('origin')}/`,
-    })
+    }
+
+    // If a promotion code was provided, validate and add it
+    if (promotionCode) {
+      try {
+        // Verify the promotion code exists and is valid
+        const promotions = await stripe.promotionCodes.list({
+          code: promotionCode,
+          active: true,
+        });
+
+        if (promotions.data.length > 0) {
+          sessionConfig.discounts = [{
+            promotion_code: promotions.data[0].id
+          }];
+        }
+      } catch (error) {
+        console.error('Error validating promotion code:', error);
+        // Continue without the promotion code if there's an error
+      }
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionConfig);
 
     console.log('Payment session created:', session.id)
     return new Response(
@@ -82,7 +106,7 @@ serve(async (req) => {
       }
     )
   } catch (error) {
-    console.error('Error creating payment session:', error)
+    console.error('Error:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
