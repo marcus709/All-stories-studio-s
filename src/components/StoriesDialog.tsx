@@ -11,7 +11,7 @@ import { ScrollArea } from "./ui/scroll-area";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
 import { StoryButtons } from "./stories/StoryButtons";
-import { useCreateStory } from "@/hooks/useCreateStory";
+import { useCreateStory, CreateStoryInput } from "@/hooks/useCreateStory";
 import { useStories } from "@/hooks/useStories";
 import { supabase } from "@/integrations/supabase/client";
 import { Story } from "@/types/story";
@@ -50,13 +50,13 @@ export function StoriesDialog() {
       throw new Error("User must be logged in to create a story");
     }
 
-    const storyData: Partial<Story> = {
+    const storyInput: CreateStoryInput = {
       title: newStory.title,
       description: newStory.description,
       user_id: user.id,
     };
 
-    createStoryMutation.mutate(storyData as Story);
+    createStoryMutation.mutate(storyInput);
   };
 
   const handleNewStoryChange = (field: "title" | "description", value: string) => {

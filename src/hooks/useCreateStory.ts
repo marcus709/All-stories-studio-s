@@ -3,7 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Story } from "@/types/story";
 import { useToast } from "@/hooks/use-toast";
 
-export type CreateStoryInput = Partial<Story>;
+export interface CreateStoryInput {
+  title: string;
+  description?: string | null;
+  user_id: string;
+}
 
 export function useCreateStory(onSuccess?: (story: Story) => void) {
   const { toast } = useToast();
