@@ -13,6 +13,7 @@ import { ScrollArea } from "./ui/scroll-area";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
 import { StoryButtons } from "./stories/StoryButtons";
+import { Story } from "@/types/story";
 
 export function StoriesDialog() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -41,7 +42,7 @@ export function StoriesDialog() {
         throw error;
       }
 
-      return data;
+      return data as Story[];
     },
     staleTime: 1000 * 60 * 5,
     retry: 2,
@@ -65,14 +66,16 @@ export function StoriesDialog() {
         throw new Error("Story title cannot be empty");
       }
 
+      const newStory = {
+        title: story.title.trim(),
+        description: story.description.trim(),
+        user_id: session.data.session.user.id,
+        updated_at: new Date().toISOString(),
+      };
+
       const { data, error } = await supabase
         .from("stories")
-        .insert({
-          title: story.title.trim(),
-          description: story.description.trim(),
-          user_id: session.data.session.user.id,
-          updated_at: new Date().toISOString(),
-        })
+        .insert(newStory)
         .select()
         .single();
 
@@ -81,7 +84,7 @@ export function StoriesDialog() {
         throw error;
       }
 
-      return data;
+      return data as Story;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["stories"] });
