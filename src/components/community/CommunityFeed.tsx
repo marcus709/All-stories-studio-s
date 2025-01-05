@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { CreatePostForm } from "./CreatePostForm";
 import { PostsList } from "./PostsList";
-import { Profile } from "@/integrations/supabase/types";
+import { Profile } from "@/integrations/supabase/types/tables.types";
 import { useQuery } from "@tanstack/react-query";
 import { PaywallAlert } from "../PaywallAlert";
 import { useSubscription } from "@/contexts/SubscriptionContext";
@@ -12,7 +12,7 @@ import { useSubscription } from "@/contexts/SubscriptionContext";
 export const CommunityFeed = () => {
   const session = useSession();
   const { toast } = useToast();
-  const { hasFeatureAccess } = useSubscription();
+  const { checkFeatureAccess } = useSubscription();
   const [isLoading, setIsLoading] = useState(true);
 
   const {
@@ -73,8 +73,8 @@ export const CommunityFeed = () => {
     retry: 1,
   });
 
-  if (!hasFeatureAccess("community_access")) {
-    return <PaywallAlert featureName="community features" />;
+  if (!checkFeatureAccess("community_access")) {
+    return <PaywallAlert isOpen={true} onClose={() => {}} feature="community features" requiredPlan="creator" />;
   }
 
   if (profileError) {
@@ -90,7 +90,7 @@ export const CommunityFeed = () => {
       {!profileLoading && profile && (
         <CreatePostForm userId={session?.user?.id!} profile={profile} />
       )}
-      <PostsList />
+      <PostsList posts={[]} />
     </div>
   );
 };
