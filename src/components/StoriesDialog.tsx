@@ -3,9 +3,7 @@ import { Dialog, DialogContent } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Plus } from "lucide-react";
 import { useStory } from "@/contexts/StoryContext";
-import { useToast } from "./ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { CreateStoryForm } from "./stories/CreateStoryForm";
 import { StoriesDialogHeader } from "./stories/StoriesDialogHeader";
 import { StoriesGrid } from "./stories/StoriesGrid";
@@ -13,43 +11,25 @@ import { ScrollArea } from "./ui/scroll-area";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
 import { StoryButtons } from "./stories/StoryButtons";
-import { Story } from "@/types/story";
+import { useCreateStory } from "@/hooks/useCreateStory";
+import { useStories } from "@/hooks/useStories";
 
 export function StoriesDialog() {
   const [isOpen, setIsOpen] = React.useState(false);
   const [showNewStory, setShowNewStory] = React.useState(false);
-  const [newStory, setNewStory] = useState<{ title: string; description: string }>({ 
-    title: "", 
-    description: "" 
+  const [newStory, setNewStory] = useState<{ title: string; description: string }>({
+    title: "",
+    description: "",
   });
+  
   const { selectedStory, setSelectedStory } = useStory();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  const { data: stories, error: storiesError, isLoading } = useQuery({
-    queryKey: ["stories"],
-    queryFn: async () => {
-      const session = await supabase.auth.getSession();
-      if (!session.data.session?.user) {
-        throw new Error("User must be logged in to view stories");
-      }
-
-      const { data, error } = await supabase
-        .from("stories")
-        .select("*")
-        .eq("user_id", session.data.session.user.id)
-        .order("updated_at", { ascending: false });
-
-      if (error) {
-        console.error("Error fetching stories:", error);
-        throw error;
-      }
-
-      return data as Story[];
-    },
-    staleTime: 1000 * 60 * 5,
-    retry: 2,
-    refetchOnWindowFocus: true,
+  const { data: stories, error: storiesError, isLoading } = useStories();
+  
+  const createStoryMutation = useCreateStory((data) => {
+    setSelectedStory(data);
+    setShowNewStory(false);
+    setNewStory({ title: "", description: "" });
   });
 
   useEffect(() => {
@@ -58,63 +38,8 @@ export function StoriesDialog() {
     }
   }, [isOpen, queryClient]);
 
-  const createStoryMutation = useMutation({
-    mutationFn: async (storyData: { title: string; description: string }) => {
-      const session = await supabase.auth.getSession();
-      if (!session.data.session?.user) {
-        throw new Error("User must be logged in to create a story");
-      }
-
-      if (!storyData.title.trim()) {
-        throw new Error("Story title cannot be empty");
-      }
-
-      const newStoryData = {
-        title: storyData.title.trim(),
-        description: storyData.description.trim(),
-        user_id: session.data.session.user.id,
-      };
-
-      const { data, error } = await supabase
-        .from("stories")
-        .insert(newStoryData)
-        .select()
-        .single();
-
-      if (error) {
-        console.error("Error creating story:", error);
-        throw error;
-      }
-
-      return data as Story;
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["stories"] });
-      setSelectedStory(data);
-      toast({
-        title: "Story created",
-        description: "Your new story has been created successfully.",
-      });
-      setShowNewStory(false);
-      setNewStory({ title: "", description: "" });
-    },
-    onError: (error) => {
-      console.error("Story creation error:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create story",
-        variant: "destructive",
-      });
-    },
-  });
-
   const handleCreateStory = () => {
     if (!newStory.title.trim()) {
-      toast({
-        title: "Error",
-        description: "Story title is required",
-        variant: "destructive",
-      });
       return;
     }
     createStoryMutation.mutate(newStory);
