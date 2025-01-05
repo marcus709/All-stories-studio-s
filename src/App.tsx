@@ -26,9 +26,21 @@ function App() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Clear any stale session data
+    const clearStaleSession = async () => {
+      try {
+        await supabase.auth.signOut();
+        localStorage.removeItem('supabase.auth.token');
+        queryClient.clear();
+      } catch (error) {
+        console.error("Error clearing session:", error);
+      }
+    };
+
     // Get initial session
     const initializeSession = async () => {
       try {
+        await clearStaleSession(); // Clear any stale session first
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         if (error) throw error;
         setSession(initialSession);
