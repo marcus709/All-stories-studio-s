@@ -13,6 +13,11 @@ interface DocumentEditorProps {
   onRefresh: () => void;
 }
 
+interface DocumentContent {
+  type: string;
+  content: string;
+}
+
 export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -44,11 +49,14 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
     if (document) {
       console.log("Setting document content:", document.content);
       setTitle(document.title);
-      // Handle both string and array content formats
+      // Handle both string and array content formats with proper type checking
       if (Array.isArray(document.content)) {
-        setContent(document.content[0]?.content || "");
+        const contentArray = document.content as DocumentContent[];
+        setContent(contentArray[0]?.content || "");
+      } else if (typeof document.content === 'string') {
+        setContent(document.content);
       } else {
-        setContent(document.content || "");
+        setContent("");
       }
     }
   }, [document]);
@@ -59,7 +67,7 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
     setIsSaving(true);
     try {
       // Always save content in the expected array format
-      const contentToSave = [{
+      const contentToSave: DocumentContent[] = [{
         type: "text",
         content: content
       }];
