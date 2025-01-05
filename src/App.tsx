@@ -42,7 +42,7 @@ function App() {
   }, []);
 
   if (isLoading) {
-    return <div>Loading...</div>; // You might want to add a proper loading spinner here
+    return <div>Loading...</div>;
   }
 
   return (
