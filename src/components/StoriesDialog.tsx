@@ -66,11 +66,10 @@ export function StoriesDialog() {
         throw new Error("Story title cannot be empty");
       }
 
-      const newStory: Omit<Story, 'id' | 'created_at'> = {
+      const newStory: Omit<Story, 'id' | 'created_at' | 'updated_at'> = {
         title: story.title.trim(),
         description: story.description.trim(),
         user_id: session.data.session.user.id,
-        updated_at: new Date().toISOString(),
       };
 
       const { data, error } = await supabase
@@ -197,4 +196,3 @@ export function StoriesDialog() {
       />
     </>
   );
-}
