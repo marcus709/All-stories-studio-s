@@ -4,7 +4,7 @@ import {
   BookOpen,
   Users,
   GitBranch,
-  GitFlow,
+  GitMerge, // Changed from GitFlow to GitMerge
   Lightbulb,
   FileText,
   Bug,
@@ -45,7 +45,7 @@ export const DashboardSidebar = ({
     },
     {
       name: "Story Flow",
-      icon: GitFlow,
+      icon: GitMerge,
       view: "flow" as const,
     },
     {
