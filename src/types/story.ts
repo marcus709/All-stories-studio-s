@@ -1,3 +1,7 @@
+import { Database } from "@/integrations/supabase/types/database.types";
+
+export type Story = Database["public"]["Tables"]["stories"]["Row"];
+
 export type StoryIssueType = 
   | "plot_hole"
   | "timeline_inconsistency"
@@ -5,15 +9,6 @@ export type StoryIssueType =
   | "character_inconsistency"
   | "setting_inconsistency"
   | "logic_flaw";
-
-export interface Story {
-  id: string;
-  title: string;
-  description: string | null;
-  user_id: string;
-  created_at: string | null;
-  updated_at: string | null;
-}
 
 export interface StoryIssue {
   id: string;
