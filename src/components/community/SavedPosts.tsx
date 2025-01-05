@@ -74,7 +74,9 @@ export const SavedPosts = () => {
         .order("created_at", { ascending: false });
 
       if (postsError) throw postsError;
-      return posts as PostData[];
+
+      // Ensure the posts array is properly typed
+      return (posts as PostData[]) || [];
     },
     enabled: !!session?.user?.id,
   });
