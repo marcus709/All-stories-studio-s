@@ -1,11 +1,9 @@
 export type StoryIssueType = 
   | "plot_hole"
-  | "consistency"
-  | "character"
-  | "timeline_inconsistency" 
-  | "pov_inconsistency" 
-  | "character_inconsistency" 
-  | "setting_inconsistency" 
+  | "timeline_inconsistency"
+  | "pov_inconsistency"
+  | "character_inconsistency"
+  | "setting_inconsistency"
   | "logic_flaw";
 
 export interface StoryIssue {

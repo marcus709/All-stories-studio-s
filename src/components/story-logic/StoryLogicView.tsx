@@ -100,9 +100,9 @@ export const StoryLogicView = () => {
     switch (type) {
       case "plot_hole":
         return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
-      case "consistency":
+      case "timeline_inconsistency":
         return <CheckCircle2 className="h-5 w-5 text-green-500" />;
-      case "character":
+      case "character_inconsistency":
         return <XCircle className="h-5 w-5 text-red-500" />;
       default:
         return null;
@@ -146,8 +146,11 @@ export const StoryLogicView = () => {
                   className="w-full border rounded-md p-2"
                 >
                   <option value="plot_hole">Plot Hole</option>
-                  <option value="consistency">Consistency Issue</option>
-                  <option value="character">Character Issue</option>
+                  <option value="timeline_inconsistency">Timeline Inconsistency</option>
+                  <option value="pov_inconsistency">POV Inconsistency</option>
+                  <option value="character_inconsistency">Character Inconsistency</option>
+                  <option value="setting_inconsistency">Setting Inconsistency</option>
+                  <option value="logic_flaw">Logic Flaw</option>
                 </select>
               </div>
               <Button type="submit" className="w-full">
