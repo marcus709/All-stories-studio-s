@@ -6,6 +6,15 @@ export type StoryIssueType =
   | "setting_inconsistency"
   | "logic_flaw";
 
+export interface Story {
+  id: string;
+  title: string;
+  description: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface StoryIssue {
   id: string;
   analysis_id: string;
