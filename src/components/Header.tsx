@@ -4,45 +4,26 @@ import { BookOpen } from "lucide-react";
 import { AuthModals } from "./auth/AuthModals";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./ui/use-toast";
-import { Session } from "@supabase/supabase-js";
+import { useSession } from "@supabase/auth-helpers-react";
 import { Navigation } from "./header/Navigation";
 import { UserMenu } from "./header/UserMenu";
+import { Profile } from "@/integrations/supabase/types/tables.types";
 
 export const Header = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [authView, setAuthView] = useState<"signin" | "signup">("signin");
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<{
-    id: string;
-    username: string | null;
-    avatar_url: string | null;
-  } | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const session = useSession();
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      }
-    });
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      } else {
-        setProfile(null);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+    if (session?.user) {
+      fetchProfile(session.user.id);
+    } else {
+      setProfile(null);
+    }
+  }, [session]);
 
   const fetchProfile = async (userId: string) => {
     try {
