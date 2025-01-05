@@ -10,9 +10,9 @@ export interface Story {
   id: string;
   title: string;
   description: string | null;
+  user_id: string;
   created_at: string;
   updated_at: string;
-  user_id: string; // Making this required to match database schema
 }
 
 export interface StoryIssue {
