@@ -7,6 +7,7 @@ import { StoryDocsView } from "@/components/docs/StoryDocsView";
 import { StoryView } from "./views/StoryView";
 import { useFeatureAccess } from "@/utils/subscriptionUtils";
 import { PaywallAlert } from "../PaywallAlert";
+import { FeatureKey } from "@/utils/subscriptionUtils";
 
 type View = "story" | "characters" | "plot" | "flow" | "ideas" | "docs";
 
@@ -19,7 +20,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
   const [blockedFeature, setBlockedFeature] = useState<{ name: string; plan: string } | null>(null);
   const { checkFeatureAccess, getRequiredPlan } = useFeatureAccess();
 
-  const handleFeatureAccess = (feature: string, requiredFeature: keyof typeof featureMatrix.free) => {
+  const handleFeatureAccess = (feature: string, requiredFeature: FeatureKey) => {
     if (!checkFeatureAccess(requiredFeature)) {
       setBlockedFeature({
         name: feature,
