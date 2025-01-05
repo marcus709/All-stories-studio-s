@@ -9,13 +9,14 @@ import { useQuery } from "@tanstack/react-query";
 import { PaywallAlert } from "../PaywallAlert";
 import { useSubscription } from "@/contexts/SubscriptionContext";
 import { useNavigate } from "react-router-dom";
+import { usePosts } from "@/hooks/usePosts";
 
 export const CommunityFeed = () => {
   const session = useSession();
   const { toast } = useToast();
   const { checkFeatureAccess } = useSubscription();
-  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const { data: posts, isLoading: postsLoading } = usePosts();
 
   // Check for session and redirect if not authenticated
   useEffect(() => {
@@ -103,12 +104,20 @@ export const CommunityFeed = () => {
     );
   }
 
+  if (profileLoading || postsLoading) {
+    return (
+      <div className="text-center p-4">
+        <p className="text-gray-500">Loading...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {!profileLoading && profile && (
+      {profile && (
         <CreatePostForm userId={session?.user?.id!} profile={profile} />
       )}
-      <PostsList posts={[]} />
+      <PostsList posts={posts || []} />
     </div>
   );
 };
