@@ -12,6 +12,16 @@ interface PaywallAlertProps {
 export const PaywallAlert = ({ isOpen, onClose, feature, requiredPlan }: PaywallAlertProps) => {
   const navigate = useNavigate();
 
+  const handleCancel = () => {
+    onClose();
+    navigate("/dashboard");
+  };
+
+  const handleViewPlans = () => {
+    onClose();
+    navigate("/?scrollTo=pricing");
+  };
+
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent>
@@ -22,13 +32,8 @@ export const PaywallAlert = ({ isOpen, onClose, feature, requiredPlan }: Paywall
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onClose}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={() => {
-              onClose();
-              navigate("/#pricing");
-            }}
-          >
+          <AlertDialogCancel onClick={handleCancel}>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleViewPlans}>
             View Plans
           </AlertDialogAction>
         </AlertDialogFooter>
