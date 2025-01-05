@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Plus } from "lucide-react";
@@ -22,7 +22,7 @@ export function StoriesDialog() {
     description: "",
   });
   
-  const { selectedStory, setSelectedStory } = useStory();
+  const { selectedStory, setSelectedStory, stories } = useStory();
   const queryClient = useQueryClient();
   const createStoryMutation = useCreateStory((story: Story) => {
     setSelectedStory(story);
