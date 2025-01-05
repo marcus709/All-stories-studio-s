@@ -1,14 +1,7 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-
-interface Story {
-  id: string;
-  title: string;
-  description: string;
-  created_at: string;
-  updated_at: string;
-}
+import { Story } from "@/integrations/supabase/types/tables.types";
 
 interface StoryContextType {
   selectedStory: Story | null;
