@@ -8,12 +8,26 @@ import { Profile } from "@/integrations/supabase/types/tables.types";
 import { useQuery } from "@tanstack/react-query";
 import { PaywallAlert } from "../PaywallAlert";
 import { useSubscription } from "@/contexts/SubscriptionContext";
+import { useNavigate } from "react-router-dom";
 
 export const CommunityFeed = () => {
   const session = useSession();
   const { toast } = useToast();
   const { checkFeatureAccess } = useSubscription();
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+
+  // Check for session and redirect if not authenticated
+  useEffect(() => {
+    if (!session) {
+      navigate('/');
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to access the community.",
+        variant: "destructive",
+      });
+    }
+  }, [session, navigate, toast]);
 
   const {
     data: profile,
@@ -72,6 +86,10 @@ export const CommunityFeed = () => {
     enabled: !!session?.user?.id,
     retry: 1,
   });
+
+  if (!session) {
+    return null; // Return null since useEffect will handle the redirect
+  }
 
   if (!checkFeatureAccess("community_access")) {
     return <PaywallAlert isOpen={true} onClose={() => {}} feature="community features" requiredPlan="creator" />;
