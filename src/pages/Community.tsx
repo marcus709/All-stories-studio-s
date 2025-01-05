@@ -33,7 +33,7 @@ const Community = () => {
 
   useEffect(() => {
     if (!isLoading && !session) {
-      navigate("/");
+      navigate('/');
     }
   }, [session, isLoading, navigate]);
 
