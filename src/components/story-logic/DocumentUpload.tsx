@@ -1,10 +1,9 @@
 import { useState } from "react";
+import { useSession } from "@supabase/auth-helpers-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { FileText, Upload, X } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface DocumentUploadProps {
   storyId: string;
@@ -16,6 +15,7 @@ export const DocumentUpload = ({ storyId, onUploadComplete }: DocumentUploadProp
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
+  const session = useSession();
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -68,7 +68,7 @@ export const DocumentUpload = ({ storyId, onUploadComplete }: DocumentUploadProp
   };
 
   const handleUpload = async () => {
-    if (!selectedFile || !storyId) return;
+    if (!selectedFile || !storyId || !session?.user?.id) return;
 
     setIsUploading(true);
     try {
@@ -77,6 +77,7 @@ export const DocumentUpload = ({ storyId, onUploadComplete }: DocumentUploadProp
         .from('documents')
         .insert({
           story_id: storyId,
+          user_id: session.user.id,
           title: selectedFile.name,
           content: [{ type: 'text', content: '' }],
         })
