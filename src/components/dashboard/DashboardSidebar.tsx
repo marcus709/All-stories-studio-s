@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Book, Users, LineChart, GitBranch, Lightbulb, FileText } from "lucide-react";
+import { Book, Users, LineChart, GitBranch, Lightbulb, FileText, AlertTriangle } from "lucide-react";
 import { StoriesDialog } from "../StoriesDialog";
 import { useStory } from "@/contexts/StoryContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +12,7 @@ const navigationItems = [
   { id: "flow", icon: GitBranch, label: "Story Flow" },
   { id: "ideas", icon: Lightbulb, label: "Story Ideas" },
   { id: "docs", icon: FileText, label: "Story Docs" },
+  { id: "logic", icon: AlertTriangle, label: "Story Logic" },
 ] as const;
 
 type View = (typeof navigationItems)[number]["id"];
