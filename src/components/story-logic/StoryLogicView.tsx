@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -34,7 +34,7 @@ export const StoryLogicView = () => {
     },
     enabled: !!selectedStory?.id,
     staleTime: 5 * 60 * 1000,
-    cacheTime: 30 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   const { data: storyIssues } = useQuery({
@@ -47,14 +47,11 @@ export const StoryLogicView = () => {
       
       if (error) throw error;
       
-      return (data as any[]).map(issue => ({
-        ...issue,
-        issue_type: issue.issue_type as StoryIssueType
-      })) as StoryIssue[];
+      return data as StoryIssue[];
     },
     enabled: !!storyAnalysis?.id,
     staleTime: 5 * 60 * 1000,
-    cacheTime: 30 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   const createIssueMutation = useMutation({

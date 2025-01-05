@@ -1,5 +1,7 @@
 export type StoryIssueType = 
-  | "plot_hole" 
+  | "PLOT_HOLE" 
+  | "CONSISTENCY" 
+  | "CHARACTER" 
   | "timeline_inconsistency" 
   | "pov_inconsistency" 
   | "character_inconsistency" 
@@ -9,6 +11,7 @@ export type StoryIssueType =
 export interface StoryIssue {
   id: string;
   analysis_id: string;
+  title: string;
   issue_type: StoryIssueType;
   description: string;
   location: string;
