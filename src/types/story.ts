@@ -11,8 +11,8 @@ export interface Story {
   title: string;
   description: string | null;
   user_id: string;
-  created_at: string;
-  updated_at: string;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 export interface StoryIssue {
