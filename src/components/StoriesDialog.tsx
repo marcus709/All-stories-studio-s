@@ -53,7 +53,7 @@ export function StoriesDialog() {
     createStoryMutation.mutate({
       title: newStory.title,
       description: newStory.description,
-      user_id: user.id
+      user_id: user.id,
     });
   };
 

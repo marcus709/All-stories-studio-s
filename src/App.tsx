@@ -26,21 +26,9 @@ function App() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Clear any stale session data
-    const clearStaleSession = async () => {
-      try {
-        await supabase.auth.signOut();
-        localStorage.removeItem('supabase.auth.token');
-        queryClient.clear();
-      } catch (error) {
-        console.error("Error clearing session:", error);
-      }
-    };
-
     // Get initial session
     const initializeSession = async () => {
       try {
-        await clearStaleSession(); // Clear any stale session first
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         if (error) throw error;
         setSession(initialSession);
@@ -62,14 +50,12 @@ function App() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (_event === 'TOKEN_REFRESHED') {
-        console.log('Token refreshed successfully');
-      }
+      console.log('Auth state changed:', _event);
       
       if (_event === 'SIGNED_OUT') {
         // Clear any local storage data
         queryClient.clear();
-        localStorage.removeItem('supabase.auth.token');
+        localStorage.clear(); // Clear all localStorage data
       }
 
       setSession(session);
