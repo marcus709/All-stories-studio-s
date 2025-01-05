@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { UploadDialog } from "./UploadDialog";
 import { AnalysisSection } from "./AnalysisSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, Check, Clock, Users } from "lucide-react";
 
 type StoryIssueType = "plot_hole" | "timeline_inconsistency" | "pov_confusion" | "character_inconsistency";
@@ -63,10 +64,20 @@ export const StoryLogicView = () => {
     enabled: !!selectedStory?.id,
   });
 
-  const hasDocuments = documents && documents.length > 0;
-  const hasMinimalContent = documents?.some(doc => 
-    doc.content && JSON.parse(doc.content as string).length > 100
-  );
+  const { data: storyIssues, isLoading } = useQuery({
+    queryKey: ["story-issues", selectedStory?.id],
+    queryFn: async () => {
+      if (!selectedStory?.id) return [];
+      const { data, error } = await supabase
+        .from("story_issues")
+        .select("*")
+        .eq("story_id", selectedStory.id);
+      
+      if (error) throw error;
+      return data as StoryIssue[];
+    },
+    enabled: !!selectedStory?.id,
+  });
 
   const handleFileSelect = async (file: File) => {
     toast({
@@ -77,7 +88,7 @@ export const StoryLogicView = () => {
   };
 
   const analyzeStory = async () => {
-    if (!hasDocuments) {
+    if (!documents?.length) {
       setShowUploadDialog(true);
       return;
     }
@@ -96,7 +107,7 @@ export const StoryLogicView = () => {
   };
 
   const handleCustomAnalysis = async (customInput: string) => {
-    if (!hasDocuments) {
+    if (!documents?.length) {
       setShowUploadDialog(true);
       return;
     }
@@ -129,8 +140,10 @@ export const StoryLogicView = () => {
       </div>
 
       <AnalysisSection
-        hasDocuments={hasDocuments}
-        hasMinimalContent={hasMinimalContent}
+        hasDocuments={!!documents?.length}
+        hasMinimalContent={documents?.some(doc => 
+          doc.content && JSON.parse(doc.content as string).length > 100
+        )}
         onAnalyze={analyzeStory}
         onCustomAnalysis={handleCustomAnalysis}
       />
@@ -149,7 +162,7 @@ export const StoryLogicView = () => {
           <TabsContent key={type} value={type}>
             {isLoading ? (
               <div className="text-center py-4">Loading issues...</div>
-            ) : storyIssues?.filter(issue => issue.issue_type === type).length === 0 ? (
+            ) : !storyIssues?.filter(issue => issue.issue_type === type).length ? (
               <Alert>
                 <Check className="h-4 w-4" />
                 <AlertTitle>All Clear!</AlertTitle>
