@@ -3,9 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Story } from "@/types/story";
 import { useToast } from "@/components/ui/use-toast";
 
-interface CreateStoryInput {
+export interface CreateStoryInput {
   title: string;
   description: string;
+  user_id: string;
 }
 
 export function useCreateStory(onSuccess?: (story: Story) => void) {
@@ -14,24 +15,9 @@ export function useCreateStory(onSuccess?: (story: Story) => void) {
 
   return useMutation({
     mutationFn: async (storyData: CreateStoryInput) => {
-      const session = await supabase.auth.getSession();
-      if (!session.data.session?.user) {
-        throw new Error("User must be logged in to create a story");
-      }
-
-      if (!storyData.title.trim()) {
-        throw new Error("Story title cannot be empty");
-      }
-
-      const newStoryData = {
-        title: storyData.title.trim(),
-        description: storyData.description.trim(),
-        user_id: session.data.session.user.id,
-      };
-
       const { data, error } = await supabase
         .from("stories")
-        .insert(newStoryData)
+        .insert(storyData)
         .select()
         .single();
 
