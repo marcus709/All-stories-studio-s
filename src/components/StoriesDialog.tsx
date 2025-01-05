@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from "./ui/alert";
 import { StoryButtons } from "./stories/StoryButtons";
 import { useCreateStory } from "@/hooks/useCreateStory";
 import { useStories } from "@/hooks/useStories";
+import { supabase } from "@/integrations/supabase/client";
 
 export function StoriesDialog() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -26,8 +27,16 @@ export function StoriesDialog() {
   const queryClient = useQueryClient();
   const { data: stories, error: storiesError, isLoading } = useStories();
   
-  const createStoryMutation = useCreateStory((data) => {
-    setSelectedStory(data);
+  const createStoryMutation = useCreateStory(async (data) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("User must be logged in to create a story");
+    
+    const storyWithUser = {
+      ...data,
+      user_id: user.id
+    };
+    
+    setSelectedStory(storyWithUser);
     setShowNewStory(false);
     setNewStory({ title: "", description: "" });
   });
@@ -38,11 +47,20 @@ export function StoriesDialog() {
     }
   }, [isOpen, queryClient]);
 
-  const handleCreateStory = () => {
+  const handleCreateStory = async () => {
     if (!newStory.title.trim()) {
       return;
     }
-    createStoryMutation.mutate(newStory);
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error("User must be logged in to create a story");
+    }
+
+    createStoryMutation.mutate({
+      ...newStory,
+      user_id: user.id
+    });
   };
 
   const handleNewStoryChange = (field: "title" | "description", value: string) => {
