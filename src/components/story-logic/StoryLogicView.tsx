@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useStory } from "@/contexts/StoryContext";
-import { Plus, AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
+import { Plus } from "lucide-react";
+import { AnalysisSection } from "./AnalysisSection";
 
 export const StoryLogicView = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -96,26 +97,10 @@ export const StoryLogicView = () => {
     });
   };
 
-  const getIssueTypeIcon = (type: StoryIssueType) => {
-    switch (type) {
-      case "plot_hole":
-        return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
-      case "timeline_inconsistency":
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
-      case "character_inconsistency":
-        return <XCircle className="h-5 w-5 text-red-500" />;
-      default:
-        return null;
-    }
-  };
-
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Story Logic</h1>
-          <p className="text-gray-500">Track and resolve story issues</p>
-        </div>
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Story Logic Analysis</h1>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -161,21 +146,36 @@ export const StoryLogicView = () => {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {storyIssues?.map((issue) => (
-          <div
-            key={issue.id}
-            className="bg-white p-6 rounded-lg shadow-sm border hover:shadow-md transition-shadow"
-          >
-            <div className="flex items-center gap-2 mb-3">
-              {getIssueTypeIcon(issue.issue_type)}
-              <span className="text-sm font-medium text-gray-500">
-                {issue.issue_type.replace("_", " ")}
-              </span>
+      {selectedStory?.id && (
+        <AnalysisSection
+          storyId={selectedStory.id}
+          hasDocuments={true}
+          hasMinimalContent={false}
+          onAnalyze={() => {}}
+          onCustomAnalysis={() => {}}
+          onDocumentUpload={() => {}}
+        />
+      )}
+
+      <div className="mt-6">
+        <h2 className="text-xl font-semibold mb-4">Story Issues</h2>
+        <div className="space-y-4">
+          {storyIssues?.map((issue) => (
+            <div
+              key={issue.id}
+              className="bg-white p-4 rounded-lg border shadow-sm"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-800 mb-2">
+                    {issue.issue_type.replace(/_/g, " ")}
+                  </span>
+                  <p className="text-gray-700">{issue.description}</p>
+                </div>
+              </div>
             </div>
-            <p className="text-gray-600 text-sm">{issue.description}</p>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
