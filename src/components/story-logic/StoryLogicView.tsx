@@ -7,6 +7,7 @@ import { AnalysisSection } from "./AnalysisSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, Check, Clock, Users } from "lucide-react";
+import { useSession } from "@supabase/auth-helpers-react";
 
 type StoryIssueType = "plot_hole" | "timeline_inconsistency" | "pov_confusion" | "character_inconsistency";
 
@@ -45,6 +46,7 @@ const issueTypeInfo = {
 export const StoryLogicView = () => {
   const { selectedStory } = useStory();
   const { toast } = useToast();
+  const session = useSession();
   const [activeTab, setActiveTab] = useState<StoryIssueType>("plot_hole");
 
   const { data: documents, refetch: refetchDocuments } = useQuery({
@@ -108,53 +110,43 @@ export const StoryLogicView = () => {
       description: "Analyzing your story for potential issues...",
     });
 
-    if (!storyAnalysis) {
-      const { error: analysisError } = await supabase
-        .from("story_analysis")
-        .insert({
-          story_id: selectedStory!.id,
-          user_id: (await supabase.auth.getUser()).data.user!.id,
-        });
+    try {
+      const documentContent = documents
+        .map(doc => {
+          if (typeof doc.content === 'string') return doc.content;
+          return JSON.stringify(doc.content);
+        })
+        .join('\n\n');
 
-      if (analysisError) {
-        toast({
-          title: "Error",
-          description: "Failed to create analysis record",
-          variant: "destructive",
-        });
-        return;
+      const response = await fetch('/api/analyze-story-logic', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`
+        },
+        body: JSON.stringify({
+          storyId: selectedStory!.id,
+          documentContent,
+          user_id: session?.user?.id
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze story');
       }
-    }
 
-    setTimeout(() => {
       toast({
         title: "Analysis Complete",
         description: "Your story has been analyzed for logical issues.",
       });
-    }, 2000);
-  };
-
-  const handleCustomAnalysis = async (customInput: string) => {
-    if (!documents?.length) {
+    } catch (error) {
+      console.error('Analysis error:', error);
       toast({
-        title: "No Documents",
-        description: "Please upload a document before custom analysis.",
-        variant: "destructive",
+        title: "Analysis Failed",
+        description: error instanceof Error ? error.message : "Failed to analyze story",
+        variant: "destructive"
       });
-      return;
     }
-
-    toast({
-      title: "Custom Analysis Started",
-      description: `Analyzing your story based on: ${customInput}`,
-    });
-
-    setTimeout(() => {
-      toast({
-        title: "Custom Analysis Complete",
-        description: "Your story has been analyzed based on your custom criteria.",
-      });
-    }, 2000);
   };
 
   if (!selectedStory) {
