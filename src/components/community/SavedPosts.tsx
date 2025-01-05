@@ -52,7 +52,6 @@ export const SavedPosts = () => {
         .eq("user_id", session?.user?.id);
 
       if (savedPostsError) throw savedPostsError;
-
       if (!savedPostsData?.length) return [];
 
       const postIds = savedPostsData.map((sp: SavedPost) => sp.post_id);
@@ -75,7 +74,13 @@ export const SavedPosts = () => {
 
       if (postsError) throw postsError;
 
-      return posts as PostData[];
+      // Handle potential type mismatch by ensuring get_post_profiles is always an array
+      return (posts as any[]).map(post => ({
+        ...post,
+        get_post_profiles: Array.isArray(post.get_post_profiles) 
+          ? post.get_post_profiles 
+          : []
+      })) as PostData[];
     },
     enabled: !!session?.user?.id,
   });

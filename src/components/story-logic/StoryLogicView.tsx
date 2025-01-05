@@ -55,7 +55,12 @@ export const StoryLogicView = () => {
         .eq("analysis_id", storyAnalysis.id);
       
       if (error) throw error;
-      return data;
+      
+      // Ensure the returned data matches our StoryIssue type
+      return (data as any[]).map(issue => ({
+        ...issue,
+        issue_type: issue.issue_type as StoryIssueType
+      })) as StoryIssue[];
     },
     enabled: !!storyAnalysis?.id,
   });
