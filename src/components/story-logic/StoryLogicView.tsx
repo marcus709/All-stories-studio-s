@@ -2,12 +2,11 @@ import { useState } from "react";
 import { useStory } from "@/contexts/StoryContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertTriangle, Check, Clock, Users } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { UploadDialog } from "./UploadDialog";
-import { AnalysisControls } from "./AnalysisControls";
+import { AnalysisSection } from "./AnalysisSection";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AlertTriangle, Check, Clock, Users } from "lucide-react";
 
 type StoryIssueType = "plot_hole" | "timeline_inconsistency" | "pov_confusion" | "character_inconsistency";
 
@@ -19,6 +18,29 @@ interface StoryIssue {
   severity: number;
   status: "open" | "resolved";
 }
+
+const issueTypeInfo = {
+  plot_hole: {
+    icon: AlertTriangle,
+    color: "text-yellow-500",
+    label: "Plot Holes",
+  },
+  timeline_inconsistency: {
+    icon: Clock,
+    color: "text-blue-500",
+    label: "Timeline Issues",
+  },
+  pov_confusion: {
+    icon: Users,
+    color: "text-purple-500",
+    label: "POV Confusion",
+  },
+  character_inconsistency: {
+    icon: AlertTriangle,
+    color: "text-red-500",
+    label: "Character Inconsistencies",
+  },
+};
 
 export const StoryLogicView = () => {
   const { selectedStory } = useStory();
@@ -37,20 +59,6 @@ export const StoryLogicView = () => {
       
       if (error) throw error;
       return data;
-    },
-    enabled: !!selectedStory?.id,
-  });
-
-  const { data: storyIssues, isLoading } = useQuery({
-    queryKey: ["story-issues", selectedStory?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("story_issues")
-        .select("*")
-        .eq("analysis_id", selectedStory?.id);
-
-      if (error) throw error;
-      return data as StoryIssue[];
     },
     enabled: !!selectedStory?.id,
   });
@@ -98,36 +106,12 @@ export const StoryLogicView = () => {
       description: `Analyzing your story based on: ${customInput}`,
     });
 
-    // Here we would integrate with an AI service to analyze the story based on custom input
     setTimeout(() => {
       toast({
         title: "Custom Analysis Complete",
         description: "Your story has been analyzed based on your custom criteria.",
       });
     }, 2000);
-  };
-
-  const issueTypeInfo = {
-    plot_hole: {
-      icon: AlertTriangle,
-      color: "text-yellow-500",
-      label: "Plot Holes",
-    },
-    timeline_inconsistency: {
-      icon: Clock,
-      color: "text-blue-500",
-      label: "Timeline Issues",
-    },
-    pov_confusion: {
-      icon: Users,
-      color: "text-purple-500",
-      label: "POV Confusion",
-    },
-    character_inconsistency: {
-      icon: AlertTriangle,
-      color: "text-red-500",
-      label: "Character Inconsistencies",
-    },
   };
 
   if (!selectedStory) {
@@ -142,34 +126,16 @@ export const StoryLogicView = () => {
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">Story Logic Analysis</h1>
-        <AnalysisControls 
-          onAnalyze={analyzeStory}
-          onCustomAnalysis={handleCustomAnalysis}
-          hasDocuments={hasDocuments}
-        />
       </div>
 
-      {!hasDocuments && (
-        <Alert className="mb-6">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>No Documents Found</AlertTitle>
-          <AlertDescription>
-            Please upload a document or use the Story Docs feature to add content before analyzing your story.
-          </AlertDescription>
-        </Alert>
-      )}
+      <AnalysisSection
+        hasDocuments={hasDocuments}
+        hasMinimalContent={hasMinimalContent}
+        onAnalyze={analyzeStory}
+        onCustomAnalysis={handleCustomAnalysis}
+      />
 
-      {hasDocuments && !hasMinimalContent && (
-        <Alert className="mb-6">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Limited Content</AlertTitle>
-          <AlertDescription>
-            Your story has very little content. The analysis might not be as comprehensive. Consider adding more content for better results.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as StoryIssueType)}>
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as StoryIssueType)} className="mt-8">
         <TabsList className="grid grid-cols-4 mb-6">
           {Object.entries(issueTypeInfo).map(([type, info]) => (
             <TabsTrigger key={type} value={type} className="flex items-center gap-2">
