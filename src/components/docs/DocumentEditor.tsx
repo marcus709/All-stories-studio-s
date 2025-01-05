@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Save } from "lucide-react";
 import { RichTextEditor } from "@/components/editor/RichTextEditor";
+import { Json } from "@/integrations/supabase/types";
 
 interface DocumentEditorProps {
   documentId: string;
@@ -49,12 +50,13 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
     if (document) {
       console.log("Setting document content:", document.content);
       setTitle(document.title);
-      // Handle both string and array content formats with proper type checking
-      if (Array.isArray(document.content)) {
-        const contentArray = document.content as DocumentContent[];
-        setContent(contentArray[0]?.content || "");
-      } else if (typeof document.content === 'string') {
-        setContent(document.content);
+      
+      const docContent = document.content as Json;
+      if (Array.isArray(docContent)) {
+        const contentItem = docContent[0] as { type?: string; content?: string };
+        setContent(contentItem?.content || "");
+      } else if (typeof docContent === 'string') {
+        setContent(docContent);
       } else {
         setContent("");
       }
@@ -66,11 +68,10 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
     
     setIsSaving(true);
     try {
-      // Always save content in the expected array format
-      const contentToSave: DocumentContent[] = [{
+      const contentToSave = [{
         type: "text",
         content: content
-      }];
+      }] as Json;
       
       console.log("Saving document:", { title, content: contentToSave });
       const { error } = await supabase
@@ -83,9 +84,7 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
 
       if (error) throw error;
 
-      // Refetch to ensure we have the latest data
       await refetch();
-      // Notify parent to refresh the document list
       onRefresh();
 
       toast({
