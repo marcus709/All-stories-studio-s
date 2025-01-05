@@ -4,6 +4,8 @@ import { MessageSquare, Users, Hash, Bookmark, Settings, UserPlus } from "lucide
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AddFriendsDialog } from "./AddFriendsDialog";
+import { useSubscription } from "@/contexts/SubscriptionContext";
+import { capitalize } from "lodash";
 
 const navItems = [
   { icon: MessageSquare, label: "Feed", href: "/community" },
@@ -15,6 +17,7 @@ const navItems = [
 
 export const CommunitySidebar = () => {
   const session = useSession();
+  const { plan } = useSubscription();
 
   const { data: profile } = useQuery({
     queryKey: ["profile"],
@@ -51,7 +54,7 @@ export const CommunitySidebar = () => {
               {profile.username || "Anonymous"}
             </span>
             <span className="text-sm text-gray-500 truncate">
-              {profile.bio || "Curious Plan"}
+              {plan !== 'free' ? `${capitalize(plan)} Plan` : "Free Plan"}
             </span>
           </div>
         </div>
