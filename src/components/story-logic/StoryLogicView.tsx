@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { useStory } from "@/contexts/StoryContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useStory } from "@/contexts/StoryContext";
 import { useToast } from "@/hooks/use-toast";
-import { UploadDialog } from "./UploadDialog";
 import { AnalysisSection } from "./AnalysisSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -47,9 +46,8 @@ export const StoryLogicView = () => {
   const { selectedStory } = useStory();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<StoryIssueType>("plot_hole");
-  const [showUploadDialog, setShowUploadDialog] = useState(false);
 
-  const { data: documents } = useQuery({
+  const { data: documents, refetch: refetchDocuments } = useQuery({
     queryKey: ["documents", selectedStory?.id],
     queryFn: async () => {
       if (!selectedStory?.id) return [];
@@ -64,7 +62,6 @@ export const StoryLogicView = () => {
     enabled: !!selectedStory?.id,
   });
 
-  // First fetch the story analysis record
   const { data: storyAnalysis } = useQuery({
     queryKey: ["story-analysis", selectedStory?.id],
     queryFn: async () => {
@@ -81,7 +78,6 @@ export const StoryLogicView = () => {
     enabled: !!selectedStory?.id,
   });
 
-  // Then fetch the issues using the analysis_id
   const { data: storyIssues, isLoading } = useQuery({
     queryKey: ["story-issues", storyAnalysis?.id],
     queryFn: async () => {
@@ -97,17 +93,13 @@ export const StoryLogicView = () => {
     enabled: !!storyAnalysis?.id,
   });
 
-  const handleFileSelect = async (file: File) => {
-    toast({
-      title: "File selected",
-      description: "Processing your document...",
-    });
-    setShowUploadDialog(false);
-  };
-
   const analyzeStory = async () => {
     if (!documents?.length) {
-      setShowUploadDialog(true);
+      toast({
+        title: "No Documents",
+        description: "Please upload a document before analyzing.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -116,7 +108,6 @@ export const StoryLogicView = () => {
       description: "Analyzing your story for potential issues...",
     });
 
-    // Create story analysis record if it doesn't exist
     if (!storyAnalysis) {
       const { error: analysisError } = await supabase
         .from("story_analysis")
@@ -145,7 +136,11 @@ export const StoryLogicView = () => {
 
   const handleCustomAnalysis = async (customInput: string) => {
     if (!documents?.length) {
-      setShowUploadDialog(true);
+      toast({
+        title: "No Documents",
+        description: "Please upload a document before custom analysis.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -179,10 +174,12 @@ export const StoryLogicView = () => {
       <AnalysisSection
         hasDocuments={!!documents?.length}
         hasMinimalContent={documents?.some(doc => 
-          doc.content && JSON.parse(doc.content as string).length > 100
+          doc.content && doc.content[0]?.content?.length > 100
         )}
         onAnalyze={analyzeStory}
         onCustomAnalysis={handleCustomAnalysis}
+        storyId={selectedStory.id}
+        onDocumentUpload={refetchDocuments}
       />
 
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as StoryIssueType)} className="mt-8">
@@ -226,12 +223,6 @@ export const StoryLogicView = () => {
           </TabsContent>
         ))}
       </Tabs>
-
-      <UploadDialog
-        open={showUploadDialog}
-        onOpenChange={setShowUploadDialog}
-        onFileSelect={handleFileSelect}
-      />
     </div>
   );
 };

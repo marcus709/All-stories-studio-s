@@ -2,12 +2,17 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import { DocumentsGrid } from "./DocumentsGrid";
+import { DocumentUpload } from "./DocumentUpload";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useState } from "react";
 
 interface AnalysisSectionProps {
   hasDocuments: boolean;
   hasMinimalContent: boolean;
   onAnalyze: () => void;
   onCustomAnalysis: (input: string) => void;
+  storyId: string;
+  onDocumentUpload: () => void;
 }
 
 export const AnalysisSection = ({
@@ -15,12 +20,33 @@ export const AnalysisSection = ({
   hasMinimalContent,
   onAnalyze,
   onCustomAnalysis,
+  storyId,
+  onDocumentUpload,
 }: AnalysisSectionProps) => {
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Documents Analysis</h2>
         <div className="flex gap-2">
+          <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">Upload Document</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Upload Story Document</DialogTitle>
+              </DialogHeader>
+              <DocumentUpload 
+                storyId={storyId} 
+                onUploadComplete={() => {
+                  setIsUploadOpen(false);
+                  onDocumentUpload();
+                }}
+              />
+            </DialogContent>
+          </Dialog>
           <Button onClick={onAnalyze} disabled={!hasDocuments}>
             Analyze Story
           </Button>
@@ -39,7 +65,7 @@ export const AnalysisSection = ({
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>No Documents Found</AlertTitle>
           <AlertDescription>
-            Please upload a document or use the Story Docs feature to add content before analyzing your story.
+            Please upload a document using the Upload Document button above to start analyzing your story.
           </AlertDescription>
         </Alert>
       )}
