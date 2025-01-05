@@ -25,6 +25,7 @@ function DashboardLayout() {
     }
   }, [session, navigate, toast]);
 
+  // Don't render anything while checking session
   if (!session) {
     return null;
   }
