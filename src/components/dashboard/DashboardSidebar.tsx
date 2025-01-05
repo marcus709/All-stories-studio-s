@@ -4,7 +4,7 @@ import {
   BookOpen,
   Users,
   GitBranch,
-  GitMerge, // Changed from GitFlow to GitMerge
+  GitMerge,
   Lightbulb,
   FileText,
   Bug,

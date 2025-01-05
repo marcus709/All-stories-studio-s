@@ -15,9 +15,11 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+type StoryIssueType = "plot_hole" | "timeline_inconsistency" | "pov_inconsistency" | "character_inconsistency" | "setting_inconsistency" | "logic_flaw";
+
 type StoryIssue = {
   id: string;
-  issue_type: 'plot_hole' | 'timeline_inconsistency' | 'pov_inconsistency' | 'character_inconsistency' | 'setting_inconsistency' | 'logic_flaw';
+  issue_type: StoryIssueType;
   description: string;
   location?: string;
   severity?: number;
@@ -40,7 +42,7 @@ const issueTypeLabels = {
   character_inconsistency: "Character Inconsistency",
   setting_inconsistency: "Setting Inconsistency",
   logic_flaw: "Logic Flaw",
-};
+} as const;
 
 export const StoryLogicView = () => {
   const { selectedStory } = useStory();
@@ -79,24 +81,22 @@ export const StoryLogicView = () => {
 
       if (analysisError) throw analysisError;
 
-      // Simulated issues for demonstration
-
-const sampleIssues = [
-  {
-    analysis_id: newAnalysis.id,
-    issue_type: "plot_hole" as const,
-    description: "Character mentions an event that wasn't previously established",
-    location: "Chapter 3",
-    severity: 3,
-  },
-  {
-    analysis_id: newAnalysis.id,
-    issue_type: "timeline_inconsistency" as const,
-    description: "Events in Chapter 5 seem to occur before Chapter 4 without explanation",
-    location: "Chapter 4-5",
-    severity: 4,
-  },
-];
+      const sampleIssues = [
+        {
+          analysis_id: newAnalysis.id,
+          issue_type: "plot_hole" as StoryIssueType,
+          description: "Character mentions an event that wasn't previously established",
+          location: "Chapter 3",
+          severity: 3,
+        },
+        {
+          analysis_id: newAnalysis.id,
+          issue_type: "timeline_inconsistency" as StoryIssueType,
+          description: "Events in Chapter 5 seem to occur before Chapter 4 without explanation",
+          location: "Chapter 4-5",
+          severity: 4,
+        },
+      ];
 
       await supabase.from("story_issues").insert(sampleIssues);
 

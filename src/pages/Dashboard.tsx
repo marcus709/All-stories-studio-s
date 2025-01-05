@@ -5,7 +5,7 @@ import { DashboardSidebar, View } from "@/components/dashboard/DashboardSidebar"
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
 import { StoryProvider } from "@/contexts/StoryContext";
 import { useSession } from "@supabase/auth-helpers-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 function DashboardLayout() {
   const [currentView, setCurrentView] = useState<View>("story");
