@@ -19,7 +19,7 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
-  const { data: document } = useQuery({
+  const { data: document, refetch } = useQuery({
     queryKey: ["document", documentId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -32,6 +32,8 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
       return data;
     },
     enabled: !!documentId,
+    staleTime: 0, // Always fetch fresh data
+    cacheTime: 0, // Don't cache the data
   });
 
   useEffect(() => {
@@ -80,6 +82,9 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
         title: "Success",
         description: "Document saved successfully",
       });
+      
+      // Refetch to ensure we have the latest data
+      refetch();
       onRefresh();
     } catch (error) {
       toast({
