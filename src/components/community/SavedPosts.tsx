@@ -4,6 +4,33 @@ import { Bookmark } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Post } from "./Post";
 
+interface SavedPost {
+  post_id: string;
+}
+
+interface PostProfile {
+  username: string;
+  avatar_url: string | null;
+}
+
+interface Comment {
+  id: string;
+  content: string;
+  created_at: string;
+  get_comment_profiles: PostProfile[];
+}
+
+interface PostData {
+  id: string;
+  content: string;
+  created_at: string;
+  user_id: string;
+  get_post_profiles: PostProfile[];
+  post_likes: { id: string; user_id: string }[];
+  comments: Comment[];
+  post_tags: { tag: string }[];
+}
+
 export const SavedPosts = () => {
   const session = useSession();
 
@@ -19,7 +46,7 @@ export const SavedPosts = () => {
 
       if (!savedPostsData?.length) return [];
 
-      const postIds = savedPostsData.map((sp) => sp.post_id);
+      const postIds = savedPostsData.map((sp: SavedPost) => sp.post_id);
 
       const { data: posts, error: postsError } = await supabase
         .from("posts")
@@ -37,7 +64,7 @@ export const SavedPosts = () => {
         .order("created_at", { ascending: false });
 
       if (postsError) throw postsError;
-      return posts;
+      return posts as PostData[];
     },
     enabled: !!session?.user?.id,
   });
