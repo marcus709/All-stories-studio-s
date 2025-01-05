@@ -8,8 +8,39 @@ import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 
+interface PostLike {
+  id: string;
+  post_id: string;
+  user_id: string;
+}
+
+interface Comment {
+  id: string;
+  content: string;
+  created_at: string;
+  get_comment_profiles: Array<{
+    username: string;
+    avatar_url: string | null;
+  }>;
+}
+
+interface PostProfile {
+  username: string;
+  avatar_url: string | null;
+}
+
+interface Post {
+  id: string;
+  content: string;
+  created_at: string;
+  user_id: string;
+  post_likes: PostLike[];
+  comments: Comment[];
+  get_post_profiles: PostProfile[];
+}
+
 interface PostProps {
-  post: any;
+  post: Post;
 }
 
 export const Post = ({ post }: PostProps) => {
@@ -20,7 +51,7 @@ export const Post = ({ post }: PostProps) => {
   const [newComment, setNewComment] = useState("");
 
   const isLiked = post.post_likes.some(
-    (like: any) => like.user_id === session?.user?.id
+    (like) => like.user_id === session?.user?.id
   );
 
   const isOwnPost = post.user_id === session?.user?.id;
@@ -194,8 +225,7 @@ export const Post = ({ post }: PostProps) => {
           </form>
 
           <div className="space-y-4 mt-4">
-            {post.comments.map((comment: any) => {
-              // Get the username from the get_comment_profiles function result
+            {post.comments.map((comment) => {
               const commentUsername = comment.get_comment_profiles?.[0]?.username || "Anonymous";
               const commentAvatarUrl = comment.get_comment_profiles?.[0]?.avatar_url;
 
