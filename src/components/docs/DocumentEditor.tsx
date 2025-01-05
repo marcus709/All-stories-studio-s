@@ -22,21 +22,27 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
   const { data: document, refetch } = useQuery({
     queryKey: ["document", documentId],
     queryFn: async () => {
+      console.log("Fetching document:", documentId);
       const { data, error } = await supabase
         .from("documents")
         .select("*")
         .eq("id", documentId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching document:", error);
+        throw error;
+      }
+      console.log("Fetched document:", data);
       return data;
     },
     enabled: !!documentId,
-    staleTime: 0, // Always fetch fresh data
+    staleTime: 0,
   });
 
   useEffect(() => {
     if (document) {
+      console.log("Setting document content:", document.content);
       setTitle(document.title);
       setContent(document.content?.[0]?.content || "");
     }
@@ -47,6 +53,7 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
     
     setIsSaving(true);
     try {
+      console.log("Saving document:", { title, content });
       const { error } = await supabase
         .from("documents")
         .update({
@@ -57,15 +64,19 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
 
       if (error) throw error;
 
+      // Refetch to ensure we have the latest data
+      await refetch();
+      // Notify parent to refresh the document list
+      onRefresh();
+
       toast({
         title: "Success",
         description: "Document saved successfully",
       });
       
-      // Refetch to ensure we have the latest data
-      refetch();
-      onRefresh();
+      console.log("Document saved successfully");
     } catch (error) {
+      console.error("Error saving document:", error);
       toast({
         title: "Error",
         description: "Failed to save document",
