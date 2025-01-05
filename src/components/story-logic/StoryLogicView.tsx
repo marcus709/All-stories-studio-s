@@ -70,7 +70,7 @@ export const StoryLogicView = () => {
         .from("story_analysis")
         .select("*")
         .eq("story_id", selectedStory.id)
-        .single();
+        .maybeSingle();
       
       if (error && error.code !== 'PGRST116') throw error;
       return data;
@@ -78,7 +78,7 @@ export const StoryLogicView = () => {
     enabled: !!selectedStory?.id,
   });
 
-  const { data: storyIssues, isLoading } = useQuery({
+  const { data: storyIssues = [], isLoading } = useQuery({
     queryKey: ["story-issues", storyAnalysis?.id],
     queryFn: async () => {
       if (!storyAnalysis?.id) return [];
