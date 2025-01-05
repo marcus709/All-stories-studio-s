@@ -1,13 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Story } from "@/types/story";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
-export interface CreateStoryInput {
-  title: string;
-  description: string;
-  user_id: string;
-}
+export type CreateStoryInput = Partial<Story>;
 
 export function useCreateStory(onSuccess?: (story: Story) => void) {
   const { toast } = useToast();

@@ -50,11 +50,13 @@ export function StoriesDialog() {
       throw new Error("User must be logged in to create a story");
     }
 
-    createStoryMutation.mutate({
+    const storyData: Partial<Story> = {
       title: newStory.title,
       description: newStory.description,
       user_id: user.id,
-    } as Story);
+    };
+
+    createStoryMutation.mutate(storyData as Story);
   };
 
   const handleNewStoryChange = (field: "title" | "description", value: string) => {
