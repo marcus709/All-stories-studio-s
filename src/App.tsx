@@ -61,7 +61,18 @@ function App() {
         localStorage.clear();
       }
 
-      setSession(session);
+      if (_event === 'SIGNED_IN' || _event === 'TOKEN_REFRESHED') {
+        // Ensure we have a valid session
+        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error("Error refreshing session:", error);
+          return;
+        }
+        setSession(currentSession);
+      } else {
+        setSession(session);
+      }
+      
       setIsLoading(false);
     });
 
