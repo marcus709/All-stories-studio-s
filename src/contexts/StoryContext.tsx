@@ -18,12 +18,26 @@ export function StoryProvider({ children }: { children: ReactNode }) {
   const { data: stories = [], isLoading } = useQuery({
     queryKey: ["stories"],
     queryFn: async () => {
+      console.log("Fetching stories...");
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        console.log("No user found, returning empty array");
+        return [];
+      }
+
       const { data, error } = await supabase
         .from("stories")
         .select("*")
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching stories:", error);
+        throw error;
+      }
+
+      console.log("Stories fetched:", data);
       return data as Story[];
     },
   });
