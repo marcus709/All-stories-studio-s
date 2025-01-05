@@ -9,11 +9,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CreateStoryForm } from "./stories/CreateStoryForm";
 import { StoriesDialogHeader } from "./stories/StoriesDialogHeader";
 import { StoriesGrid } from "./stories/StoriesGrid";
+import { ScrollArea } from "./ui/scroll-area";
 
 export function StoriesDialog() {
   const [isOpen, setIsOpen] = React.useState(false);
   const [showNewStory, setShowNewStory] = React.useState(false);
-  const [newStory, setNewStory] = React.useState({ title: "", description: "" });
+  const [newStory, setNewStory] = useState({ title: "", description: "" });
   const { selectedStory, setSelectedStory } = useStory();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -83,10 +84,12 @@ export function StoriesDialog() {
             Create New Story
           </Button>
 
-          <StoriesGrid
-            onStorySelect={setSelectedStory}
-            onClose={() => setIsOpen(false)}
-          />
+          <ScrollArea className="h-[400px] pr-4">
+            <StoriesGrid
+              onStorySelect={setSelectedStory}
+              onClose={() => setIsOpen(false)}
+            />
+          </ScrollArea>
         </DialogContent>
       </Dialog>
 
