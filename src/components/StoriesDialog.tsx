@@ -18,7 +18,10 @@ import { Story } from "@/types/story";
 export function StoriesDialog() {
   const [isOpen, setIsOpen] = React.useState(false);
   const [showNewStory, setShowNewStory] = React.useState(false);
-  const [newStory, setNewStory] = useState({ title: "", description: "" });
+  const [newStory, setNewStory] = useState<{ title: string; description: string }>({ 
+    title: "", 
+    description: "" 
+  });
   const { selectedStory, setSelectedStory } = useStory();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -56,25 +59,25 @@ export function StoriesDialog() {
   }, [isOpen, queryClient]);
 
   const createStoryMutation = useMutation({
-    mutationFn: async (story: { title: string; description: string }) => {
+    mutationFn: async (storyData: { title: string; description: string }) => {
       const session = await supabase.auth.getSession();
       if (!session.data.session?.user) {
         throw new Error("User must be logged in to create a story");
       }
 
-      if (!story.title.trim()) {
+      if (!storyData.title.trim()) {
         throw new Error("Story title cannot be empty");
       }
 
-      const newStory: Omit<Story, 'id' | 'created_at' | 'updated_at'> = {
-        title: story.title.trim(),
-        description: story.description.trim(),
+      const newStoryData = {
+        title: storyData.title.trim(),
+        description: storyData.description.trim(),
         user_id: session.data.session.user.id,
       };
 
       const { data, error } = await supabase
         .from("stories")
-        .insert(newStory)
+        .insert(newStoryData)
         .select()
         .single();
 
