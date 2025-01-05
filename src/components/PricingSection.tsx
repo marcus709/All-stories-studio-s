@@ -76,7 +76,9 @@ export const PricingSection = () => {
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
         body: { 
           priceId,
-          promotionCode: promotionCode.trim() || undefined
+          promotionCode: promotionCode.trim() || undefined,
+          successUrl: `${window.location.origin}/dashboard?subscription=success`,
+          cancelUrl: `${window.location.origin}/?scrollTo=pricing`
         }
       });
 
