@@ -27,18 +27,24 @@ function App() {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
+    const initializeSession = async () => {
+      try {
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        setSession(initialSession);
+      } catch (error) {
         console.error("Error fetching session:", error);
         toast({
           title: "Session Error",
           description: "There was an error loading your session. Please try signing in again.",
           variant: "destructive",
         });
+      } finally {
+        setIsLoading(false);
       }
-      setSession(session);
-      setIsLoading(false);
-    });
+    };
+
+    initializeSession();
 
     // Listen for auth changes
     const {
