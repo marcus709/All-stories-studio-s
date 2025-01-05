@@ -8,8 +8,6 @@ import { CreateStoryForm } from "./stories/CreateStoryForm";
 import { StoriesDialogHeader } from "./stories/StoriesDialogHeader";
 import { StoriesGrid } from "./stories/StoriesGrid";
 import { ScrollArea } from "./ui/scroll-area";
-import { AlertCircle } from "lucide-react";
-import { Alert, AlertDescription } from "./ui/alert";
 import { useCreateStory, CreateStoryInput } from "@/hooks/useCreateStory";
 import { Story } from "@/types/story";
 import { supabase } from "@/integrations/supabase/client";
