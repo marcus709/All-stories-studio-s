@@ -19,6 +19,13 @@ export function StoriesDialog() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Refetch stories when dialog opens
+  React.useEffect(() => {
+    if (isOpen) {
+      queryClient.invalidateQueries({ queryKey: ["stories"] });
+    }
+  }, [isOpen, queryClient]);
+
   const createStoryMutation = useMutation({
     mutationFn: async (story: { title: string; description: string }) => {
       const session = await supabase.auth.getSession();
