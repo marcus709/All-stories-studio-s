@@ -3,11 +3,11 @@ import { useStory } from "@/contexts/StoryContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertTriangle, Check, Clock, Users } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { UploadDialog } from "./UploadDialog";
+import { AnalysisControls } from "./AnalysisControls";
 
 type StoryIssueType = "plot_hole" | "timeline_inconsistency" | "pov_confusion" | "character_inconsistency";
 
@@ -26,7 +26,6 @@ export const StoryLogicView = () => {
   const [activeTab, setActiveTab] = useState<StoryIssueType>("plot_hole");
   const [showUploadDialog, setShowUploadDialog] = useState(false);
 
-  // Query to fetch documents
   const { data: documents } = useQuery({
     queryKey: ["documents", selectedStory?.id],
     queryFn: async () => {
@@ -42,7 +41,6 @@ export const StoryLogicView = () => {
     enabled: !!selectedStory?.id,
   });
 
-  // Query to fetch story issues
   const { data: storyIssues, isLoading } = useQuery({
     queryKey: ["story-issues", selectedStory?.id],
     queryFn: async () => {
@@ -63,13 +61,11 @@ export const StoryLogicView = () => {
   );
 
   const handleFileSelect = async (file: File) => {
-    // Here you would implement the file upload logic
     toast({
       title: "File selected",
       description: "Processing your document...",
     });
     setShowUploadDialog(false);
-    // Implement file upload logic here
   };
 
   const analyzeStory = async () => {
@@ -83,11 +79,30 @@ export const StoryLogicView = () => {
       description: "Analyzing your story for potential issues...",
     });
 
-    // Here we would integrate with an AI service to analyze the story
     setTimeout(() => {
       toast({
         title: "Analysis Complete",
         description: "Your story has been analyzed for logical issues.",
+      });
+    }, 2000);
+  };
+
+  const handleCustomAnalysis = async (customInput: string) => {
+    if (!hasDocuments) {
+      setShowUploadDialog(true);
+      return;
+    }
+
+    toast({
+      title: "Custom Analysis Started",
+      description: `Analyzing your story based on: ${customInput}`,
+    });
+
+    // Here we would integrate with an AI service to analyze the story based on custom input
+    setTimeout(() => {
+      toast({
+        title: "Custom Analysis Complete",
+        description: "Your story has been analyzed based on your custom criteria.",
       });
     }, 2000);
   };
@@ -127,9 +142,11 @@ export const StoryLogicView = () => {
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">Story Logic Analysis</h1>
-        <Button onClick={analyzeStory}>
-          Analyze Story
-        </Button>
+        <AnalysisControls 
+          onAnalyze={analyzeStory}
+          onCustomAnalysis={handleCustomAnalysis}
+          hasDocuments={hasDocuments}
+        />
       </div>
 
       {!hasDocuments && (
