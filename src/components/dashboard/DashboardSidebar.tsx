@@ -1,115 +1,91 @@
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  BookOpen,
-  Users,
-  GitBranch,
-  GitMerge,
-  Lightbulb,
-  FileText,
-  Bug,
-} from "lucide-react";
-import { useStory } from "@/contexts/StoryContext";
+import { useState, useEffect } from "react";
+import { Book, Users, LineChart, GitBranch, Lightbulb, FileText } from "lucide-react";
 import { StoriesDialog } from "../StoriesDialog";
-import { useState } from "react";
+import { useStory } from "@/contexts/StoryContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Profile } from "@/integrations/supabase/types/tables.types";
 
-export type View = "story" | "characters" | "plot" | "flow" | "ideas" | "docs" | "logic";
+const navigationItems = [
+  { id: "story", icon: Book, label: "Story Editor" },
+  { id: "characters", icon: Users, label: "Characters" },
+  { id: "plot", icon: LineChart, label: "Plot Development" },
+  { id: "flow", icon: GitBranch, label: "Story Flow" },
+  { id: "ideas", icon: Lightbulb, label: "Story Ideas" },
+  { id: "docs", icon: FileText, label: "Story Docs" },
+] as const;
+
+type View = (typeof navigationItems)[number]["id"];
 
 interface DashboardSidebarProps {
   currentView: View;
   setCurrentView: (view: View) => void;
 }
 
-export const DashboardSidebar = ({
-  currentView,
-  setCurrentView,
-}: DashboardSidebarProps) => {
-  const [isStoriesOpen, setIsStoriesOpen] = useState(false);
+export const DashboardSidebar = ({ currentView, setCurrentView }: DashboardSidebarProps) => {
   const { selectedStory } = useStory();
+  const [profile, setProfile] = useState<Profile | null>(null);
 
-  const navigation = [
-    {
-      name: "Story",
-      icon: BookOpen,
-      view: "story" as const,
-    },
-    {
-      name: "Characters",
-      icon: Users,
-      view: "characters" as const,
-    },
-    {
-      name: "Plot Development",
-      icon: GitBranch,
-      view: "plot" as const,
-    },
-    {
-      name: "Story Flow",
-      icon: GitMerge,
-      view: "flow" as const,
-    },
-    {
-      name: "Story Ideas",
-      icon: Lightbulb,
-      view: "ideas" as const,
-    },
-    {
-      name: "Documentation",
-      icon: FileText,
-      view: "docs" as const,
-    },
-    {
-      name: "Story Logic",
-      icon: Bug,
-      view: "logic" as const,
-    },
-  ];
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+        
+        if (data) {
+          setProfile({
+            id: data.id,
+            username: data.username,
+            avatar_url: data.avatar_url,
+            bio: data.bio,
+            website: null // Set a default value for the website field
+          });
+        }
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   return (
-    <>
-      <div className="fixed inset-y-0 left-0 w-72 bg-white border-r pt-16">
-        <div className="flex flex-col h-full">
-          <div className="flex-1 flex flex-col gap-y-7">
-            <div className="px-4 py-4 border-b">
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={() => setIsStoriesOpen(true)}
-              >
-                <BookOpen className="mr-2 h-4 w-4" />
-                {selectedStory?.title || "Select a Story"}
-              </Button>
-            </div>
-
-            <nav className="flex-1 px-4">
-              <ul role="list" className="flex flex-1 flex-col gap-1">
-                {navigation.map((item) => (
-                  <li key={item.name}>
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        "w-full justify-start",
-                        currentView === item.view
-                          ? "bg-violet-50 text-violet-600 hover:bg-violet-50 hover:text-violet-600"
-                          : "text-gray-700 hover:bg-gray-50"
-                      )}
-                      onClick={() => setCurrentView(item.view)}
-                    >
-                      <item.icon className="mr-2 h-4 w-4" />
-                      {item.name}
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+    <div className="fixed left-0 top-16 w-72 h-[calc(100vh-4rem)] border-r bg-white">
+      <div className="p-8 flex flex-col h-full">
+        {/* Profile Section */}
+        <div className="flex items-center gap-3 mb-12 px-2 mt-4">
+          <div className="w-11 h-11 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-lg font-medium">
+            {profile?.username?.[0]?.toUpperCase() || "?"}
+          </div>
+          <div className="flex flex-col">
+            <h3 className="font-medium text-base text-gray-900">
+              {profile?.username || "Loading..."}
+            </h3>
           </div>
         </div>
-      </div>
 
-      <StoriesDialog
-        isOpen={isStoriesOpen}
-        onOpenChange={setIsStoriesOpen}
-      />
-    </>
+        {/* Stories Section */}
+        <div className="space-y-4 mb-10">
+          <StoriesDialog />
+        </div>
+
+        {/* Navigation */}
+        <nav className="space-y-3">
+          {navigationItems.map(({ id, icon: Icon, label }) => (
+            <button
+              key={id}
+              onClick={() => setCurrentView(id)}
+              disabled={!selectedStory}
+              className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-lg transition-colors text-gray-700 text-lg
+                ${currentView === id ? "bg-purple-50 text-purple-600" : "hover:bg-gray-50"}`}
+            >
+              <Icon className="h-6 w-6" />
+              <span className="font-medium">{label}</span>
+            </button>
+          ))}
+        </nav>
+      </div>
+    </div>
   );
 };
