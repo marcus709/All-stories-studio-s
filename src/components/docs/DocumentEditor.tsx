@@ -33,7 +33,6 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
     },
     enabled: !!documentId,
     staleTime: 0, // Always fetch fresh data
-    cacheTime: 0, // Don't cache the data
   });
 
   useEffect(() => {
@@ -42,26 +41,6 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
       setContent(document.content?.[0]?.content || "");
     }
   }, [document]);
-
-  // Auto-save when content changes
-  useEffect(() => {
-    const saveTimeout = setTimeout(() => {
-      if (content !== document?.content?.[0]?.content) {
-        handleSave();
-      }
-    }, 2000);
-
-    return () => clearTimeout(saveTimeout);
-  }, [content]);
-
-  // Save before unmounting
-  useEffect(() => {
-    return () => {
-      if (content !== document?.content?.[0]?.content) {
-        handleSave();
-      }
-    };
-  }, [content, document]);
 
   const handleSave = async () => {
     if (!documentId || isSaving) return;
