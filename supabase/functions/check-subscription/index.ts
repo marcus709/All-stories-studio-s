@@ -7,6 +7,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Add better error logging
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -34,10 +35,16 @@ serve(async (req) => {
     }
 
     if (!user) {
-      console.error('No user found')
+      console.error('No user found in check-subscription')
       return new Response(
-        JSON.stringify({ plan: 'free' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          plan: 'free',
+          error: 'No user found'
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200
+        }
       )
     }
 
@@ -95,17 +102,17 @@ serve(async (req) => {
       JSON.stringify({ plan }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
-
   } catch (error) {
-    console.error('Error checking subscription:', error)
+    console.error('Error in check-subscription:', error)
     return new Response(
       JSON.stringify({ 
         plan: 'free',
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        details: error instanceof Error ? error.stack : undefined
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 // Return 200 even on error, but with free plan
+        status: 200
       }
     )
   }
