@@ -62,13 +62,13 @@ export const SavedPosts = () => {
         .from("posts")
         .select(`
           *,
-          get_post_profiles:profiles!posts_user_id_fkey(*),
+          get_post_profiles:profiles(username, avatar_url),
           post_likes (*),
           comments (
             *,
-            get_comment_profiles:profiles!comments_user_id_fkey(*)
+            get_comment_profiles:profiles(username, avatar_url)
           ),
-          post_tags (*)
+          post_tags (tag)
         `)
         .in("id", postIds)
         .order("created_at", { ascending: false });
