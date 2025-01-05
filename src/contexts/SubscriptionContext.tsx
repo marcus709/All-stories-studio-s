@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useToast } from "@/hooks/use-toast";
+import { featureMatrix } from "@/utils/subscriptionUtils";
 
 type SubscriptionPlan = 'free' | 'creator' | 'professional';
 
@@ -17,33 +18,6 @@ const SubscriptionContext = createContext<SubscriptionContextType>({
 });
 
 export const useSubscription = () => useContext(SubscriptionContext);
-
-const featureMatrix = {
-  free: {
-    max_stories: 1,
-    max_characters: 5,
-    ai_prompts: 2,
-    community_access: false,
-    custom_ai: 0,
-    backward_planning: false,
-  },
-  creator: {
-    max_stories: 10,
-    max_characters: 25,
-    ai_prompts: Infinity,
-    community_access: true,
-    custom_ai: 1,
-    backward_planning: true,
-  },
-  professional: {
-    max_stories: Infinity,
-    max_characters: Infinity,
-    ai_prompts: Infinity,
-    community_access: true,
-    custom_ai: 5,
-    backward_planning: true,
-  }
-};
 
 export const SubscriptionProvider = ({ children }: { children: React.ReactNode }) => {
   const [plan, setPlan] = useState<SubscriptionPlan>('free');

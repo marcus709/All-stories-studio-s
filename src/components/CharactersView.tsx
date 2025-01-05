@@ -8,13 +8,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CharacterCard } from "./characters/CharacterCard";
 import { DeleteCharacterDialog } from "./characters/DeleteCharacterDialog";
+import { PaywallAlert } from "./PaywallAlert";
+import { useFeatureAccess } from "@/utils/subscriptionUtils";
 
 export const CharactersView = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [characterToDelete, setCharacterToDelete] = useState<string | null>(null);
+  const [showPaywallAlert, setShowPaywallAlert] = useState(false);
   const session = useSession();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { currentLimits, getRequiredPlan } = useFeatureAccess();
 
   const { data: characters, isLoading } = useQuery({
     queryKey: ["characters", session?.user?.id],
@@ -29,6 +33,14 @@ export const CharactersView = () => {
     },
     enabled: !!session?.user?.id,
   });
+
+  const handleCreateClick = () => {
+    if (characters && characters.length >= currentLimits.max_characters) {
+      setShowPaywallAlert(true);
+      return;
+    }
+    setShowCreateDialog(true);
+  };
 
   const handleDeleteCharacter = async (characterId: string) => {
     try {
@@ -57,6 +69,10 @@ export const CharactersView = () => {
     }
   };
 
+  const requiredPlan = characters && characters.length >= currentLimits.max_characters
+    ? getRequiredPlan('max_characters', characters.length + 1)
+    : null;
+
   return (
     <div className="max-w-7xl mx-auto px-8 py-6">
       <div className="flex items-center justify-between mb-6">
@@ -66,7 +82,7 @@ export const CharactersView = () => {
         </div>
         <Button 
           className="bg-purple-500 hover:bg-purple-600 gap-2"
-          onClick={() => setShowCreateDialog(true)}
+          onClick={handleCreateClick}
         >
           <Plus className="h-4 w-4" />
           Add Character
@@ -102,6 +118,13 @@ export const CharactersView = () => {
         isOpen={!!characterToDelete}
         onClose={() => setCharacterToDelete(null)}
         onConfirm={() => characterToDelete && handleDeleteCharacter(characterToDelete)}
+      />
+
+      <PaywallAlert
+        isOpen={showPaywallAlert}
+        onClose={() => setShowPaywallAlert(false)}
+        feature="characters"
+        requiredPlan={requiredPlan || 'creator'}
       />
     </div>
   );
