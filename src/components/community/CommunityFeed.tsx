@@ -23,37 +23,47 @@ export const CommunityFeed = () => {
     queryKey: ["profile", session?.user?.id],
     queryFn: async () => {
       try {
-        if (!session?.user?.id) throw new Error("No user ID");
+        if (!session?.user?.id) {
+          console.log("No user ID found");
+          return null;
+        }
         
-        const { data, error } = await supabase
+        const { data: existingProfile, error: fetchError } = await supabase
           .from("profiles")
           .select("*")
           .eq("id", session.user.id)
           .single();
 
-        if (error) {
-          console.error("Error fetching profile:", error);
-          throw error;
+        if (fetchError) {
+          console.error("Error fetching profile:", fetchError);
+          // If the error is not a 'not found' error, throw it
+          if (fetchError.code !== 'PGRST116') {
+            throw fetchError;
+          }
         }
 
-        if (!data) {
-          // If no profile exists, create one
-          const { data: newProfile, error: createError } = await supabase
-            .from("profiles")
-            .insert([
-              {
-                id: session.user.id,
-                username: session.user.email?.split("@")[0] || "user",
-              },
-            ])
-            .select()
-            .single();
-
-          if (createError) throw createError;
-          return newProfile as Profile;
+        if (existingProfile) {
+          return existingProfile as Profile;
         }
 
-        return data as Profile;
+        // If no profile exists, create one
+        const { data: newProfile, error: createError } = await supabase
+          .from("profiles")
+          .insert([
+            {
+              id: session.user.id,
+              username: session.user.email?.split("@")[0] || "user",
+            },
+          ])
+          .select()
+          .single();
+
+        if (createError) {
+          console.error("Error creating profile:", createError);
+          throw createError;
+        }
+
+        return newProfile as Profile;
       } catch (error) {
         console.error("Error in profile query:", error);
         throw error;
@@ -77,7 +87,9 @@ export const CommunityFeed = () => {
 
   return (
     <div className="space-y-6">
-      {!profileLoading && profile && <CreatePostForm userProfile={profile} />}
+      {!profileLoading && profile && (
+        <CreatePostForm userId={session?.user?.id!} profile={profile} />
+      )}
       <PostsList />
     </div>
   );
