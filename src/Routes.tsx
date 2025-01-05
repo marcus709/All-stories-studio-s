@@ -1,16 +1,20 @@
-import { Routes as RouterRoutes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import Dashboard from "./pages/Dashboard";
-import Settings from "./pages/Settings";
-import Community from "./pages/Community";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { Header } from "./components/Header";
+import { Home } from "./pages/Home";
+import { Community } from "./pages/Community";
+import { Settings } from "./pages/Settings";
+import { PaymentSuccess } from "./pages/PaymentSuccess";
 
 export const Routes = () => {
   return (
-    <RouterRoutes>
-      <Route path="/" element={<Index />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="/community/*" element={<Community />} />
-    </RouterRoutes>
+    <BrowserRouter>
+      <Header />
+      <Switch>
+        <Route path="/" exact component={Home} />
+        <Route path="/community" component={Community} />
+        <Route path="/settings" component={Settings} />
+        <Route path="/payment/success" element={<PaymentSuccess />} />
+      </Switch>
+    </BrowserRouter>
   );
 };
