@@ -9,10 +9,10 @@ export type StoryIssueType =
 export interface Story {
   id: string;
   title: string;
-  description: string;
-  user_id: string;
+  description: string | null;
   created_at: string;
   updated_at: string;
+  user_id?: string; // Made optional since it's not always needed when displaying stories
 }
 
 export interface StoryIssue {
