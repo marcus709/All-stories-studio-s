@@ -64,19 +64,37 @@ export const StoryLogicView = () => {
     enabled: !!selectedStory?.id,
   });
 
-  const { data: storyIssues, isLoading } = useQuery({
-    queryKey: ["story-issues", selectedStory?.id],
+  // First fetch the story analysis record
+  const { data: storyAnalysis } = useQuery({
+    queryKey: ["story-analysis", selectedStory?.id],
     queryFn: async () => {
-      if (!selectedStory?.id) return [];
+      if (!selectedStory?.id) return null;
+      const { data, error } = await supabase
+        .from("story_analysis")
+        .select("*")
+        .eq("story_id", selectedStory.id)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data;
+    },
+    enabled: !!selectedStory?.id,
+  });
+
+  // Then fetch the issues using the analysis_id
+  const { data: storyIssues, isLoading } = useQuery({
+    queryKey: ["story-issues", storyAnalysis?.id],
+    queryFn: async () => {
+      if (!storyAnalysis?.id) return [];
       const { data, error } = await supabase
         .from("story_issues")
         .select("*")
-        .eq("story_id", selectedStory.id);
+        .eq("analysis_id", storyAnalysis.id);
       
       if (error) throw error;
       return data as StoryIssue[];
     },
-    enabled: !!selectedStory?.id,
+    enabled: !!storyAnalysis?.id,
   });
 
   const handleFileSelect = async (file: File) => {
@@ -97,6 +115,25 @@ export const StoryLogicView = () => {
       title: "Analysis Started",
       description: "Analyzing your story for potential issues...",
     });
+
+    // Create story analysis record if it doesn't exist
+    if (!storyAnalysis) {
+      const { error: analysisError } = await supabase
+        .from("story_analysis")
+        .insert({
+          story_id: selectedStory!.id,
+          user_id: (await supabase.auth.getUser()).data.user!.id,
+        });
+
+      if (analysisError) {
+        toast({
+          title: "Error",
+          description: "Failed to create analysis record",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
 
     setTimeout(() => {
       toast({
