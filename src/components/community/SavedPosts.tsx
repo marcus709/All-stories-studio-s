@@ -75,8 +75,7 @@ export const SavedPosts = () => {
 
       if (postsError) throw postsError;
 
-      // Ensure the posts array is properly typed
-      return (posts as PostData[]) || [];
+      return posts as PostData[];
     },
     enabled: !!session?.user?.id,
   });

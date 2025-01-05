@@ -4,44 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useStory } from "@/contexts/StoryContext";
 import { useToast } from "@/hooks/use-toast";
 import { AnalysisSection } from "./AnalysisSection";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, Check, Clock, Users } from "lucide-react";
+import { IssuesTabs } from "./IssuesTabs";
 import { useSession } from "@supabase/auth-helpers-react";
-
-type StoryIssueType = "plot_hole" | "timeline_inconsistency" | "pov_confusion" | "character_inconsistency";
-
-interface StoryIssue {
-  id: string;
-  issue_type: StoryIssueType;
-  description: string;
-  location: string;
-  severity: number;
-  status: "open" | "resolved";
-}
-
-const issueTypeInfo = {
-  plot_hole: {
-    icon: AlertTriangle,
-    color: "text-yellow-500",
-    label: "Plot Holes",
-  },
-  timeline_inconsistency: {
-    icon: Clock,
-    color: "text-blue-500",
-    label: "Timeline Issues",
-  },
-  pov_confusion: {
-    icon: Users,
-    color: "text-purple-500",
-    label: "POV Confusion",
-  },
-  character_inconsistency: {
-    icon: AlertTriangle,
-    color: "text-red-500",
-    label: "Character Inconsistencies",
-  },
-};
+import { StoryIssueType } from "@/types/story";
 
 export const StoryLogicView = () => {
   const { selectedStory } = useStory();
@@ -90,7 +55,7 @@ export const StoryLogicView = () => {
         .eq("analysis_id", storyAnalysis.id);
       
       if (error) throw error;
-      return data as StoryIssue[];
+      return data;
     },
     enabled: !!storyAnalysis?.id,
   });
@@ -149,6 +114,11 @@ export const StoryLogicView = () => {
     }
   };
 
+  const handleCustomAnalysis = async (customInput: string) => {
+    // Custom analysis logic will be implemented here
+    console.log("Custom analysis input:", customInput);
+  };
+
   if (!selectedStory) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -174,47 +144,12 @@ export const StoryLogicView = () => {
         onDocumentUpload={refetchDocuments}
       />
 
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as StoryIssueType)} className="mt-8">
-        <TabsList className="grid grid-cols-4 mb-6">
-          {Object.entries(issueTypeInfo).map(([type, info]) => (
-            <TabsTrigger key={type} value={type} className="flex items-center gap-2">
-              <info.icon className={`h-4 w-4 ${info.color}`} />
-              {info.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        {Object.keys(issueTypeInfo).map((type) => (
-          <TabsContent key={type} value={type}>
-            {isLoading ? (
-              <div className="text-center py-4">Loading issues...</div>
-            ) : !storyIssues?.filter(issue => issue.issue_type === type).length ? (
-              <Alert>
-                <Check className="h-4 w-4" />
-                <AlertTitle>All Clear!</AlertTitle>
-                <AlertDescription>
-                  No {issueTypeInfo[type as StoryIssueType].label.toLowerCase()} detected in your story.
-                </AlertDescription>
-              </Alert>
-            ) : (
-              <div className="space-y-4">
-                {storyIssues?.filter(issue => issue.issue_type === type).map((issue) => (
-                  <Alert key={issue.id} variant={issue.severity > 7 ? "destructive" : "default"}>
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertTitle className="flex items-center justify-between">
-                      <span>Issue in: {issue.location}</span>
-                      <span className="text-sm font-normal">
-                        Severity: {issue.severity}/10
-                      </span>
-                    </AlertTitle>
-                    <AlertDescription>{issue.description}</AlertDescription>
-                  </Alert>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-        ))}
-      </Tabs>
+      <IssuesTabs
+        activeTab={activeTab}
+        setActiveTab={(value) => setActiveTab(value as StoryIssueType)}
+        storyIssues={storyIssues}
+        isLoading={isLoading}
+      />
     </div>
   );
 };
