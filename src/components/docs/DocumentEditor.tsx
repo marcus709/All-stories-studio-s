@@ -44,7 +44,12 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
     if (document) {
       console.log("Setting document content:", document.content);
       setTitle(document.title);
-      setContent(document.content?.[0]?.content || "");
+      // Handle both string and array content formats
+      if (Array.isArray(document.content)) {
+        setContent(document.content[0]?.content || "");
+      } else {
+        setContent(document.content || "");
+      }
     }
   }, [document]);
 
@@ -53,12 +58,18 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
     
     setIsSaving(true);
     try {
-      console.log("Saving document:", { title, content });
+      // Always save content in the expected array format
+      const contentToSave = [{
+        type: "text",
+        content: content
+      }];
+      
+      console.log("Saving document:", { title, content: contentToSave });
       const { error } = await supabase
         .from("documents")
         .update({
           title,
-          content: [{ type: "text", content }],
+          content: contentToSave,
         })
         .eq("id", documentId);
 
