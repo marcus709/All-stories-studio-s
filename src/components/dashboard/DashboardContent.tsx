@@ -5,6 +5,7 @@ import { StoryFlow } from "@/components/story-flow/StoryFlow";
 import { StoryIdeasView } from "@/components/StoryIdeasView";
 import { StoryDocsView } from "@/components/docs/StoryDocsView";
 import { StoryView } from "./views/StoryView";
+import { StoryLogicView } from "@/components/story-logic/StoryLogicView";
 import { useFeatureAccess } from "@/utils/subscriptionUtils";
 import { PaywallAlert } from "../PaywallAlert";
 import { FeatureKey } from "@/utils/subscriptionUtils";
@@ -13,7 +14,7 @@ import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
-type View = "story" | "characters" | "plot" | "flow" | "ideas" | "docs";
+type View = "story" | "characters" | "plot" | "flow" | "ideas" | "docs" | "logic";
 
 interface DashboardContentProps {
   currentView: View;
@@ -63,6 +64,11 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
         case "docs":
           if (handleFeatureAccess("Story Documentation", "backward_planning")) {
             component = <StoryDocsView />;
+          }
+          break;
+        case "logic":
+          if (handleFeatureAccess("Story Logic", "backward_planning")) {
+            component = <StoryLogicView />;
           }
           break;
         case "story":

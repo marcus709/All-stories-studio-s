@@ -761,6 +761,38 @@ export type Database = {
         }
         Relationships: []
       }
+      story_analysis: {
+        Row: {
+          created_at: string | null
+          id: string
+          story_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          story_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          story_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_analysis_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       story_ideas: {
         Row: {
           created_at: string | null
@@ -798,6 +830,50 @@ export type Database = {
             columns: ["story_id"]
             isOneToOne: false
             referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_issues: {
+        Row: {
+          analysis_id: string
+          created_at: string | null
+          description: string
+          id: string
+          issue_type: Database["public"]["Enums"]["story_issue_type"]
+          location: string | null
+          severity: number | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          analysis_id: string
+          created_at?: string | null
+          description: string
+          id?: string
+          issue_type: Database["public"]["Enums"]["story_issue_type"]
+          location?: string | null
+          severity?: number | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          analysis_id?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          issue_type?: Database["public"]["Enums"]["story_issue_type"]
+          location?: string | null
+          severity?: number | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_issues_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "story_analysis"
             referencedColumns: ["id"]
           },
         ]
@@ -902,6 +978,13 @@ export type Database = {
         | "lover"
         | "ally"
         | "neutral"
+      story_issue_type:
+        | "plot_hole"
+        | "timeline_inconsistency"
+        | "pov_inconsistency"
+        | "character_inconsistency"
+        | "setting_inconsistency"
+        | "logic_flaw"
       topic_privacy: "public" | "private" | "friends"
     }
     CompositeTypes: {
