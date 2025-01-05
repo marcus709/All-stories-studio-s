@@ -17,7 +17,10 @@ interface Comment {
   id: string;
   content: string;
   created_at: string;
-  get_comment_profiles: PostProfile[];
+  get_comment_profiles: Array<{
+    username: string;
+    avatar_url: string | null;
+  }>;
 }
 
 interface PostData {
@@ -26,9 +29,13 @@ interface PostData {
   created_at: string;
   user_id: string;
   get_post_profiles: PostProfile[];
-  post_likes: { id: string; user_id: string }[];
+  post_likes: Array<{
+    id: string;
+    post_id: string;
+    user_id: string;
+  }>;
   comments: Comment[];
-  post_tags: { tag: string }[];
+  post_tags: Array<{ tag: string }>;
 }
 
 export const SavedPosts = () => {
