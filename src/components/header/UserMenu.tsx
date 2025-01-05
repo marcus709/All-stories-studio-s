@@ -13,6 +13,7 @@ import { Session } from "@supabase/supabase-js";
 import { Badge } from "@/components/ui/badge";
 import { useSubscription } from "@/contexts/SubscriptionContext";
 import { capitalize } from "lodash";
+import { Crown } from "lucide-react";
 
 interface UserMenuProps {
   session: Session | null;
@@ -27,6 +28,17 @@ interface UserMenuProps {
 
 export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuProps) => {
   const { plan } = useSubscription();
+
+  const getPlanColor = (planType: string) => {
+    switch (planType) {
+      case 'professional':
+        return "bg-gradient-to-r from-purple-500 to-pink-500 text-white";
+      case 'creator':
+        return "bg-gradient-to-r from-blue-500 to-cyan-500 text-white";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
 
   if (!session) {
     return (
@@ -50,7 +62,11 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
   return (
     <div className="flex items-center gap-3">
       {plan !== 'free' && (
-        <Badge variant="secondary" className="capitalize">
+        <Badge 
+          variant="secondary" 
+          className={`capitalize flex items-center gap-1 ${getPlanColor(plan)}`}
+        >
+          <Crown className="h-3 w-3" />
           {plan} Plan
         </Badge>
       )}
@@ -65,7 +81,7 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
               </AvatarFallback>
             </Avatar>
             <span className="text-sm font-medium">
-              {profile?.username || "Marcus"}
+              {profile?.username || session.user.email?.split('@')[0]}
             </span>
           </Button>
         </DropdownMenuTrigger>
@@ -73,13 +89,15 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">
-                {profile?.username || "Marcus"}
+                {profile?.username || session.user.email?.split('@')[0]}
               </p>
               <p className="text-xs leading-none text-muted-foreground">
                 {session.user.email}
               </p>
               {plan !== 'free' && (
-                <p className="text-xs text-purple-600 font-medium">
+                <p className={`text-xs font-medium mt-1 ${
+                  plan === 'professional' ? 'text-purple-600' : 'text-blue-600'
+                }`}>
                   {capitalize(plan)} Plan
                 </p>
               )}
