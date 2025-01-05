@@ -13,9 +13,8 @@ import { Plus, AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
 
 export const StoryLogicView = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [issueType, setIssueType] = useState<StoryIssueType>("PLOT_HOLE");
+  const [issueType, setIssueType] = useState<StoryIssueType>("plot_hole");
   const { selectedStory } = useStory();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -46,7 +45,6 @@ export const StoryLogicView = () => {
         .eq("analysis_id", storyAnalysis.id);
       
       if (error) throw error;
-      
       return data as StoryIssue[];
     },
     enabled: !!storyAnalysis?.id,
@@ -55,14 +53,16 @@ export const StoryLogicView = () => {
   });
 
   const createIssueMutation = useMutation({
-    mutationFn: async (newIssue: { title: string; description: string; type: StoryIssueType }) => {
+    mutationFn: async (newIssue: { description: string; type: StoryIssueType }) => {
       const { data, error } = await supabase
         .from("story_issues")
         .insert({
-          title: newIssue.title,
           description: newIssue.description,
           issue_type: newIssue.type,
           analysis_id: storyAnalysis?.id,
+          status: "open",
+          severity: 1,
+          location: ""
         })
         .select()
         .single();
@@ -73,7 +73,6 @@ export const StoryLogicView = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["story-issues"] });
       setIsOpen(false);
-      setTitle("");
       setDescription("");
       toast({
         title: "Success",
@@ -92,7 +91,6 @@ export const StoryLogicView = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     createIssueMutation.mutate({
-      title,
       description,
       type: issueType,
     });
@@ -100,11 +98,11 @@ export const StoryLogicView = () => {
 
   const getIssueTypeIcon = (type: StoryIssueType) => {
     switch (type) {
-      case "PLOT_HOLE":
+      case "plot_hole":
         return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
-      case "CONSISTENCY":
+      case "consistency":
         return <CheckCircle2 className="h-5 w-5 text-green-500" />;
-      case "CHARACTER":
+      case "character":
         return <XCircle className="h-5 w-5 text-red-500" />;
       default:
         return null;
@@ -131,15 +129,6 @@ export const StoryLogicView = () => {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="title">Title</Label>
-                <Input
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
                 <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
@@ -156,9 +145,9 @@ export const StoryLogicView = () => {
                   onChange={(e) => setIssueType(e.target.value as StoryIssueType)}
                   className="w-full border rounded-md p-2"
                 >
-                  <option value="PLOT_HOLE">Plot Hole</option>
-                  <option value="CONSISTENCY">Consistency Issue</option>
-                  <option value="CHARACTER">Character Issue</option>
+                  <option value="plot_hole">Plot Hole</option>
+                  <option value="consistency">Consistency Issue</option>
+                  <option value="character">Character Issue</option>
                 </select>
               </div>
               <Button type="submit" className="w-full">
@@ -181,7 +170,6 @@ export const StoryLogicView = () => {
                 {issue.issue_type.replace("_", " ")}
               </span>
             </div>
-            <h3 className="font-semibold mb-2">{issue.title}</h3>
             <p className="text-gray-600 text-sm">{issue.description}</p>
           </div>
         ))}
