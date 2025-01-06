@@ -5,8 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { GroupHeader } from "./chat/GroupHeader";
 import { MessageList } from "./chat/MessageList";
 import { MessageInput } from "./chat/MessageInput";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { AlertCircle } from "lucide-react";
 
 interface GroupChatProps {
   group: any;
@@ -132,15 +133,21 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
 
   if (!isMember) {
     return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-12rem)] bg-white rounded-lg shadow-sm p-6">
-        <Alert className="mb-4">
-          <AlertDescription>
-            You need to be a member of this group to view the chat.
-          </AlertDescription>
-        </Alert>
-        <Button onClick={onBack} variant="outline">
-          Go Back
-        </Button>
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-12rem)] bg-background rounded-lg shadow-sm p-8">
+        <div className="max-w-md w-full space-y-4">
+          <Alert variant="destructive" className="border-destructive/50">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Access Restricted</AlertTitle>
+            <AlertDescription className="mt-2">
+              You need to be a member of this group to view and participate in the chat.
+            </AlertDescription>
+          </Alert>
+          <div className="flex justify-center">
+            <Button onClick={onBack} variant="outline" className="min-w-[120px]">
+              Go Back
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
