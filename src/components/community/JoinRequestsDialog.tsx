@@ -94,10 +94,10 @@ export const JoinRequestsDialog = ({ open, onOpenChange }: JoinRequestsDialogPro
           <DialogTitle>Pending Requests</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          {requests?.length === 0 ? (
+          {!requests || requests.length === 0 ? (
             <p className="text-center text-gray-500">No pending requests</p>
           ) : (
-            requests?.map((request) => (
+            requests.map((request) => (
               <div
                 key={request.id}
                 className="flex items-center justify-between space-x-4 rounded-lg border p-4"
