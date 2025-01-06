@@ -47,7 +47,19 @@ export const FriendsList = () => {
         if (receivedError) throw receivedError;
 
         // Combine both sets of friendships
-        return [...(sentFriendships || []), ...(receivedFriendships || [])] as FriendshipWithProfile[];
+        const allFriendships = [
+          ...(sentFriendships || []).map(f => ({
+            ...f,
+            friend: f.friend
+          })),
+          ...(receivedFriendships || []).map(f => ({
+            ...f,
+            friend: f.friend
+          }))
+        ];
+
+        console.log('All friendships:', allFriendships);
+        return allFriendships as FriendshipWithProfile[];
       } catch (error) {
         console.error("Error in friends query:", error);
         setError("Unable to load friends at this time");
@@ -71,8 +83,8 @@ export const FriendsList = () => {
           table: 'friendships',
           filter: `or(user_id.eq.${session.user.id},friend_id.eq.${session.user.id})`,
         },
-        () => {
-          // Refetch friends list when any change occurs
+        (payload) => {
+          console.log('Friendship change detected:', payload);
           refetch();
         }
       )
