@@ -5,11 +5,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { FriendItem } from "./FriendItem";
 import { FriendshipWithProfile, filterAcceptedFriendships, removeDuplicateFriends } from "@/utils/friendshipUtils";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 export const FriendsList = () => {
   const session = useSession();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const queryClient = useQueryClient();
 
   const { data: friends, isLoading, refetch } = useQuery({
@@ -22,20 +26,6 @@ export const FriendsList = () => {
           return [];
         }
 
-        // First, let's verify we can access the friendships table at all
-        const { data: testAccess, error: testError } = await supabase
-          .from("friendships")
-          .select("id")
-          .limit(1);
-
-        if (testError) {
-          console.error("Error accessing friendships table:", testError);
-          throw new Error("Cannot access friendships table");
-        }
-
-        console.log("Successfully accessed friendships table");
-
-        // Get all friendships where user is the requester
         const { data: sentFriendships, error: sentError } = await supabase
           .from("friendships")
           .select(`
@@ -50,9 +40,7 @@ export const FriendsList = () => {
           console.error("Error fetching sent friendships:", sentError);
           throw sentError;
         }
-        console.log("Sent friendships raw data:", sentFriendships);
 
-        // Get all friendships where user is the recipient
         const { data: receivedFriendships, error: receivedError } = await supabase
           .from("friendships")
           .select(`
@@ -67,43 +55,9 @@ export const FriendsList = () => {
           console.error("Error fetching received friendships:", receivedError);
           throw receivedError;
         }
-        console.log("Received friendships raw data:", receivedFriendships);
 
-        // Log raw data before filtering
-        console.log("All sent friendships before filtering:", sentFriendships?.map(f => ({
-          id: f.id,
-          status: f.status,
-          friendId: f.friend?.id,
-          friendUsername: f.friend?.username
-        })));
-        
-        console.log("All received friendships before filtering:", receivedFriendships?.map(f => ({
-          id: f.id,
-          status: f.status,
-          friendId: f.friend?.id,
-          friendUsername: f.friend?.username
-        })));
-
-        // For received friendships, we need to map the friend data correctly
-        const mappedReceivedFriendships = receivedFriendships?.map(f => ({
-          ...f,
-          friend: f.friend // The friend field contains the sender's profile
-        })) || [];
-
-        // Combine and filter friendships
-        const sentFiltered = filterAcceptedFriendships(sentFriendships || []);
-        const receivedFiltered = filterAcceptedFriendships(mappedReceivedFriendships);
-        
-        console.log("Filtered sent friendships:", sentFiltered);
-        console.log("Filtered received friendships:", receivedFiltered);
-
-        const allFriendships = [...sentFiltered, ...receivedFiltered];
-        console.log("Combined friendships before deduplication:", allFriendships);
-
-        // Remove duplicates based on friend.id
+        const allFriendships = [...sentFriendships, ...receivedFriendships];
         const uniqueFriendships = removeDuplicateFriends(allFriendships);
-        console.log("Final unique friendships:", uniqueFriendships);
-
         return uniqueFriendships;
       } catch (error) {
         console.error("Error in friends query:", error);
@@ -119,44 +73,13 @@ export const FriendsList = () => {
     enabled: !!session?.user?.id,
   });
 
-  // Subscribe to real-time updates for friendships
-  useEffect(() => {
-    if (!session?.user?.id) {
-      console.log("No user session for real-time subscription");
-      return;
-    }
-
-    console.log("Setting up real-time subscription for friendships");
-    const channel = supabase
-      .channel('friends-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'friendships',
-          filter: `or(user_id.eq.${session.user.id},friend_id.eq.${session.user.id})`,
-        },
-        (payload) => {
-          console.log("Received friendship change:", payload);
-          queryClient.invalidateQueries({ queryKey: ["friends"] });
-          queryClient.invalidateQueries({ queryKey: ["friend-requests"] });
-          refetch();
-        }
-      )
-      .subscribe((status) => {
-        console.log("Subscription status:", status);
-      });
-
-    return () => {
-      console.log("Cleaning up real-time subscription");
-      supabase.removeChannel(channel);
-    };
-  }, [session?.user?.id, refetch, queryClient]);
+  const filteredFriends = friends?.filter(friendship => 
+    friendship.friend.username?.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
 
   if (error) {
     return (
-      <div className="p-4 text-sm text-red-500 bg-red-50 rounded-lg">
+      <div className="p-2 text-sm text-red-500 bg-red-50 rounded-lg">
         {error}
       </div>
     );
@@ -165,28 +88,40 @@ export const FriendsList = () => {
   if (isLoading) {
     return (
       <div className="p-4 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500" />
-      </div>
-    );
-  }
-
-  if (!friends || friends.length === 0) {
-    return (
-      <div className="p-4 text-sm text-gray-500 text-center">
-        No friends yet. Add some friends to chat!
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-2">
-      {friends.map((friendship) => (
-        <FriendItem 
-          key={friendship.id}
-          friend={friendship.friend}
-          friendshipId={friendship.id}
+    <div className="space-y-3">
+      <div className="relative">
+        <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+        <Input
+          placeholder="Search friends..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-8 h-8 text-sm"
         />
-      ))}
+      </div>
+      
+      <ScrollArea className="h-[280px] pr-4">
+        {filteredFriends.length === 0 ? (
+          <div className="p-4 text-sm text-gray-500 text-center bg-gray-50 rounded-lg">
+            {searchQuery ? "No friends found" : "No friends yet. Add some friends to chat!"}
+          </div>
+        ) : (
+          <div className="space-y-1">
+            {filteredFriends.map((friendship) => (
+              <FriendItem 
+                key={friendship.id}
+                friend={friendship.friend}
+                friendshipId={friendship.id}
+              />
+            ))}
+          </div>
+        )}
+      </ScrollArea>
     </div>
   );
 };
