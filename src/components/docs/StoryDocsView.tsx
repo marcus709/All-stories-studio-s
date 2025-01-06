@@ -45,7 +45,7 @@ export const StoryDocsView = () => {
       const transformedData: Document[] = data.map(doc => ({
         ...doc,
         content: Array.isArray(doc.content) 
-          ? doc.content.map(item => ({
+          ? doc.content.map((item: any) => ({
               type: typeof item.type === 'string' ? item.type : 'text',
               content: typeof item.content === 'string' ? item.content : ''
             }))
