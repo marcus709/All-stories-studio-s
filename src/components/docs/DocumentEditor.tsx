@@ -53,7 +53,7 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
         try {
           const docContent = document.content as Json;
           if (Array.isArray(docContent) && docContent.length > 0) {
-            const firstItem = docContent[0] as DocumentContent;
+            const firstItem = docContent[0] as unknown as DocumentContent;
             if (firstItem && typeof firstItem === 'object' && 'content' in firstItem) {
               setContent(firstItem.content || "");
             }
@@ -81,10 +81,10 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
         throw new Error("Title is required");
       }
 
-      const contentToSave: DocumentContent[] = [{
+      const contentToSave = [{
         type: "text",
         content: content
-      }];
+      }] as unknown as Json;
 
       const { error } = await supabase
         .from("documents")
