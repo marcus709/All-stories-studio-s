@@ -66,7 +66,7 @@ export const PrivateChat = ({ friendId }: PrivateChatProps) => {
         .from("private_messages")
         .select(`
           *,
-          profiles:profiles!private_messages_sender_id_fkey (
+          profiles:sender_id(
             username,
             avatar_url
           )
@@ -107,10 +107,12 @@ export const PrivateChat = ({ friendId }: PrivateChatProps) => {
             .eq("id", payload.new.sender_id)
             .single();
 
-          setMessages((current) => [
-            ...current,
-            { ...payload.new, profiles: profileData },
-          ]);
+          const newMessage: Message = {
+            ...payload.new,
+            profiles: profileData
+          };
+
+          setMessages((current) => [...current, newMessage]);
         }
       )
       .subscribe();

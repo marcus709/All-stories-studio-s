@@ -42,7 +42,7 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
                 <AvatarImage src={message.profiles.avatar_url} />
               ) : (
                 <AvatarFallback>
-                  {message.profiles?.username?.charAt(0).toUpperCase() || "U"}
+                  {message.profiles?.username?.[0]?.toUpperCase() || "U"}
                 </AvatarFallback>
               )}
             </Avatar>
