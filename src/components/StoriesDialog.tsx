@@ -122,7 +122,7 @@ export function StoriesDialog() {
             ) : (
               <StoriesGrid
                 stories={stories || []}
-                onStorySelect={(story) => {
+                onStorySelect={(story: Story) => {
                   setSelectedStory(story);
                   setIsOpen(false);
                 }}
