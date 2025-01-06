@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Profile } from "@/integrations/supabase/types/tables.types";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface FriendshipWithProfile {
   id: string;
@@ -14,9 +15,10 @@ interface FriendshipWithProfile {
 export const FriendsList = () => {
   const session = useSession();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
 
-  const { data: friends, refetch } = useQuery({
+  const { data: friends, isLoading, refetch } = useQuery({
     queryKey: ["friends", session?.user?.id],
     queryFn: async () => {
       try {
@@ -80,7 +82,6 @@ export const FriendsList = () => {
             }))
         ];
 
-        console.log('Processed friendships:', allFriendships);
         return allFriendships as FriendshipWithProfile[];
       } catch (error) {
         console.error("Error in friends query:", error);
@@ -96,7 +97,7 @@ export const FriendsList = () => {
     if (!session?.user?.id) return;
 
     const channel = supabase
-      .channel('schema-db-changes')
+      .channel('friends-changes')
       .on(
         'postgres_changes',
         {
@@ -105,8 +106,7 @@ export const FriendsList = () => {
           table: 'friendships',
           filter: `or(user_id.eq.${session.user.id},friend_id.eq.${session.user.id})`,
         },
-        (payload) => {
-          console.log('Friendship change detected:', payload);
+        () => {
           refetch();
         }
       )
@@ -118,14 +118,26 @@ export const FriendsList = () => {
   }, [session?.user?.id, refetch]);
 
   if (error) {
-    return <p className="text-sm text-red-500">{error}</p>;
+    return (
+      <div className="p-4 text-sm text-red-500 bg-red-50 rounded-lg">
+        {error}
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="p-4 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500" />
+      </div>
+    );
   }
 
   if (!friends || friends.length === 0) {
     return (
-      <p className="text-sm text-gray-500">
+      <div className="p-4 text-sm text-gray-500 text-center">
         No friends yet. Add some friends to chat!
-      </p>
+      </div>
     );
   }
 
@@ -135,7 +147,7 @@ export const FriendsList = () => {
         <button
           key={friendship.id}
           onClick={() => navigate(`/community/chat/${friendship.friend.id}`)}
-          className="w-full flex items-center gap-2 rounded-lg p-2 hover:bg-gray-50"
+          className="w-full flex items-center gap-2 rounded-lg p-2 hover:bg-gray-50 transition-colors"
         >
           <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
             {friendship.friend.avatar_url ? (
