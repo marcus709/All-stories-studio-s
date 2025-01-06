@@ -42,15 +42,28 @@ export const StoryDocsView = () => {
       }
 
       // Transform the data to match Document type
-      const transformedData: Document[] = data.map(doc => ({
-        ...doc,
-        content: Array.isArray(doc.content) 
-          ? doc.content.map((item: any) => ({
+      const transformedData: Document[] = data.map(doc => {
+        console.log("Raw document data:", doc); // Debug log
+        
+        let transformedContent: DocumentContent[] = [];
+        try {
+          if (Array.isArray(doc.content)) {
+            transformedContent = doc.content.map(item => ({
               type: typeof item.type === 'string' ? item.type : 'text',
               content: typeof item.content === 'string' ? item.content : ''
-            }))
-          : []
-      }));
+            }));
+          }
+        } catch (err) {
+          console.error("Error transforming document content:", err);
+        }
+
+        return {
+          ...doc,
+          content: transformedContent
+        };
+      });
+
+      console.log("Transformed documents:", transformedData); // Debug log
 
       if (transformedData.length > 0 && !selectedDocId) {
         setSelectedDocId(transformedData[0].id);

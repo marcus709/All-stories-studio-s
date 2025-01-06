@@ -46,6 +46,7 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
   const handleSave = async () => {
     try {
       setIsSaving(true);
+      console.log("Saving content:", content); // Debug log
 
       if (!title.trim()) {
         throw new Error("Title is required");
@@ -60,13 +61,15 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
         content: content
       }];
 
+      console.log("Document content to save:", documentContent); // Debug log
+
       if (document?.id) {
         // Update existing document
         const { error } = await supabase
           .from("documents")
           .update({
             title,
-            content: documentContent as any, // Type assertion needed for Supabase
+            content: documentContent,
             updated_at: new Date().toISOString()
           })
           .eq("id", document.id);
@@ -78,7 +81,7 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
           .from("documents")
           .insert({
             title,
-            content: documentContent as any, // Type assertion needed for Supabase
+            content: documentContent,
             story_id: storyId,
             user_id: session.user.id
           });
@@ -116,7 +119,10 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
       <div className="min-h-[500px] border rounded-lg">
         <RichTextEditor
           content={content}
-          onChange={(value) => setContent(value)}
+          onChange={(value) => {
+            console.log("Content changed:", value); // Debug log
+            setContent(value);
+          }}
           className="min-h-[500px]"
         />
       </div>
