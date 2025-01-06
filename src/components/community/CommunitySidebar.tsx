@@ -7,6 +7,7 @@ import { AddFriendsDialog } from "./AddFriendsDialog";
 import { useSubscription } from "@/contexts/SubscriptionContext";
 import { capitalize } from "lodash";
 import { FriendRequestsList } from "./FriendRequestsList";
+import { FriendsList } from "./FriendsList";
 
 const navItems = [
   { icon: MessageSquare, label: "Feed", href: "/community" },
@@ -111,9 +112,7 @@ export const CommunitySidebar = () => {
 
       <div className="pt-4 border-t border-gray-100">
         <h3 className="text-sm font-medium text-gray-900 mb-3">Friends</h3>
-        <p className="text-sm text-gray-500">
-          No friends yet. Add some friends to chat!
-        </p>
+        <FriendsList />
       </div>
     </div>
   );
