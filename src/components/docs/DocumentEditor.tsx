@@ -27,12 +27,11 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
     if (document?.content) {
       try {
         console.log("Raw document content:", document.content);
-        const documentContent = document.content;
-        if (Array.isArray(documentContent) && documentContent.length > 0) {
-          const firstContent = documentContent[0];
-          if (typeof firstContent === 'object' && 'content' in firstContent) {
+        if (Array.isArray(document.content) && document.content.length > 0) {
+          const firstContent = document.content[0];
+          if (typeof firstContent === 'object' && firstContent !== null && 'content' in firstContent) {
             console.log("Setting content to:", firstContent.content);
-            setContent(firstContent.content);
+            setContent(firstContent.content as string);
           }
         }
       } catch (error) {
@@ -66,29 +65,29 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
 
       console.log("Document content to save:", documentContent);
 
-      if (document?.id) {
-        const { error } = await supabase
-          .from("documents")
-          .update({
-            title,
-            content: documentContent,
-            updated_at: new Date().toISOString()
-          })
-          .eq("id", document.id);
+      const { data, error } = document?.id 
+        ? await supabase
+            .from("documents")
+            .update({
+              title,
+              content: documentContent,
+              updated_at: new Date().toISOString()
+            })
+            .eq("id", document.id)
+            .select()
+        : await supabase
+            .from("documents")
+            .insert({
+              title,
+              content: documentContent,
+              story_id: storyId,
+              user_id: session.user.id
+            })
+            .select();
 
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("documents")
-          .insert({
-            title,
-            content: documentContent,
-            story_id: storyId,
-            user_id: session.user.id
-          });
+      if (error) throw error;
 
-        if (error) throw error;
-      }
+      console.log("Saved document:", data);
 
       toast({
         title: "Success",

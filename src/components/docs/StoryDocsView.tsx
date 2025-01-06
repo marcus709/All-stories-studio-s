@@ -50,7 +50,7 @@ export const StoryDocsView = () => {
 
       console.log("Raw documents data:", data);
 
-      const transformedData: Document[] = data.map(doc => {
+      const transformedData: Document[] = (data || []).map(doc => {
         console.log("Processing document:", doc);
         let transformedContent = [];
         try {
