@@ -24,6 +24,16 @@ interface GroupSettingsDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+type GroupMember = {
+  id: string;
+  role: string;
+  user: {
+    id: string;
+    username: string | null;
+    avatar_url: string | null;
+  } | null;
+};
+
 export const GroupSettingsDialog = ({
   group,
   isCreator,
@@ -39,7 +49,7 @@ export const GroupSettingsDialog = ({
   const [userSearchQuery, setUserSearchQuery] = useState("");
 
   // Query for group members
-  const { data: members } = useQuery({
+  const { data: members } = useQuery<GroupMember[]>({
     queryKey: ["group-members", group.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -47,7 +57,7 @@ export const GroupSettingsDialog = ({
         .select(`
           id,
           role,
-          user:profiles!group_members_user_id_fkey(
+          user:profiles!group_members_user_id_fkey_profiles (
             id,
             username,
             avatar_url
