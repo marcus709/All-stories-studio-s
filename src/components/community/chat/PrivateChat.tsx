@@ -78,12 +78,12 @@ export const PrivateChat = ({ friendId }: PrivateChatProps) => {
         .order("created_at", { ascending: true });
 
       if (error) throw error;
-      
+
       const formattedMessages: Message[] = (data || []).map(msg => ({
         ...msg,
         profiles: msg.sender
       }));
-      
+
       setMessages(formattedMessages);
     } catch (error) {
       console.error("Error fetching messages:", error);

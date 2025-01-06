@@ -987,6 +987,17 @@ export type Database = {
           username: string | null
         }[]
       }
+      get_message_sender_profiles: {
+        Args: {
+          message_row: unknown
+        }
+        Returns: {
+          avatar_url: string | null
+          bio: string | null
+          id: string
+          username: string | null
+        }[]
+      }
       get_post_profiles: {
         Args: {
           post_row: unknown
