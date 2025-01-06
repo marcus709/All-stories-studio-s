@@ -1,13 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { GroupHeader } from "./chat/GroupHeader";
 import { MessageList } from "./chat/MessageList";
 import { MessageInput } from "./chat/MessageInput";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { AlertCircle } from "lucide-react";
+import { GroupHeader } from "./chat/GroupHeader";
+import { supabase } from "@/integrations/supabase/client";
 import { RealtimeChannel } from "@supabase/supabase-js";
 
 interface GroupChatProps {
@@ -17,10 +13,9 @@ interface GroupChatProps {
 
 export const GroupChat = ({ group, onBack }: GroupChatProps) => {
   const session = useSession();
-  const { toast } = useToast();
   const [messages, setMessages] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isMember, setIsMember] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const channelRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
@@ -42,16 +37,20 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
         setIsLoading(false);
         return;
       }
-      
+
       const { data, error } = await supabase
         .from("group_members")
-        .select("id")
+        .select()
         .eq("group_id", group.id)
         .eq("user_id", session.user.id)
         .single();
 
-      if (error) throw error;
-      setIsMember(!!data);
+      if (error) {
+        console.error("Error checking membership:", error);
+        setIsMember(false);
+      } else {
+        setIsMember(!!data);
+      }
     } catch (error) {
       console.error("Error checking membership:", error);
       setIsMember(false);
@@ -61,13 +60,12 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
   };
 
   const fetchMessages = async () => {
-    if (!isMember) return;
     try {
       const { data, error } = await supabase
         .from("group_messages")
         .select(`
           *,
-          profiles:profiles!group_messages_user_id_fkey_profiles (
+          profiles:user_id (
             username,
             avatar_url
           )
@@ -75,23 +73,19 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
         .eq("group_id", group.id)
         .order("created_at", { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
+
       setMessages(data || []);
     } catch (error) {
       console.error("Error fetching messages:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load messages",
-        variant: "destructive",
-      });
     }
   };
 
   const setupRealtimeSubscription = () => {
-    if (!isMember) return;
-    
     const channel = supabase
-      .channel("group_messages")
+      .channel(`group_${group.id}`)
       .on(
         "postgres_changes",
         {
@@ -101,17 +95,21 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
           filter: `group_id=eq.${group.id}`,
         },
         async (payload) => {
-          // Fetch the profile information for the new message
-          const { data: profileData } = await supabase
-            .from("profiles")
-            .select("username, avatar_url")
-            .eq("id", payload.new.user_id)
+          const { data: messageWithProfile } = await supabase
+            .from("group_messages")
+            .select(`
+              *,
+              profiles:user_id (
+                username,
+                avatar_url
+              )
+            `)
+            .eq("id", payload.new.id)
             .single();
 
-          setMessages((current) => [
-            ...current,
-            { ...payload.new, profiles: profileData },
-          ]);
+          if (messageWithProfile) {
+            setMessages((current) => [...current, messageWithProfile]);
+          }
         }
       )
       .subscribe();
@@ -132,48 +130,33 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
       if (error) throw error;
     } catch (error) {
       console.error("Error sending message:", error);
-      toast({
-        title: "Error",
-        description: "Failed to send message",
-        variant: "destructive",
-      });
     }
   };
 
   if (isLoading) {
-    return <div className="flex items-center justify-center py-8">Loading...</div>;
+    return <div>Loading...</div>;
   }
 
   if (!isMember) {
     return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-12rem)] bg-background rounded-lg shadow-sm p-8">
-        <div className="max-w-md w-full space-y-4">
-          <Alert variant="destructive" className="border-destructive/50">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Access Restricted</AlertTitle>
-            <AlertDescription className="mt-2">
-              You need to be a member of this group to view and participate in the chat.
-            </AlertDescription>
-          </Alert>
-          <div className="flex justify-center">
-            <Button onClick={onBack} variant="outline" className="min-w-[120px]">
-              Go Back
-            </Button>
-          </div>
+      <div className="p-4">
+        <button onClick={onBack} className="mb-4">
+          ← Back
+        </button>
+        <div className="text-center py-8">
+          <p>You are not a member of this group.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-12rem)] bg-white rounded-lg shadow-sm">
-      <GroupHeader groupName={group.name} onBack={onBack} />
-      <div className="flex-1 overflow-hidden">
-        <MessageList messages={messages} isLoading={isLoading} />
+    <div className="flex flex-col h-full">
+      <GroupHeader group={group} onBack={onBack} />
+      <div className="flex-1 overflow-y-auto">
+        <MessageList messages={messages} />
       </div>
-      <div className="sticky bottom-0 bg-white border-t p-4">
-        <MessageInput onSendMessage={handleSendMessage} />
-      </div>
+      <MessageInput onSendMessage={handleSendMessage} />
     </div>
   );
 };
