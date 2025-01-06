@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Profile } from "@/integrations/supabase/types/tables.types";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface FriendshipWithProfile {
   id: string;
@@ -14,15 +15,15 @@ interface FriendshipWithProfile {
 export const FriendsList = () => {
   const session = useSession();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
-  const queryClient = useQueryClient();
 
-  const { data: friends, isLoading } = useQuery({
+  const { data: friends, isLoading, refetch } = useQuery({
     queryKey: ["friends", session?.user?.id],
     queryFn: async () => {
       try {
-        console.log("Fetching friends for user:", session?.user?.id);
-        
+        if (!session?.user?.id) return [];
+
         // Get friendships where user is the requester
         const { data: sentFriendships, error: sentError } = await supabase
           .from("friendships")
@@ -35,7 +36,7 @@ export const FriendsList = () => {
               avatar_url
             )
           `)
-          .eq("user_id", session?.user?.id)
+          .eq("user_id", session.user.id)
           .eq("status", "accepted");
 
         if (sentError) {
@@ -55,7 +56,7 @@ export const FriendsList = () => {
               avatar_url
             )
           `)
-          .eq("friend_id", session?.user?.id)
+          .eq("friend_id", session.user.id)
           .eq("status", "accepted");
 
         if (receivedError) {
@@ -63,7 +64,7 @@ export const FriendsList = () => {
           throw receivedError;
         }
 
-        // Combine and filter out any null friend entries
+        // Combine both sets of friendships
         const allFriendships = [
           ...(sentFriendships || [])
             .filter(f => f.friend)
@@ -81,7 +82,6 @@ export const FriendsList = () => {
             }))
         ];
 
-        console.log("Combined friendships:", allFriendships);
         return allFriendships as FriendshipWithProfile[];
       } catch (error) {
         console.error("Error in friends query:", error);
@@ -92,12 +92,10 @@ export const FriendsList = () => {
     enabled: !!session?.user?.id,
   });
 
-  // Subscribe to real-time updates
+  // Subscribe to real-time updates for friendships
   useEffect(() => {
     if (!session?.user?.id) return;
 
-    console.log("Setting up real-time subscription for friendships");
-    
     const channel = supabase
       .channel('friends-changes')
       .on(
@@ -108,22 +106,16 @@ export const FriendsList = () => {
           table: 'friendships',
           filter: `or(user_id.eq.${session.user.id},friend_id.eq.${session.user.id})`,
         },
-        (payload) => {
-          console.log("Received friendship change:", payload);
-          // Invalidate both friends and friend-requests queries
-          queryClient.invalidateQueries({ queryKey: ["friends"] });
-          queryClient.invalidateQueries({ queryKey: ["friend-requests"] });
+        () => {
+          refetch();
         }
       )
-      .subscribe((status) => {
-        console.log("Subscription status:", status);
-      });
+      .subscribe();
 
     return () => {
-      console.log("Cleaning up real-time subscription");
       supabase.removeChannel(channel);
     };
-  }, [session?.user?.id, queryClient]);
+  }, [session?.user?.id, refetch]);
 
   if (error) {
     return (
