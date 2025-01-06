@@ -15,6 +15,7 @@ import { JoinRequestsDialog } from "./JoinRequestsDialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { GroupSearchResults } from "./GroupSearchResults";
 
 export const MyGroups = () => {
   const session = useSession();
@@ -37,6 +38,13 @@ export const MyGroups = () => {
     queryFn: async () => {
       if (!searchQuery) return [];
 
+      const { data: memberGroups } = await supabase
+        .from("group_members")
+        .select("group_id")
+        .eq("user_id", session?.user?.id);
+
+      const memberGroupIds = memberGroups?.map(mg => mg.group_id) || [];
+
       const { data, error } = await supabase
         .from("groups")
         .select(`
@@ -45,38 +53,17 @@ export const MyGroups = () => {
             user_id
           )
         `)
-        .ilike("name", `%${searchQuery}%`)
-        .not("group_members.user_id", "eq", session?.user?.id);
+        .ilike("name", `%${searchQuery}%`);
 
       if (error) throw error;
-      return data;
+
+      // Add is_member flag to each group
+      return data.map(group => ({
+        ...group,
+        is_member: memberGroupIds.includes(group.id)
+      }));
     },
     enabled: !!searchQuery && !!session?.user?.id,
-  });
-
-  // Query for pending join requests count
-  const { data: pendingRequestsCount } = useQuery({
-    queryKey: ["pending-requests-count", session?.user?.id],
-    queryFn: async () => {
-      const { data: groups } = await supabase
-        .from("groups")
-        .select("id")
-        .eq("created_by", session?.user?.id);
-
-      if (!groups?.length) return 0;
-
-      const groupIds = groups.map(g => g.id);
-
-      const { count, error } = await supabase
-        .from("group_join_requests")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "pending")
-        .in("group_id", groupIds);
-
-      if (error) throw error;
-      return count || 0;
-    },
-    enabled: !!session?.user?.id,
   });
 
   // Handle group selection from TrendingTopics
@@ -100,46 +87,8 @@ export const MyGroups = () => {
     handleDeleteSuccess
   );
 
-  const handleJoinGroup = async (group: any) => {
-    try {
-      if (group.privacy === "public") {
-        const { error } = await supabase
-          .from("group_members")
-          .insert({
-            group_id: group.id,
-            user_id: session?.user?.id,
-          });
-
-        if (error) throw error;
-
-        toast({
-          title: "Success",
-          description: "You have joined the group",
-        });
-      } else {
-        // Send join request for private groups
-        const { error } = await supabase
-          .from("group_join_requests")
-          .insert({
-            group_id: group.id,
-            user_id: session?.user?.id,
-          });
-
-        if (error) throw error;
-
-        toast({
-          title: "Success",
-          description: "Join request sent",
-        });
-      }
-    } catch (error) {
-      console.error("Error joining group:", error);
-      toast({
-        title: "Error",
-        description: "Failed to join group",
-        variant: "destructive",
-      });
-    }
+  const handleJoinSuccess = (group: any) => {
+    setSelectedChatGroup(group);
   };
 
   if (isLoading) {
@@ -184,40 +133,10 @@ export const MyGroups = () => {
       <GroupSearch onSearch={setSearchQuery} />
 
       {searchQuery ? (
-        <div className="space-y-4">
-          <h2 className="text-lg font-medium text-gray-900">Search Results</h2>
-          {searchResults?.length === 0 ? (
-            <div className="text-center py-8 bg-gray-50 rounded-lg">
-              <p className="text-gray-600">No groups found matching your search.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {searchResults?.map((group) => (
-                <div
-                  key={group.id}
-                  className="bg-gray-50 rounded-lg p-4 flex flex-col justify-between"
-                >
-                  <div>
-                    <h3 className="font-medium text-gray-900 text-lg mb-2">
-                      {group.name}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                      {group.description}
-                    </p>
-                  </div>
-                  <div className="flex justify-end">
-                    <Button
-                      onClick={() => handleJoinGroup(group)}
-                      className="bg-purple-600 hover:bg-purple-700 text-white"
-                    >
-                      {group.privacy === "public" ? "Join Group" : "Request to Join"}
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <GroupSearchResults 
+          searchResults={searchResults || []} 
+          onJoinSuccess={handleJoinSuccess}
+        />
       ) : (
         <>
           {groups?.length === 0 ? (
