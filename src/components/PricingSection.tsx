@@ -59,6 +59,7 @@ export const PricingSection = () => {
   const supabase = useSupabaseClient();
   const { toast } = useToast();
   const [promotionCode, setPromotionCode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubscription = async (priceId: string | null) => {
     if (!priceId) return; // Free plan
@@ -72,28 +73,37 @@ export const PricingSection = () => {
       return;
     }
 
+    setIsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
         body: { 
           priceId,
           promotionCode: promotionCode.trim() || undefined,
-          successUrl: `${window.location.origin}/dashboard?subscription=success`,
+          successUrl: `${window.location.origin}/payment/success`,
           cancelUrl: `${window.location.origin}/?scrollTo=pricing`
         }
       });
 
-      if (error) throw error;
-
-      if (data?.url) {
-        window.location.href = data.url;
+      if (error) {
+        console.error('Checkout error:', error);
+        throw error;
       }
+
+      if (!data?.url) {
+        throw new Error('No checkout URL received');
+      }
+
+      // Redirect to Stripe Checkout
+      window.location.href = data.url;
     } catch (error) {
       console.error('Error:', error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to start checkout process",
+        title: "Payment Error",
+        description: error instanceof Error ? error.message : "Failed to start checkout process. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -159,8 +169,9 @@ export const PricingSection = () => {
                   variant={plan.buttonVariant}
                   className="w-full mt-8"
                   onClick={() => handleSubscription(plan.priceId)}
+                  disabled={isLoading}
                 >
-                  {plan.buttonText}
+                  {isLoading ? "Processing..." : plan.buttonText}
                 </Button>
               </CardContent>
             </Card>
