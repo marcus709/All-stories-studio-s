@@ -16,7 +16,7 @@ export function useCreateStory(onSuccess?: (story: Story) => void) {
           description: storyData.description,
           user_id: storyData.user_id,
         })
-        .select()
+        .select("*")
         .single();
 
       if (error) {
@@ -24,7 +24,21 @@ export function useCreateStory(onSuccess?: (story: Story) => void) {
         throw error;
       }
 
-      return data as Story;
+      if (!data) {
+        throw new Error("No data returned from story creation");
+      }
+
+      // Ensure the returned data matches our Story type
+      const story: Story = {
+        id: data.id,
+        title: data.title,
+        description: data.description,
+        user_id: data.user_id,
+        created_at: data.created_at,
+        updated_at: data.updated_at
+      };
+
+      return story;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["stories"] });
