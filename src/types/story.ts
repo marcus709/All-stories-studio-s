@@ -1,3 +1,5 @@
+import { Json } from "@/integrations/supabase/types";
+
 export type StoryIssueType = 
   | "plot_hole"
   | "timeline_inconsistency"
