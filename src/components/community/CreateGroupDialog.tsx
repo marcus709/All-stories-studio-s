@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { UserPlus, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { InviteMembersInput } from "./InviteMembersInput";
 
 interface CreateGroupDialogProps {
   open: boolean;
@@ -25,6 +26,8 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
   const [privacy, setPrivacy] = useState<"public" | "private">("public");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [createdGroupId, setCreatedGroupId] = useState<string | null>(null);
+  const [step, setStep] = useState<"details" | "invite">("details");
 
   const createGroupMutation = useMutation({
     mutationFn: async () => {
@@ -37,6 +40,7 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
           description,
           created_by: session.user.id,
           privacy,
+          image_url: imageUrl,
         })
         .select()
         .single();
@@ -53,19 +57,12 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
 
       if (memberError) throw memberError;
 
+      setCreatedGroupId(group.id);
       return group;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-groups"] });
-      toast({
-        title: "Success",
-        description: "Group created successfully",
-      });
-      onOpenChange(false);
-      setName("");
-      setDescription("");
-      setPrivacy("public");
-      setImageUrl(null);
+      setStep("invite");
     },
     onError: (error) => {
       toast({
@@ -118,94 +115,114 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
     createGroupMutation.mutate();
   };
 
+  const handleFinish = () => {
+    onOpenChange(false);
+    setStep("details");
+    setName("");
+    setDescription("");
+    setPrivacy("public");
+    setImageUrl(null);
+    setCreatedGroupId(null);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Group</DialogTitle>
+          <DialogTitle>
+            {step === "details" ? "Create New Group" : "Invite Members"}
+          </DialogTitle>
+          {step === "invite" && (
+            <DialogDescription>
+              Invite members to your new group
+            </DialogDescription>
+          )}
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="flex justify-center">
-            <div className="relative">
-              <Avatar className="h-24 w-24">
-                {imageUrl ? (
-                  <AvatarImage src={imageUrl} alt="Group" />
-                ) : (
-                  <AvatarFallback>GP</AvatarFallback>
-                )}
-                <label
-                  htmlFor="group-image"
-                  className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100"
-                >
-                  <Upload className="h-6 w-6 text-white" />
-                  <span className="mt-1 text-xs text-white">Upload Image</span>
-                </label>
-                <input
-                  id="group-image"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageUpload}
-                  disabled={isUploading}
-                />
-              </Avatar>
+
+        {step === "details" ? (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="flex justify-center">
+              <div className="relative">
+                <Avatar className="h-24 w-24">
+                  {imageUrl ? (
+                    <AvatarImage src={imageUrl} alt="Group" />
+                  ) : (
+                    <AvatarFallback>GP</AvatarFallback>
+                  )}
+                  <label
+                    htmlFor="group-image"
+                    className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100"
+                  >
+                    <Upload className="h-6 w-6 text-white" />
+                    <span className="mt-1 text-xs text-white">Upload Image</span>
+                  </label>
+                  <input
+                    id="group-image"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                    disabled={isUploading}
+                  />
+                </Avatar>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Group Name"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Select value={privacy} onValueChange={(value: "public" | "private") => setPrivacy(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select privacy setting" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="public">Public</SelectItem>
+                  <SelectItem value="private">Private</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Group Description"
+                className="min-h-[100px]"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                className="bg-purple-600 hover:bg-purple-700"
+                disabled={!name.trim() || createGroupMutation.isPending || isUploading}
+              >
+                Create Group
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <div className="space-y-4">
+            {createdGroupId && (
+              <InviteMembersInput groupId={createdGroupId} />
+            )}
+            <div className="flex justify-end gap-3 pt-4">
+              <Button onClick={handleFinish}>
+                Done
+              </Button>
             </div>
           </div>
-          
-          <div className="space-y-2">
-            <label htmlFor="name" className="text-sm font-medium">
-              Group Name
-            </label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter group name"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="privacy" className="text-sm font-medium">
-              Privacy
-            </label>
-            <Select value={privacy} onValueChange={(value: "public" | "private") => setPrivacy(value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select privacy setting" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="public">Public</SelectItem>
-                <SelectItem value="private">Private</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="description" className="text-sm font-medium">
-              Description
-            </label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter group description"
-              className="min-h-[100px]"
-            />
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              className="bg-purple-600 hover:bg-purple-700"
-              disabled={!name.trim() || createGroupMutation.isPending || isUploading}
-            >
-              Create Group
-            </Button>
-          </div>
-        </form>
+        )}
       </DialogContent>
     </Dialog>
   );

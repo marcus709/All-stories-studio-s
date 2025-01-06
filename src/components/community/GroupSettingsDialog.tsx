@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Upload } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { InviteMembersInput } from "./InviteMembersInput";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface GroupSettingsDialogProps {
   group: {
@@ -99,76 +101,94 @@ export const GroupSettingsDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{isCreator ? "Edit" : "View"} Group Settings</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-4">
-          <div className="flex justify-center">
-            <div className="relative">
-              <Avatar className="h-24 w-24">
-                {imageUrl ? (
-                  <AvatarImage src={imageUrl} alt="Group" />
-                ) : (
-                  <AvatarFallback>GP</AvatarFallback>
-                )}
-                {isCreator && (
-                  <label
-                    htmlFor="group-image"
-                    className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100"
-                  >
-                    <Upload className="h-6 w-6 text-white" />
-                    <span className="mt-1 text-xs text-white">Upload Image</span>
-                  </label>
-                )}
-                {isCreator && (
-                  <input
-                    id="group-image"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleImageUpload}
-                    disabled={isUploading}
-                  />
-                )}
-              </Avatar>
+        <Tabs defaultValue="details">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="members">Members</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="details" className="space-y-4">
+            <div className="flex justify-center">
+              <div className="relative">
+                <Avatar className="h-24 w-24">
+                  {imageUrl ? (
+                    <AvatarImage src={imageUrl} alt="Group" />
+                  ) : (
+                    <AvatarFallback>GP</AvatarFallback>
+                  )}
+                  {isCreator && (
+                    <label
+                      htmlFor="group-image"
+                      className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100"
+                    >
+                      <Upload className="h-6 w-6 text-white" />
+                      <span className="mt-1 text-xs text-white">Upload Image</span>
+                    </label>
+                  )}
+                  {isCreator && (
+                    <input
+                      id="group-image"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                      disabled={isUploading}
+                    />
+                  )}
+                </Avatar>
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Group Name"
-              disabled={!isCreator}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Group Description"
-              className="min-h-[100px]"
-              disabled={!isCreator}
-            />
-          </div>
-
-          {isCreator && (
-            <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
-              </Button>
-              <Button 
-                onClick={() => updateGroupMutation.mutate()}
-                disabled={updateGroupMutation.isPending || isUploading}
-              >
-                Save Changes
-              </Button>
+            <div className="space-y-2">
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Group Name"
+                disabled={!isCreator}
+              />
             </div>
-          )}
-        </div>
+
+            <div className="space-y-2">
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Group Description"
+                className="min-h-[100px]"
+                disabled={!isCreator}
+              />
+            </div>
+
+            {isCreator && (
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => onOpenChange(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => updateGroupMutation.mutate()}
+                  disabled={updateGroupMutation.isPending || isUploading}
+                >
+                  Save Changes
+                </Button>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="members" className="space-y-4">
+            {isCreator && (
+              <>
+                <DialogDescription>
+                  Invite new members to join your group
+                </DialogDescription>
+                <InviteMembersInput groupId={group.id} />
+              </>
+            )}
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
