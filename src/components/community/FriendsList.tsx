@@ -23,7 +23,7 @@ export const FriendsList = () => {
     queryFn: async () => {
       try {
         if (!session?.user?.id) {
-          console.log("No session user ID available");
+          console.log("No session user ID available for friends query");
           return [];
         }
 
@@ -38,7 +38,8 @@ export const FriendsList = () => {
             friend:profiles!friendships_friend_id_fkey_profiles(
               id,
               username,
-              avatar_url
+              avatar_url,
+              bio
             )
           `)
           .eq("user_id", session.user.id)
@@ -46,7 +47,7 @@ export const FriendsList = () => {
 
         if (sentError) {
           console.error("Error fetching sent friendships:", sentError);
-          throw sentError;
+          throw new Error(`Failed to fetch sent friendships: ${sentError.message}`);
         }
 
         console.log("Sent friendships:", sentFriendships);
@@ -60,7 +61,8 @@ export const FriendsList = () => {
             friend:profiles!friendships_user_id_fkey_profiles(
               id,
               username,
-              avatar_url
+              avatar_url,
+              bio
             )
           `)
           .eq("friend_id", session.user.id)
@@ -68,7 +70,7 @@ export const FriendsList = () => {
 
         if (receivedError) {
           console.error("Error fetching received friendships:", receivedError);
-          throw receivedError;
+          throw new Error(`Failed to fetch received friendships: ${receivedError.message}`);
         }
 
         console.log("Received friendships:", receivedFriendships);
@@ -105,7 +107,13 @@ export const FriendsList = () => {
         return uniqueFriendships;
       } catch (error) {
         console.error("Error in friends query:", error);
-        setError("Unable to load friends at this time");
+        const errorMessage = error instanceof Error ? error.message : "Unable to load friends";
+        setError(errorMessage);
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
         return [];
       }
     },
