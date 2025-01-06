@@ -15,6 +15,7 @@ serve(async (req) => {
 
   try {
     const { priceId, promotionCode, successUrl, cancelUrl } = await req.json();
+    console.log('Received request:', { priceId, promotionCode, successUrl, cancelUrl });
     
     // Get the user from the authorization header
     const supabaseClient = createClient(
@@ -43,6 +44,8 @@ serve(async (req) => {
       apiVersion: '2023-10-16',
     });
 
+    console.log('Creating/retrieving customer for email:', user.email);
+
     // Get or create customer
     const customers = await stripe.customers.list({
       email: user.email,
@@ -52,6 +55,7 @@ serve(async (req) => {
     let customerId;
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
+      console.log('Found existing customer:', customerId);
     } else {
       const newCustomer = await stripe.customers.create({
         email: user.email,
@@ -60,10 +64,11 @@ serve(async (req) => {
         },
       });
       customerId = newCustomer.id;
+      console.log('Created new customer:', customerId);
     }
 
-    // Create checkout session
-    const sessionConfig = {
+    // Create checkout session configuration
+    const sessionConfig: any = {
       customer: customerId,
       line_items: [
         {
@@ -77,7 +82,9 @@ serve(async (req) => {
       allow_promotion_codes: true,
     };
 
+    // Handle promotion code if provided
     if (promotionCode) {
+      console.log('Looking up promotion code:', promotionCode);
       const promoCode = await stripe.promotionCodes.list({
         code: promotionCode,
         active: true,
@@ -85,11 +92,16 @@ serve(async (req) => {
       });
 
       if (promoCode.data.length > 0) {
+        console.log('Found valid promotion code:', promoCode.data[0].id);
         sessionConfig.discounts = [{ promotion_code: promoCode.data[0].id }];
+      } else {
+        console.log('No valid promotion code found');
       }
     }
 
+    console.log('Creating checkout session with config:', sessionConfig);
     const session = await stripe.checkout.sessions.create(sessionConfig);
+    console.log('Checkout session created:', session.id);
 
     return new Response(
       JSON.stringify({ url: session.url }),
@@ -100,13 +112,23 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error('Error in create-checkout-session:', error);
+    let errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    let statusCode = 400;
+
+    // Handle specific Stripe errors
+    if (error instanceof Stripe.errors.StripeError) {
+      statusCode = error.statusCode || 400;
+      errorMessage = error.message;
+    }
+
     return new Response(
       JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error: errorMessage,
+        details: error instanceof Error ? error.stack : undefined
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400, // Changed from 500 to 400 for client errors
+        status: statusCode,
       }
     );
   }
