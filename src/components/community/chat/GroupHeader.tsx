@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
-interface GroupHeaderProps {
+export interface GroupHeaderProps {
   groupName: string;
   onBack: () => void;
 }

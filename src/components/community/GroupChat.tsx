@@ -152,9 +152,9 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
 
   return (
     <div className="flex flex-col h-full">
-      <GroupHeader group={group} onBack={onBack} />
+      <GroupHeader groupName={group.name} onBack={onBack} />
       <div className="flex-1 overflow-y-auto">
-        <MessageList messages={messages} />
+        <MessageList messages={messages} isLoading={isLoading} />
       </div>
       <MessageInput onSendMessage={handleSendMessage} />
     </div>
