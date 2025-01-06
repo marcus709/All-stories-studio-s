@@ -21,14 +21,15 @@ export function RichTextEditor({ content, onChange, className = '' }: RichTextEd
     ],
     content,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML())
+      const html = editor.getHTML();
+      onChange(html);
     },
     editorProps: {
       attributes: {
         class: 'prose prose-sm max-w-none h-full min-h-[500px] px-8 py-6 focus:outline-none',
       },
     },
-  })
+  });
 
   return (
     <div className={`flex flex-col border rounded-lg bg-white h-full ${className}`}>

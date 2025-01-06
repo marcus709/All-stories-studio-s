@@ -88,11 +88,12 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
         throw new Error("Title is required");
       }
 
+      // Save the content as a JSON array with a single text item
       const contentToSave = [{
         type: "text",
         content: content
-      }] as Json;
-      
+      }];
+
       const { error } = await supabase
         .from("documents")
         .update({
