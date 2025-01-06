@@ -22,12 +22,7 @@ export const FriendsList = () => {
     queryKey: ["friends", session?.user?.id],
     queryFn: async () => {
       try {
-        if (!session?.user?.id) {
-          console.log("No session user ID available for friends query");
-          return [];
-        }
-
-        console.log("Fetching friends for user:", session.user.id);
+        if (!session?.user?.id) return [];
 
         // Get friendships where user is the requester
         const { data: sentFriendships, error: sentError } = await supabase
@@ -38,8 +33,7 @@ export const FriendsList = () => {
             friend:profiles!friendships_friend_id_fkey_profiles(
               id,
               username,
-              avatar_url,
-              bio
+              avatar_url
             )
           `)
           .eq("user_id", session.user.id)
@@ -47,10 +41,8 @@ export const FriendsList = () => {
 
         if (sentError) {
           console.error("Error fetching sent friendships:", sentError);
-          throw new Error(`Failed to fetch sent friendships: ${sentError.message}`);
+          throw sentError;
         }
-
-        console.log("Sent friendships:", sentFriendships);
 
         // Get friendships where user is the recipient
         const { data: receivedFriendships, error: receivedError } = await supabase
@@ -61,8 +53,7 @@ export const FriendsList = () => {
             friend:profiles!friendships_user_id_fkey_profiles(
               id,
               username,
-              avatar_url,
-              bio
+              avatar_url
             )
           `)
           .eq("friend_id", session.user.id)
@@ -70,22 +61,20 @@ export const FriendsList = () => {
 
         if (receivedError) {
           console.error("Error fetching received friendships:", receivedError);
-          throw new Error(`Failed to fetch received friendships: ${receivedError.message}`);
+          throw receivedError;
         }
 
-        console.log("Received friendships:", receivedFriendships);
-
-        // Combine both sets of friendships and remove duplicates
+        // Combine both sets of friendships
         const allFriendships = [
           ...(sentFriendships || [])
-            .filter(f => f.friend && f.status === "accepted")
+            .filter(f => f.friend)
             .map(f => ({
               id: f.id,
               status: f.status,
               friend: f.friend
             })),
           ...(receivedFriendships || [])
-            .filter(f => f.friend && f.status === "accepted")
+            .filter(f => f.friend)
             .map(f => ({
               id: f.id,
               status: f.status,
@@ -93,27 +82,10 @@ export const FriendsList = () => {
             }))
         ];
 
-        // Remove duplicates based on friend.id
-        const uniqueFriendships = allFriendships.reduce((acc, current) => {
-          const x = acc.find(item => item.friend.id === current.friend.id);
-          if (!x) {
-            return acc.concat([current]);
-          } else {
-            return acc;
-          }
-        }, [] as FriendshipWithProfile[]);
-
-        console.log("Final unique friendships:", uniqueFriendships);
-        return uniqueFriendships;
+        return allFriendships as FriendshipWithProfile[];
       } catch (error) {
         console.error("Error in friends query:", error);
-        const errorMessage = error instanceof Error ? error.message : "Unable to load friends";
-        setError(errorMessage);
-        toast({
-          title: "Error",
-          description: errorMessage,
-          variant: "destructive",
-        });
+        setError("Unable to load friends at this time");
         return [];
       }
     },
@@ -122,13 +94,8 @@ export const FriendsList = () => {
 
   // Subscribe to real-time updates for friendships
   useEffect(() => {
-    if (!session?.user?.id) {
-      console.log("No session user ID for subscription");
-      return;
-    }
+    if (!session?.user?.id) return;
 
-    console.log("Setting up real-time subscription for friendships");
-    
     const channel = supabase
       .channel('friends-changes')
       .on(
@@ -139,18 +106,13 @@ export const FriendsList = () => {
           table: 'friendships',
           filter: `or(user_id.eq.${session.user.id},friend_id.eq.${session.user.id})`,
         },
-        (payload) => {
-          console.log("Received friendship change:", payload);
-          // Refetch data when any friendship changes occur
+        () => {
           refetch();
         }
       )
-      .subscribe((status) => {
-        console.log("Subscription status:", status);
-      });
+      .subscribe();
 
     return () => {
-      console.log("Cleaning up real-time subscription");
       supabase.removeChannel(channel);
     };
   }, [session?.user?.id, refetch]);
