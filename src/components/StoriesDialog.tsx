@@ -13,7 +13,7 @@ import { StoryButtons } from "./stories/StoryButtons";
 import { useCreateStory } from "@/hooks/useCreateStory";
 import { useStories } from "@/hooks/useStories";
 import { supabase } from "@/integrations/supabase/client";
-import { Story } from "@/types/story";
+import { Story, CreateStoryInput } from "@/types/story";
 import { useToast } from "@/hooks/use-toast";
 
 export function StoriesDialog() {
@@ -64,14 +64,13 @@ export function StoriesDialog() {
         throw new Error("User must be logged in to create a story");
       }
 
-      createStoryMutation.mutate({
+      const storyInput: CreateStoryInput = {
         title: newStory.title,
         description: newStory.description,
         user_id: user.id,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        id: crypto.randomUUID(),
-      });
+      };
+
+      createStoryMutation.mutate(storyInput);
     } catch (error) {
       toast({
         title: "Error",

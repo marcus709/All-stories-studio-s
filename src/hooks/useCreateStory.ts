@@ -1,13 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Story } from "@/types/story";
-import { useToast } from "@/components/ui/use-toast";
-
-export interface CreateStoryInput {
-  title: string;
-  description: string;
-  user_id: string;
-}
+import { Story, CreateStoryInput } from "@/types/story";
+import { useToast } from "@/hooks/use-toast";
 
 export function useCreateStory(onSuccess?: (story: Story) => void) {
   const { toast } = useToast();
@@ -17,7 +11,11 @@ export function useCreateStory(onSuccess?: (story: Story) => void) {
     mutationFn: async (storyData: CreateStoryInput) => {
       const { data, error } = await supabase
         .from("stories")
-        .insert(storyData)
+        .insert({
+          ...storyData,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
         .select()
         .single();
 

@@ -15,6 +15,12 @@ export interface Story {
   updated_at: string;
 }
 
+export interface CreateStoryInput {
+  title: string;
+  description: string;
+  user_id: string;
+}
+
 export interface StoryIssue {
   id: string;
   analysis_id: string;
