@@ -45,18 +45,38 @@ export const Header = () => {
   };
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Success",
-        description: "You have been signed out successfully.",
-      });
+    try {
+      // First, clear local data
+      localStorage.clear();
+      
+      // Attempt to sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error("Error during sign out:", error);
+        // Even if server-side logout fails, we want to clear the local session
+        await supabase.auth.clearSession();
+        
+        // Show a warning but don't prevent the sign-out
+        toast({
+          title: "Warning",
+          description: "Sign out completed with some warnings. Please refresh the page.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "You have been signed out successfully.",
+        });
+      }
+
+      // Force a page refresh to clear any remaining state
+      window.location.href = '/';
+    } catch (error) {
+      console.error("Unexpected error during sign out:", error);
+      // Ensure we clear local session even if there's an error
+      await supabase.auth.clearSession();
+      window.location.href = '/';
     }
   };
 

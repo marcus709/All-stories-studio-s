@@ -26,6 +26,8 @@ function App() {
   const { toast } = useToast();
 
   useEffect(() => {
+    let mounted = true;
+
     // Get initial session
     const initializeSession = async () => {
       try {
@@ -34,16 +36,22 @@ function App() {
           console.error("Error fetching session:", error);
           throw error;
         }
-        setSession(initialSession);
+        if (mounted) {
+          setSession(initialSession);
+        }
       } catch (error) {
         console.error("Error initializing session:", error);
-        toast({
-          title: "Session Error",
-          description: "There was an error loading your session. Please try signing in again.",
-          variant: "destructive",
-        });
+        if (mounted) {
+          toast({
+            title: "Session Error",
+            description: "There was an error loading your session. Please try signing in again.",
+            variant: "destructive",
+          });
+        }
       } finally {
-        setIsLoading(false);
+        if (mounted) {
+          setIsLoading(false);
+        }
       }
     };
 
@@ -61,17 +69,28 @@ function App() {
         localStorage.clear();
       }
 
-      setSession(session);
-      setIsLoading(false);
+      if (mounted) {
+        setSession(session);
+        setIsLoading(false);
+      }
     });
 
+    // Cleanup function
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, [toast]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
