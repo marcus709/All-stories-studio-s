@@ -23,8 +23,6 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
   useEffect(() => {
     if (document?.content) {
       try {
-        // Process document content
-        console.log("Processing document content:", document.content);
         const documentContent = document.content;
         if (Array.isArray(documentContent) && documentContent.length > 0) {
           const firstContent = documentContent[0];
@@ -46,7 +44,6 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
   const handleSave = async () => {
     try {
       setIsSaving(true);
-      console.log("Setting document data:", document);
 
       if (!title.trim()) {
         throw new Error("Title is required");
@@ -57,26 +54,26 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
         content: content
       }];
 
-      console.log("Saving content:", documentContent);
-
       if (document?.id) {
         // Update existing document
         const { error } = await supabase
           .from("documents")
           .update({
             title,
-            content: documentContent,
+            content: documentContent as any, // Type assertion needed for Supabase
           })
           .eq("id", document.id);
 
         if (error) throw error;
       } else {
         // Create new document
-        const { error } = await supabase.from("documents").insert({
-          title,
-          content: documentContent,
-          story_id: storyId,
-        });
+        const { error } = await supabase
+          .from("documents")
+          .insert({
+            title,
+            content: documentContent as any, // Type assertion needed for Supabase
+            story_id: storyId,
+          });
 
         if (error) throw error;
       }
@@ -86,7 +83,6 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
         description: "Document saved successfully",
       });
 
-      // Invalidate and refetch documents query
       queryClient.invalidateQueries({ queryKey: ["documents", storyId] });
       onSave?.();
     } catch (error) {
@@ -111,7 +107,7 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
       />
       <div className="min-h-[500px] border rounded-lg">
         <RichTextEditor
-          value={content}
+          content={content}
           onChange={(value) => setContent(value)}
           className="min-h-[500px]"
         />

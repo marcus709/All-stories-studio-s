@@ -84,8 +84,9 @@ export const StoryDocsView = () => {
         <ResizablePanel defaultSize={80}>
           {selectedDocId ? (
             <DocumentEditor 
-              documentId={selectedDocId} 
-              onRefresh={refetchDocs}
+              document={documents?.find(doc => doc.id === selectedDocId)}
+              storyId={selectedStory.id}
+              onSave={refetchDocs}
             />
           ) : (
             <div className="flex flex-col items-center justify-center flex-1 bg-gray-50 text-gray-500">

@@ -5,9 +5,9 @@ import TextAlign from '@tiptap/extension-text-align'
 import { EditorToolbar } from './EditorToolbar'
 
 interface RichTextEditorProps {
-  content: string
-  onChange: (content: string) => void
-  className?: string
+  content: string;
+  onChange: (content: string) => void;
+  className?: string;
 }
 
 export function RichTextEditor({ content, onChange, className = '' }: RichTextEditorProps) {
