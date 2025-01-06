@@ -26,7 +26,7 @@ export const JoinRequestsDialog = ({ open, onOpenChange }: JoinRequestsDialogPro
           user_id,
           status,
           message,
-          groups (
+          groups:group_id (
             id,
             name,
             created_by
@@ -37,7 +37,12 @@ export const JoinRequestsDialog = ({ open, onOpenChange }: JoinRequestsDialogPro
           )
         `)
         .eq("status", "pending")
-        .eq("groups.created_by", session?.user?.id);
+        .in("group_id", 
+          supabase
+            .from("groups")
+            .select("id")
+            .eq("created_by", session?.user?.id)
+        );
 
       if (error) {
         console.error("Error fetching join requests:", error);
