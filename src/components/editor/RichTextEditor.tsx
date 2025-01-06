@@ -38,5 +38,5 @@ export function RichTextEditor({ content, onChange, className = '' }: RichTextEd
         <EditorContent editor={editor} />
       </div>
     </div>
-  )
+  );
 }

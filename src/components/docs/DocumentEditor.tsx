@@ -47,33 +47,30 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
       return data;
     },
     enabled: !!documentId,
-    staleTime: 0,
   });
 
   useEffect(() => {
     if (document) {
-      try {
-        setTitle(document.title);
-        
-        // Safely parse and extract content
-        const docContent = document.content as Json;
-        let extractedContent = "";
-        
-        if (Array.isArray(docContent) && docContent.length > 0) {
-          const firstItem = docContent[0] as { type?: string; content?: string };
-          extractedContent = firstItem?.content || "";
-        } else if (typeof docContent === 'string') {
-          extractedContent = docContent;
+      setTitle(document.title);
+      
+      // Handle content loading
+      if (document.content) {
+        try {
+          const docContent = document.content as Json;
+          if (Array.isArray(docContent) && docContent.length > 0) {
+            const firstItem = docContent[0] as DocumentContent;
+            setContent(firstItem.content || "");
+          } else if (typeof docContent === 'string') {
+            setContent(docContent);
+          }
+        } catch (error) {
+          console.error("Error processing document content:", error);
+          toast({
+            title: "Error",
+            description: "Failed to load document content",
+            variant: "destructive",
+          });
         }
-        
-        setContent(extractedContent);
-      } catch (error) {
-        console.error("Error processing document content:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load document content. Please try again.",
-          variant: "destructive",
-        });
       }
     }
   }, [document, toast]);
@@ -83,16 +80,15 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
     
     setIsSaving(true);
     try {
-      // Validate content before saving
       if (!title.trim()) {
         throw new Error("Title is required");
       }
 
-      // Save the content as a JSON array with a single text item
+      // Prepare content for saving
       const contentToSave = [{
         type: "text",
         content: content
-      }];
+      }] as Json;
 
       const { error } = await supabase
         .from("documents")
@@ -103,9 +99,7 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
         })
         .eq("id", documentId);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       await refetch();
       onRefresh();
@@ -118,7 +112,7 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
       console.error("Error saving document:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to save document. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to save document",
         variant: "destructive",
       });
     } finally {
@@ -153,7 +147,7 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
       console.error("Error handling drop:", error);
       toast({
         title: "Error",
-        description: "Failed to add content to document. Please try again.",
+        description: "Failed to add content to document",
         variant: "destructive",
       });
     }
