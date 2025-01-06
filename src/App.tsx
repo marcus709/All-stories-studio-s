@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { useToast } from "@/components/ui/use-toast";
+import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,6 +27,8 @@ function App() {
   const { toast } = useToast();
 
   useEffect(() => {
+    let mounted = true;
+
     // Get initial session
     const initializeSession = async () => {
       try {
@@ -34,16 +37,20 @@ function App() {
           console.error("Error fetching session:", error);
           throw error;
         }
-        setSession(initialSession);
+        if (mounted) {
+          setSession(initialSession);
+          setIsLoading(false);
+        }
       } catch (error) {
         console.error("Error initializing session:", error);
-        toast({
-          title: "Session Error",
-          description: "There was an error loading your session. Please try signing in again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
+        if (mounted) {
+          toast({
+            title: "Session Error",
+            description: "There was an error loading your session. Please try signing in again.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+        }
       }
     };
 
@@ -68,21 +75,33 @@ function App() {
           console.error("Error refreshing session:", error);
           return;
         }
-        setSession(currentSession);
+        if (mounted) {
+          setSession(currentSession);
+          setIsLoading(false);
+        }
       } else {
-        setSession(session);
+        if (mounted) {
+          setSession(session);
+          setIsLoading(false);
+        }
       }
-      
-      setIsLoading(false);
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, [toast]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+          <p className="text-gray-600">Loading your experience...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
