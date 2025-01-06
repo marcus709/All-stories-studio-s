@@ -1,17 +1,14 @@
 import { useSession } from "@supabase/auth-helpers-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
+import { Database } from "@/integrations/supabase/types";
 
-interface Message {
-  id: string;
-  content: string;
-  user_id: string;
-  created_at: string;
+type Message = Database["public"]["Tables"]["private_messages"]["Row"] & {
   profiles?: {
-    username: string;
+    username: string | null;
     avatar_url: string | null;
   };
-}
+};
 
 interface MessageListProps {
   messages: Message[];
@@ -32,7 +29,7 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
   return (
     <div className="flex flex-col-reverse h-full overflow-y-auto p-4 space-y-reverse space-y-4">
       {messages.map((message) => {
-        const isCurrentUser = message.user_id === session?.user?.id;
+        const isCurrentUser = message.sender_id === session?.user?.id;
         return (
           <div
             key={message.id}

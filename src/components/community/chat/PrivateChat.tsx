@@ -7,16 +7,24 @@ import { MessageInput } from "./MessageInput";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { Database } from "@/integrations/supabase/types";
 
 interface PrivateChatProps {
   friendId: string;
 }
 
+type Message = Database["public"]["Tables"]["private_messages"]["Row"] & {
+  profiles?: {
+    username: string | null;
+    avatar_url: string | null;
+  };
+};
+
 export const PrivateChat = ({ friendId }: PrivateChatProps) => {
   const session = useSession();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [friend, setFriend] = useState<any>(null);
 
