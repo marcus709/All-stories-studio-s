@@ -19,10 +19,12 @@ export const FriendsList = () => {
     queryFn: async () => {
       try {
         if (!session?.user?.id) {
+          console.log("No session user ID");
           return [];
         }
 
-        const { data: friendships, error } = await supabase
+        // First, get all accepted friendships where the current user is involved
+        const { data: friendships, error: friendshipsError } = await supabase
           .from('friendships')
           .select(`
             id,
@@ -40,30 +42,41 @@ export const FriendsList = () => {
               bio
             )
           `)
-          .or(`user_id.eq.${session.user.id},friend_id.eq.${session.user.id}`)
-          .eq('status', 'accepted');
+          .eq('status', 'accepted')
+          .or(`user_id.eq.${session.user.id},friend_id.eq.${session.user.id}`);
 
-        if (error) {
-          console.error("Error fetching friendships:", error);
-          throw error;
+        if (friendshipsError) {
+          console.error("Error fetching friendships:", friendshipsError);
+          throw friendshipsError;
         }
 
-        if (!friendships) {
+        if (!friendships || friendships.length === 0) {
           console.log("No friendships found");
           return [];
         }
 
         console.log("Raw friendships data:", friendships);
 
-        // Transform the data to always return the friend's profile
-        const transformedFriendships = friendships.map(friendship => {
-          const isFriend = session.user.id === friendship.friend.id;
-          return {
-            id: friendship.id,
-            status: friendship.status,
-            friend: isFriend ? friendship.user : friendship.friend
-          };
-        });
+        // Transform the friendships to always show the other user's profile
+        const transformedFriendships = friendships
+          .filter(friendship => friendship.friend && friendship.user) // Ensure both profiles exist
+          .map(friendship => {
+            // If the current user is the friend, show the user's profile
+            const isCurrentUserFriend = friendship.friend.id === session.user.id;
+            const friendProfile = isCurrentUserFriend ? friendship.user : friendship.friend;
+
+            if (!friendProfile || !friendProfile.id || !friendProfile.username) {
+              console.log("Invalid friend profile:", friendProfile);
+              return null;
+            }
+
+            return {
+              id: friendship.id,
+              status: friendship.status,
+              friend: friendProfile
+            };
+          })
+          .filter(Boolean); // Remove any null entries
 
         console.log("Transformed friendships:", transformedFriendships);
         return transformedFriendships;
@@ -81,11 +94,13 @@ export const FriendsList = () => {
     },
     enabled: !!session?.user?.id,
     staleTime: 1000 * 60, // Cache for 1 minute
+    refetchInterval: 1000 * 60 * 5, // Refresh every 5 minutes
     refetchOnWindowFocus: true,
+    retry: 3, // Retry failed requests 3 times
   });
 
   const filteredFriends = friends?.filter(friendship => 
-    friendship.friend?.username?.toLowerCase().includes(searchQuery.toLowerCase())
+    friendship?.friend?.username?.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
   if (error) {
@@ -124,7 +139,7 @@ export const FriendsList = () => {
         ) : (
           <div className="space-y-1">
             {filteredFriends.map((friendship) => (
-              friendship.friend && (
+              friendship?.friend && (
                 <FriendItem 
                   key={friendship.id}
                   friend={friendship.friend}
