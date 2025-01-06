@@ -68,7 +68,7 @@ export const PrivateChat = () => {
         .from("private_messages")
         .select(`
           *,
-          sender:sender_id(username, avatar_url)
+          profiles:sender_id(username, avatar_url)
         `)
         .or(`sender_id.eq.${session?.user?.id},receiver_id.eq.${session?.user?.id}`)
         .or(`sender_id.eq.${friendId},receiver_id.eq.${friendId}`)
@@ -76,9 +76,9 @@ export const PrivateChat = () => {
 
       if (error) throw error;
 
-      const formattedMessages: Message[] = (data || []).map(msg => ({
+      const formattedMessages: Message[] = data.map((msg: any) => ({
         ...msg,
-        profiles: msg.sender
+        profiles: msg.profiles
       }));
 
       setMessages(formattedMessages);
@@ -114,7 +114,7 @@ export const PrivateChat = () => {
 
           const newMessage: Message = {
             ...(payload.new as Message),
-            profiles: profileData
+            profiles: profileData || null
           };
 
           setMessages((current) => [...current, newMessage]);
@@ -145,7 +145,7 @@ export const PrivateChat = () => {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-white rounded-lg shadow-sm">
       <div className="flex items-center gap-4 p-4 border-b">
         <Button
           variant="ghost"
@@ -174,7 +174,7 @@ export const PrivateChat = () => {
       <div className="flex-1 overflow-hidden">
         <MessageList messages={messages} isLoading={isLoading} />
       </div>
-      <div className="sticky bottom-0 bg-white border-t p-4">
+      <div className="p-4 border-t">
         <MessageInput onSendMessage={handleSendMessage} />
       </div>
     </div>

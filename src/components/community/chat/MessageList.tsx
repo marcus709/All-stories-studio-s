@@ -24,15 +24,15 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
   const session = useSession();
 
   if (isLoading) {
-    return <div className="flex items-center justify-center h-full">Loading messages...</div>;
+    return <div className="flex items-center justify-center h-[400px]">Loading messages...</div>;
   }
 
   if (messages.length === 0) {
-    return <div className="flex items-center justify-center h-full text-gray-500">No messages yet</div>;
+    return <div className="flex items-center justify-center h-[400px] text-gray-500">No messages yet</div>;
   }
 
   return (
-    <div className="flex flex-col-reverse h-full overflow-y-auto p-4 space-y-reverse space-y-4">
+    <div className="flex flex-col-reverse h-[400px] overflow-y-auto p-4 space-y-reverse space-y-4">
       {messages.map((message) => {
         const isCurrentUser = message.sender_id === session?.user?.id;
         return (
