@@ -46,7 +46,7 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
   const handleSave = async () => {
     try {
       setIsSaving(true);
-      console.log("Saving content:", content); // Debug log
+      console.log("Saving content:", content);
 
       if (!title.trim()) {
         throw new Error("Title is required");
@@ -56,15 +56,14 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
         throw new Error("User must be logged in to save documents");
       }
 
-      const documentContent: DocumentContent[] = [{
+      const documentContent = [{
         type: "text",
         content: content
-      }];
+      }] as unknown as Json[];
 
-      console.log("Document content to save:", documentContent); // Debug log
+      console.log("Document content to save:", documentContent);
 
       if (document?.id) {
-        // Update existing document
         const { error } = await supabase
           .from("documents")
           .update({
@@ -76,7 +75,6 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
 
         if (error) throw error;
       } else {
-        // Create new document
         const { error } = await supabase
           .from("documents")
           .insert({
@@ -120,7 +118,7 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
         <RichTextEditor
           content={content}
           onChange={(value) => {
-            console.log("Content changed:", value); // Debug log
+            console.log("Content changed:", value);
             setContent(value);
           }}
           className="min-h-[500px]"
