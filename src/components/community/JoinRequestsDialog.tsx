@@ -22,7 +22,9 @@ export const JoinRequestsDialog = ({ open, onOpenChange }: JoinRequestsDialogPro
         .from("group_join_requests")
         .select(`
           *,
-          groups (*),
+          groups!inner (
+            *
+          ),
           profiles:user_id (
             username,
             avatar_url
