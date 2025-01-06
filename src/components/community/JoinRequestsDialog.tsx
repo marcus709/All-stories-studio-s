@@ -21,8 +21,12 @@ export const JoinRequestsDialog = ({ open, onOpenChange }: JoinRequestsDialogPro
       const { data, error } = await supabase
         .from("group_join_requests")
         .select(`
-          *,
-          groups!inner (
+          id,
+          group_id,
+          user_id,
+          status,
+          message,
+          groups (
             id,
             name,
             created_by
