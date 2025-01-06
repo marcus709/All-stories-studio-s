@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Routes, Route } from "react-router-dom";
-import { Header } from "@/components/Header";
 import { CommunitySidebar } from "@/components/community/CommunitySidebar";
 import { CommunityFeed } from "@/components/community/CommunityFeed";
 import { MyGroups } from "@/components/community/MyGroups";
@@ -9,6 +8,7 @@ import { SavedPosts } from "@/components/community/SavedPosts";
 import { TrendingTopics } from "@/components/community/TrendingTopics";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
+import { PrivateChat } from "@/components/community/chat/PrivateChat";
 
 const Community = () => {
   const navigate = useNavigate();
@@ -41,7 +41,6 @@ const Community = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
       <div className="fixed inset-0 pt-24">
         <div className="container h-full mx-auto px-4">
           <div className="flex gap-8 h-full">
@@ -57,6 +56,7 @@ const Community = () => {
                   <Route path="groups/*" element={<MyGroups />} />
                   <Route path="topics" element={<Topics />} />
                   <Route path="saved" element={<SavedPosts />} />
+                  <Route path="chat/:friendId" element={<PrivateChat />} />
                 </Routes>
               </div>
             </div>

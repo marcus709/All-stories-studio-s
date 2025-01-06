@@ -6,11 +6,7 @@ import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-
-interface PrivateChatProps {
-  friendId: string;
-}
+import { useNavigate, useParams } from "react-router-dom";
 
 type Message = {
   id: string;
@@ -25,7 +21,8 @@ type Message = {
   } | null;
 };
 
-export const PrivateChat = ({ friendId }: PrivateChatProps) => {
+export const PrivateChat = () => {
+  const { friendId } = useParams();
   const session = useSession();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -148,7 +145,7 @@ export const PrivateChat = ({ friendId }: PrivateChatProps) => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-12rem)] bg-white rounded-lg shadow-sm">
+    <div className="flex flex-col h-full">
       <div className="flex items-center gap-4 p-4 border-b">
         <Button
           variant="ghost"
