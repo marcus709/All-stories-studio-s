@@ -9,7 +9,6 @@ import { CreateDocumentDialog } from "./CreateDocumentDialog";
 import { DocumentEditor } from "./DocumentEditor";
 import { DocumentSidebar } from "./DocumentSidebar";
 import { Document } from "@/types/story";
-import { Json } from "@/integrations/supabase/types";
 import {
   ResizablePanel,
   ResizablePanelGroup,
@@ -17,8 +16,8 @@ import {
 } from "@/components/ui/resizable";
 
 interface DocumentContentItem {
-  type?: string;
-  content?: string;
+  type: string;
+  content: string;
 }
 
 export const StoryDocsView = () => {
@@ -52,19 +51,23 @@ export const StoryDocsView = () => {
 
       const transformedData: Document[] = (data || []).map(doc => {
         console.log("Processing document:", doc);
-        let transformedContent = [];
+        let transformedContent: DocumentContentItem[] = [];
+        
         try {
-          if (Array.isArray(doc.content)) {
+          if (doc.content && Array.isArray(doc.content)) {
             transformedContent = doc.content.map(item => {
-              const contentItem = item as DocumentContentItem;
-              return {
-                type: contentItem?.type || 'text',
-                content: contentItem?.content || ''
-              };
+              if (typeof item === 'object' && item !== null) {
+                return {
+                  type: (item as any).type || 'text',
+                  content: (item as any).content || ''
+                };
+              }
+              return { type: 'text', content: '' };
             });
           }
         } catch (err) {
           console.error("Error transforming document content:", err);
+          transformedContent = [{ type: 'text', content: '' }];
         }
 
         return {

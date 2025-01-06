@@ -27,13 +27,13 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
     if (document?.content) {
       try {
         console.log("Raw document content:", document.content);
-        if (Array.isArray(document.content) && document.content.length > 0) {
-          const firstContent = document.content[0];
-          if (typeof firstContent === 'object' && firstContent !== null && 'content' in firstContent) {
-            console.log("Setting content to:", firstContent.content);
-            setContent(firstContent.content as string);
-          }
-        }
+        const contentArray = Array.isArray(document.content) ? document.content : [];
+        const textContent = contentArray.length > 0 && typeof contentArray[0] === 'object' 
+          ? (contentArray[0] as { content?: string })?.content || ''
+          : '';
+        
+        console.log("Setting content to:", textContent);
+        setContent(textContent);
       } catch (error) {
         console.error("Error processing document content:", error);
         toast({
@@ -58,6 +58,7 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
         throw new Error("User must be logged in to save documents");
       }
 
+      // Format content as a JSON array with a single text object
       const documentContent = [{
         type: "text",
         content: content
@@ -75,6 +76,7 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
             })
             .eq("id", document.id)
             .select()
+            .single()
         : await supabase
             .from("documents")
             .insert({
@@ -83,7 +85,8 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
               story_id: storyId,
               user_id: session.user.id
             })
-            .select();
+            .select()
+            .single();
 
       if (error) throw error;
 
