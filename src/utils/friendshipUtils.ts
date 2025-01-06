@@ -17,11 +17,21 @@ export const removeDuplicateFriends = (friendships: FriendshipWithProfile[]) => 
 };
 
 export const filterAcceptedFriendships = (friendships: any[]) => {
-  return friendships
-    .filter(f => f.friend && f.status === "accepted")
+  console.log("Filtering friendships, input:", friendships);
+  const filtered = friendships
+    .filter(f => {
+      console.log("Checking friendship:", {
+        hasProfile: !!f.friend,
+        status: f.status,
+        friendData: f.friend
+      });
+      return f.friend && f.status === "accepted";
+    })
     .map(f => ({
       id: f.id,
       status: f.status,
       friend: f.friend
     }));
+  console.log("Filtered result:", filtered);
+  return filtered;
 };

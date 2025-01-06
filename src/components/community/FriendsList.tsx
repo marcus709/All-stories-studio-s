@@ -35,7 +35,7 @@ export const FriendsList = () => {
 
         console.log("Successfully accessed friendships table");
 
-        // Get friendships where user is the requester
+        // Get all friendships where user is the requester
         const { data: sentFriendships, error: sentError } = await supabase
           .from("friendships")
           .select(`
@@ -48,8 +48,7 @@ export const FriendsList = () => {
               bio
             )
           `)
-          .eq("user_id", session.user.id)
-          .eq("status", "accepted");
+          .eq("user_id", session.user.id);
 
         if (sentError) {
           console.error("Error fetching sent friendships:", sentError);
@@ -57,7 +56,7 @@ export const FriendsList = () => {
         }
         console.log("Sent friendships raw data:", sentFriendships);
 
-        // Get friendships where user is the recipient
+        // Get all friendships where user is the recipient
         const { data: receivedFriendships, error: receivedError } = await supabase
           .from("friendships")
           .select(`
@@ -70,14 +69,28 @@ export const FriendsList = () => {
               bio
             )
           `)
-          .eq("friend_id", session.user.id)
-          .eq("status", "accepted");
+          .eq("friend_id", session.user.id);
 
         if (receivedError) {
           console.error("Error fetching received friendships:", receivedError);
           throw receivedError;
         }
         console.log("Received friendships raw data:", receivedFriendships);
+
+        // Log raw data before filtering
+        console.log("All sent friendships before filtering:", sentFriendships?.map(f => ({
+          id: f.id,
+          status: f.status,
+          friendId: f.friend?.id,
+          friendUsername: f.friend?.username
+        })));
+        
+        console.log("All received friendships before filtering:", receivedFriendships?.map(f => ({
+          id: f.id,
+          status: f.status,
+          friendId: f.friend?.id,
+          friendUsername: f.friend?.username
+        })));
 
         // Combine and filter friendships
         const sentFiltered = filterAcceptedFriendships(sentFriendships || []);
