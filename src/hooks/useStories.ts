@@ -2,23 +2,24 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Story } from "@/types/story";
 import { useToast } from "@/hooks/use-toast";
+import { useSessionContext } from "@supabase/auth-helpers-react";
 
 export function useStories() {
   const { toast } = useToast();
+  const { session, isLoading: isSessionLoading } = useSessionContext();
 
   return useQuery({
     queryKey: ["stories"],
     queryFn: async () => {
       try {
-        const { data: session } = await supabase.auth.getSession();
-        if (!session?.session?.user) {
+        if (!session?.user) {
           throw new Error("User must be logged in to view stories");
         }
 
         const { data, error } = await supabase
           .from("stories")
           .select("*")
-          .eq("user_id", session.session.user.id)
+          .eq("user_id", session.user.id)
           .order("updated_at", { ascending: false });
 
         if (error) {
@@ -46,8 +47,15 @@ export function useStories() {
         throw error;
       }
     },
+    enabled: !!session?.user && !isSessionLoading,
     staleTime: 1000 * 60 * 5, // 5 minutes
-    retry: 2,
+    retry: (failureCount, error) => {
+      // Only retry network errors, not auth errors
+      if (error instanceof Error && error.message.includes("logged in")) {
+        return false;
+      }
+      return failureCount < 3;
+    },
     refetchOnWindowFocus: true,
   });
 }
