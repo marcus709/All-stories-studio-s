@@ -26,7 +26,11 @@ export const FriendsList = () => {
           .select(`
             id,
             status,
-            friend:profiles!friendships_friend_id_fkey_profiles(*)
+            friend:profiles!friendships_friend_id_fkey_profiles(
+              id,
+              username,
+              avatar_url
+            )
           `)
           .eq("user_id", session?.user?.id)
           .eq("status", "accepted");
@@ -39,7 +43,11 @@ export const FriendsList = () => {
           .select(`
             id,
             status,
-            friend:profiles!friendships_user_id_fkey_profiles(*)
+            friend:profiles!friendships_user_id_fkey_profiles(
+              id,
+              username,
+              avatar_url
+            )
           `)
           .eq("friend_id", session?.user?.id)
           .eq("status", "accepted");
@@ -49,7 +57,7 @@ export const FriendsList = () => {
         console.log('Sent friendships:', sentFriendships);
         console.log('Received friendships:', receivedFriendships);
 
-        // Combine both sets of friendships
+        // Combine and normalize both sets of friendships
         const allFriendships = [
           ...(sentFriendships || []).map(f => ({
             id: f.id,
@@ -63,7 +71,7 @@ export const FriendsList = () => {
           }))
         ];
 
-        console.log('All friendships:', allFriendships);
+        console.log('All combined friendships:', allFriendships);
         return allFriendships as FriendshipWithProfile[];
       } catch (error) {
         console.error("Error in friends query:", error);
@@ -83,7 +91,7 @@ export const FriendsList = () => {
       .on(
         'postgres_changes',
         {
-          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          event: '*',
           schema: 'public',
           table: 'friendships',
           filter: `or(user_id.eq.${session.user.id},friend_id.eq.${session.user.id})`,
@@ -101,9 +109,7 @@ export const FriendsList = () => {
   }, [session?.user?.id, refetch]);
 
   if (error) {
-    return (
-      <p className="text-sm text-red-500">{error}</p>
-    );
+    return <p className="text-sm text-red-500">{error}</p>;
   }
 
   if (!friends || friends.length === 0) {
