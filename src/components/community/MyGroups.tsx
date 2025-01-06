@@ -32,7 +32,28 @@ export const MyGroups = () => {
 
   const { data: groups, isLoading } = useGroups();
 
-  // Query for searching all groups
+  // Add query for pending requests count
+  const { data: pendingRequestsCount = 0 } = useQuery({
+    queryKey: ["pending-requests-count", session?.user?.id],
+    queryFn: async () => {
+      const { data: userGroups } = await supabase
+        .from("groups")
+        .select("id")
+        .eq("created_by", session?.user?.id);
+
+      if (!userGroups?.length) return 0;
+
+      const { count } = await supabase
+        .from("group_join_requests")
+        .select("*", { count: 'exact', head: true })
+        .eq("status", "pending")
+        .in("group_id", userGroups.map(g => g.id));
+
+      return count || 0;
+    },
+    enabled: !!session?.user?.id,
+  });
+
   const { data: searchResults } = useQuery({
     queryKey: ["search-groups", searchQuery],
     queryFn: async () => {
