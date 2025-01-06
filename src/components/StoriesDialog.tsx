@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "./ui/dialog";
 import { Button } from "./ui/button";
-import { Plus } from "lucide-react";
+import { Plus, AlertCircle } from "lucide-react";
 import { useStory } from "@/contexts/StoryContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { CreateStoryForm } from "./stories/CreateStoryForm";
 import { StoriesDialogHeader } from "./stories/StoriesDialogHeader";
 import { StoriesGrid } from "./stories/StoriesGrid";
 import { ScrollArea } from "./ui/scroll-area";
-import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
 import { StoryButtons } from "./stories/StoryButtons";
 import { useCreateStory } from "@/hooks/useCreateStory";
 import { useStories } from "@/hooks/useStories";
 import { supabase } from "@/integrations/supabase/client";
 import { Story } from "@/types/story";
+import { useToast } from "@/hooks/use-toast";
 
 export function StoriesDialog() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -26,7 +26,8 @@ export function StoriesDialog() {
   
   const { selectedStory, setSelectedStory } = useStory();
   const queryClient = useQueryClient();
-  const { data: stories, error: storiesError, isLoading } = useStories();
+  const { toast } = useToast();
+  const { data: stories, error: storiesError, isLoading, isError } = useStories();
   
   const createStoryMutation = useCreateStory((story: Story) => {
     setSelectedStory(story);
@@ -35,33 +36,53 @@ export function StoriesDialog() {
   });
 
   useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Session expired",
+          description: "Please sign in again to continue.",
+          variant: "destructive",
+        });
+      }
+    };
+
     if (isOpen) {
+      checkSession();
       queryClient.invalidateQueries({ queryKey: ["stories"] });
     }
-  }, [isOpen, queryClient]);
+  }, [isOpen, queryClient, toast]);
 
   const handleCreateStory = async () => {
     if (!newStory.title.trim()) {
       return;
     }
     
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      throw new Error("User must be logged in to create a story");
-    }
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("User must be logged in to create a story");
+      }
 
-    createStoryMutation.mutate({
-      title: newStory.title,
-      description: newStory.description,
-      user_id: user.id,
-    } as Story);
+      createStoryMutation.mutate({
+        title: newStory.title,
+        description: newStory.description,
+        user_id: user.id,
+      } as Story);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create story",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleNewStoryChange = (field: "title" | "description", value: string) => {
     setNewStory((prev) => ({ ...prev, [field]: value }));
   };
 
-  if (storiesError) {
+  if (isError || storiesError) {
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
