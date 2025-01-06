@@ -6,24 +6,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-interface Story {
-  id: string;
-  title: string;
-  description: string;
-  created_at: string;
-  updated_at: string;
-  user_id: string;
-}
-
 interface StoriesGridProps {
-  stories: Story[];
-  onStorySelect: (story: Story) => void;
+  onStorySelect: (story: any) => void;
   onClose: () => void;
 }
 
-export const StoriesGrid = ({ stories, onStorySelect, onClose }: StoriesGridProps) => {
-  const { selectedStory, setSelectedStory } = useStory();
-  const [storyToDelete, setStoryToDelete] = useState<Story | null>(null);
+export const StoriesGrid = ({ onStorySelect, onClose }: StoriesGridProps) => {
+  const { stories, selectedStory, setSelectedStory } = useStory();
+  const [storyToDelete, setStoryToDelete] = useState<any | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -38,7 +28,7 @@ export const StoriesGrid = ({ stories, onStorySelect, onClose }: StoriesGridProp
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stories"] });
-      if (selectedStory?.id === storyToDelete?.id) {
+      if (selectedStory?.id === storyToDelete.id) {
         setSelectedStory(null);
       }
       toast({
@@ -57,7 +47,7 @@ export const StoriesGrid = ({ stories, onStorySelect, onClose }: StoriesGridProp
     },
   });
 
-  const handleDelete = (story: Story, e: React.MouseEvent) => {
+  const handleDelete = (story: any, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent story selection when clicking delete
     setStoryToDelete(story);
   };
@@ -68,7 +58,7 @@ export const StoriesGrid = ({ stories, onStorySelect, onClose }: StoriesGridProp
     }
   };
 
-  const handleStorySelect = (story: Story) => {
+  const handleStorySelect = (story: any) => {
     onStorySelect(story);
     onClose();
   };

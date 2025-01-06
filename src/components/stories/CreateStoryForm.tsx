@@ -2,16 +2,16 @@ import React from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
+import { X } from "lucide-react";
 
 interface CreateStoryFormProps {
   newStory: { title: string; description: string };
   onClose: () => void;
   onChange: (field: "title" | "description", value: string) => void;
   onSubmit: () => void;
-  isLoading?: boolean;
 }
 
-export function CreateStoryForm({ newStory, onClose, onChange, onSubmit, isLoading }: CreateStoryFormProps) {
+export function CreateStoryForm({ newStory, onClose, onChange, onSubmit }: CreateStoryFormProps) {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -40,15 +40,15 @@ export function CreateStoryForm({ newStory, onClose, onChange, onSubmit, isLoadi
       </div>
 
       <div className="flex justify-end gap-3">
-        <Button variant="outline" onClick={onClose} disabled={isLoading}>
+        <Button variant="outline" onClick={onClose}>
           Cancel
         </Button>
         <Button
           className="bg-purple-500 hover:bg-purple-600"
           onClick={onSubmit}
-          disabled={!newStory.title.trim() || isLoading}
+          disabled={!newStory.title.trim()}
         >
-          {isLoading ? "Creating..." : "Create Story"}
+          Create Story
         </Button>
       </div>
     </div>

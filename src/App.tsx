@@ -9,7 +9,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,66 +26,63 @@ function App() {
   const { toast } = useToast();
 
   useEffect(() => {
-    let mounted = true;
-
-    // Initialize session
-    const initSession = async () => {
+    // Clear any stale session data
+    const clearStaleSession = async () => {
       try {
-        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
-        if (error) throw error;
-        
-        if (mounted) {
-          console.log("Initial session:", initialSession);
-          setSession(initialSession);
-          setIsLoading(false);
-        }
+        await supabase.auth.signOut();
+        localStorage.removeItem('supabase.auth.token');
+        queryClient.clear();
       } catch (error) {
-        console.error("Error fetching initial session:", error);
-        if (mounted) {
-          toast({
-            title: "Session Error",
-            description: "There was an error loading your session. Please try signing in again.",
-            variant: "destructive",
-          });
-          setIsLoading(false);
-        }
+        console.error("Error clearing session:", error);
       }
     };
 
-    initSession();
+    // Get initial session
+    const initializeSession = async () => {
+      try {
+        await clearStaleSession(); // Clear any stale session first
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        setSession(initialSession);
+      } catch (error) {
+        console.error("Error fetching session:", error);
+        toast({
+          title: "Session Error",
+          description: "There was an error loading your session. Please try signing in again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeSession();
 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log('Auth state changed:', _event, session);
-      
-      if (mounted) {
-        setSession(session);
-        
-        if (_event === 'SIGNED_OUT') {
-          // Clear any local storage data
-          queryClient.clear();
-          localStorage.clear();
-        }
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (_event === 'TOKEN_REFRESHED') {
+        console.log('Token refreshed successfully');
       }
+      
+      if (_event === 'SIGNED_OUT') {
+        // Clear any local storage data
+        queryClient.clear();
+        localStorage.removeItem('supabase.auth.token');
+      }
+
+      setSession(session);
+      setIsLoading(false);
     });
 
     return () => {
-      mounted = false;
       subscription.unsubscribe();
     };
   }, [toast]);
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
-          <p className="text-gray-600">Loading your experience...</p>
-        </div>
-      </div>
-    );
+    return <div>Loading...</div>;
   }
 
   return (

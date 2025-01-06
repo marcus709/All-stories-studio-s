@@ -1,3 +1,4 @@
+import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { StoriesSection } from "@/components/StoriesSection";
@@ -30,6 +31,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <Header />
       <main>
         <HeroSection onShowAuth={handleShowAuth} />
         <FeaturesSection />
