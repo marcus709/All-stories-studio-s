@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { BookOpen, LineChart, Wand, Settings, Trash2, Edit } from "lucide-react";
+import { BookOpen, LineChart, Wand, Settings } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel, SelectSeparator } from "@/components/ui/select";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useStory } from "@/contexts/StoryContext";
@@ -13,6 +12,7 @@ import { AIConfigurationDialog } from "@/components/ai/AIConfigurationDialog";
 import { calculateReadability } from "@/utils/readability";
 import { useFeatureAccess } from "@/utils/subscriptionUtils";
 import { PaywallAlert } from "@/components/PaywallAlert";
+import { useSession } from "@supabase/auth-helpers-react";
 
 export const StoryView = () => {
   const [wordCount, setWordCount] = useState(1);
@@ -22,14 +22,39 @@ export const StoryView = () => {
   const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false);
   const [selectedConfig, setSelectedConfig] = useState<string>("");
   const [configToEdit, setConfigToEdit] = useState<any>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [configToDelete, setConfigToDelete] = useState<string>("");
   const [showPaywallAlert, setShowPaywallAlert] = useState(false);
   const { selectedStory } = useStory();
   const { generateContent, isLoading } = useAI();
   const { toast } = useToast();
+  const session = useSession();
   const queryClient = useQueryClient();
   const { currentLimits, getRequiredPlan } = useFeatureAccess();
+
+  // Fetch AI configurations for the current user
+  const { data: aiConfigurations = [] } = useQuery({
+    queryKey: ["aiConfigurations", session?.user?.id],
+    queryFn: async () => {
+      if (!session?.user?.id) return [];
+      
+      const { data, error } = await supabase
+        .from("ai_configurations")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch AI configurations",
+          variant: "destructive",
+        });
+        return [];
+      }
+
+      return data;
+    },
+    enabled: !!session?.user?.id,
+  });
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (!selectedStory) return;
@@ -62,7 +87,7 @@ export const StoryView = () => {
       .single() : null;
 
     const context = {
-      storyDescription: selectedStory?.description || '',
+      storyDescription: selectedStory?.description || "",
       aiConfig: selectedAIConfig?.data,
     };
 
@@ -91,7 +116,7 @@ export const StoryView = () => {
         </div>
       </div>
 
-      <div className={`bg-white rounded-xl shadow-sm p-8 mt-6 relative ${!selectedStory ? 'opacity-50' : ''}`}>
+      <div className={`bg-white rounded-xl shadow-sm p-8 mt-6 relative ${!selectedStory ? "opacity-50" : ""}`}>
         {!selectedStory && (
           <div className="absolute inset-0 bg-transparent z-10" />
         )}
@@ -107,23 +132,27 @@ export const StoryView = () => {
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Your Configurations</SelectLabel>
-                {/* Add your AI configurations here */}
+                {aiConfigurations.map((config) => (
+                  <SelectItem key={config.id} value={config.id}>
+                    {config.name}
+                  </SelectItem>
+                ))}
                 <SelectSeparator />
-                <SelectItem value="new" onClick={() => setIsConfigDialogOpen(true)}>
+                <SelectItem value="new" onSelect={() => setIsConfigDialogOpen(true)}>
                   <span className="text-blue-600">+ Configure New AI</span>
                 </SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
 
-          <button 
-            className={`ml-auto px-8 py-2.5 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg flex items-center gap-2 transition-colors ${!selectedStory || isLoading || !selectedConfig ? 'cursor-not-allowed opacity-50' : ''}`}
+          <Button
+            className={`ml-auto px-8 py-2.5 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg flex items-center gap-2 transition-colors ${!selectedStory || isLoading || !selectedConfig ? "cursor-not-allowed opacity-50" : ""}`}
             onClick={handleGetSuggestions}
             disabled={!selectedStory || isLoading || !selectedConfig}
           >
             <Wand className="h-5 w-5" />
             {isLoading ? "Getting suggestions..." : "Get AI Suggestions"}
-          </button>
+          </Button>
         </div>
 
         <Textarea
@@ -144,7 +173,7 @@ export const StoryView = () => {
               </div>
             ) : (
               <div className="prose prose-purple max-w-none">
-                {aiSuggestions.split('\n').map((paragraph, index) => (
+                {aiSuggestions.split("\n").map((paragraph, index) => (
                   <p key={index} className="text-purple-800">{paragraph}</p>
                 ))}
               </div>
@@ -161,7 +190,7 @@ export const StoryView = () => {
         }}
         configToEdit={configToEdit}
         onConfigSaved={() => {
-          queryClient.invalidateQueries({ queryKey: ['aiConfigurations'] });
+          queryClient.invalidateQueries({ queryKey: ["aiConfigurations"] });
         }}
       />
 
@@ -169,7 +198,7 @@ export const StoryView = () => {
         isOpen={showPaywallAlert}
         onClose={() => setShowPaywallAlert(false)}
         feature="AI writing suggestions"
-        requiredPlan={getRequiredPlan('ai_prompts') || 'creator'}
+        requiredPlan={getRequiredPlan("ai_prompts") || "creator"}
       />
     </div>
   );
