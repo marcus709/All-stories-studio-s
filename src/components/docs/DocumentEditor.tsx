@@ -109,11 +109,11 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
         throw new Error("Title is required");
       }
 
-      const contentToSave: DocumentContent[] = [{
+      // Create a plain object that matches the Json type
+      const contentToSave = [{
         type: "text",
-        content: content,
-        version: "1.0"
-      }];
+        content: content
+      }] as Json;
 
       console.log("Saving content:", contentToSave);
 

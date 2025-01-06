@@ -38,6 +38,7 @@ export interface StoryIssue {
 export interface DocumentContent {
   type: string;
   content: string;
+  version?: string;  // Made version optional
 }
 
 export interface Document {
