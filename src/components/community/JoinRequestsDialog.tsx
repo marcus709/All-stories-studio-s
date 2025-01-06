@@ -26,7 +26,7 @@ export const JoinRequestsDialog = ({ open, onOpenChange }: JoinRequestsDialogPro
           user_id,
           status,
           message,
-          groups (
+          groups!inner (
             id,
             name,
             created_by
