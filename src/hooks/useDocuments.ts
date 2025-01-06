@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./use-toast";
 import { Document } from "@/types/story";
 import { parseDocumentContent, extractTextFromFile } from "@/utils/documentUtils";
-import { Json } from "@/integrations/supabase/types";
 
 export const useDocuments = (storyId?: string) => {
   const { toast } = useToast();
@@ -22,11 +21,10 @@ export const useDocuments = (storyId?: string) => {
 
       if (error) throw error;
 
-      // Convert the data to match our Document type
-      return (data as any[]).map(doc => ({
+      return (data as Document[]).map(doc => ({
         ...doc,
-        content: Array.isArray(doc.content) ? doc.content : []
-      })) as Document[];
+        content: doc.content || ""
+      }));
     },
     enabled: !!storyId,
   });
@@ -40,7 +38,7 @@ export const useDocuments = (storyId?: string) => {
         .from("documents")
         .insert({
           title: file.name,
-          content: [{ type: "text", content: parsedContent }],
+          content: parsedContent,
           story_id: storyId,
           user_id: (await supabase.auth.getUser()).data.user?.id,
         })
@@ -68,12 +66,10 @@ export const useDocuments = (storyId?: string) => {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, content }: { id: string; content: string }) => {
-      const parsedContent = parseDocumentContent(content);
-      
       const { data, error } = await supabase
         .from("documents")
         .update({
-          content: [{ type: "text", content: parsedContent }],
+          content: content,
           updated_at: new Date().toISOString(),
         })
         .eq("id", id)

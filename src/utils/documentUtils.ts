@@ -1,5 +1,3 @@
-import { Document } from "@/types/story";
-
 export const parseDocumentContent = (content: string): string => {
   try {
     // Remove any special characters that might cause issues
