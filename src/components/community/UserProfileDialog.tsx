@@ -16,6 +16,30 @@ export const UserProfileDialog = ({ user, isOpen, onClose }: UserProfileDialogPr
   const session = useSession();
   const { toast } = useToast();
   const [isSending, setIsSending] = useState(false);
+  const [existingRequest, setExistingRequest] = useState<any>(null);
+
+  // Check for existing friend request when dialog opens
+  const checkExistingRequest = async () => {
+    if (!session?.user?.id) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from("friendships")
+        .select("*")
+        .or(`user_id.eq.${session.user.id},friend_id.eq.${session.user.id}`)
+        .or(`user_id.eq.${user.id},friend_id.eq.${user.id}`)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      setExistingRequest(data);
+    } catch (error) {
+      console.error("Error checking friend request:", error);
+    }
+  };
+
+  useState(() => {
+    checkExistingRequest();
+  }, [session?.user?.id, user.id]);
 
   const handleSendFriendRequest = async () => {
     if (!session?.user?.id) return;
@@ -36,6 +60,7 @@ export const UserProfileDialog = ({ user, isOpen, onClose }: UserProfileDialogPr
         title: "Friend request sent",
         description: `A friend request has been sent to ${user.username}`,
       });
+      setExistingRequest({ status: 'pending' });
       onClose();
     } catch (error) {
       console.error("Error sending friend request:", error);
@@ -48,6 +73,21 @@ export const UserProfileDialog = ({ user, isOpen, onClose }: UserProfileDialogPr
       setIsSending(false);
     }
   };
+
+  const getRequestStatus = () => {
+    if (!existingRequest) return null;
+    if (existingRequest.status === 'accepted') return 'Already friends';
+    if (existingRequest.status === 'pending') {
+      if (existingRequest.user_id === session?.user?.id) {
+        return 'Request pending';
+      } else {
+        return 'Request received';
+      }
+    }
+    return null;
+  };
+
+  const requestStatus = getRequestStatus();
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -78,9 +118,9 @@ export const UserProfileDialog = ({ user, isOpen, onClose }: UserProfileDialogPr
           <Button 
             className="w-full" 
             onClick={handleSendFriendRequest}
-            disabled={isSending}
+            disabled={isSending || !!requestStatus}
           >
-            {isSending ? "Sending request..." : "Send Friend Request"}
+            {requestStatus || (isSending ? "Sending request..." : "Send Friend Request")}
           </Button>
         </div>
       </DialogContent>
