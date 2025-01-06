@@ -30,7 +30,14 @@ export function StoriesDialog() {
   const { data: stories, error: storiesError, isLoading, isError } = useStories();
   
   const createStoryMutation = useCreateStory((story: Story) => {
-    setSelectedStory(story);
+    // When setting the selected story, we ensure it has all required properties
+    const completeStory: Story = {
+      ...story,
+      user_id: story.user_id, // This will be set by the backend
+      created_at: story.created_at || null,
+      updated_at: story.updated_at || null
+    };
+    setSelectedStory(completeStory);
     setShowNewStory(false);
     setNewStory({ title: "", description: "" });
   });
