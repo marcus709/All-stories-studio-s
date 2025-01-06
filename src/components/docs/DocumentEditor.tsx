@@ -7,6 +7,7 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSessionContext } from "@supabase/auth-helpers-react";
+import { Json } from "@/integrations/supabase/types";
 
 interface DocumentEditorProps {
   document?: Document;
@@ -59,7 +60,7 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
       const documentContent = [{
         type: "text",
         content: content
-      }] as unknown as Json[];
+      }] as Json[];
 
       console.log("Document content to save:", documentContent);
 
