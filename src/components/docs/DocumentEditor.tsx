@@ -24,6 +24,7 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
   const { data: document, refetch } = useQuery({
     queryKey: ["document", documentId],
     queryFn: async () => {
+      console.log("Fetching document:", documentId);
       const { data, error } = await supabase
         .from("documents")
         .select("*")
@@ -40,6 +41,7 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
         throw error;
       }
 
+      console.log("Fetched document:", data);
       return data;
     },
     enabled: !!documentId,
@@ -47,14 +49,16 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
 
   useEffect(() => {
     if (document) {
+      console.log("Setting document data:", document);
       setTitle(document.title);
       
-      // Handle different content formats
       if (document.content) {
         try {
           const docContent = document.content as Json;
+          console.log("Processing document content:", docContent);
+          
           if (Array.isArray(docContent) && docContent.length > 0) {
-            const firstItem = docContent[0] as unknown as DocumentContent;
+            const firstItem = docContent[0] as DocumentContent;
             if (firstItem && typeof firstItem === 'object' && 'content' in firstItem) {
               setContent(firstItem.content || "");
             } else if (typeof firstItem === 'string') {
@@ -62,6 +66,9 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
             }
           } else if (typeof docContent === 'string') {
             setContent(docContent);
+          } else {
+            console.log("Empty or invalid content, setting default");
+            setContent("");
           }
         } catch (error) {
           console.error("Error processing document content:", error);
@@ -70,6 +77,7 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
             description: "Failed to load document content",
             variant: "destructive",
           });
+          setContent("");
         }
       }
     }
@@ -78,18 +86,22 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
   const handleSave = async () => {
     if (!documentId || isSaving) return;
     
+    console.log("Saving document...");
+    console.log("Current content:", content);
+    
     setIsSaving(true);
     try {
       if (!title.trim()) {
         throw new Error("Title is required");
       }
 
-      // Properly structure the content as a JSON array
       const contentToSave = [{
         type: "text",
         content: content,
         version: "1.0"
-      }] as unknown as Json;
+      }];
+
+      console.log("Saving content:", contentToSave);
 
       const { error } = await supabase
         .from("documents")
@@ -100,7 +112,10 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
         })
         .eq("id", documentId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error saving document:", error);
+        throw error;
+      }
 
       await refetch();
       onRefresh();
@@ -109,6 +124,8 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
         title: "Success",
         description: "Document saved successfully",
       });
+      
+      console.log("Document saved successfully");
     } catch (error) {
       console.error("Error saving document:", error);
       toast({
@@ -160,7 +177,7 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
 
   return (
     <div 
-      className="flex-1 flex flex-col h-full p-6 space-y-4 overflow-hidden"
+      className="flex-1 flex flex-col h-full p-6 space-y-4 overflow-hidden bg-white"
       onDrop={handleDrop}
       onDragOver={handleDragOver}
     >
@@ -185,11 +202,13 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
         </Button>
       </div>
       
-      <RichTextEditor
-        content={content}
-        onChange={setContent}
-        className="flex-1 overflow-auto"
-      />
+      <div className="flex-1 overflow-hidden border rounded-lg">
+        <RichTextEditor
+          content={content}
+          onChange={setContent}
+          className="h-full min-h-[500px]"
+        />
+      </div>
     </div>
   );
 };
