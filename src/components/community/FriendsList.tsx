@@ -3,6 +3,7 @@ import { useSession } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Profile } from "@/integrations/supabase/types/tables.types";
+import { useNavigate } from "react-router-dom";
 
 interface FriendshipWithProfile {
   id: string;
@@ -12,6 +13,7 @@ interface FriendshipWithProfile {
 
 export const FriendsList = () => {
   const session = useSession();
+  const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
 
   const { data: friends, refetch } = useQuery({
@@ -44,19 +46,17 @@ export const FriendsList = () => {
   });
 
   useEffect(() => {
-    // Subscribe to changes in the friendships table
     const channel = supabase
       .channel('schema-db-changes')
       .on(
         'postgres_changes',
         {
-          event: '*', // Listen to all changes
+          event: '*',
           schema: 'public',
           table: 'friendships',
           filter: `user_id=eq.${session?.user?.id}`,
         },
         () => {
-          // Refetch friends when any change occurs
           refetch();
         }
       )
@@ -84,9 +84,10 @@ export const FriendsList = () => {
   return (
     <div className="space-y-2">
       {friends.map((friendship) => (
-        <div
+        <button
           key={friendship.id}
-          className="flex items-center gap-2 rounded-lg p-2 hover:bg-gray-50"
+          onClick={() => navigate(`/community/chat/${friendship.friend.id}`)}
+          className="w-full flex items-center gap-2 rounded-lg p-2 hover:bg-gray-50"
         >
           <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
             {friendship.friend.avatar_url ? (
@@ -104,7 +105,7 @@ export const FriendsList = () => {
           <span className="text-sm font-medium truncate">
             @{friendship.friend.username}
           </span>
-        </div>
+        </button>
       ))}
     </div>
   );
