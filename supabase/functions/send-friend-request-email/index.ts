@@ -44,7 +44,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Story Writing App <notifications@yourdomain.com>",
+        from: "All Stories Studio <onboarding@resend.dev>",
         to: [userData.email],
         subject: "New Friend Request",
         html: `
