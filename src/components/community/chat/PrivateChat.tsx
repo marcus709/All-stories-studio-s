@@ -68,7 +68,7 @@ export const PrivateChat = () => {
         .from("private_messages")
         .select(`
           *,
-          profiles!private_messages_sender_id_fkey(username, avatar_url)
+          profiles!private_messages_sender_id_fkey_profiles(username, avatar_url)
         `)
         .or(
           `and(sender_id.eq.${session?.user?.id},receiver_id.eq.${friendId}),and(sender_id.eq.${friendId},receiver_id.eq.${session?.user?.id})`
