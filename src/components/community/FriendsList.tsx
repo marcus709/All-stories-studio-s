@@ -41,14 +41,10 @@ export const FriendsList = () => {
           .select(`
             id,
             status,
-            friend:profiles!friendships_friend_id_fkey_profiles(
-              id,
-              username,
-              avatar_url,
-              bio
-            )
+            friend:profiles!friendships_friend_id_fkey_profiles(*)
           `)
-          .eq("user_id", session.user.id);
+          .eq("user_id", session.user.id)
+          .eq("status", "accepted");
 
         if (sentError) {
           console.error("Error fetching sent friendships:", sentError);
@@ -62,14 +58,10 @@ export const FriendsList = () => {
           .select(`
             id,
             status,
-            friend:profiles!friendships_user_id_fkey_profiles(
-              id,
-              username,
-              avatar_url,
-              bio
-            )
+            friend:profiles!friendships_user_id_fkey_profiles(*)
           `)
-          .eq("friend_id", session.user.id);
+          .eq("friend_id", session.user.id)
+          .eq("status", "accepted");
 
         if (receivedError) {
           console.error("Error fetching received friendships:", receivedError);
@@ -92,9 +84,15 @@ export const FriendsList = () => {
           friendUsername: f.friend?.username
         })));
 
+        // For received friendships, we need to map the friend data correctly
+        const mappedReceivedFriendships = receivedFriendships?.map(f => ({
+          ...f,
+          friend: f.friend // The friend field contains the sender's profile
+        })) || [];
+
         // Combine and filter friendships
         const sentFiltered = filterAcceptedFriendships(sentFriendships || []);
-        const receivedFiltered = filterAcceptedFriendships(receivedFriendships || []);
+        const receivedFiltered = filterAcceptedFriendships(mappedReceivedFriendships);
         
         console.log("Filtered sent friendships:", sentFiltered);
         console.log("Filtered received friendships:", receivedFiltered);
