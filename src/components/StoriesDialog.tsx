@@ -15,6 +15,7 @@ import { useStories } from "@/hooks/useStories";
 import { supabase } from "@/integrations/supabase/client";
 import { Story, CreateStoryInput } from "@/types/story";
 import { useToast } from "@/hooks/use-toast";
+import { useSessionContext } from "@supabase/auth-helpers-react";
 
 export function StoriesDialog() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -27,38 +28,29 @@ export function StoriesDialog() {
   const { selectedStory, setSelectedStory } = useStory();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { session } = useSessionContext();
   const { data: stories, error: storiesError, isLoading, isError } = useStories();
   
   const createStoryMutation = useCreateStory((story: Story) => {
-    // When setting the selected story, we ensure it has all required properties
-    const completeStory: Story = {
-      ...story,
-      user_id: story.user_id, // This will be set by the backend
-      created_at: story.created_at || null,
-      updated_at: story.updated_at || null
-    };
-    setSelectedStory(completeStory);
+    setSelectedStory(story);
     setShowNewStory(false);
     setNewStory({ title: "", description: "" });
   });
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+    if (isOpen) {
       if (!session) {
         toast({
-          title: "Session expired",
-          description: "Please sign in again to continue.",
+          title: "Authentication required",
+          description: "Please sign in to view and manage your stories.",
           variant: "destructive",
         });
+        setIsOpen(false);
+        return;
       }
-    };
-
-    if (isOpen) {
-      checkSession();
       queryClient.invalidateQueries({ queryKey: ["stories"] });
     }
-  }, [isOpen, queryClient, toast]);
+  }, [isOpen, queryClient, toast, session]);
 
   const handleCreateStory = async () => {
     if (!newStory.title.trim()) {
@@ -66,15 +58,14 @@ export function StoriesDialog() {
     }
     
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error("User must be logged in to create a story");
+      if (!session?.user) {
+        throw new Error("You must be logged in to create a story");
       }
 
       const storyInput: CreateStoryInput = {
         title: newStory.title,
         description: newStory.description || null,
-        user_id: user.id,
+        user_id: session.user.id,
       };
 
       createStoryMutation.mutate(storyInput);
@@ -90,6 +81,17 @@ export function StoriesDialog() {
   const handleNewStoryChange = (field: "title" | "description", value: string) => {
     setNewStory((prev) => ({ ...prev, [field]: value }));
   };
+
+  if (!session) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Please sign in to access your stories
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   if (isError || storiesError) {
     return (
