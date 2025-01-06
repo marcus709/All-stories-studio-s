@@ -54,10 +54,6 @@ export const Header = () => {
       
       if (error) {
         console.error("Error during sign out:", error);
-        // Even if server-side logout fails, we want to clear the local session
-        await supabase.auth.clearSession();
-        
-        // Show a warning but don't prevent the sign-out
         toast({
           title: "Warning",
           description: "Sign out completed with some warnings. Please refresh the page.",
@@ -74,8 +70,6 @@ export const Header = () => {
       window.location.href = '/';
     } catch (error) {
       console.error("Unexpected error during sign out:", error);
-      // Ensure we clear local session even if there's an error
-      await supabase.auth.clearSession();
       window.location.href = '/';
     }
   };

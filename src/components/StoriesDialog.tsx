@@ -68,6 +68,9 @@ export function StoriesDialog() {
         title: newStory.title,
         description: newStory.description,
         user_id: user.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        id: crypto.randomUUID(),
       } as Story);
     } catch (error) {
       toast({
