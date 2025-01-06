@@ -9,11 +9,17 @@ import { CreateDocumentDialog } from "./CreateDocumentDialog";
 import { DocumentEditor } from "./DocumentEditor";
 import { DocumentSidebar } from "./DocumentSidebar";
 import { Document } from "@/types/story";
+import { Json } from "@/integrations/supabase/types";
 import {
   ResizablePanel,
   ResizablePanelGroup,
   ResizableHandle,
 } from "@/components/ui/resizable";
+
+interface DocumentContentItem {
+  type?: string;
+  content?: string;
+}
 
 export const StoryDocsView = () => {
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
@@ -49,10 +55,13 @@ export const StoryDocsView = () => {
         let transformedContent = [];
         try {
           if (Array.isArray(doc.content)) {
-            transformedContent = doc.content.map(item => ({
-              type: typeof item === 'object' && item !== null ? item.type?.toString() || 'text' : 'text',
-              content: typeof item === 'object' && item !== null ? item.content?.toString() || '' : ''
-            }));
+            transformedContent = doc.content.map(item => {
+              const contentItem = item as DocumentContentItem;
+              return {
+                type: contentItem?.type || 'text',
+                content: contentItem?.content || ''
+              };
+            });
           }
         } catch (err) {
           console.error("Error transforming document content:", err);
