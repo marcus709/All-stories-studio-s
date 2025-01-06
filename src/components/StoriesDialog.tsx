@@ -71,7 +71,7 @@ export function StoriesDialog() {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         id: crypto.randomUUID(),
-      } as Story);
+      });
     } catch (error) {
       toast({
         title: "Error",
