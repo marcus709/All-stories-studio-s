@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Document, DocumentContent } from "@/types/story";
+import { Document } from "@/types/story";
 import { RichTextEditor } from "../editor/RichTextEditor";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
@@ -26,10 +26,12 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
   useEffect(() => {
     if (document?.content) {
       try {
+        console.log("Raw document content:", document.content);
         const documentContent = document.content;
         if (Array.isArray(documentContent) && documentContent.length > 0) {
           const firstContent = documentContent[0];
           if (typeof firstContent === 'object' && 'content' in firstContent) {
+            console.log("Setting content to:", firstContent.content);
             setContent(firstContent.content);
           }
         }
@@ -47,7 +49,7 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
   const handleSave = async () => {
     try {
       setIsSaving(true);
-      console.log("Saving content:", content);
+      console.log("Current content state:", content);
 
       if (!title.trim()) {
         throw new Error("Title is required");

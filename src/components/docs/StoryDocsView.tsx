@@ -8,7 +8,7 @@ import { Plus, FileText } from "lucide-react";
 import { CreateDocumentDialog } from "./CreateDocumentDialog";
 import { DocumentEditor } from "./DocumentEditor";
 import { DocumentSidebar } from "./DocumentSidebar";
-import { Document, DocumentContent } from "@/types/story";
+import { Document } from "@/types/story";
 import {
   ResizablePanel,
   ResizablePanelGroup,
@@ -33,6 +33,7 @@ export const StoryDocsView = () => {
         .order("created_at", { ascending: false });
 
       if (error) {
+        console.error("Error fetching documents:", error);
         toast({
           title: "Error",
           description: "Failed to fetch documents",
@@ -41,15 +42,16 @@ export const StoryDocsView = () => {
         return [];
       }
 
+      console.log("Raw documents data:", data);
+
       const transformedData: Document[] = data.map(doc => {
-        console.log("Raw document data:", doc);
-        
-        let transformedContent: DocumentContent[] = [];
+        console.log("Processing document:", doc);
+        let transformedContent = [];
         try {
           if (Array.isArray(doc.content)) {
             transformedContent = doc.content.map(item => ({
-              type: (item as any).type?.toString() || 'text',
-              content: (item as any).content?.toString() || ''
+              type: typeof item === 'object' && item !== null ? item.type?.toString() || 'text' : 'text',
+              content: typeof item === 'object' && item !== null ? item.content?.toString() || '' : ''
             }));
           }
         } catch (err) {
