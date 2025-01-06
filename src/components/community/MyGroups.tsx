@@ -58,11 +58,20 @@ export const MyGroups = () => {
   const { data: pendingRequestsCount } = useQuery({
     queryKey: ["pending-requests-count", session?.user?.id],
     queryFn: async () => {
+      const { data: groups } = await supabase
+        .from("groups")
+        .select("id")
+        .eq("created_by", session?.user?.id);
+
+      if (!groups?.length) return 0;
+
+      const groupIds = groups.map(g => g.id);
+
       const { count, error } = await supabase
         .from("group_join_requests")
         .select("*", { count: "exact", head: true })
         .eq("status", "pending")
-        .eq("groups.created_by", session?.user?.id);
+        .in("group_id", groupIds);
 
       if (error) throw error;
       return count || 0;
