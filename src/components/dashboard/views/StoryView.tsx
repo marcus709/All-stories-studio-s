@@ -97,6 +97,14 @@ export const StoryView = () => {
     }
   };
 
+  const handleSelectChange = (value: string) => {
+    if (value === "new") {
+      setIsConfigDialogOpen(true);
+    } else {
+      setSelectedConfig(value);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-8 py-8">
       <div className="flex items-center justify-between mb-6">
@@ -123,7 +131,7 @@ export const StoryView = () => {
         <div className="flex gap-6 mb-8">
           <Select
             value={selectedConfig}
-            onValueChange={setSelectedConfig}
+            onValueChange={handleSelectChange}
             disabled={!selectedStory}
           >
             <SelectTrigger className="w-[280px]">
@@ -138,7 +146,7 @@ export const StoryView = () => {
                   </SelectItem>
                 ))}
                 <SelectSeparator />
-                <SelectItem value="new" onSelect={() => setIsConfigDialogOpen(true)}>
+                <SelectItem value="new">
                   <span className="text-blue-600">+ Configure New AI</span>
                 </SelectItem>
               </SelectGroup>
