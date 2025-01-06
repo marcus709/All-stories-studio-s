@@ -15,6 +15,16 @@ interface DocumentEditorProps {
   onRefresh: () => void;
 }
 
+// Type guard to check if an object is a DocumentContent
+const isDocumentContent = (obj: any): obj is DocumentContent => {
+  return obj && 
+    typeof obj === 'object' && 
+    'type' in obj && 
+    'content' in obj &&
+    typeof obj.type === 'string' &&
+    typeof obj.content === 'string';
+};
+
 export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -58,11 +68,15 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
           console.log("Processing document content:", docContent);
           
           if (Array.isArray(docContent) && docContent.length > 0) {
-            const firstItem = docContent[0] as DocumentContent;
-            if (firstItem && typeof firstItem === 'object' && 'content' in firstItem) {
-              setContent(firstItem.content || "");
+            const firstItem = docContent[0];
+            
+            if (isDocumentContent(firstItem)) {
+              setContent(firstItem.content);
             } else if (typeof firstItem === 'string') {
               setContent(firstItem);
+            } else {
+              console.log("Invalid content format, setting default");
+              setContent("");
             }
           } else if (typeof docContent === 'string') {
             setContent(docContent);
@@ -95,7 +109,7 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
         throw new Error("Title is required");
       }
 
-      const contentToSave = [{
+      const contentToSave: DocumentContent[] = [{
         type: "text",
         content: content,
         version: "1.0"
