@@ -32,7 +32,13 @@ export function StoriesDialog() {
   const { data: stories, error: storiesError, isLoading, isError } = useStories();
   
   const createStoryMutation = useCreateStory((story: Story) => {
-    setSelectedStory(story);
+    const completeStory: Story = {
+      ...story,
+      user_id: session?.user?.id || '',
+      created_at: story.created_at || null,
+      updated_at: story.updated_at || null
+    };
+    setSelectedStory(completeStory);
     setShowNewStory(false);
     setNewStory({ title: "", description: "" });
   });
@@ -132,7 +138,13 @@ export function StoriesDialog() {
               <StoriesGrid
                 stories={stories || []}
                 onStorySelect={(story: Story) => {
-                  setSelectedStory(story);
+                  const completeStory: Story = {
+                    ...story,
+                    user_id: session?.user?.id || '',
+                    created_at: story.created_at || null,
+                    updated_at: story.updated_at || null
+                  };
+                  setSelectedStory(completeStory);
                   setIsOpen(false);
                 }}
                 onClose={() => setIsOpen(false)}
