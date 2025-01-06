@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { FriendItem } from "./FriendItem";
-import { filterAcceptedFriendships, removeDuplicateFriends } from "@/utils/friendshipUtils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
@@ -19,89 +18,42 @@ export const FriendsList = () => {
     queryKey: ["friends", session?.user?.id],
     queryFn: async () => {
       try {
-        console.log("Starting friends fetch for user:", session?.user?.id);
         if (!session?.user?.id) {
-          console.log("No user session found");
           return [];
         }
 
-        // Fetch friendships where the user is the sender
-        const { data: sentFriendships, error: sentError } = await supabase
-          .from("friendships")
+        // Fetch friendships where the user is either the sender or receiver
+        const { data: friendships, error } = await supabase
+          .from('friendships')
           .select(`
             id,
             status,
-            friend:profiles!friendships_friend_id_fkey_profiles(
+            friend:profiles!friendships_friend_id_fkey_profiles (
+              id,
+              username,
+              avatar_url,
+              bio
+            ),
+            user:profiles!friendships_user_id_fkey_profiles (
               id,
               username,
               avatar_url,
               bio
             )
           `)
-          .eq("user_id", session.user.id)
-          .eq("status", "accepted");
+          .or(`user_id.eq.${session.user.id},friend_id.eq.${session.user.id}`)
+          .eq('status', 'accepted');
 
-        if (sentError) {
-          console.error("Error fetching sent friendships:", sentError);
-          throw sentError;
+        if (error) {
+          throw error;
         }
 
-        // Fetch friendships where the user is the receiver
-        const { data: receivedFriendships, error: receivedError } = await supabase
-          .from("friendships")
-          .select(`
-            id,
-            status,
-            friend:profiles!friendships_user_id_fkey_profiles(
-              id,
-              username,
-              avatar_url,
-              bio
-            )
-          `)
-          .eq("friend_id", session.user.id)
-          .eq("status", "accepted");
-
-        if (receivedError) {
-          console.error("Error fetching received friendships:", receivedError);
-          throw receivedError;
-        }
-
-        console.log("Sent friendships:", sentFriendships);
-        console.log("Received friendships:", receivedFriendships);
-
-        // Combine and deduplicate friendships
-        const allFriendships = [
-          ...(sentFriendships?.map(f => ({
-            id: f.id,
-            status: f.status,
-            friend: {
-              id: f.friend.id,
-              username: f.friend.username,
-              avatar_url: f.friend.avatar_url,
-              bio: f.friend.bio || null,
-              website: null
-            }
-          })) || []),
-          ...(receivedFriendships?.map(f => ({
-            id: f.id,
-            status: f.status,
-            friend: {
-              id: f.friend.id,
-              username: f.friend.username,
-              avatar_url: f.friend.avatar_url,
-              bio: f.friend.bio || null,
-              website: null
-            }
-          })) || [])
-        ];
-
-        console.log("Combined friendships:", allFriendships);
-        
-        const uniqueFriendships = removeDuplicateFriends(allFriendships);
-        console.log("Unique friendships:", uniqueFriendships);
-        
-        return uniqueFriendships;
+        // Transform the data to always return the friend's profile regardless of whether they're the sender or receiver
+        return friendships.map(friendship => ({
+          id: friendship.id,
+          status: friendship.status,
+          friend: session.user.id === friendship.friend.id ? friendship.user : friendship.friend
+        }));
       } catch (error) {
         console.error("Error in friends query:", error);
         setError("Unable to load friends at this time");
