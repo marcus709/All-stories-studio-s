@@ -64,7 +64,7 @@ export const FriendsList = () => {
           throw receivedError;
         }
 
-        // Filter out any null friend entries and combine both sets
+        // Combine both sets of friendships
         const allFriendships = [
           ...(sentFriendships || [])
             .filter(f => f.friend)
