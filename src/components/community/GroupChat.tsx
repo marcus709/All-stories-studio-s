@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { GroupHeader } from "./chat/GroupHeader";
 import { MessageList } from "./chat/MessageList";
 import { MessageInput } from "./chat/MessageInput";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 interface GroupChatProps {
   group: any;
@@ -16,8 +18,10 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
   const { toast } = useToast();
   const [messages, setMessages] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMember, setIsMember] = useState(false);
 
   useEffect(() => {
+    checkMembership();
     fetchMessages();
     const channel = setupRealtimeSubscription();
     return () => {
@@ -25,7 +29,27 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
     };
   }, [group.id]);
 
+  const checkMembership = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("group_members")
+        .select("id")
+        .eq("group_id", group.id)
+        .eq("user_id", session?.user?.id)
+        .single();
+
+      if (error) throw error;
+      setIsMember(!!data);
+    } catch (error) {
+      console.error("Error checking membership:", error);
+      setIsMember(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const fetchMessages = async () => {
+    if (!isMember) return;
     try {
       const { data, error } = await supabase
         .from("group_messages")
@@ -48,12 +72,11 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
         description: "Failed to load messages",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const setupRealtimeSubscription = () => {
+    if (!isMember) return;
     const channel = supabase
       .channel("group_messages")
       .on(
@@ -84,6 +107,7 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
   };
 
   const handleSendMessage = async (content: string) => {
+    if (!isMember) return;
     try {
       const { error } = await supabase.from("group_messages").insert({
         content,
@@ -101,6 +125,25 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
       });
     }
   };
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center py-8">Loading...</div>;
+  }
+
+  if (!isMember) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-12rem)] bg-white rounded-lg shadow-sm p-6">
+        <Alert className="mb-4">
+          <AlertDescription>
+            You need to be a member of this group to view the chat.
+          </AlertDescription>
+        </Alert>
+        <Button onClick={onBack} variant="outline">
+          Go Back
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-12rem)] bg-white rounded-lg shadow-sm">
