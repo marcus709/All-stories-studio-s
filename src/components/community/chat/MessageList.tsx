@@ -2,6 +2,7 @@ import { useSession } from "@supabase/auth-helpers-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { useEffect, useRef } from "react";
+import { getUserColor } from "@/utils/chatColors";
 
 type Message = {
   id: string;
@@ -45,6 +46,8 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
     <div className="flex flex-col h-[400px] overflow-y-auto p-4 space-y-4">
       {messages.map((message) => {
         const isCurrentUser = message.sender_id === session?.user?.id;
+        const messageColor = getUserColor(message.sender_id);
+        
         return (
           <div
             key={message.id}
@@ -69,7 +72,7 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
               }`}
             >
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm font-medium">
+                <span className="text-sm font-medium" style={{ color: messageColor }}>
                   {message.profiles?.username || "Unknown User"}
                 </span>
                 <span className="text-xs text-gray-500">
@@ -77,11 +80,11 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
                 </span>
               </div>
               <div
-                className={`rounded-lg px-4 py-2 max-w-[80%] break-words ${
-                  isCurrentUser
-                    ? "bg-purple-600 text-white"
-                    : "bg-gray-100 text-gray-900"
-                }`}
+                className={`rounded-lg px-4 py-2 max-w-[80%] break-words`}
+                style={{
+                  backgroundColor: isCurrentUser ? messageColor : '#f3f4f6',
+                  color: isCurrentUser ? 'white' : 'black'
+                }}
               >
                 {message.content}
               </div>
