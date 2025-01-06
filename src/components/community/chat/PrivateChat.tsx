@@ -68,10 +68,11 @@ export const PrivateChat = () => {
         .from("private_messages")
         .select(`
           *,
-          profiles:sender_id(username, avatar_url)
+          profiles!private_messages_sender_id_fkey(username, avatar_url)
         `)
-        .or(`sender_id.eq.${session?.user?.id},receiver_id.eq.${session?.user?.id}`)
-        .or(`sender_id.eq.${friendId},receiver_id.eq.${friendId}`)
+        .or(
+          `and(sender_id.eq.${session?.user?.id},receiver_id.eq.${friendId}),and(sender_id.eq.${friendId},receiver_id.eq.${session?.user?.id})`
+        )
         .order("created_at", { ascending: true });
 
       if (error) throw error;
