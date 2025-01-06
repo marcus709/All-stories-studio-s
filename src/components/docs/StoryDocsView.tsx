@@ -44,7 +44,12 @@ export const StoryDocsView = () => {
       // Transform the data to match Document type
       const transformedData: Document[] = data.map(doc => ({
         ...doc,
-        content: Array.isArray(doc.content) ? doc.content : []
+        content: Array.isArray(doc.content) 
+          ? doc.content.map(item => ({
+              type: typeof item.type === 'string' ? item.type : 'text',
+              content: typeof item.content === 'string' ? item.content : ''
+            }))
+          : []
       }));
 
       if (transformedData.length > 0 && !selectedDocId) {
