@@ -27,35 +27,53 @@ function App() {
   const { toast } = useToast();
 
   useEffect(() => {
+    let mounted = true;
+
     // Initialize session
-    supabase.auth.getSession().then(({ data: { session: initialSession }, error }) => {
-      if (error) {
+    const initSession = async () => {
+      try {
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        
+        if (mounted) {
+          console.log("Initial session:", initialSession);
+          setSession(initialSession);
+          setIsLoading(false);
+        }
+      } catch (error) {
         console.error("Error fetching initial session:", error);
-        toast({
-          title: "Session Error",
-          description: "There was an error loading your session. Please try signing in again.",
-          variant: "destructive",
-        });
+        if (mounted) {
+          toast({
+            title: "Session Error",
+            description: "There was an error loading your session. Please try signing in again.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+        }
       }
-      setSession(initialSession);
-      setIsLoading(false);
-    });
+    };
+
+    initSession();
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log('Auth state changed:', _event);
-      setSession(session);
+      console.log('Auth state changed:', _event, session);
       
-      if (_event === 'SIGNED_OUT') {
-        // Clear any local storage data
-        queryClient.clear();
-        localStorage.clear();
+      if (mounted) {
+        setSession(session);
+        
+        if (_event === 'SIGNED_OUT') {
+          // Clear any local storage data
+          queryClient.clear();
+          localStorage.clear();
+        }
       }
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, [toast]);
