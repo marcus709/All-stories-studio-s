@@ -49,11 +49,13 @@ export const FriendsList = () => {
         // Combine both sets of friendships
         const allFriendships = [
           ...(sentFriendships || []).map(f => ({
-            ...f,
+            id: f.id,
+            status: f.status,
             friend: f.friend
           })),
           ...(receivedFriendships || []).map(f => ({
-            ...f,
+            id: f.id,
+            status: f.status,
             friend: f.friend
           }))
         ];
