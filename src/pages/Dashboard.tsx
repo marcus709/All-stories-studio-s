@@ -5,12 +5,10 @@ import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
 import { StoryProvider } from "@/contexts/StoryContext";
 import { useSession } from "@supabase/auth-helpers-react";
-import { useToast } from "@/components/ui/use-toast";
-
-type View = "story" | "characters" | "plot" | "flow" | "ideas" | "docs" | "logic";
+import { useToast } from "@/hooks/use-toast";
 
 function DashboardLayout() {
-  const [currentView, setCurrentView] = useState<View>("story");
+  const [currentView, setCurrentView] = useState<"story" | "characters" | "plot" | "flow" | "ideas" | "docs" | "logic">("story");
   const navigate = useNavigate();
   const { toast } = useToast();
   const session = useSession();
@@ -30,14 +28,10 @@ function DashboardLayout() {
     return null;
   }
 
-  const handleViewChange = (view: View) => {
-    setCurrentView(view);
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <DashboardSidebar currentView={currentView} setCurrentView={handleViewChange} />
+      <DashboardSidebar currentView={currentView} setCurrentView={setCurrentView} />
       <div className="ml-72 pt-16">
         <DashboardContent currentView={currentView} />
       </div>

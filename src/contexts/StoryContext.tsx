@@ -1,14 +1,9 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-
-interface Story {
-  id: string;
-  title: string;
-  description: string;
-  created_at: string;
-  updated_at: string;
-}
+import { useSessionContext } from "@supabase/auth-helpers-react";
+import { useToast } from "@/hooks/use-toast";
+import { Story } from "@/types/story";
 
 interface StoryContextType {
   selectedStory: Story | null;
@@ -21,18 +16,34 @@ const StoryContext = createContext<StoryContextType | null>(null);
 
 export function StoryProvider({ children }: { children: ReactNode }) {
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const { session } = useSessionContext();
+  const { toast } = useToast();
 
   const { data: stories = [], isLoading } = useQuery({
     queryKey: ["stories"],
     queryFn: async () => {
+      if (!session?.user) {
+        return [];
+      }
+
       const { data, error } = await supabase
         .from("stories")
         .select("*")
+        .eq("user_id", session.user.id)
         .order("created_at", { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch stories",
+          variant: "destructive",
+        });
+        throw error;
+      }
+
       return data as Story[];
     },
+    enabled: !!session?.user,
   });
 
   return (
