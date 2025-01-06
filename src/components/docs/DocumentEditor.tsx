@@ -49,6 +49,7 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
     if (document) {
       setTitle(document.title);
       
+      // Handle different content formats
       if (document.content) {
         try {
           const docContent = document.content as Json;
@@ -56,6 +57,8 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
             const firstItem = docContent[0] as unknown as DocumentContent;
             if (firstItem && typeof firstItem === 'object' && 'content' in firstItem) {
               setContent(firstItem.content || "");
+            } else if (typeof firstItem === 'string') {
+              setContent(firstItem);
             }
           } else if (typeof docContent === 'string') {
             setContent(docContent);
@@ -81,9 +84,11 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
         throw new Error("Title is required");
       }
 
+      // Properly structure the content as a JSON array
       const contentToSave = [{
         type: "text",
-        content: content
+        content: content,
+        version: "1.0"
       }] as unknown as Json;
 
       const { error } = await supabase
@@ -183,7 +188,7 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
       <RichTextEditor
         content={content}
         onChange={setContent}
-        className="flex-1"
+        className="flex-1 overflow-auto"
       />
     </div>
   );
