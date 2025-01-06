@@ -22,7 +22,6 @@ export const FriendsList = () => {
           return [];
         }
 
-        // Fetch friendships where the user is either the sender or receiver
         const { data: friendships, error } = await supabase
           .from('friendships')
           .select(`
@@ -45,15 +44,30 @@ export const FriendsList = () => {
           .eq('status', 'accepted');
 
         if (error) {
+          console.error("Error fetching friendships:", error);
           throw error;
         }
 
-        // Transform the data to always return the friend's profile regardless of whether they're the sender or receiver
-        return friendships.map(friendship => ({
-          id: friendship.id,
-          status: friendship.status,
-          friend: session.user.id === friendship.friend.id ? friendship.user : friendship.friend
-        }));
+        if (!friendships) {
+          console.log("No friendships found");
+          return [];
+        }
+
+        console.log("Raw friendships data:", friendships);
+
+        // Transform the data to always return the friend's profile
+        const transformedFriendships = friendships.map(friendship => {
+          const isFriend = session.user.id === friendship.friend.id;
+          return {
+            id: friendship.id,
+            status: friendship.status,
+            friend: isFriend ? friendship.user : friendship.friend
+          };
+        });
+
+        console.log("Transformed friendships:", transformedFriendships);
+        return transformedFriendships;
+
       } catch (error) {
         console.error("Error in friends query:", error);
         setError("Unable to load friends at this time");
@@ -66,6 +80,8 @@ export const FriendsList = () => {
       }
     },
     enabled: !!session?.user?.id,
+    staleTime: 1000 * 60, // Cache for 1 minute
+    refetchOnWindowFocus: true,
   });
 
   const filteredFriends = friends?.filter(friendship => 
