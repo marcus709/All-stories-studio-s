@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AddFriendsDialog } from "./AddFriendsDialog";
 import { useSubscription } from "@/contexts/SubscriptionContext";
 import { capitalize } from "lodash";
+import { FriendRequestsList } from "./FriendRequestsList";
 
 const navItems = [
   { icon: MessageSquare, label: "Feed", href: "/community" },
@@ -33,6 +34,23 @@ export const CommunitySidebar = () => {
     },
     enabled: !!session?.user?.id,
   });
+
+  const { data: friendRequests } = useQuery({
+    queryKey: ["friend-requests", session?.user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("friendships")
+        .select("*")
+        .eq("friend_id", session?.user?.id)
+        .eq("status", "pending");
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!session?.user?.id,
+  });
+
+  const hasPendingRequests = friendRequests && friendRequests.length > 0;
 
   return (
     <div className="space-y-6">
@@ -79,12 +97,17 @@ export const CommunitySidebar = () => {
           </NavLink>
         ))}
         <AddFriendsDialog>
-          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900 relative">
             <UserPlus className="h-5 w-5" />
             <span>Add Friends</span>
+            {hasPendingRequests && (
+              <span className="absolute top-2 left-6 h-2 w-2 rounded-full bg-purple-500" />
+            )}
           </button>
         </AddFriendsDialog>
       </nav>
+
+      <FriendRequestsList />
 
       <div className="pt-4 border-t border-gray-100">
         <h3 className="text-sm font-medium text-gray-900 mb-3">Friends</h3>
