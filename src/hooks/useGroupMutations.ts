@@ -35,11 +35,14 @@ export const useGroupMutations = (onSuccess?: () => void) => {
 
   const leaveGroupMutation = useMutation({
     mutationFn: async (groupId: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
       const { error } = await supabase
         .from("group_members")
         .delete()
         .eq("group_id", groupId)
-        .eq("user_id", supabase.auth.getUser());
+        .eq("user_id", user.id);
 
       if (error) throw error;
     },

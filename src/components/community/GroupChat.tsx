@@ -27,6 +27,7 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
     checkMembership();
     fetchMessages();
     setupRealtimeSubscription();
+    
     return () => {
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
@@ -36,7 +37,11 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
 
   const checkMembership = async () => {
     try {
-      if (!session?.user?.id) return;
+      if (!session?.user?.id) {
+        setIsMember(false);
+        setIsLoading(false);
+        return;
+      }
       
       const { data, error } = await supabase
         .from("group_members")
@@ -112,11 +117,10 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
       .subscribe();
 
     channelRef.current = channel;
-    return channel;
   };
 
   const handleSendMessage = async (content: string) => {
-    if (!isMember || !session?.user?.id) return;
+    if (!session?.user?.id || !isMember) return;
     
     try {
       const { error } = await supabase.from("group_messages").insert({
