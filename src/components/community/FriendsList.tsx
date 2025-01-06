@@ -16,11 +16,24 @@ export const FriendsList = () => {
     queryKey: ["friends", session?.user?.id],
     queryFn: async () => {
       try {
-        console.log("Fetching friends for user:", session?.user?.id);
+        console.log("Starting friends fetch for user:", session?.user?.id);
         if (!session?.user?.id) {
           console.log("No user session found");
           return [];
         }
+
+        // First, let's verify we can access the friendships table at all
+        const { data: testAccess, error: testError } = await supabase
+          .from("friendships")
+          .select("id")
+          .limit(1);
+
+        if (testError) {
+          console.error("Error accessing friendships table:", testError);
+          throw new Error("Cannot access friendships table");
+        }
+
+        console.log("Successfully accessed friendships table");
 
         // Get friendships where user is the requester
         const { data: sentFriendships, error: sentError } = await supabase
@@ -42,7 +55,7 @@ export const FriendsList = () => {
           console.error("Error fetching sent friendships:", sentError);
           throw sentError;
         }
-        console.log("Sent friendships:", sentFriendships);
+        console.log("Sent friendships raw data:", sentFriendships);
 
         // Get friendships where user is the recipient
         const { data: receivedFriendships, error: receivedError } = await supabase
@@ -64,17 +77,22 @@ export const FriendsList = () => {
           console.error("Error fetching received friendships:", receivedError);
           throw receivedError;
         }
-        console.log("Received friendships:", receivedFriendships);
+        console.log("Received friendships raw data:", receivedFriendships);
 
         // Combine and filter friendships
         const sentFiltered = filterAcceptedFriendships(sentFriendships || []);
         const receivedFiltered = filterAcceptedFriendships(receivedFriendships || []);
+        
+        console.log("Filtered sent friendships:", sentFiltered);
+        console.log("Filtered received friendships:", receivedFiltered);
+
         const allFriendships = [...sentFiltered, ...receivedFiltered];
+        console.log("Combined friendships before deduplication:", allFriendships);
 
         // Remove duplicates based on friend.id
         const uniqueFriendships = removeDuplicateFriends(allFriendships);
-
         console.log("Final unique friendships:", uniqueFriendships);
+
         return uniqueFriendships;
       } catch (error) {
         console.error("Error in friends query:", error);
@@ -110,7 +128,6 @@ export const FriendsList = () => {
         },
         (payload) => {
           console.log("Received friendship change:", payload);
-          // Invalidate both friends and friend-requests queries
           queryClient.invalidateQueries({ queryKey: ["friends"] });
           queryClient.invalidateQueries({ queryKey: ["friend-requests"] });
           refetch();
