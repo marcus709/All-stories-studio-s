@@ -38,7 +38,8 @@ export const FriendsList = () => {
             friend:profiles!friendships_friend_id_fkey_profiles(
               id,
               username,
-              avatar_url
+              avatar_url,
+              bio
             )
           `)
           .eq("user_id", session.user.id)
@@ -60,7 +61,8 @@ export const FriendsList = () => {
             friend:profiles!friendships_user_id_fkey_profiles(
               id,
               username,
-              avatar_url
+              avatar_url,
+              bio
             )
           `)
           .eq("friend_id", session.user.id)
