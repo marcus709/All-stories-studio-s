@@ -5,10 +5,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { UserPlus, Upload } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface CreateGroupDialogProps {
   open: boolean;
@@ -21,6 +22,7 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
   const queryClient = useQueryClient();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [privacy, setPrivacy] = useState<"public" | "private">("public");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -34,13 +36,13 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
           name,
           description,
           created_by: session.user.id,
+          privacy,
         })
         .select()
         .single();
 
       if (groupError) throw groupError;
 
-      // Add the creator as a member with 'admin' role
       const { error: memberError } = await supabase
         .from("group_members")
         .insert({
@@ -62,6 +64,7 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
       onOpenChange(false);
       setName("");
       setDescription("");
+      setPrivacy("public");
       setImageUrl(null);
     },
     onError: (error) => {
@@ -163,6 +166,21 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
           </div>
 
           <div className="space-y-2">
+            <label htmlFor="privacy" className="text-sm font-medium">
+              Privacy
+            </label>
+            <Select value={privacy} onValueChange={(value: "public" | "private") => setPrivacy(value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select privacy setting" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="public">Public</SelectItem>
+                <SelectItem value="private">Private</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
             <label htmlFor="description" className="text-sm font-medium">
               Description
             </label>
@@ -173,23 +191,6 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
               placeholder="Enter group description"
               className="min-h-[100px]"
             />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Add Members</label>
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={() => {
-                toast({
-                  description: "Member invitation will be implemented in the next update",
-                });
-              }}
-            >
-              <UserPlus className="mr-2 h-4 w-4" />
-              Invite Members
-            </Button>
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
