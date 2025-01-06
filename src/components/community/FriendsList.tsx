@@ -46,6 +46,9 @@ export const FriendsList = () => {
 
         if (receivedError) throw receivedError;
 
+        console.log('Sent friendships:', sentFriendships);
+        console.log('Received friendships:', receivedFriendships);
+
         // Combine both sets of friendships
         const allFriendships = [
           ...(sentFriendships || []).map(f => ({
