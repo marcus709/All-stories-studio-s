@@ -8,15 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Save } from "lucide-react";
 import { RichTextEditor } from "@/components/editor/RichTextEditor";
 import { Json } from "@/integrations/supabase/types";
+import { DocumentContent } from "@/types/story";
 
 interface DocumentEditorProps {
   documentId: string;
   onRefresh: () => void;
-}
-
-interface DocumentContent {
-  type: string;
-  content: string;
 }
 
 export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) => {
@@ -53,13 +49,14 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
     if (document) {
       setTitle(document.title);
       
-      // Handle content loading
       if (document.content) {
         try {
           const docContent = document.content as Json;
           if (Array.isArray(docContent) && docContent.length > 0) {
             const firstItem = docContent[0] as DocumentContent;
-            setContent(firstItem.content || "");
+            if (firstItem && typeof firstItem === 'object' && 'content' in firstItem) {
+              setContent(firstItem.content || "");
+            }
           } else if (typeof docContent === 'string') {
             setContent(docContent);
           }
@@ -84,11 +81,10 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
         throw new Error("Title is required");
       }
 
-      // Prepare content for saving
-      const contentToSave = [{
+      const contentToSave: DocumentContent[] = [{
         type: "text",
         content: content
-      }] as Json;
+      }];
 
       const { error } = await supabase
         .from("documents")

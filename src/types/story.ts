@@ -32,3 +32,8 @@ export interface StoryIssue {
   created_at?: string;
   updated_at?: string;
 }
+
+export interface DocumentContent {
+  type: string;
+  content: string;
+}
