@@ -67,8 +67,8 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
               <div
                 className={`rounded-lg px-4 py-2 max-w-[80%] break-words ${
                   isCurrentUser
-                    ? "bg-purple-600 text-white"
-                    : "bg-gray-100 text-gray-900"
+                    ? "bg-purple-600 text-white ml-auto"
+                    : "bg-gray-100 text-gray-900 mr-auto"
                 }`}
               >
                 {message.content}
