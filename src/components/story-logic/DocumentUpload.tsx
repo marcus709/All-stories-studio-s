@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { FileText, Upload, X } from "lucide-react";
+import { useDocuments } from "@/hooks/useDocuments";
 
 interface DocumentUploadProps {
   storyId: string;
@@ -13,9 +12,8 @@ interface DocumentUploadProps {
 export const DocumentUpload = ({ storyId, onUploadComplete }: DocumentUploadProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const { toast } = useToast();
   const session = useSession();
+  const { uploadDocument, isUploading } = useDocuments(storyId);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -47,20 +45,10 @@ export const DocumentUpload = ({ storyId, onUploadComplete }: DocumentUploadProp
     const allowedTypes = ['text/plain', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
     
     if (!allowedTypes.includes(file.type)) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload a .txt, .doc, .docx, or .pdf file",
-        variant: "destructive",
-      });
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) { // 10MB limit
-      toast({
-        title: "File too large",
-        description: "Please upload a file smaller than 10MB",
-        variant: "destructive",
-      });
       return;
     }
 
@@ -70,55 +58,15 @@ export const DocumentUpload = ({ storyId, onUploadComplete }: DocumentUploadProp
   const handleUpload = async () => {
     if (!selectedFile || !storyId || !session?.user?.id) return;
 
-    setIsUploading(true);
-    try {
-      // Create a document record first
-      const { data: document, error: documentError } = await supabase
-        .from('documents')
-        .insert({
-          story_id: storyId,
-          user_id: session.user.id,
-          title: selectedFile.name,
-          content: [{ type: 'text', content: '' }],
-        })
-        .select()
-        .single();
-
-      if (documentError) throw documentError;
-
-      // Upload the file content
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const content = e.target?.result as string;
-        
-        const { error: updateError } = await supabase
-          .from('documents')
-          .update({
-            content: [{ type: 'text', content }],
-          })
-          .eq('id', document.id);
-
-        if (updateError) throw updateError;
-
-        toast({
-          title: "Success",
-          description: "Document uploaded successfully",
-        });
-
-        setSelectedFile(null);
-        onUploadComplete();
-      };
-
-      reader.readAsText(selectedFile);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to upload document",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
-    }
+    uploadDocument(
+      { file: selectedFile, storyId },
+      {
+        onSuccess: () => {
+          setSelectedFile(null);
+          onUploadComplete();
+        },
+      }
+    );
   };
 
   return (
