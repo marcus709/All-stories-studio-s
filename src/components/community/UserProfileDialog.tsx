@@ -28,9 +28,12 @@ export const UserProfileDialog = ({ user, isOpen, onClose }: UserProfileDialogPr
         .select("*")
         .or(`user_id.eq.${session.user.id},friend_id.eq.${session.user.id}`)
         .or(`user_id.eq.${user.id},friend_id.eq.${user.id}`)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error && error.code !== 'PGRST116') {
+        console.error("Error checking friend request:", error);
+        throw error;
+      }
       setExistingRequest(data);
     } catch (error) {
       console.error("Error checking friend request:", error);
