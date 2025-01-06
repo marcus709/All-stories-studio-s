@@ -22,7 +22,7 @@ export const FriendsList = () => {
       try {
         if (!session?.user?.id) return [];
 
-        // First get friendships where user is the requester
+        // Get friendships where user is the requester
         const { data: sentFriendships, error: sentError } = await supabase
           .from("friendships")
           .select(`
@@ -42,7 +42,7 @@ export const FriendsList = () => {
           throw sentError;
         }
 
-        // Then get friendships where user is the recipient
+        // Get friendships where user is the recipient
         const { data: receivedFriendships, error: receivedError } = await supabase
           .from("friendships")
           .select(`
@@ -61,9 +61,6 @@ export const FriendsList = () => {
           console.error("Error fetching received friendships:", receivedError);
           throw receivedError;
         }
-
-        console.log('Raw sent friendships:', sentFriendships);
-        console.log('Raw received friendships:', receivedFriendships);
 
         // Filter out any null friend entries and combine both sets
         const allFriendships = [
