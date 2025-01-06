@@ -20,6 +20,8 @@ export const FriendsList = () => {
     queryKey: ["friends", session?.user?.id],
     queryFn: async () => {
       try {
+        if (!session?.user?.id) return [];
+
         // First get friendships where user is the requester
         const { data: sentFriendships, error: sentError } = await supabase
           .from("friendships")
@@ -32,10 +34,13 @@ export const FriendsList = () => {
               avatar_url
             )
           `)
-          .eq("user_id", session?.user?.id)
+          .eq("user_id", session.user.id)
           .eq("status", "accepted");
 
-        if (sentError) throw sentError;
+        if (sentError) {
+          console.error("Error fetching sent friendships:", sentError);
+          throw sentError;
+        }
 
         // Then get friendships where user is the recipient
         const { data: receivedFriendships, error: receivedError } = await supabase
@@ -49,29 +54,36 @@ export const FriendsList = () => {
               avatar_url
             )
           `)
-          .eq("friend_id", session?.user?.id)
+          .eq("friend_id", session.user.id)
           .eq("status", "accepted");
 
-        if (receivedError) throw receivedError;
+        if (receivedError) {
+          console.error("Error fetching received friendships:", receivedError);
+          throw receivedError;
+        }
 
-        console.log('Sent friendships:', sentFriendships);
-        console.log('Received friendships:', receivedFriendships);
+        console.log('Raw sent friendships:', sentFriendships);
+        console.log('Raw received friendships:', receivedFriendships);
 
-        // Combine and normalize both sets of friendships
+        // Filter out any null friend entries and combine both sets
         const allFriendships = [
-          ...(sentFriendships || []).map(f => ({
-            id: f.id,
-            status: f.status,
-            friend: f.friend
-          })),
-          ...(receivedFriendships || []).map(f => ({
-            id: f.id,
-            status: f.status,
-            friend: f.friend
-          }))
+          ...(sentFriendships || [])
+            .filter(f => f.friend)
+            .map(f => ({
+              id: f.id,
+              status: f.status,
+              friend: f.friend
+            })),
+          ...(receivedFriendships || [])
+            .filter(f => f.friend)
+            .map(f => ({
+              id: f.id,
+              status: f.status,
+              friend: f.friend
+            }))
         ];
 
-        console.log('All combined friendships:', allFriendships);
+        console.log('Processed friendships:', allFriendships);
         return allFriendships as FriendshipWithProfile[];
       } catch (error) {
         console.error("Error in friends query:", error);
