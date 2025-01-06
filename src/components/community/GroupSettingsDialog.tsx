@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload } from "lucide-react";
+import { Upload, Search } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { InviteMembersInput } from "./InviteMembersInput";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface GroupSettingsDialogProps {
   group: {
@@ -35,6 +36,47 @@ export const GroupSettingsDialog = ({
   const [description, setDescription] = useState(group.description || "");
   const [imageUrl, setImageUrl] = useState<string | null>(group.image_url || null);
   const [isUploading, setIsUploading] = useState(false);
+  const [userSearchQuery, setUserSearchQuery] = useState("");
+
+  // Query for group members
+  const { data: members } = useQuery({
+    queryKey: ["group-members", group.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("group_members")
+        .select(`
+          id,
+          role,
+          user:profiles!group_members_user_id_fkey(
+            id,
+            username,
+            avatar_url
+          )
+        `)
+        .eq("group_id", group.id);
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Query for searching users
+  const { data: searchResults } = useQuery({
+    queryKey: ["search-users", userSearchQuery],
+    queryFn: async () => {
+      if (!userSearchQuery) return [];
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .ilike("username", `%${userSearchQuery}%`)
+        .limit(5);
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!userSearchQuery,
+  });
 
   const updateGroupMutation = useMutation({
     mutationFn: async () => {
@@ -187,6 +229,55 @@ export const GroupSettingsDialog = ({
                 <InviteMembersInput groupId={group.id} />
               </>
             )}
+
+            <div className="space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                <Input
+                  className="pl-10"
+                  placeholder="Search members..."
+                  value={userSearchQuery}
+                  onChange={(e) => setUserSearchQuery(e.target.value)}
+                />
+              </div>
+
+              <ScrollArea className="h-[200px] rounded-md border p-4">
+                <div className="space-y-4">
+                  {members?.map((member) => (
+                    <div key={member.id} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          {member.user?.avatar_url ? (
+                            <AvatarImage src={member.user.avatar_url} />
+                          ) : (
+                            <AvatarFallback>
+                              {member.user?.username?.[0]?.toUpperCase() || "U"}
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-medium">
+                            {member.user?.username}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {member.role}
+                          </p>
+                        </div>
+                      </div>
+                      {isCreator && member.role !== "admin" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-red-600 hover:bg-red-50"
+                        >
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
           </TabsContent>
         </Tabs>
       </DialogContent>
