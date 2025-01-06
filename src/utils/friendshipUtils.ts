@@ -7,13 +7,16 @@ export interface FriendshipWithProfile {
 }
 
 export const removeDuplicateFriends = (friendships: FriendshipWithProfile[]) => {
-  return friendships.reduce((acc, current) => {
-    const x = acc.find(item => item.friend.id === current.friend.id);
-    if (!x) {
+  console.log("Removing duplicates from:", friendships);
+  const unique = friendships.reduce((acc, current) => {
+    const x = acc.find(item => item.friend?.id === current.friend?.id);
+    if (!x && current.friend) {
       return acc.concat([current]);
     }
     return acc;
   }, [] as FriendshipWithProfile[]);
+  console.log("After removing duplicates:", unique);
+  return unique;
 };
 
 export const filterAcceptedFriendships = (friendships: any[]) => {

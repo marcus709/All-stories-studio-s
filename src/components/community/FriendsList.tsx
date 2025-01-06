@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { FriendItem } from "./FriendItem";
-import { FriendshipWithProfile, filterAcceptedFriendships, removeDuplicateFriends } from "@/utils/friendshipUtils";
+import { filterAcceptedFriendships, removeDuplicateFriends } from "@/utils/friendshipUtils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
@@ -25,12 +25,17 @@ export const FriendsList = () => {
           return [];
         }
 
+        // Fetch friendships where the user is the sender
         const { data: sentFriendships, error: sentError } = await supabase
           .from("friendships")
           .select(`
             id,
             status,
-            friend:profiles!friendships_friend_id_fkey_profiles(*)
+            friend:profiles!friendships_friend_id_fkey_profiles(
+              id,
+              username,
+              avatar_url
+            )
           `)
           .eq("user_id", session.user.id)
           .eq("status", "accepted");
@@ -40,12 +45,17 @@ export const FriendsList = () => {
           throw sentError;
         }
 
+        // Fetch friendships where the user is the receiver
         const { data: receivedFriendships, error: receivedError } = await supabase
           .from("friendships")
           .select(`
             id,
             status,
-            friend:profiles!friendships_user_id_fkey_profiles(*)
+            friend:profiles!friendships_user_id_fkey_profiles(
+              id,
+              username,
+              avatar_url
+            )
           `)
           .eq("friend_id", session.user.id)
           .eq("status", "accepted");
@@ -58,8 +68,25 @@ export const FriendsList = () => {
         console.log("Sent friendships:", sentFriendships);
         console.log("Received friendships:", receivedFriendships);
 
-        const allFriendships = [...(sentFriendships || []), ...(receivedFriendships || [])];
+        // Combine and deduplicate friendships
+        const allFriendships = [
+          ...(sentFriendships?.map(f => ({
+            id: f.id,
+            status: f.status,
+            friend: f.friend
+          })) || []),
+          ...(receivedFriendships?.map(f => ({
+            id: f.id,
+            status: f.status,
+            friend: f.friend
+          })) || [])
+        ];
+
+        console.log("Combined friendships:", allFriendships);
+        
         const uniqueFriendships = removeDuplicateFriends(allFriendships);
+        console.log("Unique friendships:", uniqueFriendships);
+        
         return uniqueFriendships;
       } catch (error) {
         console.error("Error in friends query:", error);
@@ -76,7 +103,7 @@ export const FriendsList = () => {
   });
 
   const filteredFriends = friends?.filter(friendship => 
-    friendship.friend.username?.toLowerCase().includes(searchQuery.toLowerCase())
+    friendship.friend?.username?.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
   if (error) {
@@ -115,11 +142,13 @@ export const FriendsList = () => {
         ) : (
           <div className="space-y-1">
             {filteredFriends.map((friendship) => (
-              <FriendItem 
-                key={friendship.id}
-                friend={friendship.friend}
-                friendshipId={friendship.id}
-              />
+              friendship.friend && (
+                <FriendItem 
+                  key={friendship.id}
+                  friend={friendship.friend}
+                  friendshipId={friendship.id}
+                />
+              )
             ))}
           </div>
         )}
