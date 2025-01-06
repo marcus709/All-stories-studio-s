@@ -1,6 +1,7 @@
 import { useSession } from "@supabase/auth-helpers-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
+import { useEffect, useRef } from "react";
 
 type Message = {
   id: string;
@@ -22,6 +23,15 @@ interface MessageListProps {
 
 export const MessageList = ({ messages, isLoading }: MessageListProps) => {
   const session = useSession();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   if (isLoading) {
     return <div className="flex items-center justify-center h-[400px]">Loading messages...</div>;
@@ -32,7 +42,7 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
   }
 
   return (
-    <div className="flex flex-col-reverse h-[400px] overflow-y-auto p-4 space-y-reverse space-y-4">
+    <div className="flex flex-col h-[400px] overflow-y-auto p-4 space-y-4">
       {messages.map((message) => {
         const isCurrentUser = message.sender_id === session?.user?.id;
         return (
@@ -90,6 +100,7 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
           </div>
         );
       })}
+      <div ref={messagesEndRef} />
     </div>
   );
 };
