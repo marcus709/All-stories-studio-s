@@ -38,19 +38,21 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
         return (
           <div
             key={message.id}
-            className={`flex items-start gap-3 ${
-              isCurrentUser ? "flex-row-reverse" : ""
+            className={`flex items-start gap-3 w-full ${
+              isCurrentUser ? "justify-end" : "justify-start"
             }`}
           >
-            <Avatar className="h-8 w-8 flex-shrink-0">
-              {message.profiles?.avatar_url ? (
-                <AvatarImage src={message.profiles.avatar_url} />
-              ) : (
-                <AvatarFallback>
-                  {message.profiles?.username?.[0]?.toUpperCase() || "U"}
-                </AvatarFallback>
-              )}
-            </Avatar>
+            {!isCurrentUser && (
+              <Avatar className="h-8 w-8 flex-shrink-0">
+                {message.profiles?.avatar_url ? (
+                  <AvatarImage src={message.profiles.avatar_url} />
+                ) : (
+                  <AvatarFallback>
+                    {message.profiles?.username?.[0]?.toUpperCase() || "U"}
+                  </AvatarFallback>
+                )}
+              </Avatar>
+            )}
             <div
               className={`flex flex-col ${
                 isCurrentUser ? "items-end" : "items-start"
@@ -67,13 +69,24 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
               <div
                 className={`rounded-lg px-4 py-2 max-w-[80%] break-words ${
                   isCurrentUser
-                    ? "bg-purple-600 text-white ml-auto"
-                    : "bg-gray-100 text-gray-900 mr-auto"
+                    ? "bg-purple-600 text-white"
+                    : "bg-gray-100 text-gray-900"
                 }`}
               >
                 {message.content}
               </div>
             </div>
+            {isCurrentUser && (
+              <Avatar className="h-8 w-8 flex-shrink-0">
+                {message.profiles?.avatar_url ? (
+                  <AvatarImage src={message.profiles.avatar_url} />
+                ) : (
+                  <AvatarFallback>
+                    {message.profiles?.username?.[0]?.toUpperCase() || "U"}
+                  </AvatarFallback>
+                )}
+              </Avatar>
+            )}
           </div>
         );
       })}
