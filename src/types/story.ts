@@ -15,17 +15,12 @@ export interface CreateStoryInput {
   user_id: string;
 }
 
-export interface DocumentContent {
-  type: string;
-  content: string;
-}
-
 export interface Document {
   id: string;
   story_id: string;
   user_id: string;
   title: string;
-  content: DocumentContent[];
+  content: string;
   created_at?: string;
   updated_at?: string;
 }

@@ -7,7 +7,6 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSessionContext } from "@supabase/auth-helpers-react";
-import { Json } from "@/integrations/supabase/types";
 
 interface DocumentEditorProps {
   document?: Document;
@@ -19,36 +18,21 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [title, setTitle] = useState(document?.title || "");
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState(document?.content || "");
   const [isSaving, setIsSaving] = useState(false);
   const { session } = useSessionContext();
 
   useEffect(() => {
-    if (document?.content) {
-      try {
-        console.log("Raw document content:", document.content);
-        const contentArray = Array.isArray(document.content) ? document.content : [];
-        const textContent = contentArray.length > 0 && typeof contentArray[0] === 'object' 
-          ? (contentArray[0] as { content?: string })?.content || ''
-          : '';
-        
-        console.log("Setting content to:", textContent);
-        setContent(textContent);
-      } catch (error) {
-        console.error("Error processing document content:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load document content",
-          variant: "destructive",
-        });
-      }
+    if (document) {
+      setTitle(document.title);
+      setContent(document.content || "");
     }
-  }, [document, toast]);
+  }, [document]);
 
   const handleSave = async () => {
     try {
       setIsSaving(true);
-      console.log("Current content state:", content);
+      console.log("Saving document with content:", content);
 
       if (!title.trim()) {
         throw new Error("Title is required");
@@ -58,20 +42,12 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
         throw new Error("User must be logged in to save documents");
       }
 
-      // Format content as a JSON array with a single text object
-      const documentContent = [{
-        type: "text",
-        content: content
-      }] as Json[];
-
-      console.log("Document content to save:", documentContent);
-
       const { data, error } = document?.id 
         ? await supabase
             .from("documents")
             .update({
               title,
-              content: documentContent,
+              content,
               updated_at: new Date().toISOString()
             })
             .eq("id", document.id)
@@ -81,7 +57,7 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
             .from("documents")
             .insert({
               title,
-              content: documentContent,
+              content,
               story_id: storyId,
               user_id: session.user.id
             })
@@ -122,10 +98,7 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
       <div className="min-h-[500px] border rounded-lg">
         <RichTextEditor
           content={content}
-          onChange={(value) => {
-            console.log("Content changed:", value);
-            setContent(value);
-          }}
+          onChange={setContent}
           className="min-h-[500px]"
         />
       </div>

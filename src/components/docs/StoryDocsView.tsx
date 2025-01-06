@@ -15,11 +15,6 @@ import {
   ResizableHandle,
 } from "@/components/ui/resizable";
 
-interface DocumentContentItem {
-  type: string;
-  content: string;
-}
-
 export const StoryDocsView = () => {
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -47,42 +42,13 @@ export const StoryDocsView = () => {
         return [];
       }
 
-      console.log("Raw documents data:", data);
+      console.log("Documents data:", data);
 
-      const transformedData: Document[] = (data || []).map(doc => {
-        console.log("Processing document:", doc);
-        let transformedContent: DocumentContentItem[] = [];
-        
-        try {
-          if (doc.content && Array.isArray(doc.content)) {
-            transformedContent = doc.content.map(item => {
-              if (typeof item === 'object' && item !== null) {
-                return {
-                  type: (item as any).type || 'text',
-                  content: (item as any).content || ''
-                };
-              }
-              return { type: 'text', content: '' };
-            });
-          }
-        } catch (err) {
-          console.error("Error transforming document content:", err);
-          transformedContent = [{ type: 'text', content: '' }];
-        }
-
-        return {
-          ...doc,
-          content: transformedContent
-        };
-      });
-
-      console.log("Transformed documents:", transformedData);
-
-      if (transformedData.length > 0 && !selectedDocId) {
-        setSelectedDocId(transformedData[0].id);
+      if (data && data.length > 0 && !selectedDocId) {
+        setSelectedDocId(data[0].id);
       }
 
-      return transformedData;
+      return data as Document[];
     },
     enabled: !!selectedStory?.id,
   });

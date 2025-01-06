@@ -28,6 +28,7 @@ export const CreateDocumentDialog = ({
 
     const { error } = await supabase.from("documents").insert({
       title,
+      content: "",
       story_id: selectedStory.id,
       user_id: (await supabase.auth.getUser()).data.user?.id,
     });
