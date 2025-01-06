@@ -18,7 +18,6 @@ export const UserProfileDialog = ({ user, isOpen, onClose }: UserProfileDialogPr
   const [isSending, setIsSending] = useState(false);
   const [existingRequest, setExistingRequest] = useState<any>(null);
 
-  // Check for existing friend request when dialog opens
   const checkExistingRequest = async () => {
     if (!session?.user?.id) return;
     
@@ -58,6 +57,18 @@ export const UserProfileDialog = ({ user, isOpen, onClose }: UserProfileDialogPr
         });
 
       if (error) throw error;
+
+      // Send email notification
+      const { error: emailError } = await supabase.functions.invoke('send-friend-request-email', {
+        body: {
+          recipientId: user.id,
+          senderUsername: session.user.email?.split('@')[0] || 'someone',
+        },
+      });
+
+      if (emailError) {
+        console.error("Error sending email notification:", emailError);
+      }
 
       toast({
         title: "Friend request sent",
