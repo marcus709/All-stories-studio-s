@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./use-toast";
 import { Document } from "@/types/story";
 import { parseDocumentContent, extractTextFromFile } from "@/utils/documentUtils";
+import { Json } from "@/integrations/supabase/types";
 
 export const useDocuments = (storyId?: string) => {
   const { toast } = useToast();
@@ -20,7 +21,12 @@ export const useDocuments = (storyId?: string) => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as Document[];
+
+      // Convert the data to match our Document type
+      return (data as any[]).map(doc => ({
+        ...doc,
+        content: Array.isArray(doc.content) ? doc.content : []
+      })) as Document[];
     },
     enabled: !!storyId,
   });
