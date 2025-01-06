@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Profile } from "@/integrations/supabase/types/tables.types";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +17,7 @@ export const FriendsList = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const { data: friends, isLoading, refetch } = useQuery({
     queryKey: ["friends", session?.user?.id],
@@ -129,13 +130,16 @@ export const FriendsList = () => {
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
           schema: 'public',
           table: 'friendships',
           filter: `or(user_id.eq.${session.user.id},friend_id.eq.${session.user.id})`,
         },
         (payload) => {
           console.log("Received friendship change:", payload);
+          // Invalidate both friends and friend-requests queries
+          queryClient.invalidateQueries({ queryKey: ["friends"] });
+          queryClient.invalidateQueries({ queryKey: ["friend-requests"] });
           refetch();
         }
       )
@@ -147,7 +151,7 @@ export const FriendsList = () => {
       console.log("Cleaning up real-time subscription");
       supabase.removeChannel(channel);
     };
-  }, [session?.user?.id, refetch]);
+  }, [session?.user?.id, refetch, queryClient]);
 
   if (error) {
     return (
