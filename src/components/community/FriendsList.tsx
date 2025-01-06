@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Profile } from "@/integrations/supabase/types/tables.types";
 import { useNavigate } from "react-router-dom";
@@ -17,8 +17,9 @@ export const FriendsList = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const { data: friends, isLoading, refetch } = useQuery({
+  const { data: friends, isLoading } = useQuery({
     queryKey: ["friends", session?.user?.id],
     queryFn: async () => {
       try {
@@ -64,17 +65,17 @@ export const FriendsList = () => {
           throw receivedError;
         }
 
-        // Combine both sets of friendships
+        // Combine both sets of friendships and filter out any null entries
         const allFriendships = [
           ...(sentFriendships || [])
-            .filter(f => f.friend)
+            .filter(f => f.friend && f.status === "accepted")
             .map(f => ({
               id: f.id,
               status: f.status,
               friend: f.friend
             })),
           ...(receivedFriendships || [])
-            .filter(f => f.friend)
+            .filter(f => f.friend && f.status === "accepted")
             .map(f => ({
               id: f.id,
               status: f.status,
@@ -82,7 +83,12 @@ export const FriendsList = () => {
             }))
         ];
 
-        return allFriendships as FriendshipWithProfile[];
+        // Remove duplicates if any
+        const uniqueFriendships = Array.from(
+          new Map(allFriendships.map(item => [item.friend.id, item])).values()
+        );
+
+        return uniqueFriendships as FriendshipWithProfile[];
       } catch (error) {
         console.error("Error in friends query:", error);
         setError("Unable to load friends at this time");
@@ -106,8 +112,11 @@ export const FriendsList = () => {
           table: 'friendships',
           filter: `or(user_id.eq.${session.user.id},friend_id.eq.${session.user.id})`,
         },
-        () => {
-          refetch();
+        (payload) => {
+          console.log('Friendship change detected:', payload);
+          // Invalidate both queries to ensure everything is up to date
+          queryClient.invalidateQueries({ queryKey: ["friends", session.user.id] });
+          queryClient.invalidateQueries({ queryKey: ["friend-requests", session.user.id] });
         }
       )
       .subscribe();
@@ -115,7 +124,7 @@ export const FriendsList = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [session?.user?.id, refetch]);
+  }, [session?.user?.id, queryClient]);
 
   if (error) {
     return (
