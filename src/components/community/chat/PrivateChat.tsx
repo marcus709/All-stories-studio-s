@@ -29,6 +29,43 @@ export const PrivateChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [friend, setFriend] = useState<any>(null);
+  const [isFriend, setIsFriend] = useState(false);
+
+  useEffect(() => {
+    const checkFriendship = async () => {
+      if (!session?.user?.id || !friendId) return;
+
+      const { data, error } = await supabase
+        .from("friendships")
+        .select("status")
+        .or(`and(user_id.eq.${session.user.id},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${session.user.id})`)
+        .eq("status", "accepted")
+        .single();
+
+      if (error) {
+        console.error("Error checking friendship:", error);
+        toast({
+          title: "Error",
+          description: "Could not verify friendship status",
+          variant: "destructive",
+        });
+        navigate("/community");
+        return;
+      }
+
+      setIsFriend(!!data);
+      if (!data) {
+        toast({
+          title: "Access Denied",
+          description: "You can only chat with your friends",
+          variant: "destructive",
+        });
+        navigate("/community");
+      }
+    };
+
+    checkFriendship();
+  }, [session?.user?.id, friendId, navigate, toast]);
 
   useEffect(() => {
     const fetchFriend = async () => {
@@ -55,12 +92,14 @@ export const PrivateChat = () => {
   }, [friendId, toast]);
 
   useEffect(() => {
-    fetchMessages();
-    const channel = setupRealtimeSubscription();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [friendId, session?.user?.id]);
+    if (isFriend) {
+      fetchMessages();
+      const channel = setupRealtimeSubscription();
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [friendId, session?.user?.id, isFriend]);
 
   const fetchMessages = async () => {
     try {
@@ -127,6 +166,15 @@ export const PrivateChat = () => {
   };
 
   const handleSendMessage = async (content: string) => {
+    if (!isFriend) {
+      toast({
+        title: "Error",
+        description: "You can only send messages to friends",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase.from("private_messages").insert({
         content,
@@ -144,6 +192,10 @@ export const PrivateChat = () => {
       });
     }
   };
+
+  if (!isFriend) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow-sm">
