@@ -6,6 +6,7 @@ import { RichTextEditor } from "../editor/RichTextEditor";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSessionContext } from "@supabase/auth-helpers-react";
 
 interface DocumentEditorProps {
   document?: Document;
@@ -19,6 +20,7 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
   const [title, setTitle] = useState(document?.title || "");
   const [content, setContent] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const { session } = useSessionContext();
 
   useEffect(() => {
     if (document?.content) {
@@ -49,6 +51,10 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
         throw new Error("Title is required");
       }
 
+      if (!session?.user?.id) {
+        throw new Error("User must be logged in to save documents");
+      }
+
       const documentContent: DocumentContent[] = [{
         type: "text",
         content: content
@@ -61,6 +67,7 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
           .update({
             title,
             content: documentContent as any, // Type assertion needed for Supabase
+            updated_at: new Date().toISOString()
           })
           .eq("id", document.id);
 
@@ -73,6 +80,7 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
             title,
             content: documentContent as any, // Type assertion needed for Supabase
             story_id: storyId,
+            user_id: session.user.id
           });
 
         if (error) throw error;
@@ -89,7 +97,7 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
       console.error("Error saving document:", error);
       toast({
         title: "Error",
-        description: "Failed to save document",
+        description: error instanceof Error ? error.message : "Failed to save document",
         variant: "destructive",
       });
     } finally {
