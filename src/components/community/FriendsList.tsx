@@ -45,18 +45,22 @@ export const FriendsList = () => {
     enabled: !!session?.user?.id,
   });
 
+  // Subscribe to real-time updates for friendships
   useEffect(() => {
+    if (!session?.user?.id) return;
+
     const channel = supabase
       .channel('schema-db-changes')
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
           schema: 'public',
           table: 'friendships',
-          filter: `user_id=eq.${session?.user?.id}`,
+          filter: `or(user_id.eq.${session.user.id},friend_id.eq.${session.user.id})`,
         },
         () => {
+          // Refetch friends list when any change occurs
           refetch();
         }
       )
