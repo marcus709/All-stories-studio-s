@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -37,7 +37,7 @@ export const UserProfileDialog = ({ user, isOpen, onClose }: UserProfileDialogPr
     }
   };
 
-  useState(() => {
+  useEffect(() => {
     checkExistingRequest();
   }, [session?.user?.id, user.id]);
 
