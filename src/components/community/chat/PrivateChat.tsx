@@ -7,7 +7,6 @@ import { MessageInput } from "./MessageInput";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Database } from "@/integrations/supabase/types";
 
 interface PrivateChatProps {
   friendId: string;
@@ -72,17 +71,20 @@ export const PrivateChat = ({ friendId }: PrivateChatProps) => {
         .from("private_messages")
         .select(`
           *,
-          profiles:sender_id (
-            username,
-            avatar_url
-          )
+          sender:sender_id(username, avatar_url)
         `)
         .or(`sender_id.eq.${session?.user?.id},receiver_id.eq.${session?.user?.id}`)
         .or(`sender_id.eq.${friendId},receiver_id.eq.${friendId}`)
         .order("created_at", { ascending: true });
 
       if (error) throw error;
-      setMessages(data as Message[]);
+      
+      const formattedMessages: Message[] = (data || []).map(msg => ({
+        ...msg,
+        profiles: msg.sender
+      }));
+      
+      setMessages(formattedMessages);
     } catch (error) {
       console.error("Error fetching messages:", error);
       toast({
@@ -114,7 +116,7 @@ export const PrivateChat = ({ friendId }: PrivateChatProps) => {
             .single();
 
           const newMessage: Message = {
-            ...payload.new as Message,
+            ...(payload.new as Message),
             profiles: profileData
           };
 
