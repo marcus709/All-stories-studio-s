@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { FriendItem } from "./FriendItem";
@@ -14,9 +14,8 @@ export const FriendsList = () => {
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const queryClient = useQueryClient();
-
-  const { data: friends, isLoading, refetch } = useQuery({
+  
+  const { data: friends, isLoading } = useQuery({
     queryKey: ["friends", session?.user?.id],
     queryFn: async () => {
       try {
@@ -56,7 +55,10 @@ export const FriendsList = () => {
           throw receivedError;
         }
 
-        const allFriendships = [...sentFriendships, ...receivedFriendships];
+        console.log("Sent friendships:", sentFriendships);
+        console.log("Received friendships:", receivedFriendships);
+
+        const allFriendships = [...(sentFriendships || []), ...(receivedFriendships || [])];
         const uniqueFriendships = removeDuplicateFriends(allFriendships);
         return uniqueFriendships;
       } catch (error) {
