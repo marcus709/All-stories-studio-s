@@ -1,20 +1,13 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Profile } from "@/integrations/supabase/types/tables.types";
-import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-
-interface FriendshipWithProfile {
-  id: string;
-  status: string;
-  friend: Profile;
-}
+import { FriendItem } from "./FriendItem";
+import { FriendshipWithProfile, filterAcceptedFriendships, removeDuplicateFriends } from "@/utils/friendshipUtils";
 
 export const FriendsList = () => {
   const session = useSession();
-  const navigate = useNavigate();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -73,33 +66,13 @@ export const FriendsList = () => {
         }
         console.log("Received friendships:", receivedFriendships);
 
-        // Combine both sets of friendships and remove duplicates
-        const allFriendships = [
-          ...(sentFriendships || [])
-            .filter(f => f.friend && f.status === "accepted")
-            .map(f => ({
-              id: f.id,
-              status: f.status,
-              friend: f.friend
-            })),
-          ...(receivedFriendships || [])
-            .filter(f => f.friend && f.status === "accepted")
-            .map(f => ({
-              id: f.id,
-              status: f.status,
-              friend: f.friend
-            }))
-        ];
+        // Combine and filter friendships
+        const sentFiltered = filterAcceptedFriendships(sentFriendships || []);
+        const receivedFiltered = filterAcceptedFriendships(receivedFriendships || []);
+        const allFriendships = [...sentFiltered, ...receivedFiltered];
 
         // Remove duplicates based on friend.id
-        const uniqueFriendships = allFriendships.reduce((acc, current) => {
-          const x = acc.find(item => item.friend.id === current.friend.id);
-          if (!x) {
-            return acc.concat([current]);
-          } else {
-            return acc;
-          }
-        }, [] as FriendshipWithProfile[]);
+        const uniqueFriendships = removeDuplicateFriends(allFriendships);
 
         console.log("Final unique friendships:", uniqueFriendships);
         return uniqueFriendships;
@@ -130,7 +103,7 @@ export const FriendsList = () => {
       .on(
         'postgres_changes',
         {
-          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          event: '*',
           schema: 'public',
           table: 'friendships',
           filter: `or(user_id.eq.${session.user.id},friend_id.eq.${session.user.id})`,
@@ -180,28 +153,11 @@ export const FriendsList = () => {
   return (
     <div className="space-y-2">
       {friends.map((friendship) => (
-        <button
+        <FriendItem 
           key={friendship.id}
-          onClick={() => navigate(`/community/chat/${friendship.friend.id}`)}
-          className="w-full flex items-center gap-2 rounded-lg p-2 hover:bg-gray-50 transition-colors"
-        >
-          <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
-            {friendship.friend.avatar_url ? (
-              <img
-                src={friendship.friend.avatar_url}
-                alt={friendship.friend.username || ''}
-                className="h-full w-full rounded-full object-cover"
-              />
-            ) : (
-              <span className="text-purple-600 text-sm font-medium">
-                {friendship.friend.username?.[0]?.toUpperCase() || "U"}
-              </span>
-            )}
-          </div>
-          <span className="text-sm font-medium truncate">
-            @{friendship.friend.username}
-          </span>
-        </button>
+          friend={friendship.friend}
+          friendshipId={friendship.id}
+        />
       ))}
     </div>
   );
