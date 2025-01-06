@@ -85,7 +85,7 @@ export const JoinRequestsDialog = ({ open, onOpenChange }: JoinRequestsDialogPro
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Join Requests</DialogTitle>
+          <DialogTitle>Pending Requests</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           {requests?.length === 0 ? (

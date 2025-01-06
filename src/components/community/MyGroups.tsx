@@ -156,7 +156,7 @@ export const MyGroups = () => {
             onClick={() => setIsJoinRequestsOpen(true)}
             className="relative"
           >
-            Join Requests
+            Pending Requests
             {pendingRequestsCount > 0 && (
               <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-purple-500 text-xs text-white flex items-center justify-center">
                 {pendingRequestsCount}
