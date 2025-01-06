@@ -60,6 +60,7 @@ export const PricingSection = () => {
   const { toast } = useToast();
   const [promotionCode, setPromotionCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [processingPlanId, setProcessingPlanId] = useState<string | null>(null);
 
   const handleSubscription = async (priceId: string | null) => {
     if (!priceId) return; // Free plan
@@ -74,6 +75,8 @@ export const PricingSection = () => {
     }
 
     setIsLoading(true);
+    setProcessingPlanId(priceId);
+    
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
         body: { 
@@ -104,6 +107,7 @@ export const PricingSection = () => {
       });
     } finally {
       setIsLoading(false);
+      setProcessingPlanId(null);
     }
   };
 
@@ -169,9 +173,9 @@ export const PricingSection = () => {
                   variant={plan.buttonVariant}
                   className="w-full mt-8"
                   onClick={() => handleSubscription(plan.priceId)}
-                  disabled={isLoading}
+                  disabled={isLoading || processingPlanId === plan.priceId}
                 >
-                  {isLoading ? "Processing..." : plan.buttonText}
+                  {processingPlanId === plan.priceId ? "Processing..." : plan.buttonText}
                 </Button>
               </CardContent>
             </Card>

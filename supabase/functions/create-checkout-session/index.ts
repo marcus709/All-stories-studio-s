@@ -63,7 +63,7 @@ serve(async (req) => {
     }
 
     // Create checkout session
-    const session = await stripe.checkout.sessions.create({
+    const sessionConfig = {
       customer: customerId,
       line_items: [
         {
@@ -75,8 +75,21 @@ serve(async (req) => {
       success_url: successUrl,
       cancel_url: cancelUrl,
       allow_promotion_codes: true,
-      ...(promotionCode && { discounts: [{ promotion_code: promotionCode }] }),
-    });
+    };
+
+    if (promotionCode) {
+      const promoCode = await stripe.promotionCodes.list({
+        code: promotionCode,
+        active: true,
+        limit: 1,
+      });
+
+      if (promoCode.data.length > 0) {
+        sessionConfig.discounts = [{ promotion_code: promoCode.data[0].id }];
+      }
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionConfig);
 
     return new Response(
       JSON.stringify({ url: session.url }),
@@ -93,7 +106,7 @@ serve(async (req) => {
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
+        status: 400, // Changed from 500 to 400 for client errors
       }
     );
   }
