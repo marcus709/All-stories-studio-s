@@ -1,25 +1,27 @@
-// Array of contrasting colors for different users
-export const userColors = [
-  '#9b87f5', // Primary Purple
-  '#0EA5E9', // Ocean Blue
-  '#F97316', // Bright Orange
-  '#D946EF', // Magenta Pink
-  '#7E69AB', // Secondary Purple
-  '#6E59A5', // Tertiary Purple
-  '#8B5CF6', // Vivid Purple
+const COLORS = [
+  '#4F46E5', // indigo-600
+  '#7C3AED', // violet-600
+  '#DB2777', // pink-600
+  '#059669', // emerald-600
+  '#DC2626', // red-600
+  '#D97706', // amber-600
+  '#4338CA', // indigo-700
+  '#6D28D9', // violet-700
+  '#BE185D', // pink-700
+  '#047857', // emerald-700
+  '#B91C1C', // red-700
+  '#B45309', // amber-700
 ];
 
-// Default color if no user ID is provided
-const DEFAULT_COLOR = '#9b87f5';
-
-// Get a consistent color for a user based on their ID
 export const getUserColor = (userId: string | undefined): string => {
-  if (!userId) {
-    return DEFAULT_COLOR;
-  }
+  if (!userId) return COLORS[0];
   
-  // Use the user ID to get a consistent index
-  const sum = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const colorIndex = sum % userColors.length;
-  return userColors[colorIndex];
+  // Use a consistent way to generate a number from the userId
+  const hash = userId.split('').reduce((acc, char) => {
+    return char.charCodeAt(0) + ((acc << 5) - acc);
+  }, 0);
+  
+  // Use the absolute value of the hash to ensure positive number
+  const index = Math.abs(hash) % COLORS.length;
+  return COLORS[index];
 };
