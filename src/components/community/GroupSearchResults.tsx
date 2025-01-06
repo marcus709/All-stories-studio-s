@@ -16,12 +16,21 @@ export const GroupSearchResults = ({ searchResults, onJoinSuccess }: GroupSearch
 
   const handleJoinGroup = async (group: any) => {
     try {
+      if (!session?.user?.id) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to join groups",
+          variant: "destructive",
+        });
+        return;
+      }
+
       if (group.privacy === "public") {
         const { error } = await supabase
           .from("group_members")
           .insert({
             group_id: group.id,
-            user_id: session?.user?.id,
+            user_id: session.user.id,
           });
 
         if (error) throw error;
@@ -43,7 +52,7 @@ export const GroupSearchResults = ({ searchResults, onJoinSuccess }: GroupSearch
           .from("group_join_requests")
           .insert({
             group_id: group.id,
-            user_id: session?.user?.id,
+            user_id: session.user.id,
           });
 
         if (error) throw error;
@@ -65,11 +74,20 @@ export const GroupSearchResults = ({ searchResults, onJoinSuccess }: GroupSearch
 
   const handleLeaveGroup = async (group: any) => {
     try {
+      if (!session?.user?.id) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to leave groups",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from("group_members")
         .delete()
         .eq("group_id", group.id)
-        .eq("user_id", session?.user?.id);
+        .eq("user_id", session.user.id);
 
       if (error) throw error;
 

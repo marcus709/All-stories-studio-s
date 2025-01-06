@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +8,7 @@ import { MessageInput } from "./chat/MessageInput";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
+import { RealtimeChannel } from "@supabase/supabase-js";
 
 interface GroupChatProps {
   group: any;
@@ -20,23 +21,28 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isMember, setIsMember] = useState(false);
+  const channelRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
     checkMembership();
     fetchMessages();
-    const channel = setupRealtimeSubscription();
+    setupRealtimeSubscription();
     return () => {
-      supabase.removeChannel(channel);
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+      }
     };
   }, [group.id]);
 
   const checkMembership = async () => {
     try {
+      if (!session?.user?.id) return;
+      
       const { data, error } = await supabase
         .from("group_members")
         .select("id")
         .eq("group_id", group.id)
-        .eq("user_id", session?.user?.id)
+        .eq("user_id", session.user.id)
         .single();
 
       if (error) throw error;
@@ -78,6 +84,7 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
 
   const setupRealtimeSubscription = () => {
     if (!isMember) return;
+    
     const channel = supabase
       .channel("group_messages")
       .on(
@@ -104,16 +111,18 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
       )
       .subscribe();
 
+    channelRef.current = channel;
     return channel;
   };
 
   const handleSendMessage = async (content: string) => {
-    if (!isMember) return;
+    if (!isMember || !session?.user?.id) return;
+    
     try {
       const { error } = await supabase.from("group_messages").insert({
         content,
         group_id: group.id,
-        user_id: session?.user?.id,
+        user_id: session.user.id,
       });
 
       if (error) throw error;
