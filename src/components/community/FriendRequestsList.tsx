@@ -101,7 +101,9 @@ export const FriendRequestsList = () => {
         });
       }
 
+      // Immediately refetch both friend requests and friends list
       refetchRequests();
+      queryClient.invalidateQueries({ queryKey: ["friends", session?.user?.id] });
     } catch (error) {
       console.error("Error handling friend request:", error);
       toast({
