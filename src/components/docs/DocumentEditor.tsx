@@ -19,47 +19,75 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
-  const { data: document } = useQuery({
+  const { data: document, refetch } = useQuery({
     queryKey: ["document", documentId],
     queryFn: async () => {
+      console.log("Fetching document:", documentId);
       const { data, error } = await supabase
         .from("documents")
         .select("*")
         .eq("id", documentId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching document:", error);
+        throw error;
+      }
+      console.log("Fetched document:", data);
       return data;
     },
     enabled: !!documentId,
+    staleTime: 0,
   });
 
   useEffect(() => {
     if (document) {
+      console.log("Setting document content:", document.content);
       setTitle(document.title);
-      setContent(document.content?.[0]?.content || "");
+      // Handle both string and array content formats
+      if (Array.isArray(document.content)) {
+        setContent(document.content[0]?.content || "");
+      } else {
+        setContent(document.content || "");
+      }
     }
   }, [document]);
 
   const handleSave = async () => {
+    if (!documentId || isSaving) return;
+    
     setIsSaving(true);
     try {
+      // Always save content in the expected array format
+      const contentToSave = [{
+        type: "text",
+        content: content
+      }];
+      
+      console.log("Saving document:", { title, content: contentToSave });
       const { error } = await supabase
         .from("documents")
         .update({
           title,
-          content: [{ type: "text", content }],
+          content: contentToSave,
         })
         .eq("id", documentId);
 
       if (error) throw error;
 
+      // Refetch to ensure we have the latest data
+      await refetch();
+      // Notify parent to refresh the document list
+      onRefresh();
+
       toast({
         title: "Success",
         description: "Document saved successfully",
       });
-      onRefresh();
+      
+      console.log("Document saved successfully");
     } catch (error) {
+      console.error("Error saving document:", error);
       toast({
         title: "Error",
         description: "Failed to save document",

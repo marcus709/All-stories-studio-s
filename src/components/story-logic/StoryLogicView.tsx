@@ -1,87 +1,45 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { StoryIssue, StoryIssueType } from "@/types/story";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useStory } from "@/contexts/StoryContext";
-import { useToast } from "@/hooks/use-toast";
+import { Plus } from "lucide-react";
 import { AnalysisSection } from "./AnalysisSection";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, Check, Clock, Users } from "lucide-react";
-
-type StoryIssueType = "plot_hole" | "timeline_inconsistency" | "pov_confusion" | "character_inconsistency";
-
-interface StoryIssue {
-  id: string;
-  issue_type: StoryIssueType;
-  description: string;
-  location: string;
-  severity: number;
-  status: "open" | "resolved";
-}
-
-const issueTypeInfo = {
-  plot_hole: {
-    icon: AlertTriangle,
-    color: "text-yellow-500",
-    label: "Plot Holes",
-  },
-  timeline_inconsistency: {
-    icon: Clock,
-    color: "text-blue-500",
-    label: "Timeline Issues",
-  },
-  pov_confusion: {
-    icon: Users,
-    color: "text-purple-500",
-    label: "POV Confusion",
-  },
-  character_inconsistency: {
-    icon: AlertTriangle,
-    color: "text-red-500",
-    label: "Character Inconsistencies",
-  },
-};
 
 export const StoryLogicView = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [description, setDescription] = useState("");
+  const [issueType, setIssueType] = useState<StoryIssueType>("plot_hole");
   const { selectedStory } = useStory();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<StoryIssueType>("plot_hole");
-
-  const { data: documents, refetch: refetchDocuments } = useQuery({
-    queryKey: ["documents", selectedStory?.id],
-    queryFn: async () => {
-      if (!selectedStory?.id) return [];
-      const { data, error } = await supabase
-        .from("documents")
-        .select("*")
-        .eq("story_id", selectedStory.id);
-      
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!selectedStory?.id,
-  });
+  const queryClient = useQueryClient();
 
   const { data: storyAnalysis } = useQuery({
     queryKey: ["story-analysis", selectedStory?.id],
     queryFn: async () => {
-      if (!selectedStory?.id) return null;
       const { data, error } = await supabase
         .from("story_analysis")
         .select("*")
-        .eq("story_id", selectedStory.id)
+        .eq("story_id", selectedStory?.id)
         .single();
-      
-      if (error && error.code !== 'PGRST116') throw error;
+
+      if (error) throw error;
       return data;
     },
     enabled: !!selectedStory?.id,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
-  const { data: storyIssues, isLoading } = useQuery({
+  const { data: storyIssues } = useQuery({
     queryKey: ["story-issues", storyAnalysis?.id],
     queryFn: async () => {
-      if (!storyAnalysis?.id) return [];
       const { data, error } = await supabase
         .from("story_issues")
         .select("*")
@@ -91,138 +49,134 @@ export const StoryLogicView = () => {
       return data as StoryIssue[];
     },
     enabled: !!storyAnalysis?.id,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
-  const analyzeStory = async () => {
-    if (!documents?.length) {
-      toast({
-        title: "No Documents",
-        description: "Please upload a document before analyzing.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "Analysis Started",
-      description: "Analyzing your story for potential issues...",
-    });
-
-    if (!storyAnalysis) {
-      const { error: analysisError } = await supabase
-        .from("story_analysis")
+  const createIssueMutation = useMutation({
+    mutationFn: async (newIssue: { description: string; type: StoryIssueType }) => {
+      const { data, error } = await supabase
+        .from("story_issues")
         .insert({
-          story_id: selectedStory!.id,
-          user_id: (await supabase.auth.getUser()).data.user!.id,
-        });
+          description: newIssue.description,
+          issue_type: newIssue.type,
+          analysis_id: storyAnalysis?.id,
+          status: "open",
+          severity: 1,
+          location: ""
+        })
+        .select()
+        .single();
 
-      if (analysisError) {
-        toast({
-          title: "Error",
-          description: "Failed to create analysis record",
-          variant: "destructive",
-        });
-        return;
-      }
-    }
-
-    setTimeout(() => {
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["story-issues"] });
+      setIsOpen(false);
+      setDescription("");
       toast({
-        title: "Analysis Complete",
-        description: "Your story has been analyzed for logical issues.",
+        title: "Success",
+        description: "Story issue created successfully",
       });
-    }, 2000);
-  };
-
-  const handleCustomAnalysis = async (customInput: string) => {
-    if (!documents?.length) {
+    },
+    onError: (error) => {
       toast({
-        title: "No Documents",
-        description: "Please upload a document before custom analysis.",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create issue",
         variant: "destructive",
       });
-      return;
-    }
+    },
+  });
 
-    toast({
-      title: "Custom Analysis Started",
-      description: `Analyzing your story based on: ${customInput}`,
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    createIssueMutation.mutate({
+      description,
+      type: issueType,
     });
-
-    setTimeout(() => {
-      toast({
-        title: "Custom Analysis Complete",
-        description: "Your story has been analyzed based on your custom criteria.",
-      });
-    }, 2000);
   };
-
-  if (!selectedStory) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-gray-500">Please select a story to analyze</p>
-      </div>
-    );
-  }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Story Logic Analysis</h1>
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Story Logic Analysis</h1>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Issue
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Issue</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="type">Issue Type</Label>
+                <select
+                  id="type"
+                  value={issueType}
+                  onChange={(e) => setIssueType(e.target.value as StoryIssueType)}
+                  className="w-full border rounded-md p-2"
+                >
+                  <option value="plot_hole">Plot Hole</option>
+                  <option value="timeline_inconsistency">Timeline Inconsistency</option>
+                  <option value="pov_inconsistency">POV Inconsistency</option>
+                  <option value="character_inconsistency">Character Inconsistency</option>
+                  <option value="setting_inconsistency">Setting Inconsistency</option>
+                  <option value="logic_flaw">Logic Flaw</option>
+                </select>
+              </div>
+              <Button type="submit" className="w-full">
+                Create Issue
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
-      <AnalysisSection
-        hasDocuments={!!documents?.length}
-        hasMinimalContent={documents?.some(doc => 
-          doc.content && doc.content[0]?.content?.length > 100
-        )}
-        onAnalyze={analyzeStory}
-        onCustomAnalysis={handleCustomAnalysis}
-        storyId={selectedStory.id}
-        onDocumentUpload={refetchDocuments}
-      />
+      {selectedStory?.id && (
+        <AnalysisSection
+          storyId={selectedStory.id}
+          hasDocuments={true}
+          hasMinimalContent={false}
+          onAnalyze={() => {}}
+          onCustomAnalysis={() => {}}
+          onDocumentUpload={() => {}}
+        />
+      )}
 
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as StoryIssueType)} className="mt-8">
-        <TabsList className="grid grid-cols-4 mb-6">
-          {Object.entries(issueTypeInfo).map(([type, info]) => (
-            <TabsTrigger key={type} value={type} className="flex items-center gap-2">
-              <info.icon className={`h-4 w-4 ${info.color}`} />
-              {info.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        {Object.keys(issueTypeInfo).map((type) => (
-          <TabsContent key={type} value={type}>
-            {isLoading ? (
-              <div className="text-center py-4">Loading issues...</div>
-            ) : !storyIssues?.filter(issue => issue.issue_type === type).length ? (
-              <Alert>
-                <Check className="h-4 w-4" />
-                <AlertTitle>All Clear!</AlertTitle>
-                <AlertDescription>
-                  No {issueTypeInfo[type as StoryIssueType].label.toLowerCase()} detected in your story.
-                </AlertDescription>
-              </Alert>
-            ) : (
-              <div className="space-y-4">
-                {storyIssues?.filter(issue => issue.issue_type === type).map((issue) => (
-                  <Alert key={issue.id} variant={issue.severity > 7 ? "destructive" : "default"}>
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertTitle className="flex items-center justify-between">
-                      <span>Issue in: {issue.location}</span>
-                      <span className="text-sm font-normal">
-                        Severity: {issue.severity}/10
-                      </span>
-                    </AlertTitle>
-                    <AlertDescription>{issue.description}</AlertDescription>
-                  </Alert>
-                ))}
+      <div className="mt-6">
+        <h2 className="text-xl font-semibold mb-4">Story Issues</h2>
+        <div className="space-y-4">
+          {storyIssues?.map((issue) => (
+            <div
+              key={issue.id}
+              className="bg-white p-4 rounded-lg border shadow-sm"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-800 mb-2">
+                    {issue.issue_type.replace(/_/g, " ")}
+                  </span>
+                  <p className="text-gray-700">{issue.description}</p>
+                </div>
               </div>
-            )}
-          </TabsContent>
-        ))}
-      </Tabs>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

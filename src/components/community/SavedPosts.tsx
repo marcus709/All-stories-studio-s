@@ -43,21 +43,18 @@ export const SavedPosts = () => {
   const session = useSession();
 
   const { data: savedPosts } = useQuery<PostData[]>({
-    queryKey: ["saved-posts"],
+    queryKey: ["saved-posts", session?.user?.id],
     queryFn: async () => {
-      // First get the saved post IDs
       const { data: savedPostsData, error: savedPostsError } = await supabase
         .from("saved_posts")
         .select("post_id")
         .eq("user_id", session?.user?.id);
 
       if (savedPostsError) throw savedPostsError;
-
       if (!savedPostsData?.length) return [];
 
       const postIds = savedPostsData.map((sp: SavedPost) => sp.post_id);
 
-      // Then fetch the full post data with all related information
       const { data: posts, error: postsError } = await supabase
         .from("posts")
         .select(`
@@ -74,9 +71,17 @@ export const SavedPosts = () => {
         .order("created_at", { ascending: false });
 
       if (postsError) throw postsError;
-      return posts as PostData[];
+
+      return (posts as any[]).map(post => ({
+        ...post,
+        get_post_profiles: Array.isArray(post.get_post_profiles) 
+          ? post.get_post_profiles 
+          : []
+      })) as PostData[];
     },
     enabled: !!session?.user?.id,
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    gcTime: 30 * 60 * 1000, // Keep data in cache for 30 minutes
   });
 
   if (!savedPosts?.length) {
