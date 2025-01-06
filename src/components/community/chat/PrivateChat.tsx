@@ -13,11 +13,17 @@ interface PrivateChatProps {
   friendId: string;
 }
 
-type Message = Database["public"]["Tables"]["private_messages"]["Row"] & {
+type Message = {
+  id: string;
+  content: string;
+  sender_id: string;
+  receiver_id: string;
+  created_at: string;
+  updated_at: string;
   profiles?: {
     username: string | null;
     avatar_url: string | null;
-  };
+  } | null;
 };
 
 export const PrivateChat = ({ friendId }: PrivateChatProps) => {
@@ -66,7 +72,7 @@ export const PrivateChat = ({ friendId }: PrivateChatProps) => {
         .from("private_messages")
         .select(`
           *,
-          profiles:sender_id(
+          profiles:sender_id (
             username,
             avatar_url
           )
@@ -76,7 +82,7 @@ export const PrivateChat = ({ friendId }: PrivateChatProps) => {
         .order("created_at", { ascending: true });
 
       if (error) throw error;
-      setMessages(data || []);
+      setMessages(data as Message[]);
     } catch (error) {
       console.error("Error fetching messages:", error);
       toast({
@@ -108,7 +114,7 @@ export const PrivateChat = ({ friendId }: PrivateChatProps) => {
             .single();
 
           const newMessage: Message = {
-            ...payload.new,
+            ...payload.new as Message,
             profiles: profileData
           };
 

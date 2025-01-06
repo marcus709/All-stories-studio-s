@@ -1,13 +1,18 @@
 import { useSession } from "@supabase/auth-helpers-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
-import { Database } from "@/integrations/supabase/types";
 
-type Message = Database["public"]["Tables"]["private_messages"]["Row"] & {
+type Message = {
+  id: string;
+  content: string;
+  sender_id: string;
+  receiver_id: string;
+  created_at: string;
+  updated_at: string;
   profiles?: {
     username: string | null;
     avatar_url: string | null;
-  };
+  } | null;
 };
 
 interface MessageListProps {
