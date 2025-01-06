@@ -8,6 +8,7 @@ import { Plus, FileText } from "lucide-react";
 import { CreateDocumentDialog } from "./CreateDocumentDialog";
 import { DocumentEditor } from "./DocumentEditor";
 import { DocumentSidebar } from "./DocumentSidebar";
+import { Document, DocumentContent } from "@/types/story";
 import {
   ResizablePanel,
   ResizablePanelGroup,
@@ -40,11 +41,17 @@ export const StoryDocsView = () => {
         return [];
       }
 
-      if (data.length > 0 && !selectedDocId) {
-        setSelectedDocId(data[0].id);
+      // Transform the data to match Document type
+      const transformedData: Document[] = data.map(doc => ({
+        ...doc,
+        content: Array.isArray(doc.content) ? doc.content : []
+      }));
+
+      if (transformedData.length > 0 && !selectedDocId) {
+        setSelectedDocId(transformedData[0].id);
       }
 
-      return data;
+      return transformedData;
     },
     enabled: !!selectedStory?.id,
   });
