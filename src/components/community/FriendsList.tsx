@@ -75,12 +75,24 @@ export const FriendsList = () => {
           ...(sentFriendships?.map(f => ({
             id: f.id,
             status: f.status,
-            friend: f.friend
+            friend: {
+              id: f.friend.id,
+              username: f.friend.username,
+              avatar_url: f.friend.avatar_url,
+              bio: f.friend.bio || null,
+              website: null
+            }
           })) || []),
           ...(receivedFriendships?.map(f => ({
             id: f.id,
             status: f.status,
-            friend: f.friend
+            friend: {
+              id: f.friend.id,
+              username: f.friend.username,
+              avatar_url: f.friend.avatar_url,
+              bio: f.friend.bio || null,
+              website: null
+            }
           })) || [])
         ];
 
