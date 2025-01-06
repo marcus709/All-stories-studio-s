@@ -66,7 +66,6 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
           extractedContent = docContent;
         }
         
-        console.log("Setting document content:", extractedContent);
         setContent(extractedContent);
       } catch (error) {
         console.error("Error processing document content:", error);
@@ -91,10 +90,8 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
 
       const contentToSave = [{
         type: "text",
-        content: content.trim()
+        content: content
       }] as Json;
-      
-      console.log("Saving document:", { title, content: contentToSave });
       
       const { error } = await supabase
         .from("documents")
@@ -116,8 +113,6 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
         title: "Success",
         description: "Document saved successfully",
       });
-      
-      console.log("Document saved successfully");
     } catch (error) {
       console.error("Error saving document:", error);
       toast({
