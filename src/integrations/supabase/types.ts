@@ -422,6 +422,8 @@ export type Database = {
           created_at: string | null
           group_id: string | null
           id: string
+          invitation_status: string | null
+          invited_by: string | null
           message: string | null
           status: string
           updated_at: string | null
@@ -431,6 +433,8 @@ export type Database = {
           created_at?: string | null
           group_id?: string | null
           id?: string
+          invitation_status?: string | null
+          invited_by?: string | null
           message?: string | null
           status?: string
           updated_at?: string | null
@@ -440,6 +444,8 @@ export type Database = {
           created_at?: string | null
           group_id?: string | null
           id?: string
+          invitation_status?: string | null
+          invited_by?: string | null
           message?: string | null
           status?: string
           updated_at?: string | null
