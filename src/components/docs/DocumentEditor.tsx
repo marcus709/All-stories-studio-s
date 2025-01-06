@@ -7,10 +7,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Save } from "lucide-react";
 import { RichTextEditor } from "@/components/editor/RichTextEditor";
+import { Json } from "@/integrations/supabase/types";
 
 interface DocumentEditorProps {
   documentId: string;
   onRefresh: () => void;
+}
+
+interface DocumentContent {
+  type: string;
+  content: string;
 }
 
 export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) => {
@@ -22,7 +28,6 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
   const { data: document, refetch } = useQuery({
     queryKey: ["document", documentId],
     queryFn: async () => {
-      console.log("Fetching document:", documentId);
       const { data, error } = await supabase
         .from("documents")
         .select("*")
@@ -31,9 +36,14 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
 
       if (error) {
         console.error("Error fetching document:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch document. Please try again.",
+          variant: "destructive",
+        });
         throw error;
       }
-      console.log("Fetched document:", data);
+
       return data;
     },
     enabled: !!documentId,
@@ -42,42 +52,64 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
 
   useEffect(() => {
     if (document) {
-      console.log("Setting document content:", document.content);
-      setTitle(document.title);
-      // Handle both string and array content formats
-      if (Array.isArray(document.content)) {
-        setContent(document.content[0]?.content || "");
-      } else {
-        setContent(document.content || "");
+      try {
+        setTitle(document.title);
+        
+        // Safely parse and extract content
+        const docContent = document.content as Json;
+        let extractedContent = "";
+        
+        if (Array.isArray(docContent) && docContent.length > 0) {
+          const firstItem = docContent[0] as { type?: string; content?: string };
+          extractedContent = firstItem?.content || "";
+        } else if (typeof docContent === 'string') {
+          extractedContent = docContent;
+        }
+        
+        console.log("Setting document content:", extractedContent);
+        setContent(extractedContent);
+      } catch (error) {
+        console.error("Error processing document content:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load document content. Please try again.",
+          variant: "destructive",
+        });
       }
     }
-  }, [document]);
+  }, [document, toast]);
 
   const handleSave = async () => {
     if (!documentId || isSaving) return;
     
     setIsSaving(true);
     try {
-      // Always save content in the expected array format
+      // Validate content before saving
+      if (!title.trim()) {
+        throw new Error("Title is required");
+      }
+
       const contentToSave = [{
         type: "text",
-        content: content
-      }];
+        content: content.trim()
+      }] as Json;
       
       console.log("Saving document:", { title, content: contentToSave });
+      
       const { error } = await supabase
         .from("documents")
         .update({
-          title,
+          title: title.trim(),
           content: contentToSave,
+          updated_at: new Date().toISOString()
         })
         .eq("id", documentId);
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
-      // Refetch to ensure we have the latest data
       await refetch();
-      // Notify parent to refresh the document list
       onRefresh();
 
       toast({
@@ -90,7 +122,7 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
       console.error("Error saving document:", error);
       toast({
         title: "Error",
-        description: "Failed to save document",
+        description: error instanceof Error ? error.message : "Failed to save document. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -103,12 +135,16 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
     try {
       const item = JSON.parse(e.dataTransfer.getData("application/json"));
       
-      await supabase.from("document_references").insert({
-        document_id: documentId,
-        reference_type: item.type,
-        reference_id: item.id,
-        section_id: document.id,
-      });
+      const { error } = await supabase
+        .from("document_references")
+        .insert({
+          document_id: documentId,
+          reference_type: item.type,
+          reference_id: item.id,
+          section_id: document.id,
+        });
+
+      if (error) throw error;
 
       const insertText = `\n\n[${item.type.toUpperCase()}: ${item.title}]\n${item.description || ''}\n\n`;
       setContent(prev => prev + insertText);
@@ -118,9 +154,10 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
         description: `${item.type} content has been added to your document`,
       });
     } catch (error) {
+      console.error("Error handling drop:", error);
       toast({
         title: "Error",
-        description: "Failed to add content to document",
+        description: "Failed to add content to document. Please try again.",
         variant: "destructive",
       });
     }
@@ -144,9 +181,14 @@ export const DocumentEditor = ({ documentId, onRefresh }: DocumentEditorProps) =
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="text-lg font-medium"
+            placeholder="Enter document title"
           />
         </div>
-        <Button onClick={handleSave} disabled={isSaving} className="gap-2">
+        <Button 
+          onClick={handleSave} 
+          disabled={isSaving || !title.trim()} 
+          className="gap-2"
+        >
           <Save className="w-4 h-4" />
           {isSaving ? "Saving..." : "Save"}
         </Button>

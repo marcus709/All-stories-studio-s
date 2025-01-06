@@ -54,6 +54,7 @@ export function CreateStoryIdeaDialog({ onIdeaCreated }: CreateStoryIdeaDialogPr
     });
 
     if (error) {
+      console.error("Error creating story idea:", error);
       toast({
         title: "Error",
         description: "Failed to create story idea",

@@ -20,14 +20,14 @@ export const StoryLogicView = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: storyAnalysis } = useQuery({
+  const { data: storyAnalysis, isError: analysisError } = useQuery({
     queryKey: ["story-analysis", selectedStory?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("story_analysis")
         .select("*")
         .eq("story_id", selectedStory?.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -40,6 +40,8 @@ export const StoryLogicView = () => {
   const { data: storyIssues } = useQuery({
     queryKey: ["story-issues", storyAnalysis?.id],
     queryFn: async () => {
+      if (!storyAnalysis?.id) return [];
+      
       const { data, error } = await supabase
         .from("story_issues")
         .select("*")
@@ -55,12 +57,16 @@ export const StoryLogicView = () => {
 
   const createIssueMutation = useMutation({
     mutationFn: async (newIssue: { description: string; type: StoryIssueType }) => {
+      if (!storyAnalysis?.id) {
+        throw new Error("No analysis exists for this story yet");
+      }
+
       const { data, error } = await supabase
         .from("story_issues")
         .insert({
           description: newIssue.description,
           issue_type: newIssue.type,
-          analysis_id: storyAnalysis?.id,
+          analysis_id: storyAnalysis.id,
           status: "open",
           severity: 1,
           location: ""
@@ -103,7 +109,7 @@ export const StoryLogicView = () => {
         <h1 className="text-2xl font-bold">Story Logic Analysis</h1>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button disabled={!storyAnalysis}>
               <Plus className="h-4 w-4 mr-2" />
               Add Issue
             </Button>
@@ -159,6 +165,11 @@ export const StoryLogicView = () => {
 
       <div className="mt-6">
         <h2 className="text-xl font-semibold mb-4">Story Issues</h2>
+        {!storyAnalysis && (
+          <div className="text-center text-gray-500 py-8">
+            No analysis has been created for this story yet. Use the analysis section above to create one.
+          </div>
+        )}
         <div className="space-y-4">
           {storyIssues?.map((issue) => (
             <div
