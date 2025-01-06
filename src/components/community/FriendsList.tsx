@@ -17,12 +17,18 @@ export const FriendsList = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string>("CLOSED");
 
   const { data: friends, isLoading, refetch } = useQuery({
     queryKey: ["friends", session?.user?.id],
     queryFn: async () => {
       try {
-        if (!session?.user?.id) return [];
+        if (!session?.user?.id) {
+          console.log("No user ID found in session");
+          return [];
+        }
+
+        console.log("Fetching friendships for user:", session.user.id);
 
         // Get friendships where user is the requester
         const { data: sentFriendships, error: sentError } = await supabase
@@ -33,7 +39,8 @@ export const FriendsList = () => {
             friend:profiles!friendships_friend_id_fkey_profiles(
               id,
               username,
-              avatar_url
+              avatar_url,
+              bio
             )
           `)
           .eq("user_id", session.user.id)
@@ -44,6 +51,8 @@ export const FriendsList = () => {
           throw sentError;
         }
 
+        console.log("Sent friendships:", sentFriendships);
+
         // Get friendships where user is the recipient
         const { data: receivedFriendships, error: receivedError } = await supabase
           .from("friendships")
@@ -53,7 +62,8 @@ export const FriendsList = () => {
             friend:profiles!friendships_user_id_fkey_profiles(
               id,
               username,
-              avatar_url
+              avatar_url,
+              bio
             )
           `)
           .eq("friend_id", session.user.id)
@@ -64,17 +74,19 @@ export const FriendsList = () => {
           throw receivedError;
         }
 
-        // Combine both sets of friendships
+        console.log("Received friendships:", receivedFriendships);
+
+        // Combine both sets of friendships and remove duplicates
         const allFriendships = [
           ...(sentFriendships || [])
-            .filter(f => f.friend)
+            .filter(f => f.friend && f.status === "accepted")
             .map(f => ({
               id: f.id,
               status: f.status,
               friend: f.friend
             })),
           ...(receivedFriendships || [])
-            .filter(f => f.friend)
+            .filter(f => f.friend && f.status === "accepted")
             .map(f => ({
               id: f.id,
               status: f.status,
@@ -82,10 +94,21 @@ export const FriendsList = () => {
             }))
         ];
 
-        return allFriendships as FriendshipWithProfile[];
+        // Remove duplicates based on friend.id
+        const uniqueFriendships = allFriendships.filter((friendship, index, self) =>
+          index === self.findIndex((f) => f.friend.id === friendship.friend.id)
+        );
+
+        console.log("Final unique friendships:", uniqueFriendships);
+        return uniqueFriendships as FriendshipWithProfile[];
       } catch (error) {
         console.error("Error in friends query:", error);
         setError("Unable to load friends at this time");
+        toast({
+          title: "Error",
+          description: "Failed to load friends list. Please try again later.",
+          variant: "destructive",
+        });
         return [];
       }
     },
@@ -94,8 +117,13 @@ export const FriendsList = () => {
 
   // Subscribe to real-time updates for friendships
   useEffect(() => {
-    if (!session?.user?.id) return;
+    if (!session?.user?.id) {
+      console.log("No user ID for subscription");
+      return;
+    }
 
+    console.log("Setting up real-time subscription for friendships");
+    
     const channel = supabase
       .channel('friends-changes')
       .on(
@@ -106,13 +134,18 @@ export const FriendsList = () => {
           table: 'friendships',
           filter: `or(user_id.eq.${session.user.id},friend_id.eq.${session.user.id})`,
         },
-        () => {
+        (payload) => {
+          console.log("Friendship change detected:", payload);
           refetch();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("Subscription status:", status);
+        setSubscriptionStatus(status);
+      });
 
     return () => {
+      console.log("Cleaning up real-time subscription");
       supabase.removeChannel(channel);
     };
   }, [session?.user?.id, refetch]);
