@@ -18,6 +18,20 @@ export const JoinRequestsDialog = ({ open, onOpenChange }: JoinRequestsDialogPro
   const { data: requests, refetch } = useQuery({
     queryKey: ["join-requests", session?.user?.id],
     queryFn: async () => {
+      // First get the groups created by the user
+      const { data: userGroups, error: groupsError } = await supabase
+        .from("groups")
+        .select("id")
+        .eq("created_by", session?.user?.id);
+
+      if (groupsError) {
+        console.error("Error fetching user groups:", groupsError);
+        throw groupsError;
+      }
+
+      const groupIds = userGroups.map(group => group.id);
+
+      // Then get the join requests for those groups
       const { data, error } = await supabase
         .from("group_join_requests")
         .select(`
@@ -37,12 +51,7 @@ export const JoinRequestsDialog = ({ open, onOpenChange }: JoinRequestsDialogPro
           )
         `)
         .eq("status", "pending")
-        .in("group_id", 
-          supabase
-            .from("groups")
-            .select("id")
-            .eq("created_by", session?.user?.id)
-        );
+        .in("group_id", groupIds);
 
       if (error) {
         console.error("Error fetching join requests:", error);
