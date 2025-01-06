@@ -26,7 +26,7 @@ export const JoinRequestsDialog = ({ open, onOpenChange }: JoinRequestsDialogPro
           user_id,
           status,
           message,
-          groups!inner (
+          groups (
             id,
             name,
             created_by
@@ -39,7 +39,10 @@ export const JoinRequestsDialog = ({ open, onOpenChange }: JoinRequestsDialogPro
         .eq("status", "pending")
         .eq("groups.created_by", session?.user?.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching join requests:", error);
+        throw error;
+      }
       return data;
     },
     enabled: !!session?.user?.id,
