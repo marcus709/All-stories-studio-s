@@ -20,7 +20,8 @@ export const FriendsList = () => {
     queryKey: ["friends", session?.user?.id],
     queryFn: async () => {
       try {
-        const { data: friendships, error } = await supabase
+        // First get friendships where user is the requester
+        const { data: sentFriendships, error: sentError } = await supabase
           .from("friendships")
           .select(`
             id,
@@ -30,12 +31,23 @@ export const FriendsList = () => {
           .eq("user_id", session?.user?.id)
           .eq("status", "accepted");
 
-        if (error) {
-          console.error("Error fetching friends:", error);
-          throw error;
-        }
+        if (sentError) throw sentError;
 
-        return friendships as unknown as FriendshipWithProfile[];
+        // Then get friendships where user is the recipient
+        const { data: receivedFriendships, error: receivedError } = await supabase
+          .from("friendships")
+          .select(`
+            id,
+            status,
+            friend:profiles!friendships_user_id_fkey_profiles(*)
+          `)
+          .eq("friend_id", session?.user?.id)
+          .eq("status", "accepted");
+
+        if (receivedError) throw receivedError;
+
+        // Combine both sets of friendships
+        return [...(sentFriendships || []), ...(receivedFriendships || [])] as FriendshipWithProfile[];
       } catch (error) {
         console.error("Error in friends query:", error);
         setError("Unable to load friends at this time");
