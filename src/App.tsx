@@ -27,68 +27,35 @@ function App() {
   const { toast } = useToast();
 
   useEffect(() => {
-    let mounted = true;
-
-    // Get initial session
-    const initializeSession = async () => {
-      try {
-        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error("Error fetching session:", error);
-          throw error;
-        }
-        if (mounted) {
-          setSession(initialSession);
-          setIsLoading(false);
-        }
-      } catch (error) {
-        console.error("Error initializing session:", error);
-        if (mounted) {
-          toast({
-            title: "Session Error",
-            description: "There was an error loading your session. Please try signing in again.",
-            variant: "destructive",
-          });
-          setIsLoading(false);
-        }
+    // Initialize session
+    supabase.auth.getSession().then(({ data: { session: initialSession }, error }) => {
+      if (error) {
+        console.error("Error fetching initial session:", error);
+        toast({
+          title: "Session Error",
+          description: "There was an error loading your session. Please try signing in again.",
+          variant: "destructive",
+        });
       }
-    };
-
-    initializeSession();
+      setSession(initialSession);
+      setIsLoading(false);
+    });
 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       console.log('Auth state changed:', _event);
+      setSession(session);
       
       if (_event === 'SIGNED_OUT') {
         // Clear any local storage data
         queryClient.clear();
         localStorage.clear();
       }
-
-      if (_event === 'SIGNED_IN' || _event === 'TOKEN_REFRESHED') {
-        // Ensure we have a valid session
-        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error("Error refreshing session:", error);
-          return;
-        }
-        if (mounted) {
-          setSession(currentSession);
-          setIsLoading(false);
-        }
-      } else {
-        if (mounted) {
-          setSession(session);
-          setIsLoading(false);
-        }
-      }
     });
 
     return () => {
-      mounted = false;
       subscription.unsubscribe();
     };
   }, [toast]);
