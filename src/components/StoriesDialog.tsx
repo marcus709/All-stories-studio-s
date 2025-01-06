@@ -66,7 +66,7 @@ export function StoriesDialog() {
 
       const storyInput: CreateStoryInput = {
         title: newStory.title,
-        description: newStory.description,
+        description: newStory.description || null,
         user_id: user.id,
       };
 

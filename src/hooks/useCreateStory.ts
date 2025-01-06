@@ -8,13 +8,13 @@ export function useCreateStory(onSuccess?: (story: Story) => void) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (storyData: CreateStoryInput) => {
+    mutationFn: async (storyData: CreateStoryInput): Promise<Story> => {
       const { data, error } = await supabase
         .from("stories")
         .insert({
-          ...storyData,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
+          title: storyData.title,
+          description: storyData.description,
+          user_id: storyData.user_id,
         })
         .select()
         .single();
