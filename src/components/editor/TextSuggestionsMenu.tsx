@@ -1,116 +1,79 @@
 import React from 'react';
-import { Editor } from '@tiptap/react';
-import { Button } from '../ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Wand2,
   BookOpen,
-  Scissors,
   Minimize2,
+  Scissors,
   Maximize2,
   SpellCheck2,
-} from 'lucide-react';
-import { useAI } from '@/hooks/useAI';
-import { useToast } from '../ui/use-toast';
+} from "lucide-react";
 
 interface TextSuggestionsMenuProps {
-  editor: Editor;
-  isOpen: boolean;
   top: number;
   left: number;
+  onSuggestion: (type: string) => void;
+  isLoading?: boolean;
 }
 
-export function TextSuggestionsMenu({ editor, isOpen, top, left }: TextSuggestionsMenuProps) {
-  const { generateContent, isLoading } = useAI();
-  const { toast } = useToast();
-
-  if (!isOpen) return null;
-
-  const getSelectedText = () => {
-    return editor?.state.doc.cut(
-      editor.state.selection.from,
-      editor.state.selection.to
-    ).textContent;
-  };
-
-  const handleSuggestion = async (type: string) => {
-    const selectedText = getSelectedText();
-    if (!selectedText) return;
-
-    try {
-      const prompt = `${type} the following text while maintaining its context and meaning: ${selectedText}`;
-      const improvedText = await generateContent(prompt, 'suggestions');
-      
-      if (improvedText) {
-        editor
-          .chain()
-          .focus()
-          .setTextSelection({
-            from: editor.state.selection.from,
-            to: editor.state.selection.to,
-          })
-          .insertContent(improvedText)
-          .run();
-
-        toast({
-          title: "Success",
-          description: "Text has been updated",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to generate suggestion",
-        variant: "destructive",
-      });
-    }
+export function TextSuggestionsMenu({
+  top,
+  left,
+  onSuggestion,
+  isLoading = false,
+}: TextSuggestionsMenuProps) {
+  const handleSuggestion = (type: string) => {
+    if (isLoading) return;
+    onSuggestion(type);
   };
 
   const buttons = [
     {
       label: 'Improve',
       icon: Wand2,
-      color: 'from-purple-500 to-purple-600',
+      gradient: 'from-purple-400 via-purple-500 to-purple-600',
       onClick: () => handleSuggestion('Improve')
     },
     {
       label: 'Enhance',
       icon: BookOpen,
-      color: 'from-blue-500 to-blue-600',
+      gradient: 'from-blue-400 via-blue-500 to-blue-600',
       onClick: () => handleSuggestion('Enhance readability of')
     },
     {
       label: 'Shorten',
       icon: Minimize2,
-      color: 'from-pink-500 to-pink-600',
+      gradient: 'from-pink-400 via-pink-500 to-pink-600',
       onClick: () => handleSuggestion('Shorten')
     },
     {
       label: 'Simplify',
       icon: Scissors,
-      color: 'from-orange-500 to-orange-600',
+      gradient: 'from-orange-400 via-orange-500 to-orange-600',
       onClick: () => handleSuggestion('Simplify')
     },
     {
       label: 'Lengthen',
       icon: Maximize2,
-      color: 'from-green-500 to-green-600',
+      gradient: 'from-emerald-400 via-emerald-500 to-emerald-600',
       onClick: () => handleSuggestion('Lengthen')
     },
     {
       label: 'Grammar',
       icon: SpellCheck2,
-      color: 'from-indigo-500 to-indigo-600',
+      gradient: 'from-indigo-400 via-indigo-500 to-indigo-600',
       onClick: () => handleSuggestion('Fix grammar in')
     }
   ];
 
   return (
     <div
-      className="absolute z-50 flex flex-wrap gap-1.5 p-2 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg border border-gray-200/50"
+      className="absolute z-50 flex flex-wrap gap-2 p-3 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20"
       style={{
         top: `${top}px`,
         left: `${left}px`,
-        maxWidth: '400px',
+        maxWidth: '420px',
+        animation: 'scale-in 0.2s ease-out',
       }}
     >
       {buttons.map((button) => (
@@ -118,11 +81,22 @@ export function TextSuggestionsMenu({ editor, isOpen, top, left }: TextSuggestio
           key={button.label}
           variant="ghost"
           size="sm"
-          className={`h-7 px-2.5 rounded-full bg-gradient-to-r ${button.color} hover:opacity-90 text-white transition-all flex items-center gap-1 text-xs font-medium`}
+          className={`
+            h-8 px-3 
+            rounded-full 
+            bg-gradient-to-r ${button.gradient}
+            hover:opacity-90 hover:scale-105
+            text-white 
+            transition-all duration-200
+            flex items-center gap-1.5 
+            text-xs font-medium
+            shadow-md hover:shadow-lg
+            border border-white/10
+          `}
           onClick={button.onClick}
           disabled={isLoading}
         >
-          <button.icon className="h-3 w-3" />
+          <button.icon className="h-3.5 w-3.5" />
           {button.label}
         </Button>
       ))}
