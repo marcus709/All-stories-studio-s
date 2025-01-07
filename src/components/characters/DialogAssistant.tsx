@@ -7,6 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useStory } from "@/contexts/StoryContext";
 import { Character } from "@/integrations/supabase/types/tables.types";
+import { Card } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 
 interface DialogAssistantProps {
   characters: Character[];
@@ -106,17 +108,17 @@ export function DialogAssistant({ characters }: DialogAssistantProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+      <Card className="p-6 space-y-6">
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Select Characters</h2>
+          <h2 className="text-xl font-semibold">Character Selection</h2>
           <Select
             onValueChange={(value) => setSelectedCharacters(prev => 
               prev.includes(value) ? prev : [...prev, value]
             )}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a character" />
+              <SelectValue placeholder="Select characters for the dialog" />
             </SelectTrigger>
             <SelectContent>
               {characters.map((character) => (
@@ -131,11 +133,11 @@ export function DialogAssistant({ characters }: DialogAssistantProps) {
             {selectedCharacters.map((charId) => {
               const character = characters.find(c => c.id === charId);
               return character ? (
-                <div key={charId} className="flex items-center gap-2 bg-purple-100 rounded-full px-3 py-1">
-                  <span>{character.name}</span>
+                <div key={charId} className="flex items-center gap-2 bg-purple-100 dark:bg-purple-900 rounded-full px-3 py-1">
+                  <span className="text-sm font-medium">{character.name}</span>
                   <button
                     onClick={() => setSelectedCharacters(prev => prev.filter(id => id !== charId))}
-                    className="text-purple-600 hover:text-purple-800"
+                    className="text-purple-600 dark:text-purple-300 hover:text-purple-800 dark:hover:text-purple-100"
                   >
                     ×
                   </button>
@@ -146,42 +148,52 @@ export function DialogAssistant({ characters }: DialogAssistantProps) {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Dialog Context</h2>
+          <h2 className="text-xl font-semibold">Dialog Context</h2>
           <Textarea
             value={context}
             onChange={(e) => setContext(e.target.value)}
-            placeholder="Describe the situation or scene for this dialog..."
-            className="min-h-[100px]"
+            placeholder="Set the scene or describe the situation for this dialog..."
+            className="min-h-[150px] resize-none"
           />
         </div>
-      </div>
 
-      <div className="flex justify-center">
         <Button
           onClick={handleGenerateDialog}
           disabled={isGenerating || selectedCharacters.length < 2}
-          className="bg-purple-500 hover:bg-purple-600"
+          className="w-full bg-purple-500 hover:bg-purple-600"
         >
-          {isGenerating ? "Generating..." : "Generate Dialog"}
+          {isGenerating ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Generating Dialog...
+            </>
+          ) : (
+            "Generate Dialog"
+          )}
         </Button>
-      </div>
+      </Card>
 
-      {generatedDialog && (
-        <div className="space-y-4">
-          <div className="bg-gray-50 rounded-lg p-6">
-            <pre className="whitespace-pre-wrap font-sans">{generatedDialog}</pre>
-          </div>
-          <div className="flex justify-end">
+      <Card className="p-6 space-y-4">
+        <h2 className="text-xl font-semibold">Generated Dialog</h2>
+        {generatedDialog ? (
+          <>
+            <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-6 min-h-[300px] max-h-[500px] overflow-y-auto">
+              <pre className="whitespace-pre-wrap font-sans text-sm">{generatedDialog}</pre>
+            </div>
             <Button
               onClick={handleSaveToDocument}
               variant="outline"
-              className="gap-2"
+              className="w-full"
             >
               Save to Documents
             </Button>
+          </>
+        ) : (
+          <div className="flex items-center justify-center h-[300px] text-gray-500">
+            Generated dialog will appear here
           </div>
-        </div>
-      )}
+        )}
+      </Card>
     </div>
   );
 }
