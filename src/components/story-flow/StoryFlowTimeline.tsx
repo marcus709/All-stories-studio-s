@@ -28,12 +28,9 @@ export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
     [setEdges],
   );
 
-  const nodeTypes: NodeTypes = useMemo(
-    () => ({
-      timeline: TimelineNode,
-    }),
-    []
-  );
+  const nodeTypes = useMemo<NodeTypes>(() => ({
+    timeline: TimelineNode,
+  }), []);
 
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(nodes, edges, viewMode);
 
