@@ -62,7 +62,6 @@ export const EmotionTracker = ({ plotEvents, selectedDocument, onDocumentSelect 
         body: { 
           documentId: selectedDocument,
           plotEvents,
-          structure: "selected structure" // You might want to pass this as a prop
         },
       });
 
@@ -77,9 +76,10 @@ export const EmotionTracker = ({ plotEvents, selectedDocument, onDocumentSelect 
       });
     },
     onError: (error) => {
+      console.error("Analysis error:", error);
       toast({
         title: "Error",
-        description: "Failed to analyze document",
+        description: "Failed to analyze document. Please try again.",
         variant: "destructive",
       });
     },
@@ -157,7 +157,7 @@ export const EmotionTracker = ({ plotEvents, selectedDocument, onDocumentSelect 
           <div className="absolute inset-0 flex items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-violet-500" />
           </div>
-        ) : selectedDocument ? (
+        ) : selectedDocument && emotions && emotions.length > 0 ? (
           <LineChart
             width={800}
             height={400}
@@ -174,6 +174,7 @@ export const EmotionTracker = ({ plotEvents, selectedDocument, onDocumentSelect 
             <YAxis 
               stroke="#6b7280"
               tick={{ fill: '#6b7280' }}
+              domain={[0, 10]}
             />
             <Tooltip 
               contentStyle={{ 
@@ -204,7 +205,7 @@ export const EmotionTracker = ({ plotEvents, selectedDocument, onDocumentSelect 
           </LineChart>
         ) : (
           <div className="flex items-center justify-center h-full text-gray-500">
-            Select a document to view emotional analysis
+            {selectedDocument ? "No emotional analysis data available" : "Select a document to view emotional analysis"}
           </div>
         )}
       </div>
