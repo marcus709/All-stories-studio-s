@@ -67,7 +67,7 @@ export function TextSuggestionsMenu({ editor, isOpen, top, left }: TextSuggestio
 
   return (
     <div
-      className="absolute z-50 flex gap-2 p-2"
+      className="absolute z-50 flex gap-2 p-2 bg-white/50 backdrop-blur-sm rounded-full shadow-lg"
       style={{
         top: `${top}px`,
         left: `${left}px`,
@@ -76,7 +76,7 @@ export function TextSuggestionsMenu({ editor, isOpen, top, left }: TextSuggestio
       <Button
         variant="ghost"
         size="sm"
-        className="rounded-full bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
+        className="rounded-full bg-purple-500 text-white hover:bg-purple-500/90 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
         onClick={() => handleSuggestion('Improve')}
         disabled={isLoading}
       >
@@ -86,7 +86,7 @@ export function TextSuggestionsMenu({ editor, isOpen, top, left }: TextSuggestio
       <Button
         variant="ghost"
         size="sm"
-        className="rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
+        className="rounded-full bg-blue-500 text-white hover:bg-blue-500/90 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
         onClick={() => handleSuggestion('Enhance readability of')}
         disabled={isLoading}
       >
@@ -96,7 +96,7 @@ export function TextSuggestionsMenu({ editor, isOpen, top, left }: TextSuggestio
       <Button
         variant="ghost"
         size="sm"
-        className="rounded-full bg-pink-50 text-pink-600 hover:bg-pink-100 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
+        className="rounded-full bg-pink-500 text-white hover:bg-pink-500/90 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
         onClick={() => handleSuggestion('Shorten')}
         disabled={isLoading}
       >
@@ -106,7 +106,7 @@ export function TextSuggestionsMenu({ editor, isOpen, top, left }: TextSuggestio
       <Button
         variant="ghost"
         size="sm"
-        className="rounded-full bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
+        className="rounded-full bg-orange-500 text-white hover:bg-orange-500/90 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
         onClick={() => handleSuggestion('Simplify')}
         disabled={isLoading}
       >
@@ -116,7 +116,7 @@ export function TextSuggestionsMenu({ editor, isOpen, top, left }: TextSuggestio
       <Button
         variant="ghost"
         size="sm"
-        className="rounded-full bg-green-50 text-green-600 hover:bg-green-100 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
+        className="rounded-full bg-green-500 text-white hover:bg-green-500/90 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
         onClick={() => handleSuggestion('Lengthen')}
         disabled={isLoading}
       >
@@ -126,7 +126,7 @@ export function TextSuggestionsMenu({ editor, isOpen, top, left }: TextSuggestio
       <Button
         variant="ghost"
         size="sm"
-        className="rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
+        className="rounded-full bg-indigo-500 text-white hover:bg-indigo-500/90 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
         onClick={() => handleSuggestion('Fix grammar in')}
         disabled={isLoading}
       >
