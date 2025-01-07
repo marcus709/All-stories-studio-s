@@ -1,9 +1,15 @@
 import { memo } from 'react';
-import { Handle, Position } from '@xyflow/react';
+import { Handle, Position, NodeProps } from '@xyflow/react';
 
-const TimelineNode = ({ data, style }) => {
+interface TimelineNodeData {
+  label: string;
+  subtitle?: string;
+  year?: string;
+}
+
+const TimelineNode = ({ data }: NodeProps<TimelineNodeData>) => {
   return (
-    <div style={style} className="p-4">
+    <div className="p-4">
       <Handle
         type="target"
         position={Position.Left}
