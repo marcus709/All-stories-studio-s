@@ -20,30 +20,30 @@ interface DocumentEditorProps {
 export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [title, setTitle] = useState(document?.title || "");
-  const [content, setContent] = useState(document?.content || "");
+  const [title, setTitle] = useState<string>("");
+  const [content, setContent] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
-  const [timePeriod, setTimePeriod] = useState(document?.time_period || "");
+  const [timePeriod, setTimePeriod] = useState<string>("");
   const [isTimeDialogOpen, setIsTimeDialogOpen] = useState(false);
   const [isLoadingContext, setIsLoadingContext] = useState(false);
-  const [analysisResults, setAnalysisResults] = useState<any>(document?.time_period_details || null);
+  const [analysisResults, setAnalysisResults] = useState<any>(null);
   const { session } = useSessionContext();
 
-  // Update state when document changes
+  // Initialize and update state when document changes
   useEffect(() => {
     if (document) {
-      setTitle(document.title || "");
-      setContent(document.content || "");
+      setTitle(document.title);
+      setContent(document.content);
       setTimePeriod(document.time_period || "");
-      setAnalysisResults(document.time_period_details || null);
+      setAnalysisResults(document.time_period_details);
     } else {
-      // Clear state when no document is selected
+      // Reset state when no document is selected
       setTitle("");
       setContent("");
       setTimePeriod("");
       setAnalysisResults(null);
     }
-  }, [document]); // Run when document changes
+  }, [document]); // Run when document object changes
 
   const handleSave = async () => {
     try {
