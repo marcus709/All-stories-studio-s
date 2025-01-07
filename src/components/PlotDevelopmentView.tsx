@@ -12,6 +12,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const PlotDevelopmentView = () => {
   const [selectedStructure, setSelectedStructure] = useState<string | null>(null);
@@ -91,38 +92,40 @@ export const PlotDevelopmentView = () => {
                 <PanelLeftClose className="h-4 w-4" />
               </Button>
             </div>
-            <div className="p-4 overflow-y-auto">
-              <PlotStructureSelect
-                plotStructures={plotStructures}
-                selectedStructure={selectedStructure}
-                onStructureChange={(value) => {
-                  setSelectedStructure(value);
-                  setActiveStage(null);
-                }}
-              />
+            <ScrollArea className="h-[calc(100vh-16rem)]">
+              <div className="p-4">
+                <PlotStructureSelect
+                  plotStructures={plotStructures}
+                  selectedStructure={selectedStructure}
+                  onStructureChange={(value) => {
+                    setSelectedStructure(value);
+                    setActiveStage(null);
+                  }}
+                />
 
-              {selectedStructureData && (
-                <div className="grid grid-cols-1 gap-4 mt-6">
-                  {selectedStructureData.stages.map((stage, index) => (
-                    <PlotStage
-                      key={stage}
-                      stage={stage}
-                      stageNumber={index + 1}
-                      events={plotEvents?.filter((event) => event.stage === stage) || []}
-                      activeStage={activeStage}
-                      newEvent={newEvent}
-                      onEventChange={setNewEvent}
-                      onStageClick={setActiveStage}
-                      onCancel={() => {
-                        setActiveStage(null);
-                        setNewEvent({ title: "", description: "" });
-                      }}
-                      onAddEvent={handleAddEvent}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
+                {selectedStructureData && (
+                  <div className="grid grid-cols-1 gap-4 mt-6">
+                    {selectedStructureData.stages.map((stage, index) => (
+                      <PlotStage
+                        key={stage}
+                        stage={stage}
+                        stageNumber={index + 1}
+                        events={plotEvents?.filter((event) => event.stage === stage) || []}
+                        activeStage={activeStage}
+                        newEvent={newEvent}
+                        onEventChange={setNewEvent}
+                        onStageClick={setActiveStage}
+                        onCancel={() => {
+                          setActiveStage(null);
+                          setNewEvent({ title: "", description: "" });
+                        }}
+                        onAddEvent={handleAddEvent}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
           </ResizablePanel>
         )}
         
