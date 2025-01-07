@@ -48,6 +48,17 @@ export const useStoryAnalysis = (storyId: string | undefined) => {
         throw new Error("Please select a story first");
       }
 
+      // First verify we can access the document
+      const { data: document, error: docError } = await supabase
+        .from("documents")
+        .select("content")
+        .eq("id", documentId)
+        .single();
+
+      if (docError || !document) {
+        throw new Error("Could not access document content");
+      }
+
       const { data, error } = await supabase.functions.invoke('analyze-story', {
         body: { 
           documentId,

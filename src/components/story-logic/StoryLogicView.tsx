@@ -8,6 +8,7 @@ import { Plus } from "lucide-react";
 import { AnalysisSection } from "./AnalysisSection";
 import { useStoryAnalysis } from "@/hooks/useStoryAnalysis";
 import { AnalysisResults } from "./AnalysisResults";
+import { supabase } from "@/integrations/supabase/client";
 
 export const StoryLogicView = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,18 +34,33 @@ export const StoryLogicView = () => {
     }
 
     try {
+      // First fetch the document content
+      const { data: document, error: docError } = await supabase
+        .from("documents")
+        .select("content")
+        .eq("id", documentId)
+        .single();
+
+      if (docError || !document) {
+        throw new Error("Failed to fetch document content");
+      }
+
+      // Now analyze the story with the document content
       await analyzeStory(documentId);
+      
       toast({
         title: "Success",
         description: "Story analysis completed successfully",
       });
+      
       // Invalidate queries to refresh the data
       queryClient.invalidateQueries({ queryKey: ["story-analysis", selectedStory.id] });
       queryClient.invalidateQueries({ queryKey: ["story-issues", storyAnalysis?.id] });
     } catch (error) {
+      console.error("Analysis error:", error);
       toast({
         title: "Error",
-        description: "Failed to analyze story",
+        description: "Failed to analyze story. Please try again.",
         variant: "destructive",
       });
     }
