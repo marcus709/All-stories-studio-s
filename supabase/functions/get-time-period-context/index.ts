@@ -16,6 +16,9 @@ serve(async (req) => {
   try {
     const { timePeriod, documentContent } = await req.json();
 
+    console.log('Analyzing time period:', timePeriod);
+    console.log('Document content:', documentContent);
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -28,8 +31,11 @@ serve(async (req) => {
           {
             role: 'system',
             content: `You are a historical context expert. Analyze the provided text content and verify its historical accuracy for the specified time period. 
-            Provide feedback on language usage, cultural references, and environmental details. Format the response as JSON with sections for language, culture, and environment.
-            For each section, include both analysis of current content and suggestions for improvement.`
+            Return a JSON object with three properties:
+            - language: analysis of language usage and authenticity for the time period
+            - culture: analysis of cultural references and historical accuracy
+            - environment: analysis of environmental and setting details
+            Keep each analysis concise but informative.`
           },
           {
             role: 'user',
@@ -42,14 +48,34 @@ serve(async (req) => {
     });
 
     const data = await response.json();
-    const contextInfo = JSON.parse(data.choices[0].message.content);
+    console.log('OpenAI response:', data);
+
+    // Extract the content and parse it as JSON
+    const analysisText = data.choices[0].message.content;
+    let contextInfo;
+    
+    try {
+      // Try to parse the response directly
+      contextInfo = JSON.parse(analysisText);
+    } catch (parseError) {
+      console.error('Failed to parse OpenAI response:', parseError);
+      // Fallback to a structured response if parsing fails
+      contextInfo = {
+        language: "Could not analyze language usage.",
+        culture: "Could not analyze cultural context.",
+        environment: "Could not analyze environmental details."
+      };
+    }
 
     return new Response(JSON.stringify({ contextInfo }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
     console.error('Error in get-time-period-context function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      details: "Failed to process time period analysis request"
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
