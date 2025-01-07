@@ -18,11 +18,11 @@ export const ViewModeSelector = ({ viewMode, onViewModeChange }: ViewModeSelecto
         </SelectValue>
       </SelectTrigger>
       <SelectContent>
-        <ScrollArea className="h-[400px] w-[350px] rounded-md">
+        <ScrollArea className="h-[200px] w-[180px] rounded-md">
           {(Object.keys(viewModeLabels) as ViewMode[]).map((mode) => (
             <SelectItem key={mode} value={mode}>
               <div className="flex items-center gap-2 py-1">
-                {viewModeIcons[mode] && React.createElement(viewModeIcons[mode], { size: 16 })}
+                {viewModeIcons[mode] && React.createElement(viewModeIcons[mode], { className: "h-4 w-4" })}
                 <span>{viewModeLabels[mode]}</span>
               </div>
             </SelectItem>
