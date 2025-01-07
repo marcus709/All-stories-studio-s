@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { ReactFlow, Background, Controls, MiniMap, Node, Edge, useNodesState, useEdgesState, addEdge } from '@xyflow/react';
+import { ReactFlow, Background, Controls, MiniMap, Node, Edge, useNodesState, useEdgesState, addEdge, MarkerType } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -116,7 +116,7 @@ export const CharacterRelationshipMap = () => {
         strokeWidth: rel.strength ? Math.max(1, Math.min(rel.strength / 20, 5)) : 1,
       },
       markerEnd: {
-        type: 'arrow',
+        type: MarkerType.Arrow,
         color: relationshipColors[rel.relationship_type as RelationshipType] || '#94a3b8',
       },
     }));
