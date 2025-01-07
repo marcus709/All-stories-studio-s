@@ -42,7 +42,7 @@ const Index = () => {
       {!splineError && (
         <div className="fixed inset-0 w-full h-full pointer-events-none z-0">
           <Spline 
-            scene="https://prod.spline.design/worldplanetesimora-17c8bec8526f0397f17fad3e8ffb1eb4/scene.splinecode"
+            scene="/spline-scene.splinecode"
             onError={handleSplineError}
           />
         </div>
