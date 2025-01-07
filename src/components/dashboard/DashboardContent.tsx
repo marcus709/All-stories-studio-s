@@ -49,12 +49,12 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
           component = <CharactersView />;
           break;
         case "plot":
-          if (handleFeatureAccess("Plot Development", "backward_planning")) {
+          if (handleFeatureAccess("Plot Development", "story_docs")) {
             component = <PlotDevelopmentView />;
           }
           break;
         case "flow":
-          if (handleFeatureAccess("Story Flow", "backward_planning")) {
+          if (handleFeatureAccess("Story Flow", "story_docs")) {
             component = <StoryFlow />;
           }
           break;
@@ -62,12 +62,12 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
           component = <StoryIdeasView />;
           break;
         case "docs":
-          if (handleFeatureAccess("Story Documentation", "backward_planning")) {
+          if (handleFeatureAccess("Story Documentation", "story_docs")) {
             component = <StoryDocsView />;
           }
           break;
         case "logic":
-          if (handleFeatureAccess("Story Logic", "backward_planning")) {
+          if (handleFeatureAccess("Story Logic", "story_logic")) {
             component = <StoryLogicView />;
           }
           break;
