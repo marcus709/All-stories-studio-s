@@ -6,9 +6,8 @@ import {
   useNodesState,
   useEdgesState,
   addEdge,
-  NodeTypes,
   Connection,
-  Node,
+  NodeTypes,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import TimelineNode from './TimelineNode';
@@ -16,7 +15,7 @@ import { TimelineNodeData, TimelineNode as TimelineNodeType } from './types/time
 import { initialNodes, initialEdges } from './data/initialElements';
 
 export const StoryFlowTimeline = () => {
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node<TimelineNodeData>>(initialNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState<TimelineNodeType>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const onConnect = useCallback(
@@ -25,7 +24,7 @@ export const StoryFlowTimeline = () => {
   );
 
   const handleNodeAdd = useCallback(() => {
-    const newNode: Node<TimelineNodeData> = {
+    const newNode: TimelineNodeType = {
       id: `node-${nodes.length + 1}`,
       type: 'timeline',
       position: { x: 100, y: 100 },
@@ -37,11 +36,6 @@ export const StoryFlowTimeline = () => {
     };
     setNodes((nds) => [...nds, newNode]);
   }, [nodes.length, setNodes]);
-
-  const handleNodeDelete = useCallback((nodeId: string) => {
-    setNodes((nds) => nds.filter((node) => node.id !== nodeId));
-    setEdges((eds) => eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId));
-  }, [setNodes, setEdges]);
 
   const nodeTypes = useMemo<NodeTypes>(() => ({
     timeline: TimelineNode,
