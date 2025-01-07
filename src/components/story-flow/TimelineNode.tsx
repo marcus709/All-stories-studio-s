@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { TimelineNodeData } from './types/timeline';
 import { TimelineNodeFields } from './TimelineNodeFields';

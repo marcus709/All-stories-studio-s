@@ -12,7 +12,6 @@ import {
 import '@xyflow/react/dist/style.css';
 import TimelineNode from './TimelineNode';
 import { TimelineNodeData, TimelineNode as TimelineNodeType } from './types/timeline';
-import { initialNodes, initialEdges } from './data/initialElements';
 
 export const StoryFlowTimeline = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState<TimelineNodeType>(initialNodes);
