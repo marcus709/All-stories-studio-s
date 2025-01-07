@@ -4,7 +4,9 @@ export interface TimelineNodeData {
   label: string;
   subtitle?: string;
   year?: string;
-  [key: string]: unknown;
+  data?: Record<string, unknown>;
+  id: string;
+  position: { x: number; y: number };
 }
 
 export type TimelineNode = Node<TimelineNodeData>;
