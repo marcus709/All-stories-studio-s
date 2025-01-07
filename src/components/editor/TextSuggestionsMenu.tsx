@@ -65,74 +65,67 @@ export function TextSuggestionsMenu({ editor, isOpen, top, left }: TextSuggestio
     }
   };
 
+  const buttons = [
+    {
+      label: 'Improve',
+      icon: Wand2,
+      color: 'from-purple-500 to-purple-600',
+      onClick: () => handleSuggestion('Improve')
+    },
+    {
+      label: 'Enhance',
+      icon: BookOpen,
+      color: 'from-blue-500 to-blue-600',
+      onClick: () => handleSuggestion('Enhance readability of')
+    },
+    {
+      label: 'Shorten',
+      icon: Minimize2,
+      color: 'from-pink-500 to-pink-600',
+      onClick: () => handleSuggestion('Shorten')
+    },
+    {
+      label: 'Simplify',
+      icon: Scissors,
+      color: 'from-orange-500 to-orange-600',
+      onClick: () => handleSuggestion('Simplify')
+    },
+    {
+      label: 'Lengthen',
+      icon: Maximize2,
+      color: 'from-green-500 to-green-600',
+      onClick: () => handleSuggestion('Lengthen')
+    },
+    {
+      label: 'Grammar',
+      icon: SpellCheck2,
+      color: 'from-indigo-500 to-indigo-600',
+      onClick: () => handleSuggestion('Fix grammar in')
+    }
+  ];
+
   return (
     <div
-      className="absolute z-50 flex gap-2 p-2 bg-white/50 backdrop-blur-sm rounded-full shadow-lg"
+      className="absolute z-50 flex flex-wrap gap-1.5 p-2 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg border border-gray-200/50"
       style={{
         top: `${top}px`,
         left: `${left}px`,
+        maxWidth: '400px',
       }}
     >
-      <Button
-        variant="ghost"
-        size="sm"
-        className="rounded-full bg-purple-500 text-white hover:bg-purple-500/90 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
-        onClick={() => handleSuggestion('Improve')}
-        disabled={isLoading}
-      >
-        <Wand2 className="h-3.5 w-3.5" />
-        Improve
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="rounded-full bg-blue-500 text-white hover:bg-blue-500/90 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
-        onClick={() => handleSuggestion('Enhance readability of')}
-        disabled={isLoading}
-      >
-        <BookOpen className="h-3.5 w-3.5" />
-        Enhance
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="rounded-full bg-pink-500 text-white hover:bg-pink-500/90 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
-        onClick={() => handleSuggestion('Shorten')}
-        disabled={isLoading}
-      >
-        <Minimize2 className="h-3.5 w-3.5" />
-        Shorten
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="rounded-full bg-orange-500 text-white hover:bg-orange-500/90 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
-        onClick={() => handleSuggestion('Simplify')}
-        disabled={isLoading}
-      >
-        <Scissors className="h-3.5 w-3.5" />
-        Simplify
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="rounded-full bg-green-500 text-white hover:bg-green-500/90 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
-        onClick={() => handleSuggestion('Lengthen')}
-        disabled={isLoading}
-      >
-        <Maximize2 className="h-3.5 w-3.5" />
-        Lengthen
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="rounded-full bg-indigo-500 text-white hover:bg-indigo-500/90 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
-        onClick={() => handleSuggestion('Fix grammar in')}
-        disabled={isLoading}
-      >
-        <SpellCheck2 className="h-3.5 w-3.5" />
-        Grammar
-      </Button>
+      {buttons.map((button) => (
+        <Button
+          key={button.label}
+          variant="ghost"
+          size="sm"
+          className={`h-7 px-2.5 rounded-full bg-gradient-to-r ${button.color} hover:opacity-90 text-white transition-all flex items-center gap-1 text-xs font-medium`}
+          onClick={button.onClick}
+          disabled={isLoading}
+        >
+          <button.icon className="h-3 w-3" />
+          {button.label}
+        </Button>
+      ))}
     </div>
   );
 }
