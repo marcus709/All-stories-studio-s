@@ -15,7 +15,7 @@ export const MessageActions = ({ onEdit, onDelete }: MessageActionsProps) => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity delay-[2000ms] duration-200">
           <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
             <Edit className="h-4 w-4" />
           </Button>
