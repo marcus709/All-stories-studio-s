@@ -9,7 +9,7 @@ import { useState } from "react";
 interface AnalysisSectionProps {
   hasDocuments: boolean;
   hasMinimalContent: boolean;
-  onAnalyze: () => void;
+  onAnalyze: (documentId: string) => void;
   onCustomAnalysis: (input: string) => void;
   storyId: string;
   onDocumentUpload: () => void;
@@ -24,6 +24,7 @@ export const AnalysisSection = ({
   onDocumentUpload,
 }: AnalysisSectionProps) => {
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
 
   return (
     <div className="space-y-6">
@@ -47,7 +48,10 @@ export const AnalysisSection = ({
               />
             </DialogContent>
           </Dialog>
-          <Button onClick={onAnalyze} disabled={!hasDocuments}>
+          <Button 
+            onClick={() => selectedDocumentId && onAnalyze(selectedDocumentId)} 
+            disabled={!selectedDocumentId}
+          >
             Analyze Story
           </Button>
           <Button 
@@ -80,7 +84,17 @@ export const AnalysisSection = ({
         </Alert>
       )}
 
-      <DocumentsGrid />
+      {!selectedDocumentId && hasDocuments && (
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>No Document Selected</AlertTitle>
+          <AlertDescription>
+            Please select a document from the grid below to analyze.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <DocumentsGrid onSelectDocument={setSelectedDocumentId} selectedDocumentId={selectedDocumentId} />
     </div>
   );
 };

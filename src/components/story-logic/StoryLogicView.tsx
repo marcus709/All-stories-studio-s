@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
-import { StoryIssueType } from "@/types/story";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useStory } from "@/contexts/StoryContext";
@@ -24,7 +23,7 @@ export const StoryLogicView = () => {
     isAnalyzing
   } = useStoryAnalysis(selectedStory?.id);
 
-  const handleAnalyze = () => {
+  const handleAnalyze = (documentId: string) => {
     if (!selectedStory?.id) {
       toast({
         title: "Error",
@@ -33,7 +32,7 @@ export const StoryLogicView = () => {
       });
       return;
     }
-    analyzeStory("");
+    analyzeStory(documentId);
   };
 
   return (

@@ -10,7 +10,12 @@ interface Document {
   content: any;
 }
 
-export const DocumentsGrid = () => {
+interface DocumentsGridProps {
+  onSelectDocument: (id: string) => void;
+  selectedDocumentId: string | null;
+}
+
+export const DocumentsGrid = ({ onSelectDocument, selectedDocumentId }: DocumentsGridProps) => {
   const { selectedStory } = useStory();
 
   const { data: documents } = useQuery({
@@ -46,12 +51,25 @@ export const DocumentsGrid = () => {
       {documents.map((doc) => (
         <div
           key={doc.id}
-          className="p-4 border rounded-lg hover:border-purple-500 transition-colors cursor-pointer group"
+          onClick={() => onSelectDocument(doc.id)}
+          className={`p-4 border rounded-lg transition-colors cursor-pointer group
+            ${selectedDocumentId === doc.id 
+              ? 'border-purple-500 bg-purple-50' 
+              : 'hover:border-purple-500'
+            }`}
         >
           <div className="flex items-start gap-3">
-            <FileText className="h-5 w-5 text-gray-400 group-hover:text-purple-500" />
+            <FileText className={`h-5 w-5 ${
+              selectedDocumentId === doc.id 
+                ? 'text-purple-500' 
+                : 'text-gray-400 group-hover:text-purple-500'
+            }`} />
             <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-gray-900 truncate group-hover:text-purple-500">
+              <h3 className={`font-medium truncate ${
+                selectedDocumentId === doc.id 
+                  ? 'text-purple-700' 
+                  : 'text-gray-900 group-hover:text-purple-500'
+              }`}>
                 {doc.title}
               </h3>
               <p className="text-sm text-gray-500">
