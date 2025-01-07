@@ -2,10 +2,12 @@ import { StoryIssue } from "@/types/story";
 
 interface IssuesListProps {
   issues: StoryIssue[];
-  analysisExists: boolean;
+  issueType: string;
+  isLoading: boolean;
+  analysisExists?: boolean;
 }
 
-export const IssuesList = ({ issues, analysisExists }: IssuesListProps) => {
+export const IssuesList = ({ issues, issueType, isLoading, analysisExists }: IssuesListProps) => {
   if (!analysisExists) {
     return (
       <div className="text-center text-gray-500 py-8">
@@ -14,9 +16,27 @@ export const IssuesList = ({ issues, analysisExists }: IssuesListProps) => {
     );
   }
 
+  const filteredIssues = issues.filter(issue => issue.issue_type === issueType);
+
+  if (isLoading) {
+    return (
+      <div className="text-center text-gray-500 py-8">
+        Loading issues...
+      </div>
+    );
+  }
+
+  if (filteredIssues.length === 0) {
+    return (
+      <div className="text-center text-gray-500 py-8">
+        No {issueType.replace(/_/g, " ")} issues found.
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
-      {issues?.map((issue) => (
+      {filteredIssues.map((issue) => (
         <div
           key={issue.id}
           className="bg-white p-4 rounded-lg border shadow-sm"
