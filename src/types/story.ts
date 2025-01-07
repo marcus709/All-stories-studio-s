@@ -21,6 +21,12 @@ export interface Document {
   user_id: string;
   title: string;
   content: string;
+  time_period?: string;
+  time_period_details?: {
+    language: string;
+    culture: string;
+    environment: string;
+  };
   created_at?: string;
   updated_at?: string;
 }

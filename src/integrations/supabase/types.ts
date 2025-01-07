@@ -343,6 +343,8 @@ export type Database = {
           created_at: string | null
           id: string
           story_id: string
+          time_period: string | null
+          time_period_details: Json | null
           title: string
           updated_at: string | null
           user_id: string
@@ -352,6 +354,8 @@ export type Database = {
           created_at?: string | null
           id?: string
           story_id: string
+          time_period?: string | null
+          time_period_details?: Json | null
           title: string
           updated_at?: string | null
           user_id: string
@@ -361,6 +365,8 @@ export type Database = {
           created_at?: string | null
           id?: string
           story_id?: string
+          time_period?: string | null
+          time_period_details?: Json | null
           title?: string
           updated_at?: string | null
           user_id?: string
