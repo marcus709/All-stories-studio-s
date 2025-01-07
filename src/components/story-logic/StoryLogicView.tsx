@@ -1,17 +1,17 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
-import { StoryIssue, StoryIssueType } from "@/types/story";
+import { StoryIssueType } from "@/types/story";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useStory } from "@/contexts/StoryContext";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { AnalysisSection } from "./AnalysisSection";
-import { useSession } from "@supabase/auth-helpers-react";
+import { useStoryAnalysis } from "@/hooks/useStoryAnalysis";
+import { IssuesList } from "./IssuesList";
 
 export const StoryLogicView = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,91 +20,16 @@ export const StoryLogicView = () => {
   const { selectedStory } = useStory();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const session = useSession();
 
-  const { data: storyAnalysis, isError: analysisError } = useQuery({
-    queryKey: ["story-analysis", selectedStory?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("story_analysis")
-        .select("*")
-        .eq("story_id", selectedStory?.id)
-        .order('created_at', { ascending: false })
-        .maybeSingle();
+  const {
+    storyAnalysis,
+    storyIssues,
+    analyzeStory,
+    isAnalyzing
+  } = useStoryAnalysis(selectedStory?.id);
 
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!selectedStory?.id,
-  });
-
-  const { data: storyIssues } = useQuery({
-    queryKey: ["story-issues", storyAnalysis?.id],
-    queryFn: async () => {
-      if (!storyAnalysis?.id) return [];
-      
-      const { data, error } = await supabase
-        .from("story_issues")
-        .select("*")
-        .eq("analysis_id", storyAnalysis.id)
-        .order('severity', { ascending: false });
-      
-      if (error) throw error;
-      return data as StoryIssue[];
-    },
-    enabled: !!storyAnalysis?.id,
-  });
-
-  const createIssueMutation = useMutation({
-    mutationFn: async (newIssue: { description: string; type: StoryIssueType }) => {
-      if (!storyAnalysis?.id) {
-        throw new Error("No analysis exists for this story yet");
-      }
-
-      const { data, error } = await supabase
-        .from("story_issues")
-        .insert({
-          description: newIssue.description,
-          issue_type: newIssue.type,
-          analysis_id: storyAnalysis.id,
-          status: "open",
-          severity: 1,
-          location: ""
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["story-issues"] });
-      setIsOpen(false);
-      setDescription("");
-      toast({
-        title: "Success",
-        description: "Story issue created successfully",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create issue",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    createIssueMutation.mutate({
-      description,
-      type: issueType,
-    });
-  };
-
-  const handleAnalyze = async (documentId: string) => {
-    if (!selectedStory?.id || !session?.user?.id) {
+  const handleAnalyze = () => {
+    if (!selectedStory?.id) {
       toast({
         title: "Error",
         description: "Please select a story first",
@@ -112,33 +37,7 @@ export const StoryLogicView = () => {
       });
       return;
     }
-
-    try {
-      const { data, error } = await supabase.functions.invoke('analyze-story', {
-        body: { 
-          documentId,
-          storyId: selectedStory.id,
-          userId: session.user.id
-        },
-      });
-
-      if (error) throw error;
-
-      queryClient.invalidateQueries({ queryKey: ["story-analysis"] });
-      queryClient.invalidateQueries({ queryKey: ["story-issues"] });
-
-      toast({
-        title: "Success",
-        description: "Story analyzed successfully",
-      });
-    } catch (error) {
-      console.error('Analysis error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to analyze story. Please try again.",
-        variant: "destructive",
-      });
-    }
+    analyzeStory("");
   };
 
   return (
@@ -156,7 +55,13 @@ export const StoryLogicView = () => {
             <DialogHeader>
               <DialogTitle>Add New Issue</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              createIssueMutation.mutate({
+                description,
+                type: issueType,
+              });
+            }} className="space-y-4">
               <div>
                 <Label htmlFor="description">Description</Label>
                 <Textarea
@@ -205,38 +110,10 @@ export const StoryLogicView = () => {
 
       <div className="mt-6">
         <h2 className="text-xl font-semibold mb-4">Story Issues</h2>
-        {!storyAnalysis && (
-          <div className="text-center text-gray-500 py-8">
-            No analysis has been created for this story yet. Use the analysis section above to create one.
-          </div>
-        )}
-        <div className="space-y-4">
-          {storyIssues?.map((issue) => (
-            <div
-              key={issue.id}
-              className="bg-white p-4 rounded-lg border shadow-sm"
-            >
-              <div className="flex justify-between items-start">
-                <div>
-                  <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-800 mb-2">
-                    {issue.issue_type.replace(/_/g, " ")}
-                  </span>
-                  <p className="text-gray-700">{issue.description}</p>
-                  {issue.location && (
-                    <p className="text-sm text-gray-500 mt-1">
-                      Location: {issue.location}
-                    </p>
-                  )}
-                  {issue.severity && (
-                    <p className="text-sm text-gray-500">
-                      Severity: {issue.severity}/10
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <IssuesList 
+          issues={storyIssues || []} 
+          analysisExists={!!storyAnalysis}
+        />
       </div>
     </div>
   );
