@@ -30,12 +30,15 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are a historical context expert. Analyze the provided text content and verify its historical accuracy for the specified time period. 
-            Return a JSON object with three properties:
-            - language: analysis of language usage and authenticity for the time period
-            - culture: analysis of cultural references and historical accuracy
-            - environment: analysis of environmental and setting details
-            Keep each analysis concise but informative.`
+            content: `You are a historical context expert. You must analyze the provided text content and verify its historical accuracy for the specified time period.
+            You must ONLY return a valid JSON object with exactly this structure:
+            {
+              "language": "your analysis of language usage and authenticity for the time period",
+              "culture": "your analysis of cultural references and historical accuracy",
+              "environment": "your analysis of environmental and setting details"
+            }
+            Keep each analysis concise but informative. Do not include any markdown, code blocks, or additional formatting.
+            IMPORTANT: Your response must be a valid JSON object that can be parsed directly.`
           },
           {
             role: 'user',
@@ -50,20 +53,25 @@ serve(async (req) => {
     const data = await response.json();
     console.log('OpenAI response:', data);
 
-    // Extract the content and parse it as JSON
-    const analysisText = data.choices[0].message.content;
     let contextInfo;
-    
     try {
-      // Try to parse the response directly
-      contextInfo = JSON.parse(analysisText);
+      // First try to parse the response content directly
+      contextInfo = JSON.parse(data.choices[0].message.content);
+      
+      // Validate the response structure
+      if (!contextInfo.language || !contextInfo.culture || !contextInfo.environment) {
+        throw new Error('Invalid response structure');
+      }
     } catch (parseError) {
       console.error('Failed to parse OpenAI response:', parseError);
-      // Fallback to a structured response if parsing fails
+      console.log('Raw response content:', data.choices[0].message.content);
+      
+      // Extract content using regex as fallback
+      const content = data.choices[0].message.content;
       contextInfo = {
-        language: "Could not analyze language usage.",
-        culture: "Could not analyze cultural context.",
-        environment: "Could not analyze environmental details."
+        language: content.match(/\"language\":\s*\"([^\"]+)\"/)?.pop() || "Could not analyze language usage.",
+        culture: content.match(/\"culture\":\s*\"([^\"]+)\"/)?.pop() || "Could not analyze cultural context.",
+        environment: content.match(/\"environment\":\s*\"([^\"]+)\"/)?.pop() || "Could not analyze environmental details."
       };
     }
 
@@ -74,7 +82,8 @@ serve(async (req) => {
     console.error('Error in get-time-period-context function:', error);
     return new Response(JSON.stringify({ 
       error: error.message,
-      details: "Failed to process time period analysis request"
+      details: "Failed to process time period analysis request",
+      stack: error.stack
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
