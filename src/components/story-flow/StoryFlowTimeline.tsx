@@ -10,6 +10,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import { TimelineNode } from './TimelineNode';
 import { ViewMode } from "./types";
+import { getNodeStyle } from './styles/nodeStyles';
 
 const initialNodes = [
   {
@@ -96,10 +97,16 @@ export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
     const radius = 300;
     const nodeCount = nodes.length;
     
+    const layoutedNodes = nodes.map((node, index) => ({
+      ...node,
+      style: getNodeStyle(viewMode, index, nodeCount),
+      position: { x: index * spacing, y: 100 }, // Default position
+    }));
+
     switch (viewMode) {
       case 'timeline':
         return {
-          nodes: nodes.map((node, index) => ({
+          nodes: layoutedNodes.map((node, index) => ({
             ...node,
             position: { x: index * spacing, y: 100 },
           })),
@@ -108,7 +115,7 @@ export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
       
       case 'cluster':
         return {
-          nodes: nodes.map((node, index) => ({
+          nodes: layoutedNodes.map((node, index) => ({
             ...node,
             position: {
               x: 200 + Math.cos(index * 2 * Math.PI / (nodeCount / 2)) * radius,
@@ -273,7 +280,7 @@ export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
         };
       
       default:
-        return { nodes, edges };
+        return { nodes: layoutedNodes, edges };
     }
   }, [viewMode, nodes, edges]);
 
