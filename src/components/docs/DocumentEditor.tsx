@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Document } from "@/types/story";
 import { RichTextEditor } from "../editor/RichTextEditor";
 import { Input } from "../ui/input";
-import { Button } from "../ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSessionContext } from "@supabase/auth-helpers-react";
-import { Clock, Save } from "lucide-react";
 import { TimeAnalysisDialog } from "./TimeAnalysisDialog";
 import { HistoricalAnalysis } from "./HistoricalAnalysis";
+import { DocumentToolbar } from "./DocumentToolbar";
+import { useDocumentState } from "@/hooks/useDocumentState";
 
 interface DocumentEditorProps {
   document?: Document;
@@ -20,28 +20,22 @@ interface DocumentEditorProps {
 export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [timePeriod, setTimePeriod] = useState("");
   const [isTimeDialogOpen, setIsTimeDialogOpen] = useState(false);
   const [isLoadingContext, setIsLoadingContext] = useState(false);
-  const [analysisResults, setAnalysisResults] = useState<any>(null);
   const { session } = useSessionContext();
-  const [currentDocId, setCurrentDocId] = useState<string | undefined>(undefined);
 
-  // Reset state when document ID changes
-  useEffect(() => {
-    // Only update state if we're switching to a different document
-    if (document?.id !== currentDocId) {
-      setCurrentDocId(document?.id);
-      // Initialize state with the new document's data
-      setTitle(document?.title ?? "");
-      setContent(document?.content ?? "");
-      setTimePeriod(document?.time_period ?? "");
-      setAnalysisResults(document?.time_period_details ?? null);
-    }
-  }, [document?.id]); // Only run when document ID changes
+  const {
+    title,
+    setTitle,
+    content,
+    setContent,
+    timePeriod,
+    setTimePeriod,
+    analysisResults,
+    setAnalysisResults,
+    documentId
+  } = useDocumentState(document);
 
   const handleSave = async () => {
     try {
@@ -62,37 +56,28 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
         updated_at: new Date().toISOString()
       };
 
-      let response;
-      
-      if (document?.id) {
-        // Update existing document
-        response = await supabase
-          .from("documents")
-          .update(documentData)
-          .eq("id", document.id)
-          .select()
-          .maybeSingle();
-      } else {
-        // Create new document
-        response = await supabase
-          .from("documents")
-          .insert({
-            ...documentData,
-            story_id: storyId,
-            user_id: session.user.id
-          })
-          .select()
-          .maybeSingle();
-      }
+      const response = documentId
+        ? await supabase
+            .from("documents")
+            .update(documentData)
+            .eq("id", documentId)
+            .select()
+            .maybeSingle()
+        : await supabase
+            .from("documents")
+            .insert({
+              ...documentData,
+              story_id: storyId,
+              user_id: session.user.id
+            })
+            .select()
+            .maybeSingle();
 
       const { data, error } = response;
 
       if (error) throw error;
 
       if (data) {
-        // Update the current document ID to match the saved document
-        setCurrentDocId(data.id);
-        
         toast({
           title: "Success",
           description: "Document saved successfully",
@@ -100,7 +85,7 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
 
         // Only invalidate queries for this specific document
         queryClient.invalidateQueries({ 
-          queryKey: ["documents", storyId, document?.id],
+          queryKey: ["documents", storyId, documentId],
         });
         
         onSave?.();
@@ -141,13 +126,13 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
       const { contextInfo } = data;
       setAnalysisResults(contextInfo);
 
-      if (document?.id) {
+      if (documentId) {
         const { error: updateError } = await supabase
           .from("documents")
           .update({
             time_period_details: contextInfo,
           })
-          .eq("id", document.id);
+          .eq("id", documentId);
 
         if (updateError) throw updateError;
       }
@@ -187,28 +172,20 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
         />
       </div>
 
-      <div className="flex justify-end gap-2 p-4 border-t bg-white">
-        <TimeAnalysisDialog
-          isOpen={isTimeDialogOpen}
-          onOpenChange={setIsTimeDialogOpen}
-          timePeriod={timePeriod}
-          setTimePeriod={setTimePeriod}
-          onAnalyze={getTimeContext}
-          isLoading={isLoadingContext}
-        />
-        <Button variant="outline" onClick={() => setIsTimeDialogOpen(true)} className="gap-2">
-          <Clock className="w-4 h-4" />
-          Analyze Time Period
-        </Button>
-        <Button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 gap-2"
-        >
-          <Save className="w-4 h-4" />
-          {isSaving ? "Saving..." : "Save Document"}
-        </Button>
-      </div>
+      <TimeAnalysisDialog
+        isOpen={isTimeDialogOpen}
+        onOpenChange={setIsTimeDialogOpen}
+        timePeriod={timePeriod}
+        setTimePeriod={setTimePeriod}
+        onAnalyze={getTimeContext}
+        isLoading={isLoadingContext}
+      />
+
+      <DocumentToolbar
+        onSave={handleSave}
+        onTimeAnalysis={() => setIsTimeDialogOpen(true)}
+        isSaving={isSaving}
+      />
     </div>
   );
 }
