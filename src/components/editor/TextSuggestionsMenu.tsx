@@ -67,7 +67,7 @@ export function TextSuggestionsMenu({ editor, isOpen, top, left }: TextSuggestio
 
   return (
     <div
-      className="absolute z-50 bg-white rounded-lg shadow-lg border p-1 flex gap-1"
+      className="absolute z-50 bg-white/95 backdrop-blur-sm rounded-full shadow-lg border border-gray-200/50 p-1.5 flex gap-1.5"
       style={{
         top: `${top}px`,
         left: `${left}px`,
@@ -76,61 +76,61 @@ export function TextSuggestionsMenu({ editor, isOpen, top, left }: TextSuggestio
       <Button
         variant="ghost"
         size="sm"
-        className="flex items-center gap-1 text-xs"
+        className="rounded-full hover:bg-purple-50 hover:text-purple-600 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
         onClick={() => handleSuggestion('Improve')}
         disabled={isLoading}
       >
-        <Wand2 className="h-3 w-3" />
+        <Wand2 className="h-3.5 w-3.5" />
         Improve
       </Button>
       <Button
         variant="ghost"
         size="sm"
-        className="flex items-center gap-1 text-xs"
+        className="rounded-full hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
         onClick={() => handleSuggestion('Enhance readability of')}
         disabled={isLoading}
       >
-        <BookOpen className="h-3 w-3" />
+        <BookOpen className="h-3.5 w-3.5" />
         Enhance
       </Button>
       <Button
         variant="ghost"
         size="sm"
-        className="flex items-center gap-1 text-xs"
+        className="rounded-full hover:bg-pink-50 hover:text-pink-600 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
         onClick={() => handleSuggestion('Shorten')}
         disabled={isLoading}
       >
-        <Minimize2 className="h-3 w-3" />
+        <Minimize2 className="h-3.5 w-3.5" />
         Shorten
       </Button>
       <Button
         variant="ghost"
         size="sm"
-        className="flex items-center gap-1 text-xs"
+        className="rounded-full hover:bg-orange-50 hover:text-orange-600 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
         onClick={() => handleSuggestion('Simplify')}
         disabled={isLoading}
       >
-        <Scissors className="h-3 w-3" />
+        <Scissors className="h-3.5 w-3.5" />
         Simplify
       </Button>
       <Button
         variant="ghost"
         size="sm"
-        className="flex items-center gap-1 text-xs"
+        className="rounded-full hover:bg-green-50 hover:text-green-600 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
         onClick={() => handleSuggestion('Lengthen')}
         disabled={isLoading}
       >
-        <Maximize2 className="h-3 w-3" />
+        <Maximize2 className="h-3.5 w-3.5" />
         Lengthen
       </Button>
       <Button
         variant="ghost"
         size="sm"
-        className="flex items-center gap-1 text-xs"
+        className="rounded-full hover:bg-indigo-50 hover:text-indigo-600 transition-colors flex items-center gap-1.5 text-xs font-medium px-3"
         onClick={() => handleSuggestion('Fix grammar in')}
         disabled={isLoading}
       >
-        <SpellCheck2 className="h-3 w-3" />
+        <SpellCheck2 className="h-3.5 w-3.5" />
         Grammar
       </Button>
     </div>
