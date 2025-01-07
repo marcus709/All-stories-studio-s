@@ -11,7 +11,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Valid issue types according to the database enum
 const validIssueTypes = [
   'plot_hole',
   'timeline_inconsistency',
@@ -75,7 +74,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
@@ -93,15 +92,14 @@ serve(async (req) => {
               - Location in the story (approximate)
               - Severity (1-10)
               
-              Format your response as a JSON array of objects with these properties.`
+              Format your response as a JSON object with an 'issues' array containing objects with these properties.`
           },
           {
             role: 'user',
             content: document.content
           }
         ],
-        temperature: 0.7,
-        response_format: { type: "json_object" }
+        temperature: 0.7
       }),
     });
 
@@ -116,7 +114,20 @@ serve(async (req) => {
 
     let parsedContent;
     try {
-      parsedContent = JSON.parse(aiResponse.choices[0].message.content);
+      // First try to parse the content directly if it's already JSON
+      try {
+        parsedContent = JSON.parse(aiResponse.choices[0].message.content);
+      } catch {
+        // If direct parsing fails, assume it's a string that needs to be parsed
+        const contentString = aiResponse.choices[0].message.content.trim();
+        // Try to extract JSON from the string
+        const jsonMatch = contentString.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          parsedContent = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error('Could not extract JSON from AI response');
+        }
+      }
     } catch (error) {
       console.error('Error parsing AI response:', error);
       throw new Error('Invalid response format from AI');
