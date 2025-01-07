@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Calendar, StickyNote, Wand2, ArrowRight, GitBranch, Network } from "lucide-react";
+import { UserPlus, Calendar, StickyNote, Wand2, ArrowRight, GitBranch, Network, Circle, Clock, Grid, Boxes, Spiral, Tree, FlowChart, Map, Target, Hexagon, Star, Route, Layers, Sphere, Box } from "lucide-react";
 import { StoryFlowTimeline } from "./StoryFlowTimeline";
 import { CharacterRelationshipMap } from "./CharacterRelationshipMap";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,12 +8,57 @@ import { useStory } from "@/contexts/StoryContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-type ViewMode = "timeline" | "relationships";
+type ViewMode = "linear" | "branching" | "network" | "radial" | "timeline" | "cluster" | 
+                "grid" | "spiral" | "tree" | "flowchart" | "mindmap" | "concentric" | 
+                "hexagonal" | "starburst" | "pathway" | "layered" | "sphere" | "fractal";
+
+const viewModeIcons = {
+  linear: ArrowRight,
+  branching: GitBranch,
+  network: Network,
+  radial: Circle,
+  timeline: Clock,
+  cluster: Boxes,
+  grid: Grid,
+  spiral: Spiral,
+  tree: Tree,
+  flowchart: FlowChart,
+  mindmap: Map,
+  concentric: Target,
+  hexagonal: Hexagon,
+  starburst: Star,
+  pathway: Route,
+  layered: Layers,
+  sphere: Sphere,
+  fractal: Box
+};
+
+const viewModeLabels: Record<ViewMode, string> = {
+  linear: "Linear",
+  branching: "Branching",
+  network: "Network",
+  radial: "Radial",
+  timeline: "Timeline",
+  cluster: "Cluster",
+  grid: "Grid",
+  spiral: "Spiral",
+  tree: "Tree (Collapsible)",
+  flowchart: "Flowchart",
+  mindmap: "Mind Map",
+  concentric: "Concentric Circles",
+  hexagonal: "Hexagonal Web",
+  starburst: "Starburst",
+  pathway: "Pathway",
+  layered: "Layered",
+  sphere: "Interactive 3D Sphere",
+  fractal: "Fractal"
+};
 
 export const StoryFlow = () => {
-  const [viewMode, setViewMode] = useState<"linear" | "branching" | "network">("linear");
-  const [activeView, setActiveView] = useState<ViewMode>("timeline");
+  const [viewMode, setViewMode] = useState<ViewMode>("linear");
+  const [activeView, setActiveView] = useState<"timeline" | "relationships">("timeline");
   const [isGenerating, setIsGenerating] = useState(false);
   const { selectedStory } = useStory();
   const { toast } = useToast();
@@ -51,7 +96,7 @@ export const StoryFlow = () => {
               description: suggestion.description,
               stage: suggestion.stage,
               user_id: (await supabase.auth.getUser()).data.user?.id,
-              order_index: 0, // You might want to calculate this based on existing events
+              order_index: 0,
             });
         }
         queryClient.invalidateQueries({ queryKey: ['plotEvents', selectedStory.id] });
@@ -131,48 +176,23 @@ export const StoryFlow = () => {
         {activeView === "timeline" ? (
           <div className="relative">
             <div className="absolute left-4 top-4 z-10">
-              <Select value={viewMode} onValueChange={(value: "linear" | "branching" | "network") => setViewMode(value)}>
+              <Select value={viewMode} onValueChange={(value: ViewMode) => setViewMode(value)}>
                 <SelectTrigger className="w-[180px] bg-white">
                   <SelectValue>
-                    {viewMode === "linear" && (
-                      <div className="flex items-center gap-2">
-                        <ArrowRight className="w-4 h-4" />
-                        Linear
-                      </div>
-                    )}
-                    {viewMode === "branching" && (
-                      <div className="flex items-center gap-2">
-                        <GitBranch className="w-4 h-4" />
-                        Branching
-                      </div>
-                    )}
-                    {viewMode === "network" && (
-                      <div className="flex items-center gap-2">
-                        <Network className="w-4 h-4" />
-                        Network
-                      </div>
-                    )}
+                    {viewModeLabels[viewMode]}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="linear">
-                    <div className="flex items-center gap-2">
-                      <ArrowRight className="w-4 h-4" />
-                      Linear
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="branching">
-                    <div className="flex items-center gap-2">
-                      <GitBranch className="w-4 h-4" />
-                      Branching
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="network">
-                    <div className="flex items-center gap-2">
-                      <Network className="w-4 h-4" />
-                      Network
-                    </div>
-                  </SelectItem>
+                  <ScrollArea className="h-[400px] w-[350px] rounded-md">
+                    {(Object.keys(viewModeLabels) as ViewMode[]).map((mode) => (
+                      <SelectItem key={mode} value={mode}>
+                        <div className="flex items-center gap-2 py-1">
+                          {viewModeIcons[mode] && React.createElement(viewModeIcons[mode], { className: "w-4 h-4" })}
+                          <span>{viewModeLabels[mode]}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </ScrollArea>
                 </SelectContent>
               </Select>
             </div>
