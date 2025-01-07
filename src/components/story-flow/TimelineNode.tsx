@@ -3,6 +3,7 @@ import { useNodesState } from '@xyflow/react';
 import { useToast } from "@/hooks/use-toast";
 import { TimelineNodeFields } from './TimelineNodeFields';
 import { TimelineNodeMenu } from './TimelineNodeMenu';
+import { Card } from "@/components/ui/card";
 
 export const TimelineNode = ({ data, id }: { data: any; id: string }) => {
   const { toast } = useToast();
@@ -13,6 +14,7 @@ export const TimelineNode = ({ data, id }: { data: any; id: string }) => {
   const [editedYear, setEditedYear] = useState(data.year);
 
   const handleEdit = () => {
+    setIsEditing(true);
     toast({
       title: "Edit Event",
       description: `Editing event: ${data.label}`,
@@ -24,6 +26,7 @@ export const TimelineNode = ({ data, id }: { data: any; id: string }) => {
     toast({
       title: "Delete Event",
       description: `Deleted event: ${data.label}`,
+      variant: "destructive"
     });
   };
 
@@ -39,42 +42,49 @@ export const TimelineNode = ({ data, id }: { data: any; id: string }) => {
     setIsEditing(true);
   };
 
-  const handleBlur = () => {
+  const handleSave = () => {
     setIsEditing(false);
     data.label = editedLabel;
     data.subtitle = editedSubtitle;
     data.year = editedYear;
+    
+    toast({
+      title: "Success",
+      description: "Event details saved successfully",
+    });
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      setIsEditing(false);
-      handleBlur();
-    }
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditedLabel(data.label);
+    setEditedSubtitle(data.subtitle);
+    setEditedYear(data.year);
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 min-w-[200px]">
-      <div className="flex justify-between items-start mb-2">
-        <TimelineNodeFields
-          isEditing={isEditing}
-          editedLabel={editedLabel}
-          editedSubtitle={editedSubtitle}
-          editedYear={editedYear}
-          setEditedLabel={setEditedLabel}
-          setEditedSubtitle={setEditedSubtitle}
-          setEditedYear={setEditedYear}
-          handleBlur={handleBlur}
-          handleKeyDown={handleKeyDown}
-          handleDoubleClick={handleDoubleClick}
-          data={data}
-        />
-        <TimelineNodeMenu
-          handleEdit={handleEdit}
-          handleAddConnection={handleAddConnection}
-          handleDelete={handleDelete}
-        />
+    <Card className="min-w-[250px] bg-white shadow-md">
+      <div className="p-4">
+        <div className="flex justify-between items-start mb-2">
+          <TimelineNodeFields
+            isEditing={isEditing}
+            editedLabel={editedLabel}
+            editedSubtitle={editedSubtitle}
+            editedYear={editedYear}
+            setEditedLabel={setEditedLabel}
+            setEditedSubtitle={setEditedSubtitle}
+            setEditedYear={setEditedYear}
+            handleSave={handleSave}
+            handleCancel={handleCancel}
+            handleDoubleClick={handleDoubleClick}
+            data={data}
+          />
+          <TimelineNodeMenu
+            handleEdit={handleEdit}
+            handleAddConnection={handleAddConnection}
+            handleDelete={handleDelete}
+          />
+        </div>
       </div>
-    </div>
+    </Card>
   );
 };

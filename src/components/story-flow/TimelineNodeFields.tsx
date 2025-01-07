@@ -1,4 +1,6 @@
-import React from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface TimelineNodeFieldsProps {
   isEditing: boolean;
@@ -8,8 +10,8 @@ interface TimelineNodeFieldsProps {
   setEditedLabel: (value: string) => void;
   setEditedSubtitle: (value: string) => void;
   setEditedYear: (value: string) => void;
-  handleBlur: () => void;
-  handleKeyDown: (e: React.KeyboardEvent) => void;
+  handleSave: () => void;
+  handleCancel: () => void;
   handleDoubleClick: (e: React.MouseEvent) => void;
   data: {
     label: string;
@@ -26,45 +28,53 @@ export const TimelineNodeFields = ({
   setEditedLabel,
   setEditedSubtitle,
   setEditedYear,
-  handleBlur,
-  handleKeyDown,
+  handleSave,
+  handleCancel,
   handleDoubleClick,
   data,
 }: TimelineNodeFieldsProps) => {
   if (isEditing) {
     return (
-      <div className="flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
-        <input
+      <div className="flex flex-col gap-2 w-full" onClick={(e) => e.stopPropagation()}>
+        <Input
           type="text"
           value={editedLabel}
           onChange={(e) => setEditedLabel(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="font-medium text-gray-900 border border-gray-300 rounded px-2 py-1"
+          placeholder="Event title"
+          className="font-medium"
           autoFocus
         />
-        <input
-          type="text"
+        <Textarea
           value={editedSubtitle}
           onChange={(e) => setEditedSubtitle(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="text-sm text-gray-500 border border-gray-300 rounded px-2 py-1"
+          placeholder="Event description"
+          className="text-sm resize-none"
+          rows={2}
         />
-        <input
+        <Input
           type="text"
           value={editedYear}
           onChange={(e) => setEditedYear(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="text-xs text-gray-400 border border-gray-300 rounded px-2 py-1"
+          placeholder="Year/Time period"
+          className="text-sm"
         />
+        <div className="flex justify-end gap-2 mt-2">
+          <Button variant="outline" size="sm" onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button size="sm" onClick={handleSave}>
+            Save
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div onDoubleClick={handleDoubleClick}>
+    <div onDoubleClick={handleDoubleClick} className="w-full cursor-pointer">
       <h3 className="font-medium text-gray-900">{data.label}</h3>
-      <p className="text-sm text-gray-500">{data.subtitle}</p>
-      <p className="text-xs text-gray-400">{data.year}</p>
+      <p className="text-sm text-gray-500 mt-1">{data.subtitle}</p>
+      <p className="text-xs text-gray-400 mt-2">{data.year}</p>
     </div>
   );
 };
