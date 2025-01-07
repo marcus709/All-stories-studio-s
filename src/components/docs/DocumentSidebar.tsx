@@ -49,7 +49,8 @@ export const DocumentSidebar = ({
       const { data } = await supabase
         .from("documents")
         .select("*")
-        .eq("story_id", selectedStory?.id);
+        .eq("story_id", selectedStory?.id)
+        .order("created_at", { ascending: false });
       return data || [];
     },
     enabled: !!selectedStory?.id,

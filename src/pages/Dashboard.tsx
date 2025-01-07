@@ -7,7 +7,7 @@ import { StoryProvider } from "@/contexts/StoryContext";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useToast } from "@/hooks/use-toast";
 
-type View = "story" | "characters" | "plot" | "flow" | "ideas" | "docs" | "logic";
+type View = "story" | "characters" | "plot" | "dream" | "ideas" | "docs" | "logic";
 
 function DashboardLayout() {
   const [currentView, setCurrentView] = useState<View>("story");

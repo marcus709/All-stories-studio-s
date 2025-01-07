@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Document } from "@/types/story";
@@ -9,7 +9,6 @@ import { useSessionContext } from "@supabase/auth-helpers-react";
 import { TimeAnalysisDialog } from "./TimeAnalysisDialog";
 import { HistoricalAnalysis } from "./HistoricalAnalysis";
 import { DocumentToolbar } from "./DocumentToolbar";
-import { useDocumentState } from "@/hooks/useDocumentState";
 
 interface DocumentEditorProps {
   document?: Document;
@@ -24,18 +23,22 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
   const [isTimeDialogOpen, setIsTimeDialogOpen] = useState(false);
   const [isLoadingContext, setIsLoadingContext] = useState(false);
   const { session } = useSessionContext();
+  
+  // Individual state for each document
+  const [title, setTitle] = useState(document?.title || "");
+  const [content, setContent] = useState(document?.content || "");
+  const [timePeriod, setTimePeriod] = useState(document?.time_period || "");
+  const [analysisResults, setAnalysisResults] = useState(document?.time_period_details || null);
 
-  const {
-    title,
-    setTitle,
-    content,
-    setContent,
-    timePeriod,
-    setTimePeriod,
-    analysisResults,
-    setAnalysisResults,
-    documentId
-  } = useDocumentState(document);
+  // Update state when document changes
+  useEffect(() => {
+    if (document) {
+      setTitle(document.title);
+      setContent(document.content || "");
+      setTimePeriod(document.time_period || "");
+      setAnalysisResults(document.time_period_details || null);
+    }
+  }, [document?.id]); // Only update when document ID changes
 
   const handleSave = async () => {
     try {
@@ -56,11 +59,11 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
         updated_at: new Date().toISOString()
       };
 
-      const response = documentId
+      const { data, error } = document?.id
         ? await supabase
             .from("documents")
             .update(documentData)
-            .eq("id", documentId)
+            .eq("id", document.id)
             .select()
             .maybeSingle()
         : await supabase
@@ -73,8 +76,6 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
             .select()
             .maybeSingle();
 
-      const { data, error } = response;
-
       if (error) throw error;
 
       if (data) {
@@ -83,10 +84,16 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
           description: "Document saved successfully",
         });
 
-        // Only invalidate queries for this specific document
-        queryClient.invalidateQueries({ 
-          queryKey: ["documents", storyId, documentId],
-        });
+        // Only invalidate the specific document query
+        if (document?.id) {
+          queryClient.invalidateQueries({ 
+            queryKey: ["documents", storyId, document.id],
+          });
+        } else {
+          queryClient.invalidateQueries({ 
+            queryKey: ["documents", storyId],
+          });
+        }
         
         onSave?.();
       }
@@ -126,13 +133,13 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
       const { contextInfo } = data;
       setAnalysisResults(contextInfo);
 
-      if (documentId) {
+      if (document?.id) {
         const { error: updateError } = await supabase
           .from("documents")
           .update({
             time_period_details: contextInfo,
           })
-          .eq("id", documentId);
+          .eq("id", document.id);
 
         if (updateError) throw updateError;
       }

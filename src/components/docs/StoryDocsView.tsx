@@ -42,16 +42,12 @@ export const StoryDocsView = () => {
         return [];
       }
 
-      console.log("Documents data:", data);
-
-      if (data && data.length > 0 && !selectedDocId) {
-        setSelectedDocId(data[0].id);
-      }
-
       return data as Document[];
     },
     enabled: !!selectedStory?.id,
   });
+
+  const selectedDocument = documents.find(doc => doc.id === selectedDocId);
 
   if (!selectedStory) {
     return (
@@ -86,9 +82,9 @@ export const StoryDocsView = () => {
         <ResizableHandle withHandle />
         
         <ResizablePanel defaultSize={80}>
-          {selectedDocId ? (
+          {selectedDocument ? (
             <DocumentEditor 
-              document={documents?.find(doc => doc.id === selectedDocId)}
+              document={selectedDocument}
               storyId={selectedStory.id}
               onSave={refetchDocs}
             />
@@ -111,4 +107,4 @@ export const StoryDocsView = () => {
       />
     </div>
   );
-};
+}
