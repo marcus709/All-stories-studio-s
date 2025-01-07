@@ -49,6 +49,14 @@ export const StoryDocsView = () => {
 
   const selectedDocument = documents.find(doc => doc.id === selectedDocId);
 
+  const handleDocumentSelect = (docId: string) => {
+    setSelectedDocId(docId);
+  };
+
+  const handleDocumentSave = () => {
+    refetchDocs();
+  };
+
   if (!selectedStory) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-4rem)] text-gray-500">
@@ -75,7 +83,7 @@ export const StoryDocsView = () => {
           <DocumentSidebar 
             onContentDrop={() => {}} 
             selectedDocId={selectedDocId}
-            onSelectDocument={setSelectedDocId}
+            onSelectDocument={handleDocumentSelect}
           />
         </ResizablePanel>
         
@@ -84,12 +92,13 @@ export const StoryDocsView = () => {
         <ResizablePanel defaultSize={80}>
           {selectedDocument ? (
             <DocumentEditor 
+              key={selectedDocument.id}
               document={selectedDocument}
               storyId={selectedStory.id}
-              onSave={refetchDocs}
+              onSave={handleDocumentSave}
             />
           ) : (
-            <div className="flex flex-col items-center justify-center flex-1 bg-gray-50 text-gray-500">
+            <div className="flex flex-col items-center justify-center flex-1 h-full bg-gray-50 text-gray-500">
               <FileText className="w-12 h-12 mb-4" />
               <p>Select a document to start editing</p>
             </div>

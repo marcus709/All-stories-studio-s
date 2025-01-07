@@ -29,16 +29,18 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
   const [content, setContent] = useState(document?.content || "");
   const [timePeriod, setTimePeriod] = useState(document?.time_period || "");
   const [analysisResults, setAnalysisResults] = useState(document?.time_period_details || null);
+  const [currentDocId, setCurrentDocId] = useState<string | undefined>(document?.id);
 
   // Update state when document changes
   useEffect(() => {
-    if (document) {
-      setTitle(document.title);
-      setContent(document.content || "");
-      setTimePeriod(document.time_period || "");
-      setAnalysisResults(document.time_period_details || null);
+    if (document?.id !== currentDocId) {
+      setCurrentDocId(document?.id);
+      setTitle(document?.title || "");
+      setContent(document?.content || "");
+      setTimePeriod(document?.time_period || "");
+      setAnalysisResults(document?.time_period_details || null);
     }
-  }, [document?.id]); // Only update when document ID changes
+  }, [document?.id]);
 
   const handleSave = async () => {
     try {
@@ -56,7 +58,7 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
         title,
         content,
         time_period: timePeriod,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
 
       const { data, error } = document?.id
@@ -65,16 +67,16 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
             .update(documentData)
             .eq("id", document.id)
             .select()
-            .maybeSingle()
+            .single()
         : await supabase
             .from("documents")
             .insert({
               ...documentData,
               story_id: storyId,
-              user_id: session.user.id
+              user_id: session.user.id,
             })
             .select()
-            .maybeSingle();
+            .single();
 
       if (error) throw error;
 
@@ -85,15 +87,9 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
         });
 
         // Only invalidate the specific document query
-        if (document?.id) {
-          queryClient.invalidateQueries({ 
-            queryKey: ["documents", storyId, document.id],
-          });
-        } else {
-          queryClient.invalidateQueries({ 
-            queryKey: ["documents", storyId],
-          });
-        }
+        queryClient.invalidateQueries({ 
+          queryKey: ["documents", storyId, data.id],
+        });
         
         onSave?.();
       }
