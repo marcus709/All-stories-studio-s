@@ -151,7 +151,7 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
                 </div>
               ) : (
                 <div
-                  className={`rounded-lg px-4 py-2 max-w-[80%] break-words relative`}
+                  className={`rounded-lg px-4 py-2 max-w-[80%] break-words relative group/message transition-all duration-200 hover:delay-[2000ms]`}
                   style={{
                     backgroundColor: isCurrentUser ? messageColor : '#f3f4f6',
                     color: isCurrentUser ? 'white' : 'black'
