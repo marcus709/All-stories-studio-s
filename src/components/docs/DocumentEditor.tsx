@@ -20,30 +20,23 @@ interface DocumentEditorProps {
 export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [title, setTitle] = useState<string>("");
-  const [content, setContent] = useState<string>("");
+  const [title, setTitle] = useState(document?.title ?? "");
+  const [content, setContent] = useState(document?.content ?? "");
   const [isSaving, setIsSaving] = useState(false);
-  const [timePeriod, setTimePeriod] = useState<string>("");
+  const [timePeriod, setTimePeriod] = useState(document?.time_period ?? "");
   const [isTimeDialogOpen, setIsTimeDialogOpen] = useState(false);
   const [isLoadingContext, setIsLoadingContext] = useState(false);
-  const [analysisResults, setAnalysisResults] = useState<any>(null);
+  const [analysisResults, setAnalysisResults] = useState(document?.time_period_details ?? null);
   const { session } = useSessionContext();
 
-  // Initialize and update state when document changes
   useEffect(() => {
     if (document) {
       setTitle(document.title);
       setContent(document.content);
-      setTimePeriod(document.time_period || "");
+      setTimePeriod(document.time_period ?? "");
       setAnalysisResults(document.time_period_details);
-    } else {
-      // Reset state when no document is selected
-      setTitle("");
-      setContent("");
-      setTimePeriod("");
-      setAnalysisResults(null);
     }
-  }, [document]); // Run when document object changes
+  }, [document?.id, document?.title, document?.content, document?.time_period, document?.time_period_details]);
 
   const handleSave = async () => {
     try {
