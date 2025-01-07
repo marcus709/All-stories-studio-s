@@ -22,7 +22,7 @@ export const StoryLogicView = () => {
     isAnalyzing
   } = useStoryAnalysis(selectedStory?.id);
 
-  const handleAnalyze = (documentId: string) => {
+  const handleAnalyze = async (documentId: string) => {
     if (!selectedStory?.id) {
       toast({
         title: "Error",
@@ -31,12 +31,28 @@ export const StoryLogicView = () => {
       });
       return;
     }
-    analyzeStory(documentId);
+
+    try {
+      await analyzeStory(documentId);
+      toast({
+        title: "Success",
+        description: "Story analysis completed successfully",
+      });
+      // Invalidate queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ["story-analysis", selectedStory.id] });
+      queryClient.invalidateQueries({ queryKey: ["story-issues", storyAnalysis?.id] });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to analyze story",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-4">
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Story Logic Analysis</h1>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
@@ -66,11 +82,13 @@ export const StoryLogicView = () => {
         />
       )}
 
-      <AnalysisResults
-        issues={storyIssues || []}
-        isLoading={isAnalyzing}
-        analysisExists={!!storyAnalysis}
-      />
+      <div className="mt-8">
+        <AnalysisResults
+          issues={storyIssues || []}
+          isLoading={isAnalyzing}
+          analysisExists={!!storyAnalysis}
+        />
+      </div>
     </div>
   );
 };

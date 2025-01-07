@@ -42,7 +42,7 @@ export const AnalysisResults = ({ issues, isLoading, analysisExists }: AnalysisR
 
   if (!analysisExists) {
     return (
-      <div className="text-center text-gray-500 py-12 bg-white rounded-lg border shadow-sm">
+      <div className="text-center text-gray-500 py-12 bg-white/50 backdrop-blur-sm rounded-lg border shadow-sm">
         No analysis has been created for this story yet. Use the analysis section above to create one.
       </div>
     );
@@ -50,14 +50,15 @@ export const AnalysisResults = ({ issues, isLoading, analysisExists }: AnalysisR
 
   if (isLoading) {
     return (
-      <div className="text-center text-gray-500 py-12 bg-white rounded-lg border shadow-sm">
+      <div className="text-center text-gray-500 py-12 bg-white/50 backdrop-blur-sm rounded-lg border shadow-sm">
+        <Clock className="h-6 w-6 animate-spin mx-auto mb-2" />
         Analyzing story...
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {issueTypes.map((issueType) => {
         const typeIssues = issues.filter(issue => issue.issue_type === issueType.type);
         const Icon = issueType.icon;
@@ -66,9 +67,9 @@ export const AnalysisResults = ({ issues, isLoading, analysisExists }: AnalysisR
           <div 
             key={issueType.type}
             className={cn(
-              "p-4 rounded-lg border transition-all",
+              "p-4 rounded-lg border transition-all hover:shadow-md",
               issueType.borderColor,
-              typeIssues.length > 0 ? "bg-white" : "bg-gray-50"
+              typeIssues.length > 0 ? "bg-white/50 backdrop-blur-sm" : "bg-gray-50/50"
             )}
           >
             <div className="flex items-center gap-2 mb-3">
@@ -83,7 +84,7 @@ export const AnalysisResults = ({ issues, isLoading, analysisExists }: AnalysisR
                 {typeIssues.map((issue) => (
                   <div 
                     key={issue.id} 
-                    className="text-sm text-gray-600 border-l-2 pl-3 py-1"
+                    className="text-sm text-gray-600 border-l-2 pl-3 py-1 hover:bg-gray-50/50 rounded-r transition-colors"
                     style={{ borderColor: issueType.color.split(" ")[0].replace("text", "border") }}
                   >
                     {issue.description}
