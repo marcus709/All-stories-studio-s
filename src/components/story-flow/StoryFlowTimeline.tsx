@@ -92,58 +92,191 @@ export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
   );
 
   const getLayoutedElements = useCallback(() => {
+    const spacing = 100;
+    const radius = 300;
+    const nodeCount = nodes.length;
+    
     switch (viewMode) {
-      case 'linear':
+      case 'timeline':
         return {
           nodes: nodes.map((node, index) => ({
             ...node,
-            position: { x: 100 + index * 200, y: 100 },
+            position: { x: index * spacing, y: 100 },
           })),
           edges,
         };
-      case 'branching':
-        return {
-          nodes: nodes.map((node, index) => ({
-            ...node,
-            position: { 
-              x: 100 + (index % 3) * 300,
-              y: 100 + Math.floor(index / 3) * 200,
-            },
-          })),
-          edges,
-        };
-      case 'network':
-        const radius = 300;
-        const angle = (2 * Math.PI) / nodes.length;
+      
+      case 'cluster':
         return {
           nodes: nodes.map((node, index) => ({
             ...node,
             position: {
-              x: 400 + radius * Math.cos(index * angle),
-              y: 300 + radius * Math.sin(index * angle),
+              x: 200 + Math.cos(index * 2 * Math.PI / (nodeCount / 2)) * radius,
+              y: 200 + Math.sin(index * 2 * Math.PI / (nodeCount / 2)) * radius,
             },
           })),
           edges,
         };
-      case 'radial':
-        const innerRadius = 150;
-        const outerRadius = 300;
+      
+      case 'grid':
+        const cols = Math.ceil(Math.sqrt(nodeCount));
         return {
           nodes: nodes.map((node, index) => ({
             ...node,
             position: {
-              x: 400 + (index % 2 ? outerRadius : innerRadius) * Math.cos(index * angle),
-              y: 300 + (index % 2 ? outerRadius : innerRadius) * Math.sin(index * angle),
+              x: (index % cols) * spacing,
+              y: Math.floor(index / cols) * spacing,
             },
           })),
           edges,
         };
+      
+      case 'spiral':
+        return {
+          nodes: nodes.map((node, index) => {
+            const angle = index * 0.5;
+            const radius = 50 + index * 20;
+            return {
+              ...node,
+              position: {
+                x: 300 + Math.cos(angle) * radius,
+                y: 300 + Math.sin(angle) * radius,
+              },
+            };
+          }),
+          edges,
+        };
+      
+      case 'tree':
+        return {
+          nodes: nodes.map((node, index) => ({
+            ...node,
+            position: {
+              x: index * spacing,
+              y: Math.floor(Math.log2(index + 1)) * spacing,
+            },
+          })),
+          edges,
+        };
+      
+      case 'flowchart':
+        return {
+          nodes: nodes.map((node, index) => ({
+            ...node,
+            position: { x: index * spacing, y: (index % 2) * spacing },
+          })),
+          edges,
+        };
+      
+      case 'mindmap':
+        return {
+          nodes: nodes.map((node, index) => {
+            const angle = (index * 2 * Math.PI) / nodeCount;
+            return {
+              ...node,
+              position: {
+                x: 300 + Math.cos(angle) * (index === 0 ? 0 : radius),
+                y: 300 + Math.sin(angle) * (index === 0 ? 0 : radius),
+              },
+            };
+          }),
+          edges,
+        };
+      
+      case 'concentric':
+        return {
+          nodes: nodes.map((node, index) => {
+            const level = Math.floor(Math.sqrt(index));
+            const angleStep = 2 * Math.PI / (level || 1);
+            const angle = index * angleStep;
+            return {
+              ...node,
+              position: {
+                x: 300 + Math.cos(angle) * (level * spacing),
+                y: 300 + Math.sin(angle) * (level * spacing),
+              },
+            };
+          }),
+          edges,
+        };
+      
+      case 'hexagonal':
+        return {
+          nodes: nodes.map((node, index) => {
+            const angle = (index * 2 * Math.PI) / 6;
+            return {
+              ...node,
+              position: {
+                x: 300 + Math.cos(angle) * radius,
+                y: 300 + Math.sin(angle) * radius,
+              },
+            };
+          }),
+          edges,
+        };
+      
+      case 'starburst':
+        return {
+          nodes: nodes.map((node, index) => {
+            const angle = (index * 2 * Math.PI) / (nodeCount - 1);
+            return {
+              ...node,
+              position: {
+                x: 300 + (index === 0 ? 0 : Math.cos(angle) * radius),
+                y: 300 + (index === 0 ? 0 : Math.sin(angle) * radius),
+              },
+            };
+          }),
+          edges,
+        };
+      
+      case 'pathway':
+        return {
+          nodes: nodes.map((node, index) => ({
+            ...node,
+            position: {
+              x: index * spacing,
+              y: 100 + Math.sin(index * 0.5) * 100,
+            },
+          })),
+          edges,
+        };
+      
+      case 'layered':
+        return {
+          nodes: nodes.map((node, index) => ({
+            ...node,
+            position: {
+              x: (index % 3) * spacing,
+              y: Math.floor(index / 3) * spacing,
+            },
+          })),
+          edges,
+        };
+      
+      case 'sphere':
+      case 'fractal':
+        // For sphere and fractal, we'll use a simplified 2D representation
+        return {
+          nodes: nodes.map((node, index) => {
+            const angle = (index * 2 * Math.PI) / nodeCount;
+            const radiusVar = radius * (0.5 + Math.random() * 0.5);
+            return {
+              ...node,
+              position: {
+                x: 300 + Math.cos(angle) * radiusVar,
+                y: 300 + Math.sin(angle) * radiusVar,
+              },
+            };
+          }),
+          edges,
+        };
+      
       default:
         return { nodes, edges };
     }
   }, [viewMode, nodes, edges]);
 
-  // Update layout when view mode changes
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements();
 
   return (

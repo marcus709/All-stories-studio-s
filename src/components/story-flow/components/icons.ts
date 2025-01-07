@@ -1,9 +1,35 @@
-import { GitCommit, GitBranch, Network, CircleDot, LucideIcon } from 'lucide-react';
+import { 
+  Clock,
+  Group,
+  Grid,
+  CircleOff,
+  GitBranch,
+  GitCommit,
+  Network,
+  CircleDot,
+  Hexagon,
+  Sun,
+  Route,
+  Layers,
+  Sphere,
+  Snowflake,
+  LucideIcon
+} from 'lucide-react';
 import { ViewMode } from '../types';
 
 export const viewModeIcons: Record<ViewMode, LucideIcon> = {
-  linear: GitCommit,
-  branching: GitBranch,
-  network: Network,
-  radial: CircleDot,
+  timeline: Clock,
+  cluster: Group,
+  grid: Grid,
+  spiral: CircleOff,
+  tree: GitBranch,
+  flowchart: GitCommit,
+  mindmap: Network,
+  concentric: CircleDot,
+  hexagonal: Hexagon,
+  starburst: Sun,
+  pathway: Route,
+  layered: Layers,
+  sphere: Sphere,
+  fractal: Snowflake
 };
