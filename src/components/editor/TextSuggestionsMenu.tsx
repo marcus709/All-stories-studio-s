@@ -7,7 +7,7 @@ import {
   Scissors,
   Minimize2,
   Maximize2,
-  GrammarIcon,
+  SpellCheck2,
 } from 'lucide-react';
 import { useAI } from '@/hooks/useAI';
 import { useToast } from '../ui/use-toast';
@@ -130,7 +130,7 @@ export function TextSuggestionsMenu({ editor, isOpen, top, left }: TextSuggestio
         onClick={() => handleSuggestion('Fix grammar in')}
         disabled={isLoading}
       >
-        <GrammarIcon className="h-3 w-3" />
+        <SpellCheck2 className="h-3 w-3" />
         Grammar
       </Button>
     </div>
