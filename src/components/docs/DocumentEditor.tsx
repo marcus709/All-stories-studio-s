@@ -9,6 +9,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import { Clock, Save } from "lucide-react";
 import { TimeAnalysisDialog } from "./TimeAnalysisDialog";
+import { HistoricalAnalysis } from "./HistoricalAnalysis";
 
 interface DocumentEditorProps {
   document?: Document;
@@ -142,49 +143,29 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
   };
 
   return (
-    <div className="space-y-4">
-      <Input
-        placeholder="Document Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        className="text-lg font-medium"
-      />
-      <div className="min-h-[500px] border rounded-lg">
-        <RichTextEditor
-          content={content}
-          onChange={setContent}
-          className="min-h-[500px]"
+    <div className="flex flex-col h-[calc(100vh-8rem)]">
+      <div className="flex-1 overflow-y-auto space-y-4 px-4">
+        <Input
+          placeholder="Document Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="text-lg font-medium"
+        />
+        <div className="min-h-[500px] border rounded-lg">
+          <RichTextEditor
+            content={content}
+            onChange={setContent}
+            className="min-h-[500px]"
+          />
+        </div>
+
+        <HistoricalAnalysis 
+          isLoading={isLoadingContext}
+          results={analysisResults}
         />
       </div>
 
-      {(isLoadingContext || analysisResults) && (
-        <div className="bg-purple-50 rounded-lg p-6 relative">
-          <h3 className="text-xl font-semibold text-purple-900 mb-4">Historical Analysis</h3>
-          {isLoadingContext ? (
-            <div className="flex items-center gap-2 text-purple-600">
-              <Clock className="h-5 w-5 animate-spin" />
-              <span>Analyzing historical context...</span>
-            </div>
-          ) : (
-            <div className="prose prose-purple max-w-none space-y-4">
-              <div>
-                <h4 className="text-lg font-semibold text-purple-800">Language Analysis</h4>
-                <p className="text-purple-700">{analysisResults?.language}</p>
-              </div>
-              <div>
-                <h4 className="text-lg font-semibold text-purple-800">Cultural Context</h4>
-                <p className="text-purple-700">{analysisResults?.culture}</p>
-              </div>
-              <div>
-                <h4 className="text-lg font-semibold text-purple-800">Environmental Details</h4>
-                <p className="text-purple-700">{analysisResults?.environment}</p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-end gap-2 p-4 border-t bg-white">
         <TimeAnalysisDialog
           isOpen={isTimeDialogOpen}
           onOpenChange={setIsTimeDialogOpen}
