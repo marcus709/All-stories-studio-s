@@ -7,7 +7,9 @@ export const featureMatrix = {
     ai_prompts: 2,
     community_access: false,
     custom_ai: 0,
-    max_groups: 0
+    max_groups: 0,
+    story_docs: false,
+    story_logic: false
   },
   creator: {
     max_stories: 5,
@@ -15,7 +17,9 @@ export const featureMatrix = {
     ai_prompts: Infinity,
     community_access: true,
     custom_ai: 1,
-    max_groups: 5
+    max_groups: 5,
+    story_docs: true,
+    story_logic: true
   },
   professional: {
     max_stories: Infinity,
@@ -23,7 +27,9 @@ export const featureMatrix = {
     ai_prompts: Infinity,
     community_access: true,
     custom_ai: 5,
-    max_groups: Infinity
+    max_groups: Infinity,
+    story_docs: true,
+    story_logic: true
   }
 } as const;
 

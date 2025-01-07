@@ -29,7 +29,9 @@ const plans = [
       "5 stories maximum",
       "15 characters maximum",
       "Full community access (5 groups max)",
-      "1 custom AI"
+      "1 custom AI",
+      "Unlimited story docs",
+      "Story logic checker"
     ],
     popular: true,
     buttonText: "Choose Creator",
@@ -45,7 +47,9 @@ const plans = [
       "Unlimited characters",
       "Full community access",
       "5 custom AIs",
-      "Priority feature access"
+      "Priority feature access",
+      "Unlimited story docs",
+      "Story logic checker"
     ],
     buttonText: "Choose Professional",
     buttonVariant: "outline" as const,
