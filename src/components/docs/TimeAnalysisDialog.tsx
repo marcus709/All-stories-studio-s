@@ -8,6 +8,7 @@ import {
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
+import { History } from "lucide-react";
 
 interface TimeAnalysisDialogProps {
   isOpen: boolean;
@@ -44,10 +45,11 @@ export function TimeAnalysisDialog({
           </div>
           <Button 
             onClick={onAnalyze}
-            disabled={isLoading}
-            className="w-full"
+            disabled={isLoading || !timePeriod.trim()}
+            className="w-full gap-2"
           >
-            {isLoading ? "Analyzing..." : "Analyze Historical Context"}
+            <History className="w-4 h-4" />
+            {isLoading ? "Analyzing..." : "Analyse Historical Context"}
           </Button>
         </div>
       </DialogContent>
