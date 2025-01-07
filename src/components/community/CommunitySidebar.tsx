@@ -56,8 +56,8 @@ export const CommunitySidebar = () => {
   return (
     <div className="space-y-6">
       {profile && (
-        <div className="flex items-center gap-3 px-3 py-2">
-          <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-medium text-lg">
+        <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-gradient-to-r from-purple-50 to-transparent transition-all duration-300 hover:from-purple-100">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white font-medium text-lg shadow-md">
             {profile.avatar_url ? (
               <img
                 src={profile.avatar_url}
@@ -86,10 +86,10 @@ export const CommunitySidebar = () => {
             to={href}
             end={href === "/community"}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+              `flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ${
                 isActive
-                  ? "bg-purple-100 text-purple-900 font-medium"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  ? "bg-gradient-to-r from-purple-100 to-purple-50 text-purple-900 font-medium shadow-sm"
+                  : "text-gray-600 hover:bg-purple-50/50 hover:text-gray-900"
               }`
             }
           >
@@ -98,11 +98,11 @@ export const CommunitySidebar = () => {
           </NavLink>
         ))}
         <AddFriendsDialog>
-          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900 relative">
+          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 text-gray-600 hover:bg-purple-50/50 hover:text-gray-900 relative">
             <UserPlus className="h-5 w-5" />
             <span>Add Friends</span>
             {hasPendingRequests && (
-              <span className="absolute top-2 left-6 h-2 w-2 rounded-full bg-purple-500" />
+              <span className="absolute top-2 left-6 h-2 w-2 rounded-full bg-purple-500 animate-pulse" />
             )}
           </button>
         </AddFriendsDialog>
