@@ -5,6 +5,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { DocumentUpload } from "@/components/story-logic/DocumentUpload";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 
 interface EmotionData {
   stage: string;
@@ -20,6 +23,7 @@ interface EmotionTrackerProps {
 
 export const EmotionTracker = ({ plotEvents, selectedDocument, onDocumentSelect }: EmotionTrackerProps) => {
   const [showDocumentSelector, setShowDocumentSelector] = useState(false);
+  const { toast } = useToast();
 
   const { data: documents } = useQuery({
     queryKey: ["documents"],
@@ -36,6 +40,8 @@ export const EmotionTracker = ({ plotEvents, selectedDocument, onDocumentSelect 
   const { data: emotions } = useQuery({
     queryKey: ["plotEmotions", selectedDocument],
     queryFn: async () => {
+      if (!selectedDocument) return null;
+      
       const { data, error } = await supabase
         .from("plot_emotions")
         .select("*")
@@ -55,6 +61,14 @@ export const EmotionTracker = ({ plotEvents, selectedDocument, onDocumentSelect 
     };
   });
 
+  const handleUploadComplete = () => {
+    toast({
+      title: "Success",
+      description: "Document uploaded successfully",
+    });
+    setShowDocumentSelector(false);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -63,56 +77,76 @@ export const EmotionTracker = ({ plotEvents, selectedDocument, onDocumentSelect 
           <DialogTrigger asChild>
             <Button variant="outline">Select Document</Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Select Document for Analysis</DialogTitle>
+              <DialogTitle>Select or Upload Document for Analysis</DialogTitle>
             </DialogHeader>
-            <ScrollArea className="h-[300px]">
-              <div className="space-y-2">
-                {documents?.map((doc) => (
-                  <Button
-                    key={doc.id}
-                    variant="ghost"
-                    className="w-full justify-start"
-                    onClick={() => {
-                      onDocumentSelect(doc.id);
-                      setShowDocumentSelector(false);
-                    }}
-                  >
-                    {doc.title}
-                  </Button>
-                ))}
-              </div>
-            </ScrollArea>
+            <Tabs defaultValue="existing" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="existing">Existing Documents</TabsTrigger>
+                <TabsTrigger value="upload">Upload New</TabsTrigger>
+              </TabsList>
+              <TabsContent value="existing">
+                <ScrollArea className="h-[300px]">
+                  <div className="space-y-2">
+                    {documents?.map((doc) => (
+                      <Button
+                        key={doc.id}
+                        variant="ghost"
+                        className="w-full justify-start"
+                        onClick={() => {
+                          onDocumentSelect(doc.id);
+                          setShowDocumentSelector(false);
+                        }}
+                      >
+                        {doc.title}
+                      </Button>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+              <TabsContent value="upload">
+                <DocumentUpload 
+                  storyId={selectedDocument || ''} 
+                  onUploadComplete={handleUploadComplete}
+                />
+              </TabsContent>
+            </Tabs>
           </DialogContent>
         </Dialog>
       </div>
 
       <div className="w-full h-64 bg-violet-50/50 rounded-lg p-4">
-        <LineChart
-          width={800}
-          height={200}
-          data={emotionData}
-          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="stage" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Line 
-            type="monotone" 
-            dataKey="characterEmotion" 
-            stroke="#8b5cf6" 
-            name="Character Emotion"
-          />
-          <Line 
-            type="monotone" 
-            dataKey="readerEmotion" 
-            stroke="#ec4899" 
-            name="Reader Emotion"
-          />
-        </LineChart>
+        {selectedDocument ? (
+          <LineChart
+            width={800}
+            height={200}
+            data={emotionData}
+            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="stage" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line 
+              type="monotone" 
+              dataKey="characterEmotion" 
+              stroke="#8b5cf6" 
+              name="Character Emotion"
+            />
+            <Line 
+              type="monotone" 
+              dataKey="readerEmotion" 
+              stroke="#ec4899" 
+              name="Reader Emotion"
+            />
+          </LineChart>
+        ) : (
+          <div className="flex items-center justify-center h-full text-gray-500">
+            Select a document to view emotional analysis
+          </div>
+        )}
       </div>
     </div>
   );
