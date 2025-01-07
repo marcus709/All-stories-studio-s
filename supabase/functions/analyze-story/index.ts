@@ -11,6 +11,16 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Valid issue types according to the database enum
+const validIssueTypes = [
+  'plot_hole',
+  'timeline_inconsistency',
+  'pov_inconsistency',
+  'character_inconsistency',
+  'setting_inconsistency',
+  'logic_flaw'
+];
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -18,6 +28,7 @@ serve(async (req) => {
 
   try {
     const { documentId, storyId, userId } = await req.json();
+    console.log('Received request:', { documentId, storyId, userId });
 
     if (!documentId || !storyId || !userId) {
       throw new Error('Missing required parameters');
@@ -52,6 +63,8 @@ serve(async (req) => {
       throw new Error('Failed to create analysis');
     }
 
+    console.log('Created analysis:', analysis);
+
     // Analyze content with OpenAI
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -73,7 +86,7 @@ serve(async (req) => {
               6. Logic flaws
               
               For each issue found, provide:
-              - Issue type (one of the above categories)
+              - Issue type (exactly one of: plot_hole, timeline_inconsistency, pov_inconsistency, character_inconsistency, setting_inconsistency, logic_flaw)
               - Description
               - Location in the story (approximate)
               - Severity (1-10)
@@ -97,37 +110,45 @@ serve(async (req) => {
     }
 
     const aiResponse = await response.json();
-    console.log('AI Response:', aiResponse); // Add logging for debugging
+    console.log('AI Response:', aiResponse);
 
-    // Ensure we have a valid response with issues array
-    const issues = JSON.parse(aiResponse.choices[0].message.content).issues;
-    
-    if (!Array.isArray(issues)) {
+    let parsedContent;
+    try {
+      parsedContent = JSON.parse(aiResponse.choices[0].message.content);
+    } catch (error) {
+      console.error('Error parsing AI response:', error);
       throw new Error('Invalid response format from AI');
     }
 
-    // Process and validate each issue before inserting
-    const validatedIssues = issues.map(issue => {
-      // Ensure issue type is valid and properly formatted
-      const rawType = (issue.type || '').toString().toLowerCase().replace(/ /g, '_');
-      let issueType = 'plot_hole'; // Default type
+    if (!Array.isArray(parsedContent.issues)) {
+      console.error('Invalid issues array:', parsedContent);
+      throw new Error('Invalid response format from AI - issues is not an array');
+    }
 
-      // Map the raw type to valid issue types
-      if (rawType.includes('timeline')) issueType = 'timeline_inconsistency';
-      else if (rawType.includes('pov')) issueType = 'pov_inconsistency';
-      else if (rawType.includes('character')) issueType = 'character_inconsistency';
-      else if (rawType.includes('setting')) issueType = 'setting_inconsistency';
-      else if (rawType.includes('logic')) issueType = 'logic_flaw';
+    // Process and validate each issue before inserting
+    const validatedIssues = parsedContent.issues.map(issue => {
+      // Ensure issue type is valid
+      let issueType = issue.type?.toString().toLowerCase() || 'plot_hole';
+      
+      if (!validIssueTypes.includes(issueType)) {
+        console.warn(`Invalid issue type "${issueType}", defaulting to plot_hole`);
+        issueType = 'plot_hole';
+      }
+
+      // Validate and normalize severity
+      const severity = Math.min(Math.max(1, parseInt(issue.severity?.toString() || '5') || 5), 10);
 
       return {
         analysis_id: analysis.id,
         issue_type: issueType,
-        description: issue.description || 'No description provided',
-        location: issue.location || 'Unknown location',
-        severity: Math.min(Math.max(1, parseInt(issue.severity) || 5), 10), // Ensure severity is between 1-10
+        description: issue.description?.toString() || 'No description provided',
+        location: issue.location?.toString() || 'Unknown location',
+        severity,
         status: 'open'
       };
     });
+
+    console.log('Validated issues:', validatedIssues);
 
     // Insert issues
     const { error: issuesError } = await supabase
