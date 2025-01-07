@@ -11,7 +11,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import TimelineNode from './TimelineNode';
 import { ViewMode } from "./types";
-import { TimelineNode as TimelineNodeType, TimelineEdge } from './types/timeline';
+import { TimelineNode as TimelineNodeType, TimelineEdge, TimelineNodeData } from './types/timeline';
 import { initialNodes, initialEdges } from './data/initialElements';
 import { getLayoutedElements } from './utils/layoutUtils';
 
@@ -29,7 +29,7 @@ export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
   );
 
   const nodeTypes = useMemo<NodeTypes>(() => ({
-    timeline: TimelineNode,
+    timeline: TimelineNode as any,
   }), []);
 
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(nodes, edges, viewMode);
