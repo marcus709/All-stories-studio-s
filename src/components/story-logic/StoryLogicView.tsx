@@ -7,11 +7,10 @@ import { useStory } from "@/contexts/StoryContext";
 import { Plus } from "lucide-react";
 import { AnalysisSection } from "./AnalysisSection";
 import { useStoryAnalysis } from "@/hooks/useStoryAnalysis";
-import { IssuesTabs } from "./IssuesTabs";
+import { AnalysisResults } from "./AnalysisResults";
 
 export const StoryLogicView = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>("plot_hole");
   const { selectedStory } = useStory();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -67,11 +66,10 @@ export const StoryLogicView = () => {
         />
       )}
 
-      <IssuesTabs
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        storyIssues={storyIssues || []}
+      <AnalysisResults
+        issues={storyIssues || []}
         isLoading={isAnalyzing}
+        analysisExists={!!storyAnalysis}
       />
     </div>
   );
