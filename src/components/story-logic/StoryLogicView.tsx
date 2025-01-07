@@ -9,8 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useStory } from "@/contexts/StoryContext";
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { AnalysisSection } from "./AnalysisSection";
+import { useSession } from "@supabase/auth-helpers-react";
 
 export const StoryLogicView = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,6 +20,7 @@ export const StoryLogicView = () => {
   const { selectedStory } = useStory();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const session = useSession();
 
   const { data: storyAnalysis, isError: analysisError } = useQuery({
     queryKey: ["story-analysis", selectedStory?.id],
@@ -27,14 +29,13 @@ export const StoryLogicView = () => {
         .from("story_analysis")
         .select("*")
         .eq("story_id", selectedStory?.id)
+        .order('created_at', { ascending: false })
         .maybeSingle();
 
       if (error) throw error;
       return data;
     },
     enabled: !!selectedStory?.id,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
   });
 
   const { data: storyIssues } = useQuery({
@@ -45,14 +46,13 @@ export const StoryLogicView = () => {
       const { data, error } = await supabase
         .from("story_issues")
         .select("*")
-        .eq("analysis_id", storyAnalysis.id);
+        .eq("analysis_id", storyAnalysis.id)
+        .order('severity', { ascending: false });
       
       if (error) throw error;
       return data as StoryIssue[];
     },
     enabled: !!storyAnalysis?.id,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
   });
 
   const createIssueMutation = useMutation({
@@ -101,6 +101,44 @@ export const StoryLogicView = () => {
       description,
       type: issueType,
     });
+  };
+
+  const handleAnalyze = async (documentId: string) => {
+    if (!selectedStory?.id || !session?.user?.id) {
+      toast({
+        title: "Error",
+        description: "Please select a story first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-story', {
+        body: { 
+          documentId,
+          storyId: selectedStory.id,
+          userId: session.user.id
+        },
+      });
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ["story-analysis"] });
+      queryClient.invalidateQueries({ queryKey: ["story-issues"] });
+
+      toast({
+        title: "Success",
+        description: "Story analyzed successfully",
+      });
+    } catch (error) {
+      console.error('Analysis error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to analyze story. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -157,9 +195,11 @@ export const StoryLogicView = () => {
           storyId={selectedStory.id}
           hasDocuments={true}
           hasMinimalContent={false}
-          onAnalyze={() => {}}
+          onAnalyze={handleAnalyze}
           onCustomAnalysis={() => {}}
-          onDocumentUpload={() => {}}
+          onDocumentUpload={() => {
+            queryClient.invalidateQueries({ queryKey: ["documents"] });
+          }}
         />
       )}
 
@@ -182,6 +222,16 @@ export const StoryLogicView = () => {
                     {issue.issue_type.replace(/_/g, " ")}
                   </span>
                   <p className="text-gray-700">{issue.description}</p>
+                  {issue.location && (
+                    <p className="text-sm text-gray-500 mt-1">
+                      Location: {issue.location}
+                    </p>
+                  )}
+                  {issue.severity && (
+                    <p className="text-sm text-gray-500">
+                      Severity: {issue.severity}/10
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
