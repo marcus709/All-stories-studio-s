@@ -6,12 +6,10 @@ import { PricingSection } from "@/components/PricingSection";
 import { useState, useEffect } from "react";
 import { AuthModals } from "@/components/auth/AuthModals";
 import { useLocation } from "react-router-dom";
-import Spline from '@splinetool/react-spline';
 
 const Index = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [authView, setAuthView] = useState<"signin" | "signup">("signup");
-  const [splineError, setSplineError] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -31,22 +29,9 @@ const Index = () => {
     setShowAuth(true);
   };
 
-  const handleSplineError = () => {
-    console.error("Failed to load Spline scene");
-    setSplineError(true);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white">
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
-      {!splineError && (
-        <div className="fixed inset-0 w-full h-full pointer-events-none z-0">
-          <Spline 
-            scene="/spline-scene.splinecode"
-            onError={handleSplineError}
-          />
-        </div>
-      )}
       <div className="relative">
         <Header />
         <main className="relative">
