@@ -1,20 +1,9 @@
 import { useState } from "react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { DocumentUpload } from "@/components/story-logic/DocumentUpload";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
-
-interface EmotionData {
-  stage: string;
-  characterEmotion: number;
-  readerEmotion: number;
-}
+import { EmotionChart } from "./emotion-tracker/EmotionChart";
+import { DocumentSelector } from "./emotion-tracker/DocumentSelector";
 
 interface EmotionTrackerProps {
   plotEvents: any[];
@@ -85,7 +74,7 @@ export const EmotionTracker = ({ plotEvents, selectedDocument, onDocumentSelect 
     },
   });
 
-  const emotionData: EmotionData[] = plotEvents.map((event) => {
+  const emotionData = plotEvents.map((event) => {
     const eventEmotion = emotions?.find((e) => e.plot_event_id === event.id);
     return {
       stage: event.stage,
@@ -112,102 +101,22 @@ export const EmotionTracker = ({ plotEvents, selectedDocument, onDocumentSelect 
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Emotional Arc</h3>
-        <Dialog open={showDocumentSelector} onOpenChange={setShowDocumentSelector}>
-          <DialogTrigger asChild>
-            <Button variant="outline">Select Document</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Select or Upload Document for Analysis</DialogTitle>
-            </DialogHeader>
-            <Tabs defaultValue="existing" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="existing">Existing Documents</TabsTrigger>
-                <TabsTrigger value="upload">Upload New</TabsTrigger>
-              </TabsList>
-              <TabsContent value="existing">
-                <ScrollArea className="h-[300px]">
-                  <div className="space-y-2">
-                    {documents?.map((doc) => (
-                      <Button
-                        key={doc.id}
-                        variant="ghost"
-                        className="w-full justify-start"
-                        onClick={() => handleDocumentSelect(doc.id)}
-                      >
-                        {doc.title}
-                      </Button>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </TabsContent>
-              <TabsContent value="upload">
-                <DocumentUpload 
-                  storyId={selectedDocument || ''} 
-                  onUploadComplete={handleUploadComplete}
-                />
-              </TabsContent>
-            </Tabs>
-          </DialogContent>
-        </Dialog>
+        <DocumentSelector
+          documents={documents || []}
+          showDocumentSelector={showDocumentSelector}
+          setShowDocumentSelector={setShowDocumentSelector}
+          handleDocumentSelect={handleDocumentSelect}
+          handleUploadComplete={handleUploadComplete}
+        />
       </div>
 
       <div className="relative w-full aspect-[2/1] min-h-[400px] bg-violet-50/50 rounded-lg p-4">
-        {isLoadingEmotions || analyzeEmotionsMutation.isPending ? (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-violet-500" />
-          </div>
-        ) : selectedDocument && emotions && emotions.length > 0 ? (
-          <LineChart
-            width={800}
-            height={400}
-            data={emotionData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-            className="mx-auto"
-          >
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis 
-              dataKey="stage" 
-              stroke="#6b7280"
-              tick={{ fill: '#6b7280' }}
-            />
-            <YAxis 
-              stroke="#6b7280"
-              tick={{ fill: '#6b7280' }}
-              domain={[0, 10]}
-            />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: '#ffffff',
-                border: '1px solid #e5e7eb',
-                borderRadius: '0.375rem'
-              }}
-            />
-            <Legend />
-            <Line 
-              type="monotone" 
-              dataKey="characterEmotion" 
-              stroke="#8b5cf6" 
-              strokeWidth={2}
-              name="Character Emotion"
-              dot={{ stroke: '#8b5cf6', strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6 }}
-            />
-            <Line 
-              type="monotone" 
-              dataKey="readerEmotion" 
-              stroke="#ec4899" 
-              strokeWidth={2}
-              name="Reader Emotion"
-              dot={{ stroke: '#ec4899', strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6 }}
-            />
-          </LineChart>
-        ) : (
-          <div className="flex items-center justify-center h-full text-gray-500">
-            {selectedDocument ? "No emotional analysis data available" : "Select a document to view emotional analysis"}
-          </div>
-        )}
+        <EmotionChart
+          isLoading={isLoadingEmotions || analyzeEmotionsMutation.isPending}
+          emotions={emotions}
+          emotionData={emotionData}
+          selectedDocument={selectedDocument}
+        />
       </div>
     </div>
   );
