@@ -8,7 +8,7 @@ import {
   addEdge,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { TimelineNode } from './TimelineNode';
+import TimelineNode from './TimelineNode';
 import { ViewMode } from "./types";
 import { getNodeStyle } from './styles/nodeStyles';
 
