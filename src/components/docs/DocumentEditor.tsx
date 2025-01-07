@@ -25,6 +25,7 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
   const [timePeriod, setTimePeriod] = useState(document?.time_period || "");
   const [isTimeDialogOpen, setIsTimeDialogOpen] = useState(false);
   const [isLoadingContext, setIsLoadingContext] = useState(false);
+  const [analysisResults, setAnalysisResults] = useState<any>(document?.time_period_details || null);
   const { session } = useSessionContext();
 
   useEffect(() => {
@@ -32,6 +33,7 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
       setTitle(document.title);
       setContent(document.content || "");
       setTimePeriod(document.time_period || "");
+      setAnalysisResults(document.time_period_details);
     }
   }, [document]);
 
@@ -114,27 +116,7 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
       if (error) throw error;
 
       const { contextInfo } = data;
-      
-      toast({
-        title: "Historical Analysis",
-        description: (
-          <div className="mt-2 space-y-2">
-            <div>
-              <strong>Language Analysis:</strong>
-              <p>{contextInfo.language}</p>
-            </div>
-            <div>
-              <strong>Cultural Context:</strong>
-              <p>{contextInfo.culture}</p>
-            </div>
-            <div>
-              <strong>Environmental Details:</strong>
-              <p>{contextInfo.environment}</p>
-            </div>
-          </div>
-        ),
-        duration: 10000,
-      });
+      setAnalysisResults(contextInfo);
 
       if (document?.id) {
         const { error: updateError } = await supabase
@@ -174,6 +156,34 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
           className="min-h-[500px]"
         />
       </div>
+
+      {(isLoadingContext || analysisResults) && (
+        <div className="bg-purple-50 rounded-lg p-6 relative">
+          <h3 className="text-xl font-semibold text-purple-900 mb-4">Historical Analysis</h3>
+          {isLoadingContext ? (
+            <div className="flex items-center gap-2 text-purple-600">
+              <Clock className="h-5 w-5 animate-spin" />
+              <span>Analyzing historical context...</span>
+            </div>
+          ) : (
+            <div className="prose prose-purple max-w-none space-y-4">
+              <div>
+                <h4 className="text-lg font-semibold text-purple-800">Language Analysis</h4>
+                <p className="text-purple-700">{analysisResults?.language}</p>
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold text-purple-800">Cultural Context</h4>
+                <p className="text-purple-700">{analysisResults?.culture}</p>
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold text-purple-800">Environmental Details</h4>
+                <p className="text-purple-700">{analysisResults?.environment}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="flex justify-end gap-2">
         <TimeAnalysisDialog
           isOpen={isTimeDialogOpen}
