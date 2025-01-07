@@ -1,14 +1,9 @@
-import {
-  ArrowRight,
-  GitBranch,
-  Network,
-  Circle
-} from "lucide-react";
-import { ViewMode } from "../types";
+import { GitCommit, GitBranch, Network, CircleDot, LucideIcon } from 'lucide-react';
+import { ViewMode } from '../types';
 
-export const viewModeIcons: Record<ViewMode, React.ComponentType> = {
-  linear: ArrowRight,
+export const viewModeIcons: Record<ViewMode, LucideIcon> = {
+  linear: GitCommit,
   branching: GitBranch,
   network: Network,
-  radial: Circle
+  radial: CircleDot,
 };
