@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Line } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useQuery } from "@tanstack/react-query";
@@ -89,13 +89,30 @@ export const EmotionTracker = ({ plotEvents, selectedDocument, onDocumentSelect 
       </div>
 
       <div className="w-full h-64 bg-violet-50/50 rounded-lg p-4">
-        <Line
+        <LineChart
+          width={800}
+          height={200}
           data={emotionData}
           margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
         >
-          <Line type="monotone" dataKey="characterEmotion" stroke="#8b5cf6" />
-          <Line type="monotone" dataKey="readerEmotion" stroke="#ec4899" />
-        </Line>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="stage" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Line 
+            type="monotone" 
+            dataKey="characterEmotion" 
+            stroke="#8b5cf6" 
+            name="Character Emotion"
+          />
+          <Line 
+            type="monotone" 
+            dataKey="readerEmotion" 
+            stroke="#ec4899" 
+            name="Reader Emotion"
+          />
+        </LineChart>
       </div>
     </div>
   );
