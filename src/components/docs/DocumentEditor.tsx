@@ -20,16 +20,16 @@ interface DocumentEditorProps {
 export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [title, setTitle] = useState(document?.title || "");
+  const [content, setContent] = useState(document?.content || "");
   const [isSaving, setIsSaving] = useState(false);
-  const [timePeriod, setTimePeriod] = useState("");
+  const [timePeriod, setTimePeriod] = useState(document?.time_period || "");
   const [isTimeDialogOpen, setIsTimeDialogOpen] = useState(false);
   const [isLoadingContext, setIsLoadingContext] = useState(false);
-  const [analysisResults, setAnalysisResults] = useState<any>(null);
+  const [analysisResults, setAnalysisResults] = useState<any>(document?.time_period_details || null);
   const { session } = useSessionContext();
 
-  // Reset state when document changes
+  // Update state when document changes
   useEffect(() => {
     if (document) {
       setTitle(document.title || "");
@@ -43,7 +43,7 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
       setTimePeriod("");
       setAnalysisResults(null);
     }
-  }, [document?.id]); // Only run when document ID changes
+  }, [document]); // Run when document changes
 
   const handleSave = async () => {
     try {
