@@ -4,11 +4,11 @@ import { TimelineNodeData } from './types/timeline';
 import { TimelineNodeFields } from './TimelineNodeFields';
 import { TimelineNodeMenu } from './TimelineNodeMenu';
 
-const TimelineNode = ({ data, id }: NodeProps<TimelineNodeData>) => {
+const TimelineNode = ({ data }: NodeProps<TimelineNodeData>) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editedLabel, setEditedLabel] = useState(data.label);
-  const [editedSubtitle, setEditedSubtitle] = useState(data.subtitle || '');
-  const [editedYear, setEditedYear] = useState(data.year || '');
+  const [editedLabel, setEditedLabel] = useState(data.label as string);
+  const [editedSubtitle, setEditedSubtitle] = useState(data.subtitle as string || '');
+  const [editedYear, setEditedYear] = useState(data.year as string || '');
 
   const handleSave = () => {
     // Save functionality will be handled by the parent component
@@ -16,9 +16,9 @@ const TimelineNode = ({ data, id }: NodeProps<TimelineNodeData>) => {
   };
 
   const handleCancel = () => {
-    setEditedLabel(data.label);
-    setEditedSubtitle(data.subtitle || '');
-    setEditedYear(data.year || '');
+    setEditedLabel(data.label as string);
+    setEditedSubtitle(data.subtitle as string || '');
+    setEditedYear(data.year as string || '');
     setIsEditing(false);
   };
 
@@ -41,7 +41,7 @@ const TimelineNode = ({ data, id }: NodeProps<TimelineNodeData>) => {
           handleSave={handleSave}
           handleCancel={handleCancel}
           handleDoubleClick={() => setIsEditing(true)}
-          data={data}
+          data={data as TimelineNodeData}
         />
         <TimelineNodeMenu
           handleEdit={() => setIsEditing(true)}

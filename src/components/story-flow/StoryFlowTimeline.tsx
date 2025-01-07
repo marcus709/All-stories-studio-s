@@ -12,11 +12,11 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import TimelineNode from './TimelineNode';
-import { TimelineNodeData, TimelineNode as TimelineNodeType, TimelineEdge } from './types/timeline';
+import { TimelineNodeData, TimelineNode as TimelineNodeType } from './types/timeline';
 import { initialNodes, initialEdges } from './data/initialElements';
 
 export const StoryFlowTimeline = () => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node<TimelineNodeData>>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const onConnect = useCallback(
@@ -42,17 +42,6 @@ export const StoryFlowTimeline = () => {
     setNodes((nds) => nds.filter((node) => node.id !== nodeId));
     setEdges((eds) => eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId));
   }, [setNodes, setEdges]);
-
-  const handleNodeEdit = useCallback((nodeId: string, newData: TimelineNodeData) => {
-    setNodes((nds) =>
-      nds.map((node) => {
-        if (node.id === nodeId) {
-          return { ...node, data: newData };
-        }
-        return node;
-      })
-    );
-  }, [setNodes]);
 
   const nodeTypes = useMemo<NodeTypes>(() => ({
     timeline: TimelineNode,
