@@ -20,23 +20,30 @@ interface DocumentEditorProps {
 export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [title, setTitle] = useState(document?.title || "");
-  const [content, setContent] = useState(document?.content || "");
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [timePeriod, setTimePeriod] = useState(document?.time_period || "");
+  const [timePeriod, setTimePeriod] = useState("");
   const [isTimeDialogOpen, setIsTimeDialogOpen] = useState(false);
   const [isLoadingContext, setIsLoadingContext] = useState(false);
-  const [analysisResults, setAnalysisResults] = useState<any>(document?.time_period_details || null);
+  const [analysisResults, setAnalysisResults] = useState<any>(null);
   const { session } = useSessionContext();
 
+  // Reset state when document changes
   useEffect(() => {
     if (document) {
-      setTitle(document.title);
+      setTitle(document.title || "");
       setContent(document.content || "");
       setTimePeriod(document.time_period || "");
-      setAnalysisResults(document.time_period_details);
+      setAnalysisResults(document.time_period_details || null);
+    } else {
+      // Clear state when no document is selected
+      setTitle("");
+      setContent("");
+      setTimePeriod("");
+      setAnalysisResults(null);
     }
-  }, [document]);
+  }, [document?.id]); // Only run when document ID changes
 
   const handleSave = async () => {
     try {
@@ -50,24 +57,24 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
         throw new Error("User must be logged in to save documents");
       }
 
+      const documentData = {
+        title,
+        content,
+        time_period: timePeriod,
+        updated_at: new Date().toISOString()
+      };
+
       const { data, error } = document?.id 
         ? await supabase
             .from("documents")
-            .update({
-              title,
-              content,
-              time_period: timePeriod,
-              updated_at: new Date().toISOString()
-            })
+            .update(documentData)
             .eq("id", document.id)
             .select()
             .single()
         : await supabase
             .from("documents")
             .insert({
-              title,
-              content,
-              time_period: timePeriod,
+              ...documentData,
               story_id: storyId,
               user_id: session.user.id
             })
