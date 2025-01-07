@@ -3,6 +3,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ViewMode, viewModeLabels } from "../types";
 import { viewModeIcons } from "./icons";
+import { LucideProps } from 'lucide-react';
 
 interface ViewModeSelectorProps {
   viewMode: ViewMode;
@@ -22,7 +23,9 @@ export const ViewModeSelector = ({ viewMode, onViewModeChange }: ViewModeSelecto
           {(Object.keys(viewModeLabels) as ViewMode[]).map((mode) => (
             <SelectItem key={mode} value={mode}>
               <div className="flex items-center gap-2 py-1">
-                {viewModeIcons[mode] && React.createElement(viewModeIcons[mode], { className: "h-4 w-4" })}
+                {viewModeIcons[mode] && React.createElement(viewModeIcons[mode], { 
+                  className: "h-4 w-4"
+                } as LucideProps)}
                 <span>{viewModeLabels[mode]}</span>
               </div>
             </SelectItem>
