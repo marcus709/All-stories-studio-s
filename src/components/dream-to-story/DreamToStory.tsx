@@ -27,14 +27,12 @@ export const DreamToStory = () => {
 
     setIsGenerating(true);
     try {
-      const response = await fetch("/api/generate-dream-story", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dream }),
+      const { data, error } = await supabase.functions.invoke('generate-dream-story', {
+        body: { dream },
       });
 
-      const data = await response.json();
-      if (data.error) throw new Error(data.error);
+      if (error) throw error;
+      if (!data?.generatedStory) throw new Error('No story generated');
 
       setGeneratedStory(data.generatedStory);
       toast({
@@ -42,6 +40,7 @@ export const DreamToStory = () => {
         description: "Your dream has been transformed into a story",
       });
     } catch (error) {
+      console.error('Error generating story:', error);
       toast({
         title: "Error",
         description: "Failed to generate story. Please try again.",
@@ -78,6 +77,7 @@ export const DreamToStory = () => {
         description: "Story saved to documents",
       });
     } catch (error) {
+      console.error('Error saving story:', error);
       toast({
         title: "Error",
         description: "Failed to save story. Please try again.",
