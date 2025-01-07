@@ -25,23 +25,30 @@ const features = [
 
 export const FeaturesSection = () => {
   return (
-    <section id="features" className="py-20 px-4 bg-white scroll-mt-16">
-      <div className="container mx-auto">
-        <h2 className="text-4xl font-bold text-center mb-16">
+    <section id="features" className="py-32 px-4 relative overflow-hidden scroll-mt-16">
+      <div className="container mx-auto relative z-10">
+        <h2 className="text-4xl md:text-5xl font-bold text-center mb-20 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600">
           Powerful Features for Every Writer
         </h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {features.map((feature) => (
-            <div key={feature.title} className="flex flex-col items-start">
-              <div className="h-12 w-12 rounded-lg bg-purple-100 flex items-center justify-center mb-4">
-                <feature.icon className="h-6 w-6 text-purple-600" />
+          {features.map((feature, index) => (
+            <div 
+              key={feature.title}
+              className="group relative p-8 rounded-2xl bg-white/50 backdrop-blur-sm border border-gray-200 hover:border-purple-200 transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-pink-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
+              <div className="relative z-10">
+                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-6 text-white shadow-lg">
+                  <feature.icon className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-semibold mb-4 text-gray-900">{feature.title}</h3>
+                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
               </div>
-              <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-              <p className="text-gray-600">{feature.description}</p>
             </div>
           ))}
         </div>
       </div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(147,51,234,0.1),transparent_70%)]" />
     </section>
   );
 };
