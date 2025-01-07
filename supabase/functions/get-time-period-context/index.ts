@@ -14,7 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    const { timePeriod } = await req.json();
+    const { timePeriod, documentContent } = await req.json();
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -27,11 +27,13 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are a historical context expert. Provide accurate information about language, culture, and environment for specific time periods. Format the response as JSON with sections for language, culture, and environment.'
+            content: `You are a historical context expert. Analyze the provided text content and verify its historical accuracy for the specified time period. 
+            Provide feedback on language usage, cultural references, and environmental details. Format the response as JSON with sections for language, culture, and environment.
+            For each section, include both analysis of current content and suggestions for improvement.`
           },
           {
             role: 'user',
-            content: `Provide detailed historical context for the time period: ${timePeriod}`
+            content: `Time Period: ${timePeriod}\n\nDocument Content: ${documentContent}`
           }
         ],
         temperature: 0.7,

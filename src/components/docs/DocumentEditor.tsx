@@ -8,14 +8,7 @@ import { Button } from "../ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import { Clock, Save } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
-import { Label } from "../ui/label";
+import { TimeAnalysisDialog } from "./TimeAnalysisDialog";
 
 interface DocumentEditorProps {
   document?: Document;
@@ -45,7 +38,6 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
   const handleSave = async () => {
     try {
       setIsSaving(true);
-      console.log("Saving document with content:", content);
 
       if (!title.trim()) {
         throw new Error("Title is required");
@@ -81,8 +73,6 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
 
       if (error) throw error;
 
-      console.log("Saved document:", data);
-
       toast({
         title: "Success",
         description: "Document saved successfully",
@@ -115,7 +105,10 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
     try {
       setIsLoadingContext(true);
       const { data, error } = await supabase.functions.invoke('get-time-period-context', {
-        body: { timePeriod },
+        body: { 
+          timePeriod,
+          documentContent: content 
+        },
       });
 
       if (error) throw error;
@@ -123,18 +116,26 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
       const { contextInfo } = data;
       
       toast({
-        title: "Time Period Context",
+        title: "Historical Analysis",
         description: (
           <div className="mt-2 space-y-2">
-            <p><strong>Language:</strong> {contextInfo.language}</p>
-            <p><strong>Culture:</strong> {contextInfo.culture}</p>
-            <p><strong>Environment:</strong> {contextInfo.environment}</p>
+            <div>
+              <strong>Language Analysis:</strong>
+              <p>{contextInfo.language}</p>
+            </div>
+            <div>
+              <strong>Cultural Context:</strong>
+              <p>{contextInfo.culture}</p>
+            </div>
+            <div>
+              <strong>Environmental Details:</strong>
+              <p>{contextInfo.environment}</p>
+            </div>
           </div>
         ),
         duration: 10000,
       });
 
-      // Save the context details to the document
       if (document?.id) {
         const { error: updateError } = await supabase
           .from("documents")
@@ -174,37 +175,18 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
         />
       </div>
       <div className="flex justify-end gap-2">
-        <Dialog open={isTimeDialogOpen} onOpenChange={setIsTimeDialogOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" className="gap-2">
-              <Clock className="w-4 h-4" />
-              Set Time Period
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Set Time Period</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="timePeriod">Time Period</Label>
-                <Input
-                  id="timePeriod"
-                  placeholder="e.g., Victorian Era, Ancient Rome, 1920s"
-                  value={timePeriod}
-                  onChange={(e) => setTimePeriod(e.target.value)}
-                />
-              </div>
-              <Button 
-                onClick={getTimeContext}
-                disabled={isLoadingContext}
-                className="w-full"
-              >
-                {isLoadingContext ? "Getting Context..." : "Get Historical Context"}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <TimeAnalysisDialog
+          isOpen={isTimeDialogOpen}
+          onOpenChange={setIsTimeDialogOpen}
+          timePeriod={timePeriod}
+          setTimePeriod={setTimePeriod}
+          onAnalyze={getTimeContext}
+          isLoading={isLoadingContext}
+        />
+        <Button variant="outline" onClick={() => setIsTimeDialogOpen(true)} className="gap-2">
+          <Clock className="w-4 h-4" />
+          Analyze Time Period
+        </Button>
         <Button
           onClick={handleSave}
           disabled={isSaving}
