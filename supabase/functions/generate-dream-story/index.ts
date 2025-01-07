@@ -13,6 +13,10 @@ serve(async (req) => {
 
   try {
     const { dream } = await req.json();
+    
+    if (!dream) {
+      throw new Error('No dream content provided');
+    }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -21,7 +25,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
@@ -35,6 +39,12 @@ serve(async (req) => {
         temperature: 0.8,
       }),
     });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('OpenAI API error:', error);
+      throw new Error(error.error?.message || 'Failed to generate story');
+    }
 
     const data = await response.json();
     const generatedStory = data.choices[0].message.content;
