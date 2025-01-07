@@ -11,7 +11,7 @@ import { ToolbarButtons } from "./components/ToolbarButtons";
 import { Button } from "@/components/ui/button";
 
 export const StoryFlow = () => {
-  const [viewMode, setViewMode] = useState<ViewMode>("linear");
+  const [viewMode, setViewMode] = useState<ViewMode>("timeline");
   const [activeView, setActiveView] = useState<"timeline" | "relationships">("timeline");
   const [isGenerating, setIsGenerating] = useState(false);
   const { selectedStory } = useStory();

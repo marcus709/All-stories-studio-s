@@ -11,7 +11,7 @@ import {
   Sun,
   Route,
   Layers,
-  Sphere,
+  Globe,
   Snowflake,
   LucideIcon
 } from 'lucide-react';
@@ -30,6 +30,6 @@ export const viewModeIcons: Record<ViewMode, LucideIcon> = {
   starburst: Sun,
   pathway: Route,
   layered: Layers,
-  sphere: Sphere,
+  sphere: Globe,
   fractal: Snowflake
 };
