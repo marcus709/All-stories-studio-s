@@ -19,6 +19,7 @@ export function DialogAssistant({ characters }: DialogAssistantProps) {
   const [context, setContext] = useState("");
   const [generatedDialog, setGeneratedDialog] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const { generateContent } = useAI();
   const { toast } = useToast();
   const { selectedStory } = useStory();
@@ -76,15 +77,19 @@ export function DialogAssistant({ characters }: DialogAssistantProps) {
   const handleSaveToDocument = async () => {
     if (!selectedStory || !generatedDialog) return;
 
+    setIsSaving(true);
     try {
-      const { data, error } = await supabase
+      const timestamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
+      const characterNames = characters
+        .filter(char => selectedCharacters.includes(char.id))
+        .map(char => char.name)
+        .join(" & ");
+
+      const { data: document, error } = await supabase
         .from("documents")
         .insert({
           story_id: selectedStory.id,
-          title: `Dialog: ${characters
-            .filter(char => selectedCharacters.includes(char.id))
-            .map(char => char.name)
-            .join(" & ")}`,
+          title: `Dialog: ${characterNames} - ${timestamp}`,
           content: generatedDialog,
           user_id: (await supabase.auth.getUser()).data.user?.id,
         })
@@ -95,8 +100,13 @@ export function DialogAssistant({ characters }: DialogAssistantProps) {
 
       toast({
         title: "Success",
-        description: "Dialog saved to documents successfully",
+        description: "Dialog saved as a new document",
       });
+
+      // Reset the form after successful save
+      setGeneratedDialog("");
+      setContext("");
+      setSelectedCharacters([]);
     } catch (error) {
       console.error("Error saving document:", error);
       toast({
@@ -104,6 +114,8 @@ export function DialogAssistant({ characters }: DialogAssistantProps) {
         description: "Failed to save dialog to documents",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -182,10 +194,18 @@ export function DialogAssistant({ characters }: DialogAssistantProps) {
             </div>
             <Button
               onClick={handleSaveToDocument}
+              disabled={isSaving}
               variant="outline"
               className="w-full"
             >
-              Save to Documents
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving to Documents...
+                </>
+              ) : (
+                "Save as New Document"
+              )}
             </Button>
           </>
         ) : (
