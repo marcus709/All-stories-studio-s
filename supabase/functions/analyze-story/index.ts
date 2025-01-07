@@ -97,21 +97,42 @@ serve(async (req) => {
     }
 
     const aiResponse = await response.json();
+    console.log('AI Response:', aiResponse); // Add logging for debugging
+
+    // Ensure we have a valid response with issues array
     const issues = JSON.parse(aiResponse.choices[0].message.content).issues;
+    
+    if (!Array.isArray(issues)) {
+      throw new Error('Invalid response format from AI');
+    }
+
+    // Process and validate each issue before inserting
+    const validatedIssues = issues.map(issue => {
+      // Ensure issue type is valid and properly formatted
+      const rawType = (issue.type || '').toString().toLowerCase().replace(/ /g, '_');
+      let issueType = 'plot_hole'; // Default type
+
+      // Map the raw type to valid issue types
+      if (rawType.includes('timeline')) issueType = 'timeline_inconsistency';
+      else if (rawType.includes('pov')) issueType = 'pov_inconsistency';
+      else if (rawType.includes('character')) issueType = 'character_inconsistency';
+      else if (rawType.includes('setting')) issueType = 'setting_inconsistency';
+      else if (rawType.includes('logic')) issueType = 'logic_flaw';
+
+      return {
+        analysis_id: analysis.id,
+        issue_type: issueType,
+        description: issue.description || 'No description provided',
+        location: issue.location || 'Unknown location',
+        severity: Math.min(Math.max(1, parseInt(issue.severity) || 5), 10), // Ensure severity is between 1-10
+        status: 'open'
+      };
+    });
 
     // Insert issues
     const { error: issuesError } = await supabase
       .from('story_issues')
-      .insert(
-        issues.map((issue: any) => ({
-          analysis_id: analysis.id,
-          issue_type: issue.type.toLowerCase().replace(/ /g, '_'),
-          description: issue.description,
-          location: issue.location,
-          severity: issue.severity,
-          status: 'open'
-        }))
-      );
+      .insert(validatedIssues);
 
     if (issuesError) {
       console.error('Error inserting issues:', issuesError);
