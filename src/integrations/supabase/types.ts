@@ -585,6 +585,57 @@ export type Database = {
         }
         Relationships: []
       }
+      plot_emotions: {
+        Row: {
+          analysis_text: string | null
+          character_emotion: string | null
+          created_at: string | null
+          document_id: string | null
+          id: string
+          intensity: number | null
+          plot_event_id: string | null
+          reader_emotion: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          analysis_text?: string | null
+          character_emotion?: string | null
+          created_at?: string | null
+          document_id?: string | null
+          id?: string
+          intensity?: number | null
+          plot_event_id?: string | null
+          reader_emotion?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          analysis_text?: string | null
+          character_emotion?: string | null
+          created_at?: string | null
+          document_id?: string | null
+          id?: string
+          intensity?: number | null
+          plot_event_id?: string | null
+          reader_emotion?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plot_emotions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plot_emotions_plot_event_id_fkey"
+            columns: ["plot_event_id"]
+            isOneToOne: false
+            referencedRelation: "plot_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plot_events: {
         Row: {
           created_at: string | null

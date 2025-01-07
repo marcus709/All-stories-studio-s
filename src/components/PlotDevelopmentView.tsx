@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PlotStructureSelect } from "./plot/PlotStructureSelect";
 import { PlotStage } from "./plot/PlotStage";
+import { EmotionTracker } from "./plot/EmotionTracker";
 import { usePlotEvents } from "./plot/usePlotEvents";
 import { PlotStructure } from "./plot/types";
 import { Button } from "./ui/button";
@@ -17,6 +18,7 @@ export const PlotDevelopmentView = () => {
   const [newEvent, setNewEvent] = useState({ title: "", description: "" });
   const [activeStage, setActiveStage] = useState<string | null>(null);
   const [showSidebar, setShowSidebar] = useState(true);
+  const [selectedDocument, setSelectedDocument] = useState<string | null>(null);
 
   const { data: plotStructures } = useQuery({
     queryKey: ["plotStructures"],
@@ -89,7 +91,7 @@ export const PlotDevelopmentView = () => {
                 <PanelLeftClose className="h-4 w-4" />
               </Button>
             </div>
-            <div className="p-4">
+            <div className="p-4 overflow-y-auto">
               <PlotStructureSelect
                 plotStructures={plotStructures}
                 selectedStructure={selectedStructure}
@@ -125,10 +127,13 @@ export const PlotDevelopmentView = () => {
         )}
         
         <ResizablePanel defaultSize={75}>
-          <div className="p-6">
+          <div className="p-6 h-full overflow-y-auto">
             <div className="bg-white rounded-xl p-6 shadow-sm">
-              <h2 className="text-lg font-semibold mb-4">Plot Timeline</h2>
-              {/* Timeline content will be implemented later */}
+              <EmotionTracker
+                plotEvents={plotEvents || []}
+                selectedDocument={selectedDocument}
+                onDocumentSelect={setSelectedDocument}
+              />
             </div>
           </div>
         </ResizablePanel>
