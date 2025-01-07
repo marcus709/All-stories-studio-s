@@ -26,11 +26,10 @@ const plans = [
     price: "9.99",
     features: [
       "Unlimited prompts",
-      "10 stories maximum",
-      "25 characters maximum",
-      "Full community access",
-      "1 custom AI",
-      "Backward story planning"
+      "5 stories maximum",
+      "15 characters maximum",
+      "Full community access (5 groups max)",
+      "1 custom AI"
     ],
     popular: true,
     buttonText: "Choose Creator",
