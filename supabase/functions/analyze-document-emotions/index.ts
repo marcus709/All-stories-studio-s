@@ -40,15 +40,17 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are an expert at analyzing emotional arcs in stories. For each plot event in the story structure, analyze the emotional intensity for both characters and readers on a scale of 1-10. Consider:
-            1. Character emotions: How intensely are the characters feeling in this moment?
-            2. Reader emotions: What emotional impact would this have on readers?
-            
-            Structure your response as a JSON array of objects with plot_event_id, character_emotion, reader_emotion, and intensity fields.`
+            content: `You are an expert at analyzing emotional arcs in stories. For each plot event in the story structure, analyze the emotional intensity for both characters and readers on a scale of 1-10.`
           },
           {
             role: 'user',
-            content: `Analyze this text and assign emotional values for these plot events in the ${structure} structure:
+            content: `Analyze this text and assign emotional values for these plot events in the ${structure} structure. Return ONLY a JSON array of objects with the following structure for each event:
+            {
+              "plot_event_id": "event_id",
+              "character_emotion": number (1-10),
+              "reader_emotion": number (1-10),
+              "intensity": number (1-10)
+            }
             
             Text: ${document.content}
             
@@ -60,7 +62,22 @@ serve(async (req) => {
     })
 
     const aiResponse = await response.json()
-    const analysis = JSON.parse(aiResponse.choices[0].message.content)
+    
+    // Ensure we get a valid JSON array from the AI response
+    let analysis
+    try {
+      const content = aiResponse.choices[0].message.content
+      // Remove any markdown formatting if present
+      const jsonStr = content.replace(/```json\n|\n```/g, '').trim()
+      analysis = JSON.parse(jsonStr)
+      
+      if (!Array.isArray(analysis)) {
+        throw new Error('Analysis result is not an array')
+      }
+    } catch (error) {
+      console.error('Error parsing AI response:', error)
+      throw new Error('Failed to parse emotional analysis results')
+    }
 
     // Store emotion analysis results
     const emotionPromises = analysis.map(async (emotion: any) => {
@@ -83,13 +100,24 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ success: true, emotions: analysis }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        } 
+      }
     )
   } catch (error) {
     console.error('Error:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      { 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        }, 
+        status: 500 
+      }
     )
   }
 })
