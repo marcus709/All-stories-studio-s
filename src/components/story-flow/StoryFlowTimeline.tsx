@@ -6,13 +6,22 @@ import {
   useNodesState,
   useEdgesState,
   addEdge,
+  Node,
+  Edge,
+  NodeTypes,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import TimelineNode from './TimelineNode';
 import { ViewMode } from "./types";
 import { getNodeStyle } from './styles/nodeStyles';
 
-const initialNodes = [
+interface TimelineNodeData {
+  label: string;
+  subtitle?: string;
+  year?: string;
+}
+
+const initialNodes: Node<TimelineNodeData>[] = [
   {
     id: '1',
     type: 'timeline',
@@ -65,7 +74,7 @@ const initialNodes = [
   },
 ];
 
-const initialEdges = [
+const initialEdges: Edge[] = [
   { id: 'e1-2', source: '1', target: '2', type: 'smoothstep' },
   { id: 'e2-3', source: '2', target: '3', type: 'smoothstep' },
   { id: 'e3-4', source: '3', target: '4', type: 'smoothstep' },
@@ -85,7 +94,7 @@ export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
     [setEdges],
   );
 
-  const nodeTypes = useMemo(
+  const nodeTypes = useMemo<NodeTypes>(
     () => ({
       timeline: TimelineNode,
     }),

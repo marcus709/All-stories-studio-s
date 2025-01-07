@@ -7,7 +7,7 @@ interface TimelineNodeData {
   year?: string;
 }
 
-const TimelineNode = ({ data }: NodeProps<TimelineNodeData>) => {
+const TimelineNode = ({ data }: NodeProps<{ label: string; subtitle?: string; year?: string }>) => {
   return (
     <div className="p-4">
       <Handle
