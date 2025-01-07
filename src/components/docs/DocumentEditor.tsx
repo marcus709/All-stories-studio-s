@@ -20,23 +20,24 @@ interface DocumentEditorProps {
 export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [title, setTitle] = useState(document?.title ?? "");
-  const [content, setContent] = useState(document?.content ?? "");
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [timePeriod, setTimePeriod] = useState(document?.time_period ?? "");
+  const [timePeriod, setTimePeriod] = useState("");
   const [isTimeDialogOpen, setIsTimeDialogOpen] = useState(false);
   const [isLoadingContext, setIsLoadingContext] = useState(false);
-  const [analysisResults, setAnalysisResults] = useState(document?.time_period_details ?? null);
+  const [analysisResults, setAnalysisResults] = useState<any>(null);
   const { session } = useSessionContext();
 
+  // Reset state when document ID changes
   useEffect(() => {
     if (document) {
-      setTitle(document.title);
-      setContent(document.content);
-      setTimePeriod(document.time_period ?? "");
-      setAnalysisResults(document.time_period_details);
+      setTitle(document.title || "");
+      setContent(document.content || "");
+      setTimePeriod(document.time_period || "");
+      setAnalysisResults(document.time_period_details || null);
     }
-  }, [document?.id, document?.title, document?.content, document?.time_period, document?.time_period_details]);
+  }, [document?.id]); // Only run when document ID changes
 
   const handleSave = async () => {
     try {
