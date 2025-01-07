@@ -27,7 +27,7 @@ export const FeaturesSection = () => {
   return (
     <section id="features" className="py-32 px-4 relative overflow-hidden scroll-mt-16 bg-gradient-to-br from-purple-50/80 to-pink-50/80">
       <div className="container mx-auto relative z-10">
-        <h2 className="text-4xl md:text-5xl font-bold text-center mb-20 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600">
+        <h2 className="text-4xl md:text-5xl font-bold text-center mb-20 bg-clip-text text-transparent bg-gradient-to-r from-purple-400/80 to-pink-400/80">
           Powerful Features for Every Writer
         </h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -38,7 +38,7 @@ export const FeaturesSection = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 to-pink-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
               <div className="relative z-10">
-                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-6 text-white shadow-lg">
+                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-400/80 to-pink-400/80 flex items-center justify-center mb-6 text-white shadow-lg">
                   <feature.icon className="h-6 w-6" />
                 </div>
                 <h3 className="text-xl font-semibold mb-4 text-gray-900">{feature.title}</h3>
