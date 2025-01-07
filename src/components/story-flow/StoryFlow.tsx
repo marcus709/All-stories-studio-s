@@ -1,6 +1,25 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Calendar, StickyNote, Wand2, ArrowRight, GitBranch, Network, Circle, Clock, Grid, Boxes, Spiral, Tree, FlowChart, Map, Target, Hexagon, Star, Route, Layers, Sphere, Box } from "lucide-react";
+import { 
+  UserPlus, 
+  Calendar, 
+  StickyNote, 
+  Wand2, 
+  ArrowRight, 
+  GitBranch, 
+  Network, 
+  Circle, 
+  Clock, 
+  Grid, 
+  Boxes, 
+  TreeDeciduous,
+  Map,
+  Target,
+  Hexagon, 
+  Star, 
+  Route, 
+  Layers 
+} from "lucide-react";
 import { StoryFlowTimeline } from "./StoryFlowTimeline";
 import { CharacterRelationshipMap } from "./CharacterRelationshipMap";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,10 +28,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-type ViewMode = "linear" | "branching" | "network" | "radial" | "timeline" | "cluster" | 
-                "grid" | "spiral" | "tree" | "flowchart" | "mindmap" | "concentric" | 
-                "hexagonal" | "starburst" | "pathway" | "layered" | "sphere" | "fractal";
+import { ViewMode, viewModeLabels } from "./types";
 
 const viewModeIcons = {
   linear: ArrowRight,
@@ -22,38 +38,13 @@ const viewModeIcons = {
   timeline: Clock,
   cluster: Boxes,
   grid: Grid,
-  spiral: Spiral,
-  tree: Tree,
-  flowchart: FlowChart,
   mindmap: Map,
   concentric: Target,
   hexagonal: Hexagon,
   starburst: Star,
   pathway: Route,
   layered: Layers,
-  sphere: Sphere,
-  fractal: Box
-};
-
-const viewModeLabels: Record<ViewMode, string> = {
-  linear: "Linear",
-  branching: "Branching",
-  network: "Network",
-  radial: "Radial",
-  timeline: "Timeline",
-  cluster: "Cluster",
-  grid: "Grid",
-  spiral: "Spiral",
-  tree: "Tree (Collapsible)",
-  flowchart: "Flowchart",
-  mindmap: "Mind Map",
-  concentric: "Concentric Circles",
-  hexagonal: "Hexagonal Web",
-  starburst: "Starburst",
-  pathway: "Pathway",
-  layered: "Layered",
-  sphere: "Interactive 3D Sphere",
-  fractal: "Fractal"
+  fractal: TreeDeciduous
 };
 
 export const StoryFlow = () => {
