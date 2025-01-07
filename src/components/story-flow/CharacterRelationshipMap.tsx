@@ -9,6 +9,7 @@ import { Plus } from 'lucide-react';
 import { AddRelationshipDialog } from './AddRelationshipDialog';
 import { useToast } from '@/hooks/use-toast';
 import { RelationshipType } from '@/types/relationships';
+import RelationshipNode from './RelationshipNode';
 
 const relationshipColors: Record<RelationshipType, string> = {
   'ally': '#22c55e',
@@ -18,6 +19,10 @@ const relationshipColors: Record<RelationshipType, string> = {
   'enemy': '#dc2626',
   'mentor': '#f59e0b',
   'student': '#6366f1',
+};
+
+const nodeTypes = {
+  relationship: RelationshipNode,
 };
 
 export const CharacterRelationshipMap = () => {
@@ -65,37 +70,55 @@ export const CharacterRelationshipMap = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['relationships'] });
       toast({
-        title: 'Success',
-        description: 'Relationship deleted successfully',
+        title: "Success",
+        description: "Relationship deleted successfully",
       });
     },
   });
 
-  // Transform characters and relationships into nodes and edges
+  // Transform characters and relationships into nodes and edges with neural network style
   const updateNodesAndEdges = useCallback(() => {
     if (!characters || !relationships) return;
 
-    const newNodes: Node[] = characters.map((char, index) => ({
-      id: char.id,
-      data: { label: char.name },
-      position: {
-        x: 250 + Math.cos(index * 2 * Math.PI / characters.length) * 200,
-        y: 250 + Math.sin(index * 2 * Math.PI / characters.length) * 200,
-      },
-      type: 'default',
-    }));
+    // Create a circular layout with some randomization for organic feel
+    const radius = 200;
+    const centerX = 400;
+    const centerY = 300;
+    
+    const newNodes: Node[] = characters.map((char, index) => {
+      const angle = (index * 2 * Math.PI) / characters.length;
+      const randomOffset = Math.random() * 50; // Add some randomness to positions
+      
+      return {
+        id: char.id,
+        type: 'relationship',
+        data: { 
+          label: char.name.split(' ')[0], // Use first name only for cleaner display
+          isActive: relationships.some(
+            rel => rel.character1_id === char.id || rel.character2_id === char.id
+          )
+        },
+        position: {
+          x: centerX + (radius + randomOffset) * Math.cos(angle),
+          y: centerY + (radius + randomOffset) * Math.sin(angle),
+        },
+      };
+    });
 
     const newEdges: Edge[] = relationships.map((rel) => ({
       id: rel.id,
       source: rel.character1_id,
       target: rel.character2_id,
-      label: rel.relationship_type,
       type: 'smoothstep',
+      animated: true,
       style: { 
         stroke: relationshipColors[rel.relationship_type as RelationshipType] || '#94a3b8',
         strokeWidth: rel.strength ? Math.max(1, Math.min(rel.strength / 20, 5)) : 1,
       },
-      data: { strength: rel.strength },
+      markerEnd: {
+        type: 'arrow',
+        color: relationshipColors[rel.relationship_type as RelationshipType] || '#94a3b8',
+      },
     }));
 
     setNodes(newNodes);
@@ -138,11 +161,21 @@ export const CharacterRelationshipMap = () => {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        nodeTypes={nodeTypes}
         fitView
+        minZoom={0.5}
+        maxZoom={2}
+        defaultEdgeOptions={{
+          type: 'smoothstep',
+          animated: true,
+        }}
       >
-        <Background />
+        <Background color="#aaa" gap={16} />
         <Controls />
-        <MiniMap />
+        <MiniMap 
+          nodeColor={(node) => (node.data?.isActive ? '#000' : '#fff')}
+          maskColor="rgba(255, 255, 255, 0.8)"
+        />
       </ReactFlow>
 
       <AddRelationshipDialog
