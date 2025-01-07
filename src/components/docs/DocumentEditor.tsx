@@ -32,14 +32,16 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
 
   // Reset state when document ID changes
   useEffect(() => {
+    // Only update state if we're switching to a different document
     if (document?.id !== currentDocId) {
       setCurrentDocId(document?.id);
-      setTitle(document?.title || "");
-      setContent(document?.content || "");
-      setTimePeriod(document?.time_period || "");
-      setAnalysisResults(document?.time_period_details || null);
+      // Initialize state with the new document's data
+      setTitle(document?.title ?? "");
+      setContent(document?.content ?? "");
+      setTimePeriod(document?.time_period ?? "");
+      setAnalysisResults(document?.time_period_details ?? null);
     }
-  }, [document?.id]);
+  }, [document?.id]); // Only run when document ID changes
 
   const handleSave = async () => {
     try {
@@ -60,33 +62,49 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
         updated_at: new Date().toISOString()
       };
 
-      const { data, error } = document?.id 
-        ? await supabase
-            .from("documents")
-            .update(documentData)
-            .eq("id", document.id)
-            .select()
-            .single()
-        : await supabase
-            .from("documents")
-            .insert({
-              ...documentData,
-              story_id: storyId,
-              user_id: session.user.id
-            })
-            .select()
-            .single();
+      let response;
+      
+      if (document?.id) {
+        // Update existing document
+        response = await supabase
+          .from("documents")
+          .update(documentData)
+          .eq("id", document.id)
+          .select()
+          .maybeSingle();
+      } else {
+        // Create new document
+        response = await supabase
+          .from("documents")
+          .insert({
+            ...documentData,
+            story_id: storyId,
+            user_id: session.user.id
+          })
+          .select()
+          .maybeSingle();
+      }
+
+      const { data, error } = response;
 
       if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "Document saved successfully",
-      });
+      if (data) {
+        // Update the current document ID to match the saved document
+        setCurrentDocId(data.id);
+        
+        toast({
+          title: "Success",
+          description: "Document saved successfully",
+        });
 
-      // Only invalidate the specific document's query
-      queryClient.invalidateQueries({ queryKey: ["documents", storyId] });
-      onSave?.();
+        // Only invalidate queries for this specific document
+        queryClient.invalidateQueries({ 
+          queryKey: ["documents", storyId, document?.id],
+        });
+        
+        onSave?.();
+      }
     } catch (error) {
       console.error("Error saving document:", error);
       toast({
