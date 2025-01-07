@@ -28,16 +28,18 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
   const [isLoadingContext, setIsLoadingContext] = useState(false);
   const [analysisResults, setAnalysisResults] = useState<any>(null);
   const { session } = useSessionContext();
+  const [currentDocId, setCurrentDocId] = useState<string | undefined>(undefined);
 
   // Reset state when document ID changes
   useEffect(() => {
-    if (document) {
-      setTitle(document.title || "");
-      setContent(document.content || "");
-      setTimePeriod(document.time_period || "");
-      setAnalysisResults(document.time_period_details || null);
+    if (document?.id !== currentDocId) {
+      setCurrentDocId(document?.id);
+      setTitle(document?.title || "");
+      setContent(document?.content || "");
+      setTimePeriod(document?.time_period || "");
+      setAnalysisResults(document?.time_period_details || null);
     }
-  }, [document?.id]); // Only run when document ID changes
+  }, [document?.id]);
 
   const handleSave = async () => {
     try {
@@ -82,6 +84,7 @@ export function DocumentEditor({ document, storyId, onSave }: DocumentEditorProp
         description: "Document saved successfully",
       });
 
+      // Only invalidate the specific document's query
       queryClient.invalidateQueries({ queryKey: ["documents", storyId] });
       onSave?.();
     } catch (error) {
