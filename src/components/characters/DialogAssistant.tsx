@@ -79,38 +79,54 @@ export function DialogAssistant({ characters }: DialogAssistantProps) {
 
     setIsSaving(true);
     try {
-      const timestamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
+      const timestamp = new Date().toISOString();
       const characterNames = characters
         .filter(char => selectedCharacters.includes(char.id))
         .map(char => char.name)
         .join(" & ");
 
-      // Create a unique document title
+      // Create a unique document title with more specific identifier
       const uniqueTitle = `Dialog: ${characterNames} - ${timestamp}`;
 
-      // Save as a new document with unique content
-      const { data: document, error } = await supabase
+      // First, check if a document with this exact content already exists
+      const { data: existingDocs, error: checkError } = await supabase
         .from("documents")
-        .insert({
-          story_id: selectedStory.id,
-          title: uniqueTitle,
-          content: generatedDialog,
-          user_id: (await supabase.auth.getUser()).data.user?.id,
-        })
-        .select()
-        .single();
+        .select("id")
+        .eq("story_id", selectedStory.id)
+        .eq("content", generatedDialog);
 
-      if (error) throw error;
+      if (checkError) throw checkError;
 
-      toast({
-        title: "Success",
-        description: "Dialog saved as a new document",
-      });
+      // Only proceed if no duplicate content is found
+      if (!existingDocs || existingDocs.length === 0) {
+        // Create a new document with unique content
+        const { error: insertError } = await supabase
+          .from("documents")
+          .insert({
+            story_id: selectedStory.id,
+            title: uniqueTitle,
+            content: generatedDialog,
+            user_id: (await supabase.auth.getUser()).data.user?.id,
+          });
 
-      // Reset the form after successful save
-      setGeneratedDialog("");
-      setContext("");
-      setSelectedCharacters([]);
+        if (insertError) throw insertError;
+
+        toast({
+          title: "Success",
+          description: "Dialog saved as a new document",
+        });
+
+        // Reset the form after successful save
+        setGeneratedDialog("");
+        setContext("");
+        setSelectedCharacters([]);
+      } else {
+        toast({
+          title: "Warning",
+          description: "This dialog content already exists in another document",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error("Error saving document:", error);
       toast({
@@ -122,6 +138,8 @@ export function DialogAssistant({ characters }: DialogAssistantProps) {
       setIsSaving(false);
     }
   };
+
+  // ... keep existing code (JSX rendering part remains unchanged)
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
