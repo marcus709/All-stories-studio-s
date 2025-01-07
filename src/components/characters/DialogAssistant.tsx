@@ -85,11 +85,15 @@ export function DialogAssistant({ characters }: DialogAssistantProps) {
         .map(char => char.name)
         .join(" & ");
 
+      // Create a unique document title
+      const uniqueTitle = `Dialog: ${characterNames} - ${timestamp}`;
+
+      // Save as a new document with unique content
       const { data: document, error } = await supabase
         .from("documents")
         .insert({
           story_id: selectedStory.id,
-          title: `Dialog: ${characterNames} - ${timestamp}`,
+          title: uniqueTitle,
           content: generatedDialog,
           user_id: (await supabase.auth.getUser()).data.user?.id,
         })
