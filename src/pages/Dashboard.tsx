@@ -7,8 +7,10 @@ import { StoryProvider } from "@/contexts/StoryContext";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useToast } from "@/hooks/use-toast";
 
+type View = "story" | "characters" | "plot" | "ideas" | "docs" | "logic";
+
 function DashboardLayout() {
-  const [currentView, setCurrentView] = useState<"story" | "characters" | "plot" | "flow" | "ideas" | "docs" | "logic">("story");
+  const [currentView, setCurrentView] = useState<View>("story");
   const navigate = useNavigate();
   const { toast } = useToast();
   const session = useSession();
@@ -23,7 +25,6 @@ function DashboardLayout() {
     }
   }, [session, navigate, toast]);
 
-  // Don't render anything while checking session
   if (!session) {
     return null;
   }
