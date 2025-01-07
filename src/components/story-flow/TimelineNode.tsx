@@ -1,13 +1,8 @@
 import { memo } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
+import { TimelineNodeData } from './types/timeline';
 
-interface TimelineNodeData {
-  label: string;
-  subtitle?: string;
-  year?: string;
-}
-
-const TimelineNode = ({ data }: NodeProps<{ label: string; subtitle?: string; year?: string }>) => {
+const TimelineNode = ({ data }: NodeProps<TimelineNodeData>) => {
   return (
     <div className="p-4">
       <Handle
