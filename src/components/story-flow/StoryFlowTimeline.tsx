@@ -10,16 +10,10 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import TimelineNode from './TimelineNode';
-import { ViewMode } from "./types";
-import { TimelineNode as TimelineNodeType, TimelineEdge, TimelineNodeData } from './types/timeline';
+import { TimelineNode as TimelineNodeType, TimelineEdge } from './types/timeline';
 import { initialNodes, initialEdges } from './data/initialElements';
-import { getLayoutedElements } from './utils/layoutUtils';
 
-interface StoryFlowTimelineProps {
-  viewMode: ViewMode;
-}
-
-export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
+export const StoryFlowTimeline = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState<TimelineNodeType>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<TimelineEdge>(initialEdges);
 
@@ -29,15 +23,13 @@ export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
   );
 
   const nodeTypes = useMemo<NodeTypes>(() => ({
-    timeline: TimelineNode,
+    timeline: TimelineNode as any,
   }), []);
-
-  const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(nodes, edges, viewMode);
 
   return (
     <ReactFlow
-      nodes={layoutedNodes}
-      edges={layoutedEdges}
+      nodes={nodes}
+      edges={edges}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
