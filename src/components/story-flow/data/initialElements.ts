@@ -4,20 +4,32 @@ export const initialNodes: TimelineNode[] = [
   {
     id: '1',
     type: 'timeline',
-    data: { label: 'Story Beginning', subtitle: 'The journey starts', year: '2024' },
     position: { x: 0, y: 0 },
+    data: {
+      label: 'Story Beginning',
+      subtitle: 'The journey starts',
+      year: '2024',
+    },
   },
   {
     id: '2',
     type: 'timeline',
-    data: { label: 'Rising Action', subtitle: 'Conflict emerges', year: '2024' },
     position: { x: 200, y: 0 },
+    data: {
+      label: 'Rising Action',
+      subtitle: 'Conflict emerges',
+      year: '2024',
+    },
   },
   {
     id: '3',
     type: 'timeline',
-    data: { label: 'Climax', subtitle: 'Peak tension', year: '2024' },
     position: { x: 400, y: 0 },
+    data: {
+      label: 'Climax',
+      subtitle: 'Peak tension',
+      year: '2024',
+    },
   },
 ];
 

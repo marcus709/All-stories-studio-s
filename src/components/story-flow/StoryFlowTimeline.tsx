@@ -7,23 +7,55 @@ import {
   useEdgesState,
   addEdge,
   NodeTypes,
+  Connection,
+  Node,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import TimelineNode from './TimelineNode';
-import { TimelineNode as TimelineNodeType, TimelineEdge } from './types/timeline';
+import { TimelineNodeData, TimelineNode as TimelineNodeType, TimelineEdge } from './types/timeline';
 import { initialNodes, initialEdges } from './data/initialElements';
 
 export const StoryFlowTimeline = () => {
-  const [nodes, setNodes, onNodesChange] = useNodesState<TimelineNodeType>(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<TimelineEdge>(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const onConnect = useCallback(
-    (params: any) => setEdges((eds) => addEdge(params, eds)),
+    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
     [setEdges],
   );
 
+  const handleNodeAdd = useCallback(() => {
+    const newNode: Node<TimelineNodeData> = {
+      id: `node-${nodes.length + 1}`,
+      type: 'timeline',
+      position: { x: 100, y: 100 },
+      data: {
+        label: 'New Event',
+        subtitle: 'Description',
+        year: '2024',
+      },
+    };
+    setNodes((nds) => [...nds, newNode]);
+  }, [nodes.length, setNodes]);
+
+  const handleNodeDelete = useCallback((nodeId: string) => {
+    setNodes((nds) => nds.filter((node) => node.id !== nodeId));
+    setEdges((eds) => eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId));
+  }, [setNodes, setEdges]);
+
+  const handleNodeEdit = useCallback((nodeId: string, newData: TimelineNodeData) => {
+    setNodes((nds) =>
+      nds.map((node) => {
+        if (node.id === nodeId) {
+          return { ...node, data: newData };
+        }
+        return node;
+      })
+    );
+  }, [setNodes]);
+
   const nodeTypes = useMemo<NodeTypes>(() => ({
-    timeline: TimelineNode as any,
+    timeline: TimelineNode,
   }), []);
 
   return (
