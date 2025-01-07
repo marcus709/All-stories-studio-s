@@ -1,51 +1,14 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { 
-  UserPlus, 
-  Calendar, 
-  StickyNote, 
-  Wand2, 
-  ArrowRight, 
-  GitBranch, 
-  Network, 
-  Circle, 
-  Clock, 
-  Grid, 
-  Boxes, 
-  TreeDeciduous,
-  Map,
-  Target,
-  Hexagon, 
-  Star, 
-  Route, 
-  Layers 
-} from "lucide-react";
+import React, { useState } from "react";
 import { StoryFlowTimeline } from "./StoryFlowTimeline";
 import { CharacterRelationshipMap } from "./CharacterRelationshipMap";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useStory } from "@/contexts/StoryContext";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { ViewMode, viewModeLabels } from "./types";
-
-const viewModeIcons = {
-  linear: ArrowRight,
-  branching: GitBranch,
-  network: Network,
-  radial: Circle,
-  timeline: Clock,
-  cluster: Boxes,
-  grid: Grid,
-  mindmap: Map,
-  concentric: Target,
-  hexagonal: Hexagon,
-  starburst: Star,
-  pathway: Route,
-  layered: Layers,
-  fractal: TreeDeciduous
-};
+import { supabase } from "@/integrations/supabase/client";
+import { ViewMode } from "./types";
+import { ViewModeSelector } from "./components/ViewModeSelector";
+import { ToolbarButtons } from "./components/ToolbarButtons";
+import { Button } from "@/components/ui/button";
 
 export const StoryFlow = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("linear");
@@ -132,60 +95,19 @@ export const StoryFlow = () => {
         </div>
       </div>
 
-      <div className="flex gap-3 mb-6">
-        <Button 
-          variant={activeView === "timeline" ? "default" : "outline"} 
-          className="gap-2"
-          onClick={() => setActiveView("timeline")}
-        >
-          <Calendar className="w-4 h-4" />
-          Timeline
-        </Button>
-        <Button 
-          variant={activeView === "relationships" ? "default" : "outline"} 
-          className="gap-2"
-          onClick={() => setActiveView("relationships")}
-        >
-          <Network className="w-4 h-4" />
-          Relationships
-        </Button>
-        <Button variant="outline" className="gap-2">
-          <StickyNote className="w-4 h-4" />
-          Add Note
-        </Button>
-        <Button 
-          className="bg-violet-500 hover:bg-violet-600 gap-2 ml-auto"
-          onClick={handleGetSuggestions}
-          disabled={isGenerating || !selectedStory}
-        >
-          <Wand2 className={`w-4 h-4 ${isGenerating ? 'animate-spin' : ''}`} />
-          {isGenerating ? 'Generating...' : 'AI Suggestions'}
-        </Button>
-      </div>
+      <ToolbarButtons
+        activeView={activeView}
+        onViewChange={setActiveView}
+        onGetSuggestions={handleGetSuggestions}
+        isGenerating={isGenerating}
+        selectedStory={selectedStory}
+      />
 
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         {activeView === "timeline" ? (
           <div className="relative">
             <div className="absolute left-4 top-4 z-10">
-              <Select value={viewMode} onValueChange={(value: ViewMode) => setViewMode(value)}>
-                <SelectTrigger className="w-[180px] bg-white">
-                  <SelectValue>
-                    {viewModeLabels[viewMode]}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <ScrollArea className="h-[400px] w-[350px] rounded-md">
-                    {(Object.keys(viewModeLabels) as ViewMode[]).map((mode) => (
-                      <SelectItem key={mode} value={mode}>
-                        <div className="flex items-center gap-2 py-1">
-                          {viewModeIcons[mode] && React.createElement(viewModeIcons[mode], { className: "w-4 h-4" })}
-                          <span>{viewModeLabels[mode]}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </ScrollArea>
-                </SelectContent>
-              </Select>
+              <ViewModeSelector viewMode={viewMode} onViewModeChange={setViewMode} />
             </div>
             
             <div className="absolute right-4 top-4 flex flex-col gap-2 z-10">
