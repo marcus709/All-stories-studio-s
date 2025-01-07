@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { CharacterForm } from "./character/CharacterForm";
+import { useStory } from "@/contexts/StoryContext";
 
 interface CreateCharacterDialogProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export function CreateCharacterDialog({ isOpen, onOpenChange }: CreateCharacterD
   const session = useSession();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { selectedStory } = useStory();
   
   const [formData, setFormData] = useState({
     name: "",
@@ -45,8 +47,45 @@ export function CreateCharacterDialog({ isOpen, onOpenChange }: CreateCharacterD
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
+  const createCharacterDocument = async (characterId: string) => {
+    if (!selectedStory?.id || !session?.user?.id) return;
+
+    try {
+      const documentTitle = `Character: ${formData.name}`;
+      const documentContent = `
+        <h2>Character Profile: ${formData.name}</h2>
+        <p><strong>Role:</strong> ${formData.role}</p>
+        <p><strong>Traits:</strong> ${formData.traits}</p>
+        <p><strong>Goals:</strong> ${formData.goals}</p>
+        <h3>Backstory</h3>
+        <p>${formData.backstory}</p>
+      `;
+
+      const { error: docError } = await supabase
+        .from("documents")
+        .insert({
+          title: documentTitle,
+          content: documentContent,
+          story_id: selectedStory.id,
+          user_id: session.user.id
+        });
+
+      if (docError) throw docError;
+
+      // Invalidate documents query to refresh the list
+      queryClient.invalidateQueries({ queryKey: ["documents", selectedStory.id] });
+    } catch (error) {
+      console.error("Error creating character document:", error);
+      toast({
+        title: "Warning",
+        description: "Character was created but failed to create associated document",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleCreateCharacter = async () => {
-    if (!session?.user?.id) {
+    if (!session?.user?.id || !selectedStory?.id) {
       toast({
         title: "Authentication Required",
         description: "Please sign in to create a character",
@@ -68,16 +107,25 @@ export function CreateCharacterDialog({ isOpen, onOpenChange }: CreateCharacterD
     setIsSubmitting(true);
     
     try {
-      const { error } = await supabase.from("characters").insert({
-        name: formData.name,
-        role: formData.role,
-        traits: formData.traits.split(",").map((trait) => trait.trim()),
-        goals: formData.goals,
-        backstory: formData.backstory,
-        user_id: session.user.id
-      });
+      const { data, error } = await supabase
+        .from("characters")
+        .insert({
+          name: formData.name,
+          role: formData.role,
+          traits: formData.traits.split(",").map((trait) => trait.trim()),
+          goals: formData.goals,
+          backstory: formData.backstory,
+          user_id: session.user.id,
+          story_id: selectedStory.id
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+
+      if (data) {
+        await createCharacterDocument(data.id);
+      }
 
       toast({
         title: "Success",
