@@ -29,7 +29,7 @@ export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
   );
 
   const nodeTypes = useMemo<NodeTypes>(() => ({
-    timeline: TimelineNode as any,
+    timeline: TimelineNode,
   }), []);
 
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(nodes, edges, viewMode);
