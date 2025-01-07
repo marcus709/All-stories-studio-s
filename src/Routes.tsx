@@ -1,4 +1,4 @@
-import { Route, Routes as RouterRoutes, useParams } from "react-router-dom";
+import { Route, Routes as RouterRoutes } from "react-router-dom";
 import { Header } from "./components/Header";
 import Index from "./pages/Index";
 import Community from "./pages/Community";

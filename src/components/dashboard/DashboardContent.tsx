@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { CharactersView } from "@/components/CharactersView";
 import { PlotDevelopmentView } from "@/components/PlotDevelopmentView";
-import { StoryFlow } from "@/components/story-flow/StoryFlow";
+import { DreamToStory } from "@/components/dream-to-story/DreamToStory";
 import { StoryIdeasView } from "@/components/StoryIdeasView";
 import { StoryDocsView } from "@/components/docs/StoryDocsView";
 import { StoryView } from "./views/StoryView";
@@ -14,7 +14,7 @@ import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
-type View = "story" | "characters" | "plot" | "flow" | "ideas" | "docs" | "logic";
+type View = "story" | "characters" | "plot" | "dream" | "ideas" | "docs" | "logic";
 
 interface DashboardContentProps {
   currentView: View;
@@ -53,9 +53,9 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
             component = <PlotDevelopmentView />;
           }
           break;
-        case "flow":
-          if (handleFeatureAccess("Story Flow", "story_docs")) {
-            component = <StoryFlow />;
+        case "dream":
+          if (handleFeatureAccess("Dream to Story", "story_docs")) {
+            component = <DreamToStory />;
           }
           break;
         case "ideas":
