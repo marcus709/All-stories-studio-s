@@ -4,7 +4,7 @@ import { TimelineNodeData } from './types/timeline';
 
 const TimelineNode = ({ data }: NodeProps<TimelineNodeData>) => {
   return (
-    <div className="p-4">
+    <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-200">
       <Handle
         type="target"
         position={Position.Left}

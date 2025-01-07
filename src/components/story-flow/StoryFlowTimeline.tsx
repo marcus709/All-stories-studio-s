@@ -20,15 +20,15 @@ interface StoryFlowTimelineProps {
 }
 
 export const StoryFlowTimeline = ({ viewMode }: StoryFlowTimelineProps) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState<TimelineNodeType>(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<TimelineEdge>(initialEdges);
 
   const onConnect = useCallback(
     (params: any) => setEdges((eds) => addEdge(params, eds)),
     [setEdges],
   );
 
-  const nodeTypes = useMemo<NodeTypes>(
+  const nodeTypes: NodeTypes = useMemo(
     () => ({
       timeline: TimelineNode,
     }),
