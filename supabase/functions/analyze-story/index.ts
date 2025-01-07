@@ -19,7 +19,9 @@ const validIssueTypes = [
   'character_inconsistency',
   'setting_inconsistency',
   'logic_flaw'
-];
+] as const;
+
+type StoryIssueType = typeof validIssueTypes[number];
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -73,7 +75,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4',
         messages: [
           {
             role: 'system',
@@ -128,11 +130,13 @@ serve(async (req) => {
     // Process and validate each issue before inserting
     const validatedIssues = parsedContent.issues.map(issue => {
       // Ensure issue type is valid
-      let issueType = issue.type?.toString().toLowerCase() || 'plot_hole';
+      const rawType = issue.type?.toString().toLowerCase() || 'plot_hole';
+      let issueType: StoryIssueType = 'plot_hole';
       
-      if (!validIssueTypes.includes(issueType)) {
-        console.warn(`Invalid issue type "${issueType}", defaulting to plot_hole`);
-        issueType = 'plot_hole';
+      if (validIssueTypes.includes(rawType as StoryIssueType)) {
+        issueType = rawType as StoryIssueType;
+      } else {
+        console.warn(`Invalid issue type "${rawType}", defaulting to plot_hole`);
       }
 
       // Validate and normalize severity
@@ -150,14 +154,16 @@ serve(async (req) => {
 
     console.log('Validated issues:', validatedIssues);
 
-    // Insert issues
-    const { error: issuesError } = await supabase
-      .from('story_issues')
-      .insert(validatedIssues);
+    // Insert issues one by one to better handle errors
+    for (const issue of validatedIssues) {
+      const { error: issueError } = await supabase
+        .from('story_issues')
+        .insert(issue);
 
-    if (issuesError) {
-      console.error('Error inserting issues:', issuesError);
-      throw new Error('Failed to save analysis issues');
+      if (issueError) {
+        console.error('Error inserting issue:', issueError, 'Issue data:', issue);
+        throw new Error(`Failed to save analysis issue: ${issueError.message}`);
+      }
     }
 
     return new Response(
