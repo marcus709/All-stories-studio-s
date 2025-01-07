@@ -40,7 +40,11 @@ const TimelineNode = ({ data }: NodeProps<TimelineNodeData>) => {
           handleSave={handleSave}
           handleCancel={handleCancel}
           handleDoubleClick={() => setIsEditing(true)}
-          data={data}
+          data={{
+            label: data.label,
+            subtitle: data.subtitle || '',
+            year: data.year || ''
+          }}
         />
         <TimelineNodeMenu
           handleEdit={() => setIsEditing(true)}

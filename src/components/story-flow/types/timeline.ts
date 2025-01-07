@@ -1,6 +1,6 @@
 import { Node, Edge } from '@xyflow/react';
 
-export interface TimelineNodeData extends Record<string, unknown> {
+export interface TimelineNodeData {
   label: string;
   subtitle?: string;
   year?: string;
