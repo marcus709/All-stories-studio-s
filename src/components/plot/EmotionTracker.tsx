@@ -2,12 +2,13 @@ import { useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DocumentUpload } from "@/components/story-logic/DocumentUpload";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 interface EmotionData {
   stage: string;
@@ -24,6 +25,7 @@ interface EmotionTrackerProps {
 export const EmotionTracker = ({ plotEvents, selectedDocument, onDocumentSelect }: EmotionTrackerProps) => {
   const [showDocumentSelector, setShowDocumentSelector] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: documents } = useQuery({
     queryKey: ["documents"],
@@ -37,7 +39,7 @@ export const EmotionTracker = ({ plotEvents, selectedDocument, onDocumentSelect 
     },
   });
 
-  const { data: emotions } = useQuery({
+  const { data: emotions, isLoading: isLoadingEmotions } = useQuery({
     queryKey: ["plotEmotions", selectedDocument],
     queryFn: async () => {
       if (!selectedDocument) return null;
@@ -52,6 +54,37 @@ export const EmotionTracker = ({ plotEvents, selectedDocument, onDocumentSelect 
     enabled: !!selectedDocument,
   });
 
+  const analyzeEmotionsMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedDocument) return;
+      
+      const response = await supabase.functions.invoke('analyze-document-emotions', {
+        body: { 
+          documentId: selectedDocument,
+          plotEvents,
+          structure: "selected structure" // You might want to pass this as a prop
+        },
+      });
+
+      if (response.error) throw response.error;
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["plotEmotions"] });
+      toast({
+        title: "Success",
+        description: "Document analyzed successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to analyze document",
+        variant: "destructive",
+      });
+    },
+  });
+
   const emotionData: EmotionData[] = plotEvents.map((event) => {
     const eventEmotion = emotions?.find((e) => e.plot_event_id === event.id);
     return {
@@ -60,6 +93,12 @@ export const EmotionTracker = ({ plotEvents, selectedDocument, onDocumentSelect 
       readerEmotion: eventEmotion?.intensity || 0,
     };
   });
+
+  const handleDocumentSelect = async (docId: string) => {
+    onDocumentSelect(docId);
+    setShowDocumentSelector(false);
+    analyzeEmotionsMutation.mutate();
+  };
 
   const handleUploadComplete = () => {
     toast({
@@ -94,10 +133,7 @@ export const EmotionTracker = ({ plotEvents, selectedDocument, onDocumentSelect 
                         key={doc.id}
                         variant="ghost"
                         className="w-full justify-start"
-                        onClick={() => {
-                          onDocumentSelect(doc.id);
-                          setShowDocumentSelector(false);
-                        }}
+                        onClick={() => handleDocumentSelect(doc.id)}
                       >
                         {doc.title}
                       </Button>
@@ -117,7 +153,11 @@ export const EmotionTracker = ({ plotEvents, selectedDocument, onDocumentSelect 
       </div>
 
       <div className="relative w-full aspect-[2/1] min-h-[400px] bg-violet-50/50 rounded-lg p-4">
-        {selectedDocument ? (
+        {isLoadingEmotions || analyzeEmotionsMutation.isPending ? (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-violet-500" />
+          </div>
+        ) : selectedDocument ? (
           <LineChart
             width={800}
             height={400}
