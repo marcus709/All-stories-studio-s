@@ -1,14 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send } from "lucide-react";
 
 interface MessageInputProps {
   onSendMessage: (content: string) => Promise<void>;
+  initialValue?: string;
 }
 
-export const MessageInput = ({ onSendMessage }: MessageInputProps) => {
+export const MessageInput = ({ onSendMessage, initialValue }: MessageInputProps) => {
   const [newMessage, setNewMessage] = useState("");
+
+  useEffect(() => {
+    if (initialValue) {
+      setNewMessage(initialValue);
+    }
+  }, [initialValue]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,7 +26,7 @@ export const MessageInput = ({ onSendMessage }: MessageInputProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2">
+    <form onSubmit={handleSubmit} className="flex gap-2 p-4 border-t border-gray-100">
       <Input
         value={newMessage}
         onChange={(e) => setNewMessage(e.target.value)}

@@ -5,30 +5,28 @@ import { MessageInput } from "./chat/MessageInput";
 import { GroupHeader } from "./chat/GroupHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { RealtimeChannel } from "@supabase/supabase-js";
+import { Character } from "@/integrations/supabase/types/tables.types";
+import { CharacterPreview } from "./chat/CharacterPreview";
 
 interface GroupChatProps {
   group: any;
   onBack: () => void;
+  sharedCharacter?: Character;
 }
 
-export const GroupChat = ({ group, onBack }: GroupChatProps) => {
+export const GroupChat = ({ group, onBack, sharedCharacter }: GroupChatProps) => {
   const session = useSession();
   const [messages, setMessages] = useState<any[]>([]);
   const [isMember, setIsMember] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [draftMessage, setDraftMessage] = useState("");
   const channelRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
-    checkMembership();
-    fetchMessages();
-    setupRealtimeSubscription();
-    
-    return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-      }
-    };
-  }, [group.id]);
+    if (sharedCharacter) {
+      setDraftMessage(`I'd like to share a character with the group:`);
+    }
+  }, [sharedCharacter]);
 
   const checkMembership = async () => {
     try {
@@ -121,13 +119,37 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
     if (!session?.user?.id || !isMember) return;
     
     try {
-      const { error } = await supabase.from("group_messages").insert({
+      let messageData: any = {
         content,
         group_id: group.id,
         user_id: session.user.id,
-      });
+      };
+
+      if (sharedCharacter) {
+        messageData.metadata = {
+          type: 'character_share',
+          character: sharedCharacter
+        };
+      }
+
+      const { error } = await supabase
+        .from("group_messages")
+        .insert(messageData);
 
       if (error) throw error;
+
+      if (sharedCharacter) {
+        // Create the share record
+        const { error: shareError } = await supabase
+          .from("character_shares")
+          .insert({
+            character_id: sharedCharacter.id,
+            shared_by: session.user.id,
+            shared_with_group: group.id
+          });
+
+        if (shareError) throw shareError;
+      }
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -156,7 +178,15 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
       <div className="flex-1 overflow-y-auto">
         <MessageList messages={messages} isLoading={isLoading} />
       </div>
-      <MessageInput onSendMessage={handleSendMessage} />
+      {sharedCharacter && (
+        <div className="p-4 border-t border-gray-100">
+          <CharacterPreview character={sharedCharacter} />
+        </div>
+      )}
+      <MessageInput 
+        onSendMessage={handleSendMessage} 
+        initialValue={draftMessage}
+      />
     </div>
   );
 };
