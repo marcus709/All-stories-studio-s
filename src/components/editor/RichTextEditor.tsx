@@ -57,6 +57,19 @@ export function RichTextEditor({ content, onChange, className = '' }: RichTextEd
           setShowMenu(false);
           return false;
         },
+        keyup: (view) => {
+          // Check if there's any text selected
+          const { from, to } = view.state.selection;
+          if (from === to) {
+            setShowMenu(false);
+          }
+          return false;
+        },
+        mousedown: () => {
+          // Hide menu when starting a new selection
+          setShowMenu(false);
+          return false;
+        },
       },
     },
   });
