@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileText } from "lucide-react";
+import { FileText, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Heading1, Heading2 } from "lucide-react";
+import { Toggle } from "@/components/ui/toggle";
+import { Separator } from "@/components/ui/separator";
 
 interface DocumentPreviewProps {
   document: {
@@ -42,6 +44,50 @@ export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps)
                 {document.title}
               </DialogTitle>
             </DialogHeader>
+
+            <div className="border-b border-input bg-white px-4">
+              <div className="flex flex-wrap gap-2 py-2">
+                <Toggle size="sm" disabled>
+                  <Bold className="h-4 w-4" />
+                </Toggle>
+                <Toggle size="sm" disabled>
+                  <Italic className="h-4 w-4" />
+                </Toggle>
+                <Toggle size="sm" disabled>
+                  <Underline className="h-4 w-4" />
+                </Toggle>
+
+                <Separator orientation="vertical" className="mx-1 h-8" />
+
+                <Toggle size="sm" disabled>
+                  <AlignLeft className="h-4 w-4" />
+                </Toggle>
+                <Toggle size="sm" disabled>
+                  <AlignCenter className="h-4 w-4" />
+                </Toggle>
+                <Toggle size="sm" disabled>
+                  <AlignRight className="h-4 w-4" />
+                </Toggle>
+
+                <Separator orientation="vertical" className="mx-1 h-8" />
+
+                <Toggle size="sm" disabled>
+                  <List className="h-4 w-4" />
+                </Toggle>
+                <Toggle size="sm" disabled>
+                  <ListOrdered className="h-4 w-4" />
+                </Toggle>
+
+                <Separator orientation="vertical" className="mx-1 h-8" />
+
+                <Toggle size="sm" disabled>
+                  <Heading1 className="h-4 w-4" />
+                </Toggle>
+                <Toggle size="sm" disabled>
+                  <Heading2 className="h-4 w-4" />
+                </Toggle>
+              </div>
+            </div>
             
             <ScrollArea className="flex-1 p-12">
               <div className="max-w-[750px] mx-auto">
