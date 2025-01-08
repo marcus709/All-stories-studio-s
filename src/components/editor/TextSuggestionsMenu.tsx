@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Editor } from '@tiptap/react';
 import { Button } from '../ui/button';
 import {
@@ -22,29 +22,9 @@ interface TextSuggestionsMenuProps {
 export function TextSuggestionsMenu({ editor, isOpen, top, left }: TextSuggestionsMenuProps) {
   const { generateContent, isLoading } = useAI();
   const { toast } = useToast();
-  const [showMenu, setShowMenu] = useState(false);
   const menuWidth = 200; // Approximate width of the menu in pixels
 
-  // Add a slight delay before showing the menu to ensure the user has finished selecting
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    
-    if (isOpen) {
-      timeoutId = setTimeout(() => {
-        setShowMenu(true);
-      }, 200); // 200ms delay
-    } else {
-      setShowMenu(false);
-    }
-
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, [isOpen]);
-
-  if (!isOpen || !showMenu) return null;
+  if (!isOpen) return null;
 
   const getSelectedText = () => {
     return editor?.state.doc.cut(
@@ -87,8 +67,9 @@ export function TextSuggestionsMenu({ editor, isOpen, top, left }: TextSuggestio
   };
 
   // Calculate position to avoid menu being cut off at screen edges
+  // and ensure it appears to the right of the selection
   const menuLeft = Math.min(
-    left + menuWidth,
+    left + 20, // Add 20px padding from the selection
     window.innerWidth - menuWidth - 20 // 20px padding from right edge
   );
 
@@ -98,7 +79,6 @@ export function TextSuggestionsMenu({ editor, isOpen, top, left }: TextSuggestio
       style={{
         top: `${top}px`,
         left: `${menuLeft}px`,
-        transform: 'translateX(-100%)',
       }}
     >
       <Button
