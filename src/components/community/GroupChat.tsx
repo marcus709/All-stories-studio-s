@@ -9,7 +9,7 @@ import { Character } from "@/integrations/supabase/types/tables.types";
 import { CharacterPreview } from "./chat/CharacterPreview";
 import { useGroupMessages } from "./chat/hooks/useGroupMessages";
 import { useGroupMembership } from "./chat/hooks/useGroupMembership";
-import { X, Users } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface GroupChatProps {
@@ -119,17 +119,6 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
         onSendMessage={handleSendMessage} 
         initialValue={draftMessage}
       />
-      
-      {/* Floating My Groups Button */}
-      <Button
-        variant="secondary"
-        size="sm"
-        className="fixed bottom-24 right-8 shadow-lg hover:shadow-xl transition-shadow duration-200 bg-white hover:bg-gray-50"
-        onClick={onBack}
-      >
-        <Users className="h-4 w-4 mr-2" />
-        My Groups
-      </Button>
     </div>
   );
 };
