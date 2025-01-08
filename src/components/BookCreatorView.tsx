@@ -8,6 +8,9 @@ import { DesignHeader } from "./book/DesignHeader";
 import { TemplatePanel } from "./book/TemplatePanel";
 import { ImageUploadPanel } from "./book/ImageUploadPanel";
 import { PropertiesPanel } from "./book/PropertiesPanel";
+import { PageTurner } from "./book/PageTurner";
+import { BookSizeSelector, BookSize } from "./book/BookSizeSelector";
+import { PreviewScene } from "./book/PreviewScene";
 
 const templates: Template[] = [
   {
@@ -44,6 +47,8 @@ export const BookCreatorView = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [activeTab, setActiveTab] = useState("templates");
   const [coverImage, setCoverImage] = useState<string | null>(null);
+  const [bookSize, setBookSize] = useState<BookSize>({ width: 6, height: 9, name: "Trade Paperback (6\" × 9\")" });
+  const [previewScene, setPreviewScene] = useState("none");
 
   const { data: bookStructures } = useQuery({
     queryKey: ["bookStructures"],
@@ -71,6 +76,57 @@ export const BookCreatorView = () => {
 
   const handleImageUpload = (url: string) => {
     setCoverImage(url);
+  };
+
+  const renderBookPages = () => {
+    const pages = [
+      // Cover
+      <div
+        key="cover"
+        className="w-full h-full bg-white rounded-lg shadow-lg overflow-hidden"
+        style={{
+          aspectRatio: `${bookSize.width} / ${bookSize.height}`,
+        }}
+      >
+        {coverImage ? (
+          <img
+            src={coverImage}
+            alt="Book Cover"
+            className="w-full h-full object-cover"
+          />
+        ) : selectedTemplate ? (
+          <div
+            className="w-full h-full bg-gradient-to-br flex items-center justify-center"
+            style={{
+              background: `linear-gradient(to bottom right, ${selectedTemplate.colors.join(
+                ", "
+              )})`,
+            }}
+          >
+            <p className="text-white text-xl font-bold">Your Book Title</p>
+          </div>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-400">
+            Select a template to start designing
+          </div>
+        )}
+      </div>,
+      // Back cover
+      <div
+        key="back"
+        className="w-full h-full bg-white rounded-lg shadow-lg overflow-hidden"
+        style={{
+          aspectRatio: `${bookSize.width} / ${bookSize.height}`,
+        }}
+      >
+        <div className="p-8">
+          <h2 className="text-2xl font-bold mb-4">Back Cover</h2>
+          <p className="text-gray-600">Add your book description here...</p>
+        </div>
+      </div>,
+    ];
+
+    return pages;
   };
 
   return (
@@ -105,6 +161,9 @@ export const BookCreatorView = () => {
                 selectedTemplate={selectedTemplate}
                 onTemplateSelect={handleTemplateSelect}
               />
+              <div className="mt-6">
+                <BookSizeSelector onSizeChange={setBookSize} />
+              </div>
             </TabsContent>
 
             <TabsContent value="images" className="mt-0">
@@ -119,32 +178,11 @@ export const BookCreatorView = () => {
           </Tabs>
         </div>
 
-        {/* Center Panel - Cover Preview */}
+        {/* Center Panel - Book Preview */}
         <div className="flex-1 p-8 flex items-center justify-center bg-gray-100">
-          <div className="aspect-[2/3] w-[400px] bg-white rounded-lg shadow-lg overflow-hidden">
-            {coverImage ? (
-              <img
-                src={coverImage}
-                alt="Book Cover"
-                className="w-full h-full object-cover"
-              />
-            ) : selectedTemplate ? (
-              <div
-                className="w-full h-full bg-gradient-to-br flex items-center justify-center"
-                style={{
-                  background: `linear-gradient(to bottom right, ${selectedTemplate.colors.join(
-                    ", "
-                  )})`,
-                }}
-              >
-                <p className="text-white text-xl font-bold">Your Book Title</p>
-              </div>
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400">
-                Select a template to start designing
-              </div>
-            )}
-          </div>
+          <PreviewScene onSceneChange={setPreviewScene} className="w-full h-full">
+            <PageTurner pages={renderBookPages()} className="max-w-[600px] mx-auto" />
+          </PreviewScene>
         </div>
 
         {/* Right Panel - Properties */}
