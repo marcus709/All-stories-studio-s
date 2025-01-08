@@ -63,12 +63,12 @@ export const ShareDocumentDialog = ({ document, open, onOpenChange }: ShareDocum
             <div className="space-y-2">
               {friends?.map((friend) => (
                 <Button
-                  key={friend.id}
+                  key={friend.friend.id}
                   variant="outline"
                   className="w-full justify-start"
-                  onClick={() => handleShareWithFriend(friend.id)}
+                  onClick={() => handleShareWithFriend(friend.friend.id)}
                 >
-                  {friend.username || "Unknown User"}
+                  {friend.friend.username || "Unknown User"}
                 </Button>
               ))}
             </div>
