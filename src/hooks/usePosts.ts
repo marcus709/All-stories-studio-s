@@ -1,11 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useSession } from "@supabase/auth-helpers-react";
 
 export const usePosts = () => {
+  const session = useSession();
+  
   return useQuery({
     queryKey: ["posts"],
     queryFn: async () => {
-      console.log("Fetching posts...");
+      console.log("Fetching posts... User authenticated:", !!session?.user);
       
       const { data, error } = await supabase
         .from("posts")
@@ -26,7 +29,9 @@ export const usePosts = () => {
         throw error;
       }
 
+      console.log("Posts fetched successfully:", data?.length || 0, "posts found");
       return data || [];
     },
+    enabled: !!session?.user,
   });
 };

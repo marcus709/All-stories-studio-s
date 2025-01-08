@@ -16,11 +16,17 @@ export const CommunityFeed = () => {
   const { toast } = useToast();
   const { checkFeatureAccess } = useSubscription();
   const navigate = useNavigate();
-  const { data: posts, isLoading: postsLoading } = usePosts();
+  const { data: posts, isLoading: postsLoading, error: postsError } = usePosts();
+
+  console.log("CommunityFeed render - Session:", !!session);
+  console.log("CommunityFeed - Posts:", posts?.length);
+  console.log("CommunityFeed - Loading:", postsLoading);
+  console.log("CommunityFeed - Error:", postsError);
 
   // Check for session and redirect if not authenticated
   useEffect(() => {
     if (!session) {
+      console.log("No session found, redirecting to home");
       navigate('/');
       toast({
         title: "Authentication Required",
@@ -57,6 +63,7 @@ export const CommunityFeed = () => {
           }
         }
 
+        console.log("Profile fetched:", existingProfile);
         if (existingProfile) {
           return existingProfile as Profile;
         }
@@ -78,6 +85,7 @@ export const CommunityFeed = () => {
           throw createError;
         }
 
+        console.log("New profile created:", newProfile);
         return newProfile as Profile;
       } catch (error) {
         console.error("Error in profile query:", error);
@@ -89,14 +97,17 @@ export const CommunityFeed = () => {
   });
 
   if (!session) {
+    console.log("Rendering null due to no session");
     return null; // Return null since useEffect will handle the redirect
   }
 
   if (!checkFeatureAccess("community_access")) {
+    console.log("No community access");
     return <PaywallAlert isOpen={true} onClose={() => {}} feature="community features" requiredPlan="creator" />;
   }
 
   if (profileError) {
+    console.log("Profile error:", profileError);
     return (
       <div className="text-center p-4">
         <p className="text-red-500">Error loading profile. Please try again later.</p>
@@ -105,6 +116,7 @@ export const CommunityFeed = () => {
   }
 
   if (profileLoading || postsLoading) {
+    console.log("Loading state");
     return (
       <div className="text-center p-4">
         <p className="text-gray-500">Loading...</p>
