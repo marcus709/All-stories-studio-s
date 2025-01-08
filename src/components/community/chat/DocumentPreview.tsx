@@ -25,15 +25,13 @@ export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps)
   const handleSave = async () => {
     try {
       setIsSaving(true);
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('documents')
         .update({ 
           content,
           updated_at: new Date().toISOString()
         })
-        .eq('id', document.id)
-        .select()
-        .single();
+        .eq('id', document.id);
 
       if (error) {
         throw error;
@@ -85,6 +83,7 @@ export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps)
                 onClick={handleSave}
                 disabled={isSaving}
                 size="sm"
+                className="bg-violet-600 hover:bg-violet-700"
               >
                 {isSaving ? "Saving..." : "Save"}
               </Button>
@@ -94,7 +93,7 @@ export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps)
               <RichTextEditor 
                 content={content} 
                 onChange={setContent}
-                className="bg-white rounded-none border-0"
+                className="bg-white rounded-none border-0 h-full"
               />
             </div>
           </div>
