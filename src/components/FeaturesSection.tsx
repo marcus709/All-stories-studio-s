@@ -18,8 +18,8 @@ const features = [
   },
   {
     icon: Target,
-    title: "Contextual Story Planning",
-    description: "Start with your desired ending and let our AI help craft the perfect path there, while staying true to your established characters and world."
+    title: "Story Logic & Historical Analysis",
+    description: "Ensure historical accuracy and narrative consistency with our advanced analysis tools. Identify plot holes, timeline inconsistencies, and historical context to create authentic and compelling stories."
   }
 ];
 
