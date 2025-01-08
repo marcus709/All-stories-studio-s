@@ -3,15 +3,14 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import { EditorToolbar } from './EditorToolbar';
-import { cn } from '@/lib/utils';
 
 interface RichTextEditorProps {
   content: string;
   onChange: (content: string) => void;
-  className?: string; // Added className prop
+  className?: string;
 }
 
-export const RichTextEditor = ({ content, onChange, className }: RichTextEditorProps) => {
+export function RichTextEditor({ content, onChange, className = '' }: RichTextEditorProps) {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -22,20 +21,20 @@ export const RichTextEditor = ({ content, onChange, className }: RichTextEditorP
     ],
     content,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      const html = editor.getHTML();
+      onChange(html);
+    },
+    editorProps: {
+      attributes: {
+        class: 'prose prose-sm max-w-none flex-1 px-8 py-6 focus:outline-none overflow-y-auto',
+      },
     },
   });
 
-  if (!editor) {
-    return null;
-  }
-
   return (
-    <div className={cn("border rounded-lg overflow-hidden", className)}>
+    <div className={`flex flex-col ${className}`}>
       <EditorToolbar editor={editor} />
-      <div className="p-4 min-h-[300px] prose prose-sm max-w-none">
-        <EditorContent editor={editor} />
-      </div>
+      <EditorContent editor={editor} className="flex-1 overflow-y-auto" />
     </div>
   );
-};
+}
