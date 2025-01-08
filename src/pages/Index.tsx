@@ -30,20 +30,20 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white">
       <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
       <div className="relative">
         <Header />
         <main className="relative">
           {/* Decorative gradients */}
           <div className="absolute top-0 right-0 -translate-y-1/4 animate-pulse">
-            <div className="w-[250px] md:w-[500px] h-[250px] md:h-[500px] bg-purple-500/10 rounded-full blur-3xl" />
+            <div className="w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-3xl" />
           </div>
           <div className="absolute top-1/3 left-0 -translate-x-1/2 animate-pulse delay-700">
-            <div className="w-[250px] md:w-[500px] h-[250px] md:h-[500px] bg-pink-500/10 rounded-full blur-3xl" />
+            <div className="w-[500px] h-[500px] bg-pink-500/10 rounded-full blur-3xl" />
           </div>
           <div className="absolute bottom-0 right-1/4 translate-y-1/4 animate-pulse delay-1000">
-            <div className="w-[250px] md:w-[500px] h-[250px] md:h-[500px] bg-blue-500/10 rounded-full blur-3xl" />
+            <div className="w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-3xl" />
           </div>
           
           <HeroSection onShowAuth={handleShowAuth} />
