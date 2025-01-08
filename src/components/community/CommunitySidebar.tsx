@@ -11,7 +11,7 @@ import { FriendsList } from "./FriendsList";
 
 const navItems = [
   { icon: MessageSquare, label: "Feed", href: "/community" },
-  { icon: Users, label: "My Groups", href: "/community/groups" },
+  { icon: Users, label: "My Groups", href: "/community/groups", end: true },
   { icon: Hash, label: "Topics", href: "/community/topics" },
   { icon: Bookmark, label: "Saved", href: "/community/saved" },
   { icon: Settings, label: "Settings", href: "/settings" },
@@ -80,11 +80,11 @@ export const CommunitySidebar = () => {
       )}
 
       <nav className="space-y-1">
-        {navItems.map(({ icon: Icon, label, href }) => (
+        {navItems.map(({ icon: Icon, label, href, end }) => (
           <NavLink
             key={href}
             to={href}
-            end={href === "/community"}
+            end={end}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ${
                 isActive
