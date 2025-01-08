@@ -28,7 +28,6 @@ export function CreateCharacterDialog({ isOpen, onOpenChange }: CreateCharacterD
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Effect to check authentication status when dialog opens
   useEffect(() => {
     if (isOpen && !session) {
       toast({
@@ -45,43 +44,6 @@ export function CreateCharacterDialog({ isOpen, onOpenChange }: CreateCharacterD
   ) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
-  };
-
-  const createCharacterDocument = async (characterId: string) => {
-    if (!selectedStory?.id || !session?.user?.id) return;
-
-    try {
-      const documentTitle = `Character: ${formData.name}`;
-      const documentContent = `
-        <h2>Character Profile: ${formData.name}</h2>
-        <p><strong>Role:</strong> ${formData.role}</p>
-        <p><strong>Traits:</strong> ${formData.traits}</p>
-        <p><strong>Goals:</strong> ${formData.goals}</p>
-        <h3>Backstory</h3>
-        <p>${formData.backstory}</p>
-      `;
-
-      const { error: docError } = await supabase
-        .from("documents")
-        .insert({
-          title: documentTitle,
-          content: documentContent,
-          story_id: selectedStory.id,
-          user_id: session.user.id
-        });
-
-      if (docError) throw docError;
-
-      // Invalidate documents query to refresh the list
-      queryClient.invalidateQueries({ queryKey: ["documents", selectedStory.id] });
-    } catch (error) {
-      console.error("Error creating character document:", error);
-      toast({
-        title: "Warning",
-        description: "Character was created but failed to create associated document",
-        variant: "destructive",
-      });
-    }
   };
 
   const handleCreateCharacter = async () => {
@@ -107,7 +69,7 @@ export function CreateCharacterDialog({ isOpen, onOpenChange }: CreateCharacterD
     setIsSubmitting(true);
     
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("characters")
         .insert({
           name: formData.name,
@@ -117,15 +79,9 @@ export function CreateCharacterDialog({ isOpen, onOpenChange }: CreateCharacterD
           backstory: formData.backstory,
           user_id: session.user.id,
           story_id: selectedStory.id
-        })
-        .select()
-        .single();
+        });
 
       if (error) throw error;
-
-      if (data) {
-        await createCharacterDocument(data.id);
-      }
 
       toast({
         title: "Success",

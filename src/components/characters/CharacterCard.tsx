@@ -1,9 +1,10 @@
-import { UserRound, Calendar, Clock, Trash2, Share2 } from "lucide-react";
+import { UserRound, Calendar, Clock, Trash2, Share2, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { Character } from "@/integrations/supabase/types/tables.types";
 import { useState } from "react";
 import { ShareCharacterDialog } from "./ShareCharacterDialog";
+import { EditCharacterDialog } from "./EditCharacterDialog";
 
 interface CharacterCardProps {
   character: Character;
@@ -12,10 +13,19 @@ interface CharacterCardProps {
 
 export const CharacterCard = ({ character, onDeleteClick }: CharacterCardProps) => {
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   return (
     <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg shadow-purple-100/50 p-6 hover:shadow-purple-200/50 transition-all duration-300 relative group transform hover:scale-[1.02]">
       <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hover:bg-purple-50 hover:text-purple-600"
+          onClick={() => setShowEditDialog(true)}
+        >
+          <Edit className="h-4 w-4 text-purple-500" />
+        </Button>
         <Button
           variant="ghost"
           size="icon"
@@ -73,6 +83,12 @@ export const CharacterCard = ({ character, onDeleteClick }: CharacterCardProps) 
         character={character}
         isOpen={showShareDialog}
         onOpenChange={setShowShareDialog}
+      />
+
+      <EditCharacterDialog
+        character={character}
+        isOpen={showEditDialog}
+        onOpenChange={setShowEditDialog}
       />
     </div>
   );
