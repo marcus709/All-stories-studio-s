@@ -36,7 +36,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
           <div className="inline-flex items-center px-4 py-2 rounded-full bg-purple-50 border border-purple-100 mb-8 animate-fade-in">
             <Sparkles className="w-4 h-4 text-purple-600 mr-2" />
             <span className="text-sm text-purple-600 font-medium">
-              Unleash your creativity with AI-powered storytelling
+              Where Stories Come to Life - Join Our Creative Community
             </span>
           </div>
           
@@ -48,19 +48,17 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
             Create deeper characters, richer plots, and more engaging narratives with our AI-powered storytelling platform.
           </p>
           
-          {/* New prominent CTA button */}
-          <div className="mb-12 animate-fade-in opacity-0" style={{ animationDelay: '400ms' }}>
-            <Button 
-              size="lg"
-              onClick={handleStartWriting}
-              className="relative group px-8 py-6 overflow-hidden rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:scale-105 hover:from-purple-500 hover:to-pink-500"
-            >
-              <span className="relative z-10 text-lg font-medium">
-                Start Writing Now
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </Button>
-          </div>
+          {/* Main CTA button */}
+          <Button 
+            size="lg"
+            onClick={handleStartWriting}
+            className="relative group px-8 py-6 mb-12 overflow-hidden rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:scale-105 hover:from-purple-500 hover:to-pink-500"
+          >
+            <span className="relative z-10 text-lg font-medium">
+              Start Writing Now
+            </span>
+            <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </Button>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in opacity-0" style={{ animationDelay: '600ms' }}>
             <Button 
