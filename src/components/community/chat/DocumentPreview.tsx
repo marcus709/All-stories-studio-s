@@ -23,6 +23,15 @@ export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps)
   const { toast } = useToast();
 
   const handleSave = async () => {
+    if (!content.trim()) {
+      toast({
+        title: "Error",
+        description: "Document content cannot be empty",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsSaving(true);
       const { error } = await supabase
@@ -34,6 +43,7 @@ export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps)
         .eq('id', document.id);
 
       if (error) {
+        console.error("Supabase error:", error);
         throw error;
       }
 
@@ -72,29 +82,35 @@ export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps)
       </div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-4xl h-[85vh] p-0 gap-0">
-          <div className="flex flex-col h-full bg-zinc-50">
-            <DialogHeader className="px-6 py-4 border-b bg-white flex flex-row items-center justify-between">
-              <DialogTitle className="flex items-center gap-2 text-xl font-semibold">
-                <FileText className="h-5 w-5 text-violet-500" />
-                {document.title}
-              </DialogTitle>
-              <Button 
-                onClick={handleSave}
-                disabled={isSaving}
-                size="sm"
-                className="bg-violet-600 hover:bg-violet-700"
-              >
-                {isSaving ? "Saving..." : "Save"}
-              </Button>
-            </DialogHeader>
+        <DialogContent className="max-w-4xl h-[85vh] p-0">
+          <DialogHeader className="px-6 py-4 border-b bg-white">
+            <DialogTitle className="flex items-center gap-2 text-xl font-semibold">
+              <FileText className="h-5 w-5 text-violet-500" />
+              {document.title}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex flex-col h-[calc(100%-4rem)] bg-white">
+            <div className="border-b">
+              <EditorToolbar editor={null} />
+            </div>
             
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 overflow-hidden relative">
               <RichTextEditor 
                 content={content} 
                 onChange={setContent}
-                className="bg-white rounded-none border-0 h-full"
+                className="h-full"
               />
+              
+              <div className="absolute bottom-0 right-0 p-4 bg-white border-t border-l rounded-tl-lg">
+                <Button 
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="bg-violet-600 hover:bg-violet-700"
+                >
+                  {isSaving ? "Saving..." : "Save"}
+                </Button>
+              </div>
             </div>
           </div>
         </DialogContent>

@@ -3,8 +3,6 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import { EditorToolbar } from './EditorToolbar';
-import { TextSuggestionsMenu } from './TextSuggestionsMenu';
-import { useState } from 'react';
 
 interface RichTextEditorProps {
   content: string;
@@ -13,9 +11,6 @@ interface RichTextEditorProps {
 }
 
 export function RichTextEditor({ content, onChange, className = '' }: RichTextEditorProps) {
-  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
-  const [showMenu, setShowMenu] = useState(false);
-
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -31,56 +26,16 @@ export function RichTextEditor({ content, onChange, className = '' }: RichTextEd
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none h-full min-h-[500px] px-8 py-6 focus:outline-none',
-      },
-      handleDOMEvents: {
-        mouseup: (view, event) => {
-          const { from, to } = view.state.selection;
-          if (from === to) {
-            setShowMenu(false);
-            return false;
-          }
-
-          const { top, right } = view.coordsAtPos(to);
-          const domRect = view.dom.getBoundingClientRect();
-          
-          setMenuPosition({
-            top: top - domRect.top,
-            left: right - domRect.left,
-          });
-          setShowMenu(true);
-          return false;
-        },
-        blur: () => {
-          setShowMenu(false);
-          return false;
-        },
-        keyup: (view) => {
-          const { from, to } = view.state.selection;
-          if (from === to) {
-            setShowMenu(false);
-          }
-          return false;
-        },
-        mousedown: () => {
-          setShowMenu(false);
-          return false;
-        },
+        class: 'prose prose-sm max-w-none h-full px-8 py-6 focus:outline-none',
       },
     },
   });
 
   return (
-    <div className={`flex flex-col border rounded-lg bg-white h-full relative ${className}`}>
+    <div className={`flex flex-col border rounded-lg bg-white overflow-hidden ${className}`}>
       <EditorToolbar editor={editor} />
       <div className="flex-1 overflow-y-auto">
         <EditorContent editor={editor} />
-        <TextSuggestionsMenu
-          editor={editor}
-          isOpen={showMenu}
-          top={menuPosition.top}
-          left={menuPosition.left}
-        />
       </div>
     </div>
   );
