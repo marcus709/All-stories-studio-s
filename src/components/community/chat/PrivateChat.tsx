@@ -6,9 +6,9 @@ import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Character } from "@/integrations/supabase/types/tables.types";
-import { CharacterPreview } from "./CharacterPreview";
 import { PrivateChatHeader } from "./PrivateChatHeader";
 import { Message } from "./types";
+import { useMessageSending } from "./hooks/useMessageSending";
 
 export const PrivateChat = () => {
   const { friendId } = useParams();
@@ -16,20 +16,30 @@ export const PrivateChat = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [friend, setFriend] = useState<any>(null);
   const [isFriend, setIsFriend] = useState(false);
-  const [sharedCharacter, setSharedCharacter] = useState<Character | undefined>(
-    location.state?.sharedCharacter
-  );
-  const [draftMessage, setDraftMessage] = useState("");
+
+  const {
+    sharedCharacter,
+    setSharedCharacter,
+    sharedDocument,
+    setSharedDocument,
+    draftMessage,
+    setDraftMessage,
+    handleSendMessage
+  } = useMessageSending({ friendId, isFriend });
 
   useEffect(() => {
-    if (sharedCharacter) {
+    if (location.state?.sharedCharacter) {
+      setSharedCharacter(location.state.sharedCharacter);
       setDraftMessage("I'd like to share a character with you:");
+    } else if (location.state?.sharedDocument) {
+      setSharedDocument(location.state.sharedDocument);
+      setDraftMessage("I'd like to share a document with you:");
     }
-  }, [sharedCharacter]);
+  }, [location.state]);
 
   useEffect(() => {
     const checkFriendship = async () => {
@@ -165,72 +175,21 @@ export const PrivateChat = () => {
     return channel;
   };
 
-  const handleSendMessage = async (content: string) => {
-    if (!isFriend) {
-      toast({
-        title: "Error",
-        description: "You can only send messages to friends",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      let messageData: any = {
-        content,
-        sender_id: session?.user?.id,
-        receiver_id: friendId,
-      };
-
-      if (sharedCharacter) {
-        messageData.metadata = {
-          type: 'character_share',
-          character: sharedCharacter
-        };
-      }
-
-      const { error } = await supabase
-        .from("private_messages")
-        .insert(messageData);
-
-      if (error) throw error;
-
-      if (sharedCharacter) {
-        const { error: shareError } = await supabase
-          .from("character_shares")
-          .insert({
-            character_id: sharedCharacter.id,
-            shared_by: session?.user?.id,
-            shared_with_user: friendId
-          });
-
-        if (shareError) throw shareError;
-        
-        setSharedCharacter(undefined);
-        setDraftMessage("");
-      }
-    } catch (error) {
-      console.error("Error sending message:", error);
-      toast({
-        title: "Error",
-        description: "Failed to send message",
-        variant: "destructive",
-      });
-    }
-  };
-
   if (!isFriend) {
     return null;
   }
 
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow-sm">
-      <PrivateChatHeader friend={friend} />
+      <PrivateChatHeader friend={friend} onBack={() => navigate("/community")} />
       <div className="flex-1 overflow-hidden">
         <MessageList messages={messages} isLoading={isLoading} />
       </div>
       <div className="p-4 border-t">
-        <MessageInput onSendMessage={handleSendMessage} initialValue={draftMessage} />
+        <MessageInput 
+          onSendMessage={handleSendMessage} 
+          initialValue={draftMessage}
+        />
       </div>
     </div>
   );

@@ -379,6 +379,48 @@ export type Database = {
           },
         ]
       }
+      document_shares: {
+        Row: {
+          created_at: string | null
+          document_id: string
+          id: string
+          shared_by: string
+          shared_with_group: string | null
+          shared_with_user: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          document_id: string
+          id?: string
+          shared_by: string
+          shared_with_group?: string | null
+          shared_with_user?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          document_id?: string
+          id?: string
+          shared_by?: string
+          shared_with_group?: string | null
+          shared_with_user?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_shares_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_shares_shared_with_group_fkey"
+            columns: ["shared_with_group"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           content: string
@@ -830,6 +872,7 @@ export type Database = {
           content: string
           created_at: string | null
           id: string
+          metadata: Json | null
           receiver_id: string
           sender_id: string
           updated_at: string | null
@@ -838,6 +881,7 @@ export type Database = {
           content: string
           created_at?: string | null
           id?: string
+          metadata?: Json | null
           receiver_id: string
           sender_id: string
           updated_at?: string | null
@@ -846,6 +890,7 @@ export type Database = {
           content?: string
           created_at?: string | null
           id?: string
+          metadata?: Json | null
           receiver_id?: string
           sender_id?: string
           updated_at?: string | null

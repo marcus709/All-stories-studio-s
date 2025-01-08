@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { useEffect, useRef } from "react";
 import { getUserColor } from "@/utils/chatColors";
 import { CharacterPreview } from "./CharacterPreview";
+import { DocumentPreview } from "./DocumentPreview";
 
 interface MessageListProps {
   messages: any[];
@@ -36,6 +37,7 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
         const isCurrentUser = message.user_id === session?.user?.id;
         const messageColor = getUserColor(message.user_id);
         const hasCharacter = message.metadata?.type === 'character_share';
+        const hasDocument = message.metadata?.type === 'document_share';
         
         return (
           <div
@@ -75,6 +77,12 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
                 {hasCharacter && (
                   <CharacterPreview 
                     character={message.metadata.character} 
+                    isInMessage={true}
+                  />
+                )}
+                {hasDocument && (
+                  <DocumentPreview 
+                    document={message.metadata.document}
                     isInMessage={true}
                   />
                 )}
