@@ -8,6 +8,7 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Character } from "@/integrations/supabase/types/tables.types";
 import { CharacterPreview } from "./CharacterPreview";
 import { PrivateChatHeader } from "./PrivateChatHeader";
+import { Message } from "./types";
 
 export const PrivateChat = () => {
   const { friendId } = useParams();
