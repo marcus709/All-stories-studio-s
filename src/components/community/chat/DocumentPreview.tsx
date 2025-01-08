@@ -36,16 +36,16 @@ export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps)
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-3xl h-[80vh]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 pb-4 border-b">
               <FileText className="h-5 w-5 text-violet-500" />
               {document.title}
             </DialogTitle>
           </DialogHeader>
-          <ScrollArea className="h-full pr-4">
-            <div className="prose prose-sm max-w-none">
+          <ScrollArea className="h-full px-8">
+            <div className="prose prose-sm max-w-none py-8">
               <div 
                 dangerouslySetInnerHTML={{ __html: document.content }} 
-                className="whitespace-pre-wrap font-instagram-draft text-gray-800 leading-relaxed"
+                className="whitespace-pre-wrap font-instagram-draft text-gray-800 leading-relaxed max-w-[65ch] mx-auto"
               />
             </div>
           </ScrollArea>
