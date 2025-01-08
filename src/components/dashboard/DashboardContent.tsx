@@ -123,18 +123,15 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
   }
 
   return (
-    <>
+    <div className="h-full overflow-auto">
       {currentComponent}
       
       <PaywallAlert
         isOpen={showPaywallAlert}
-        onClose={() => {
-          setShowPaywallAlert(false);
-          setBlockedFeature(null);
-        }}
+        onClose={() => setShowPaywallAlert(false)}
         feature={blockedFeature?.name || ""}
         requiredPlan={blockedFeature?.plan || "creator"}
       />
-    </>
+    </div>
   );
 };

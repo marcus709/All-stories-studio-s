@@ -30,12 +30,12 @@ function DashboardLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
+    <div className="flex h-screen overflow-hidden bg-gray-50">
+      <Header className="fixed top-0 left-0 right-0 z-50" />
       <DashboardSidebar currentView={currentView} setCurrentView={setCurrentView} />
-      <div className="ml-72 pt-16">
+      <main className="flex-1 overflow-hidden pt-16 pl-72">
         <DashboardContent currentView={currentView} />
-      </div>
+      </main>
     </div>
   );
 }
