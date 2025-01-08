@@ -2,7 +2,6 @@ import { useState } from "react";
 import { BookOpen, LineChart, Wand, Settings } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel, SelectSeparator } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { useStory } from "@/contexts/StoryContext";
 import { useAI } from "@/hooks/useAI";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +12,7 @@ import { calculateReadability } from "@/utils/readability";
 import { useFeatureAccess } from "@/utils/subscriptionUtils";
 import { PaywallAlert } from "@/components/PaywallAlert";
 import { useSession } from "@supabase/auth-helpers-react";
+import { RichTextEditor } from "@/components/editor/RichTextEditor";
 
 export const StoryView = () => {
   const [wordCount, setWordCount] = useState(1);
@@ -56,11 +56,10 @@ export const StoryView = () => {
     enabled: !!session?.user?.id,
   });
 
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleContentChange = (content: string) => {
     if (!selectedStory) return;
-    const content = e.target.value;
     setStoryContent(content);
-    const words = content.trim().split(/\s+/);
+    const words = content.replace(/<[^>]*>/g, '').trim().split(/\s+/);
     setWordCount(content.trim() === "" ? 0 : words.length);
     setReadabilityScore(calculateReadability(content));
   };
@@ -140,7 +139,7 @@ export const StoryView = () => {
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Your Configurations</SelectLabel>
-                {aiConfigurations.map((config) => (
+                {aiConfigurations?.map((config) => (
                   <SelectItem key={config.id} value={config.id}>
                     {config.name}
                   </SelectItem>
@@ -163,16 +162,14 @@ export const StoryView = () => {
           </Button>
         </div>
 
-        <Textarea
-          placeholder={selectedStory ? "Start writing your story here..." : "Please select or create a story to start writing"}
-          className="min-h-[400px] resize-none text-lg p-6"
-          onChange={handleTextChange}
-          value={storyContent}
-          disabled={!selectedStory}
+        <RichTextEditor
+          content={storyContent}
+          onChange={handleContentChange}
+          className="min-h-[400px]"
         />
 
         {(isLoading || aiSuggestions) && (
-          <div className="bg-purple-50 rounded-lg p-6 relative">
+          <div className="bg-purple-50 rounded-lg p-6 relative mt-6">
             <h3 className="text-xl font-semibold text-purple-900 mb-4">AI Suggestions</h3>
             {isLoading ? (
               <div className="flex items-center gap-2 text-purple-600">
