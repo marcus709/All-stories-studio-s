@@ -7,10 +7,9 @@ import { EditorToolbar } from './EditorToolbar';
 interface RichTextEditorProps {
   content: string;
   onChange: (content: string) => void;
-  className?: string;
 }
 
-export function RichTextEditor({ content, onChange, className = '' }: RichTextEditorProps) {
+export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -21,20 +20,20 @@ export function RichTextEditor({ content, onChange, className = '' }: RichTextEd
     ],
     content,
     onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
-      onChange(html);
-    },
-    editorProps: {
-      attributes: {
-        class: 'prose prose-sm max-w-none flex-1 px-8 py-6 focus:outline-none overflow-y-auto',
-      },
+      onChange(editor.getHTML());
     },
   });
 
+  if (!editor) {
+    return null;
+  }
+
   return (
-    <div className={`flex flex-col ${className}`}>
+    <div className="border rounded-lg overflow-hidden">
       <EditorToolbar editor={editor} />
-      <EditorContent editor={editor} className="flex-1 overflow-y-auto" />
+      <div className="p-4 min-h-[300px] prose prose-sm max-w-none">
+        <EditorContent editor={editor} />
+      </div>
     </div>
   );
-}
+};
