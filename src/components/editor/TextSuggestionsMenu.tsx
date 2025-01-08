@@ -13,7 +13,7 @@ import { useAI } from '@/hooks/useAI';
 import { useToast } from '../ui/use-toast';
 
 interface TextSuggestionsMenuProps {
-  editor: Editor;
+  editor: Editor | null;
   isOpen: boolean;
   top: number;
   left: number;
@@ -75,7 +75,7 @@ export function TextSuggestionsMenu({ editor, isOpen, top, left }: TextSuggestio
 
   return (
     <div
-      className="absolute z-50 flex flex-col gap-2 p-4 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-purple-500/20"
+      className="absolute z-50 flex flex-col gap-2 p-4 bg-white/70 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200/50"
       style={{
         top: `${top}px`,
         left: `${menuLeft}px`,
