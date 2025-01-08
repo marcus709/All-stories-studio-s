@@ -35,15 +35,15 @@ const Index = () => {
       <div className="relative">
         <Header />
         <main className="relative">
-          {/* Decorative gradients - increased sizes */}
+          {/* Decorative gradients - increased sizes and opacity */}
           <div className="absolute top-0 right-0 -translate-y-1/4 animate-pulse">
-            <div className="w-[800px] h-[800px] bg-purple-500/10 rounded-full blur-3xl" />
+            <div className="w-[800px] h-[800px] bg-purple-500/20 rounded-full blur-3xl" />
           </div>
           <div className="absolute top-1/3 left-0 -translate-x-1/2 animate-pulse delay-700">
-            <div className="w-[800px] h-[800px] bg-pink-500/10 rounded-full blur-3xl" />
+            <div className="w-[800px] h-[800px] bg-pink-500/20 rounded-full blur-3xl" />
           </div>
           <div className="absolute bottom-0 right-1/4 translate-y-1/4 animate-pulse delay-1000">
-            <div className="w-[800px] h-[800px] bg-blue-500/10 rounded-full blur-3xl" />
+            <div className="w-[800px] h-[800px] bg-blue-500/20 rounded-full blur-3xl" />
           </div>
           
           <HeroSection onShowAuth={handleShowAuth} />
