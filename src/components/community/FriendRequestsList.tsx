@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "../ui/button";
 import { UserCheck, UserX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface FriendRequest {
   id: string;
@@ -18,8 +20,9 @@ interface FriendRequest {
 export const FriendRequestsList = () => {
   const session = useSession();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const { data: friendRequests } = useQuery({
+  const { data: friendRequests, refetch: refetchRequests } = useQuery({
     queryKey: ["friend-requests", session?.user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -27,7 +30,7 @@ export const FriendRequestsList = () => {
         .select(`
           id,
           status,
-          user:profiles!friendships_user_id_fkey_profiles (
+          user:profiles!friendships_user_id_fkey_profiles(
             id,
             username,
             avatar_url
@@ -41,6 +44,34 @@ export const FriendRequestsList = () => {
     },
     enabled: !!session?.user?.id,
   });
+
+  // Subscribe to real-time updates for friendships
+  useEffect(() => {
+    if (!session?.user?.id) return;
+
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'friendships',
+          filter: `friend_id=eq.${session.user.id}`,
+        },
+        () => {
+          // Refetch friend requests when any change occurs
+          refetchRequests();
+          // Also refetch the friends list
+          queryClient.invalidateQueries({ queryKey: ["friends", session.user.id] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [session?.user?.id, refetchRequests, queryClient]);
 
   const handleFriendRequest = async (requestId: string, action: 'accept' | 'reject') => {
     try {
@@ -72,6 +103,7 @@ export const FriendRequestsList = () => {
 
       // Immediately refetch both friend requests and friends list
       refetchRequests();
+      queryClient.invalidateQueries({ queryKey: ["friends", session?.user?.id] });
     } catch (error) {
       console.error("Error handling friend request:", error);
       toast({

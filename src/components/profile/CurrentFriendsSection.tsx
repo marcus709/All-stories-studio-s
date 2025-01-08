@@ -22,9 +22,10 @@ export function CurrentFriendsSection({
 }) {
   const session = useSession();
 
-  const { data: friends } = useQuery<Friend[]>({
+  const { data: friends } = useQuery({
     queryKey: ["friends", session?.user?.id],
     queryFn: async () => {
+      // First get friendships where user is the requester
       const { data: sentFriendships, error: sentError } = await supabase
         .from("friendships")
         .select(`
@@ -37,11 +38,11 @@ export function CurrentFriendsSection({
           )
         `)
         .eq("user_id", session?.user?.id)
-        .eq("status", "accepted")
-        .single();
+        .eq("status", "accepted");
 
       if (sentError) throw sentError;
 
+      // Then get friendships where user is the recipient
       const { data: receivedFriendships, error: receivedError } = await supabase
         .from("friendships")
         .select(`
@@ -54,15 +55,12 @@ export function CurrentFriendsSection({
           )
         `)
         .eq("friend_id", session?.user?.id)
-        .eq("status", "accepted")
-        .single();
+        .eq("status", "accepted");
 
       if (receivedError) throw receivedError;
 
-      return [
-        ...(sentFriendships ? [sentFriendships] : []),
-        ...(receivedFriendships ? [receivedFriendships] : [])
-      ] as Friend[];
+      // Combine both sets of friendships
+      return [...(sentFriendships || []), ...(receivedFriendships || [])] as Friend[];
     },
     enabled: !!session?.user?.id,
   });

@@ -35,10 +35,10 @@ const iconMap: Record<string, React.ReactNode> = {
 export function AchievementsDialog({ isOpen, onClose, onSelect, selectedSlot }: AchievementsDialogProps) {
   const session = useSession();
 
-  const { data: unlockedAchievements } = useQuery<Achievement[]>({
+  const { data: unlockedAchievements } = useQuery({
     queryKey: ["unlockedAchievements"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("user_achievements")
         .select(`
           achievement:achievements (
@@ -51,14 +51,12 @@ export function AchievementsDialog({ isOpen, onClose, onSelect, selectedSlot }: 
           )
         `)
         .eq("user_id", session?.user?.id);
-
-      if (error) throw error;
       return data?.map(item => item.achievement) as Achievement[] || [];
     },
     enabled: !!session?.user?.id,
   });
 
-  const { data: allAchievements } = useQuery<Achievement[]>({
+  const { data: allAchievements } = useQuery({
     queryKey: ["allAchievements"],
     queryFn: async () => {
       const { data } = await supabase
