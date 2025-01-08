@@ -9,6 +9,8 @@ import { Character } from "@/integrations/supabase/types/tables.types";
 import { CharacterPreview } from "./chat/CharacterPreview";
 import { useGroupMessages } from "./chat/hooks/useGroupMessages";
 import { useGroupMembership } from "./chat/hooks/useGroupMembership";
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface GroupChatProps {
   group: any;
@@ -19,7 +21,9 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
   const session = useSession();
   const location = useLocation();
   const [draftMessage, setDraftMessage] = useState("");
-  const sharedCharacter = location.state?.sharedCharacter as Character | undefined;
+  const [sharedCharacter, setSharedCharacter] = useState<Character | undefined>(
+    location.state?.sharedCharacter
+  );
   const { messages, isLoading } = useGroupMessages(group.id);
   const { isMember, isLoading: membershipLoading } = useGroupMembership(group.id);
 
@@ -62,10 +66,18 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
           });
 
         if (shareError) throw shareError;
+        
+        // Clear the shared character after sending
+        setSharedCharacter(undefined);
       }
     } catch (error) {
       console.error("Error sending message:", error);
     }
+  };
+
+  const handleRemoveCharacter = () => {
+    setSharedCharacter(undefined);
+    setDraftMessage("");
   };
 
   if (membershipLoading) {
@@ -92,7 +104,15 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
         <MessageList messages={messages} isLoading={isLoading} />
       </div>
       {sharedCharacter && (
-        <div className="p-4 border-t border-gray-100">
+        <div className="p-4 border-t border-gray-100 relative">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-2 right-2 h-6 w-6"
+            onClick={handleRemoveCharacter}
+          >
+            <X className="h-4 w-4" />
+          </Button>
           <CharacterPreview character={sharedCharacter} />
         </div>
       )}
