@@ -561,6 +561,7 @@ export type Database = {
           created_at: string | null
           group_id: string | null
           id: string
+          metadata: Json | null
           updated_at: string | null
           user_id: string | null
         }
@@ -569,6 +570,7 @@ export type Database = {
           created_at?: string | null
           group_id?: string | null
           id?: string
+          metadata?: Json | null
           updated_at?: string | null
           user_id?: string | null
         }
@@ -577,6 +579,7 @@ export type Database = {
           created_at?: string | null
           group_id?: string | null
           id?: string
+          metadata?: Json | null
           updated_at?: string | null
           user_id?: string | null
         }
