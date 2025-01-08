@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 const navigationItems = [
   { id: "story", icon: Book, label: "Story Editor" },
   { id: "characters", icon: Users, label: "Characters" },
-  { id: "plot", icon: LineChart, label: "Plot Development" },
+  { id: "plot", icon: LineChart, label: "Virtual Book Creator" },
   { id: "dream", icon: CloudLightning, label: "Dream to Story" },
   { id: "ideas", icon: Lightbulb, label: "Story Ideas" },
   { id: "docs", icon: FileText, label: "Story Docs" },
