@@ -34,21 +34,37 @@ export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps)
       </div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-3xl h-[80vh]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 pb-4 border-b">
-              <FileText className="h-5 w-5 text-violet-500" />
-              {document.title}
-            </DialogTitle>
-          </DialogHeader>
-          <ScrollArea className="h-full px-8">
-            <div className="prose prose-sm max-w-none py-8">
-              <div 
-                dangerouslySetInnerHTML={{ __html: document.content }} 
-                className="whitespace-pre-wrap font-instagram-draft text-gray-800 leading-relaxed max-w-[65ch] mx-auto"
-              />
-            </div>
-          </ScrollArea>
+        <DialogContent className="max-w-4xl h-[85vh] p-0 gap-0">
+          <div className="flex flex-col h-full bg-zinc-50">
+            <DialogHeader className="px-6 py-4 border-b bg-white">
+              <DialogTitle className="flex items-center gap-2 text-xl font-semibold">
+                <FileText className="h-5 w-5 text-violet-500" />
+                {document.title}
+              </DialogTitle>
+            </DialogHeader>
+            
+            <ScrollArea className="flex-1 p-12">
+              <div className="max-w-[750px] mx-auto">
+                <div 
+                  dangerouslySetInnerHTML={{ __html: document.content }} 
+                  className="prose prose-slate prose-lg max-w-none
+                    prose-headings:font-semibold
+                    prose-h1:text-3xl prose-h1:mb-8
+                    prose-h2:text-2xl prose-h2:mb-6
+                    prose-p:leading-relaxed prose-p:mb-6
+                    prose-li:leading-relaxed
+                    prose-img:rounded-lg
+                    prose-blockquote:border-l-4 prose-blockquote:border-gray-300
+                    prose-blockquote:pl-4 prose-blockquote:italic
+                    prose-pre:bg-gray-100 prose-pre:p-4 prose-pre:rounded-lg
+                    prose-code:text-violet-600 prose-code:bg-violet-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md
+                    prose-strong:text-gray-900
+                    prose-a:text-violet-600 prose-a:no-underline hover:prose-a:underline
+                  "
+                />
+              </div>
+            </ScrollArea>
+          </div>
         </DialogContent>
       </Dialog>
     </>
