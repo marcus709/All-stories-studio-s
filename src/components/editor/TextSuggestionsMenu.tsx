@@ -65,12 +65,16 @@ export function TextSuggestionsMenu({ editor, isOpen, top, left }: TextSuggestio
     }
   };
 
+  // Calculate the width of the menu to offset it correctly
+  const menuWidth = 200; // Approximate width of the menu in pixels
+
   return (
     <div
       className="absolute z-50 flex flex-col gap-2 p-4 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-purple-500/20"
       style={{
         top: `${top}px`,
-        left: `${left}px`,
+        left: `${left + menuWidth}px`, // Add the menu width to position it on the right
+        transform: 'translateX(-100%)', // Move it back by its full width
       }}
     >
       <Button
