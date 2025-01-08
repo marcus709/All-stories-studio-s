@@ -4,11 +4,10 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Character } from "@/integrations/supabase/types/tables.types";
 import { CharacterPreview } from "./CharacterPreview";
+import { PrivateChatHeader } from "./PrivateChatHeader";
 
 export const PrivateChat = () => {
   const { friendId } = useParams();
@@ -225,36 +224,13 @@ export const PrivateChat = () => {
 
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow-sm">
-      <div className="flex items-center gap-4 p-4 border-b">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate("/community")}
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
-            {friend?.avatar_url ? (
-              <img
-                src={friend.avatar_url}
-                alt={friend.username}
-                className="h-full w-full rounded-full object-cover"
-              />
-            ) : (
-              <span className="text-purple-600 text-sm font-medium">
-                {friend?.username?.[0]?.toUpperCase() || "U"}
-              </span>
-            )}
-          </div>
-          <span className="font-medium">@{friend?.username}</span>
-        </div>
-      </div>
+      <PrivateChatHeader friend={friend} />
       <div className="flex-1 overflow-hidden">
         <MessageList messages={messages} isLoading={isLoading} />
       </div>
       <div className="p-4 border-t">
-        <MessageInput onSendMessage={handleSendMessage} />
+        <MessageInput onSendMessage={handleSendMessage} initialValue={draftMessage} />
       </div>
     </div>
   );
+};
