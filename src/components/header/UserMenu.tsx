@@ -46,12 +46,11 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
         <Button 
           variant="ghost"
           onClick={() => onShowAuth("signin")}
-          className="bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-500 hover:to-pink-500 transition-all duration-300"
         >
           Sign In
         </Button>
         <Button 
-          className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 transition-all duration-300"
+          className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600"
           onClick={() => onShowAuth("signup")}
         >
           Sign Up
