@@ -7,17 +7,26 @@ interface PrivateChatHeaderProps {
     avatar_url?: string | null;
     username?: string | null;
   } | null;
+  onBack?: () => void;
 }
 
-export const PrivateChatHeader = ({ friend }: PrivateChatHeaderProps) => {
+export const PrivateChatHeader = ({ friend, onBack }: PrivateChatHeaderProps) => {
   const navigate = useNavigate();
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      navigate("/community");
+    }
+  };
 
   return (
     <div className="flex items-center gap-4 p-4 border-b">
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => navigate("/community")}
+        onClick={handleBack}
       >
         <ArrowLeft className="h-5 w-5" />
       </Button>
