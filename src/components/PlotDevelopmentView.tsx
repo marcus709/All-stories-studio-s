@@ -83,7 +83,10 @@ export const PlotDevelopmentView = () => {
               <h2 className="text-lg font-instagram-draft">Plot Development Score</h2>
               <span className="text-lg font-instagram-draft text-violet-600">{plotScore}/100</span>
             </div>
-            <Progress value={plotScore} className="h-2 bg-violet-100" indicatorClassName="bg-violet-500" />
+            <Progress 
+              value={plotScore} 
+              className="h-2 bg-violet-100 [&>div]:bg-violet-500" 
+            />
           </div>
 
           <div className="bg-white rounded-xl p-6 shadow-sm">
