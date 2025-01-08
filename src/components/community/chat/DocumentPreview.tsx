@@ -27,8 +27,12 @@ export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps)
       setIsSaving(true);
       const { error } = await supabase
         .from('documents')
-        .update({ content })
-        .eq('id', document.id);
+        .update({ 
+          content,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', document.id)
+        .select();
 
       if (error) throw error;
 
