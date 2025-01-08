@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Share } from "lucide-react";
 import { ShareDocumentDialog } from "@/components/community/chat/ShareDocumentDialog";
+import { useDocuments } from "@/hooks/useDocuments";
+import { useToast } from "@/hooks/use-toast";
 
 interface DocumentEditorProps {
   document: {
@@ -17,9 +19,38 @@ interface DocumentEditorProps {
 export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProps) => {
   const [content, setContent] = useState(document.content);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const { updateDocument } = useDocuments(storyId);
+  const { toast } = useToast();
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value);
+  };
+
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+      await updateDocument({
+        id: document.id,
+        content: content
+      });
+      
+      toast({
+        title: "Success",
+        description: "Document saved successfully",
+      });
+      
+      onSave();
+    } catch (error) {
+      console.error("Error saving document:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save document",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -36,7 +67,14 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
             <Share className="h-4 w-4" />
             Share
           </Button>
-          <Button size="sm" onClick={onSave}>Save</Button>
+          <Button 
+            size="sm" 
+            onClick={handleSave}
+            disabled={isSaving}
+            className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600"
+          >
+            {isSaving ? "Saving..." : "Save"}
+          </Button>
         </div>
       </div>
 
