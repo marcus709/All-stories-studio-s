@@ -1,25 +1,13 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "./ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { Card } from "./ui/card";
-import { useToast } from "@/hooks/use-toast";
-import { 
-  BookCopy, 
-  ImagePlus, 
-  Type, 
-  Palette,
-  RotateCcw
-} from "lucide-react";
-
-interface Template {
-  id: string;
-  name: string;
-  genre: string;
-  previewUrl: string;
-  colors: string[];
-}
+import { BookCopy, ImagePlus, Type } from "lucide-react";
+import { Template } from "@/types/book";
+import { DesignHeader } from "./book/DesignHeader";
+import { TemplatePanel } from "./book/TemplatePanel";
+import { ImageUploadPanel } from "./book/ImageUploadPanel";
+import { PropertiesPanel } from "./book/PropertiesPanel";
 
 const templates: Template[] = [
   {
@@ -55,7 +43,7 @@ const templates: Template[] = [
 export const BookCreatorView = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [activeTab, setActiveTab] = useState("templates");
-  const { toast } = useToast();
+  const [coverImage, setCoverImage] = useState<string | null>(null);
 
   const { data: bookStructures } = useQuery({
     queryKey: ["bookStructures"],
@@ -70,44 +58,27 @@ export const BookCreatorView = () => {
 
   const handleTemplateSelect = (template: Template) => {
     setSelectedTemplate(template);
-    toast({
-      title: "Template Selected",
-      description: `${template.name} template has been applied to your cover.`,
-    });
   };
 
   const handleResetDesign = () => {
     setSelectedTemplate(null);
-    toast({
-      title: "Design Reset",
-      description: "Your cover design has been reset.",
-    });
+    setCoverImage(null);
   };
 
   const handleSaveDesign = () => {
-    toast({
-      title: "Design Saved",
-      description: "Your cover design has been saved successfully.",
-    });
+    // Implementation for saving the design will be added later
+  };
+
+  const handleImageUpload = (url: string) => {
+    setCoverImage(url);
   };
 
   return (
     <div className="h-[calc(100vh-4rem)] overflow-hidden bg-gray-50">
-      <div className="flex items-center justify-between px-8 py-4 bg-white border-b">
-        <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-bold">Virtual Book Designer</h1>
-          <p className="text-gray-500">Create your perfect book cover</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleResetDesign}>
-            <RotateCcw className="h-4 w-4 mr-2" />
-            Reset Design
-          </Button>
-          <Button className="bg-violet-500 hover:bg-violet-600" onClick={handleSaveDesign}>
-            Save Cover
-          </Button>
-        </div>
-      </div>
+      <DesignHeader
+        onResetDesign={handleResetDesign}
+        onSaveDesign={handleSaveDesign}
+      />
 
       <div className="flex h-[calc(100vh-8rem)]">
         {/* Left Panel - Design Tools */}
@@ -129,53 +100,20 @@ export const BookCreatorView = () => {
             </TabsList>
 
             <TabsContent value="templates" className="mt-0">
-              <div className="grid grid-cols-2 gap-4">
-                {templates.map((template) => (
-                  <Card 
-                    key={template.id} 
-                    className={`p-4 cursor-pointer transition-all hover:scale-105 ${
-                      selectedTemplate?.id === template.id 
-                        ? 'ring-2 ring-violet-500' 
-                        : 'hover:border-violet-500'
-                    }`}
-                    onClick={() => handleTemplateSelect(template)}
-                  >
-                    <div className="aspect-[2/3] bg-gradient-to-br from-[${template.colors[0]}] via-[${template.colors[1]}] to-[${template.colors[2]}] rounded-md mb-2" />
-                    <p className="text-sm text-center font-medium">{template.name}</p>
-                    <p className="text-xs text-center text-gray-500">{template.genre}</p>
-                  </Card>
-                ))}
-              </div>
+              <TemplatePanel
+                templates={templates}
+                selectedTemplate={selectedTemplate}
+                onTemplateSelect={handleTemplateSelect}
+              />
             </TabsContent>
 
             <TabsContent value="images" className="mt-0">
-              <div className="space-y-4">
-                <Button className="w-full" variant="outline">
-                  <ImagePlus className="h-4 w-4 mr-2" />
-                  Upload Cover Image
-                </Button>
-                <div className="grid grid-cols-2 gap-4">
-                  <Card className="p-2 cursor-pointer hover:border-violet-500">
-                    <div className="aspect-square bg-gray-100 rounded-md" />
-                  </Card>
-                </div>
-              </div>
+              <ImageUploadPanel onImageUpload={handleImageUpload} />
             </TabsContent>
 
             <TabsContent value="text" className="mt-0">
               <div className="space-y-4">
-                <Button className="w-full" variant="outline">
-                  <Type className="h-4 w-4 mr-2" />
-                  Add Text Element
-                </Button>
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-500">Text Styles</p>
-                  {['Title', 'Subtitle', 'Author Name'].map((style) => (
-                    <Card key={style} className="p-3 cursor-pointer hover:border-violet-500">
-                      {style}
-                    </Card>
-                  ))}
-                </div>
+                {/* Text editing functionality will be implemented next */}
               </div>
             </TabsContent>
           </Tabs>
@@ -184,9 +122,20 @@ export const BookCreatorView = () => {
         {/* Center Panel - Cover Preview */}
         <div className="flex-1 p-8 flex items-center justify-center bg-gray-100">
           <div className="aspect-[2/3] w-[400px] bg-white rounded-lg shadow-lg overflow-hidden">
-            {selectedTemplate ? (
-              <div 
-                className="w-full h-full bg-gradient-to-br from-[${selectedTemplate.colors[0]}] via-[${selectedTemplate.colors[1]}] to-[${selectedTemplate.colors[2]}] flex items-center justify-center"
+            {coverImage ? (
+              <img
+                src={coverImage}
+                alt="Book Cover"
+                className="w-full h-full object-cover"
+              />
+            ) : selectedTemplate ? (
+              <div
+                className="w-full h-full bg-gradient-to-br flex items-center justify-center"
+                style={{
+                  background: `linear-gradient(to bottom right, ${selectedTemplate.colors.join(
+                    ", "
+                  )})`,
+                }}
               >
                 <p className="text-white text-xl font-bold">Your Book Title</p>
               </div>
@@ -199,40 +148,7 @@ export const BookCreatorView = () => {
         </div>
 
         {/* Right Panel - Properties */}
-        <div className="w-80 border-l bg-white p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Palette className="h-5 w-5" />
-            <h2 className="font-semibold">Properties</h2>
-          </div>
-          {selectedTemplate ? (
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm font-medium mb-2">Template</p>
-                <p className="text-sm text-gray-500">{selectedTemplate.name}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium mb-2">Genre</p>
-                <p className="text-sm text-gray-500">{selectedTemplate.genre}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium mb-2">Colors</p>
-                <div className="flex gap-2">
-                  {selectedTemplate.colors.map((color, index) => (
-                    <div
-                      key={index}
-                      className="w-8 h-8 rounded-full"
-                      style={{ backgroundColor: color }}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-gray-500 text-center">
-              Select an element to edit its properties
-            </p>
-          )}
-        </div>
+        <PropertiesPanel selectedTemplate={selectedTemplate} />
       </div>
     </div>
   );
