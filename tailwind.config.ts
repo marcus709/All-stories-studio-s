@@ -19,7 +19,7 @@ export default {
 		},
 		extend: {
 			backgroundImage: {
-				'grid-pattern': 'linear-gradient(to right, rgb(55 65 81 / 0.2) 1px, transparent 1px), linear-gradient(to bottom, rgb(55 65 81 / 0.2) 1px, transparent 1px)',
+				'grid-pattern': 'linear-gradient(to right, rgb(55 65 81 / 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgb(55 65 81 / 0.3) 1px, transparent 1px)',
 			},
 			backgroundSize: {
 				'grid': '40px 40px',
