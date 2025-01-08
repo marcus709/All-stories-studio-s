@@ -102,7 +102,7 @@ export const AuthModals = ({ isOpen, onClose, defaultView = "signin" }: AuthModa
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[850px] p-0 overflow-hidden">
+      <DialogContent className="sm:max-w-[850px] overflow-hidden p-0">
         <div className="grid grid-cols-1 md:grid-cols-2">
           {/* Left side - Purple gradient background */}
           <div className="hidden md:block bg-gradient-to-br from-purple-600 to-pink-500 p-8 text-white">
