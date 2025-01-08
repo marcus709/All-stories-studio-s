@@ -67,7 +67,6 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
 
         if (shareError) throw shareError;
         
-        // Clear the shared character after sending
         setSharedCharacter(undefined);
       }
     } catch (error) {
@@ -104,14 +103,14 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
         <MessageList messages={messages} isLoading={isLoading} />
       </div>
       {sharedCharacter && (
-        <div className="p-4 border-t border-gray-100 relative">
+        <div className="p-4 border-t border-gray-100 bg-gray-50/50 backdrop-blur-sm relative">
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-2 right-2 h-6 w-6"
+            className="absolute -top-3 -right-3 h-7 w-7 rounded-full bg-white shadow-sm hover:bg-gray-100 border transition-colors"
             onClick={handleRemoveCharacter}
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4 text-gray-600" />
           </Button>
           <CharacterPreview character={sharedCharacter} />
         </div>
