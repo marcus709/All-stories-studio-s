@@ -19,8 +19,7 @@ export function DialogPreview({ generatedDialog, isSaving, onSave }: DialogPrevi
           <Button
             onClick={onSave}
             disabled={isSaving}
-            variant="outline"
-            className="w-full"
+            className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600"
           >
             {isSaving ? (
               <>
