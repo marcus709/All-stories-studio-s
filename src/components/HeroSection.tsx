@@ -44,22 +44,25 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
             Transform Your Writing Journey
           </h1>
           
-          <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed animate-fade-in opacity-0" style={{ animationDelay: '300ms' }}>
+          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed animate-fade-in opacity-0" style={{ animationDelay: '300ms' }}>
             Create deeper characters, richer plots, and more engaging narratives with our AI-powered storytelling platform.
           </p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in opacity-0" style={{ animationDelay: '600ms' }}>
+          {/* New prominent CTA button */}
+          <div className="mb-12 animate-fade-in opacity-0" style={{ animationDelay: '400ms' }}>
             <Button 
               size="lg"
               onClick={handleStartWriting}
-              className="relative group px-8 py-6 overflow-hidden rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:from-purple-500 hover:to-pink-500"
+              className="relative group px-8 py-6 overflow-hidden rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:scale-105 hover:from-purple-500 hover:to-pink-500"
             >
               <span className="relative z-10 text-lg font-medium">
                 Start Writing Now
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </Button>
-            
+          </div>
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in opacity-0" style={{ animationDelay: '600ms' }}>
             <Button 
               size="lg"
               variant="outline"
