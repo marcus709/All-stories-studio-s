@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { FileText } from "lucide-react";
 
 interface DocumentPreviewProps {
   document: {
@@ -18,21 +19,34 @@ export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps)
     <>
       <div 
         onClick={() => setIsOpen(true)}
-        className={`cursor-pointer p-3 rounded-lg ${
-          isInMessage ? 'bg-gray-100/50' : 'bg-gray-100'
-        } hover:bg-gray-200/50 transition-colors`}
+        className={`
+          cursor-pointer p-3 rounded-lg transition-colors
+          ${isInMessage 
+            ? 'bg-gray-100/50 hover:bg-gray-200/50' 
+            : 'bg-white border border-gray-200 hover:bg-gray-50'
+          }
+        `}
       >
-        <h4 className="font-medium text-sm">📄 {document.title}</h4>
+        <div className="flex items-center gap-2">
+          <FileText className="h-4 w-4 text-violet-500" />
+          <h4 className="font-medium text-sm text-gray-900">{document.title}</h4>
+        </div>
       </div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-2xl h-[80vh]">
+        <DialogContent className="max-w-3xl h-[80vh]">
           <DialogHeader>
-            <DialogTitle>{document.title}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-violet-500" />
+              {document.title}
+            </DialogTitle>
           </DialogHeader>
           <ScrollArea className="h-full pr-4">
             <div className="prose prose-sm max-w-none">
-              {document.content}
+              <div 
+                dangerouslySetInnerHTML={{ __html: document.content }} 
+                className="whitespace-pre-wrap font-instagram-draft text-gray-800 leading-relaxed"
+              />
             </div>
           </ScrollArea>
         </DialogContent>
