@@ -73,7 +73,7 @@ export const StoriesSection = () => {
                 
                 <div className="flex items-center text-purple-600 font-medium">
                   <BookOpen className="h-4 w-4 mr-2" />
-                  <span>Read More</span>
+                  <span>Read</span>
                 </div>
               </CardContent>
             </Card>
