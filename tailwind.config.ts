@@ -18,12 +18,6 @@ export default {
 			}
 		},
 		extend: {
-			backgroundImage: {
-				'grid-pattern': 'linear-gradient(to right, rgb(55 65 81 / 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgb(55 65 81 / 0.3) 1px, transparent 1px)',
-			},
-			backgroundSize: {
-				'grid': '40px 40px',
-			},
 			fontFamily: {
 				'instagram-draft': ['Instagram Sans Draft', 'sans-serif'],
 			},
@@ -79,12 +73,20 @@ export default {
 			},
 			keyframes: {
 				'accordion-down': {
-					from: { height: '0' },
-					to: { height: 'var(--radix-accordion-content-height)' }
+					from: {
+						height: '0'
+					},
+					to: {
+						height: 'var(--radix-accordion-content-height)'
+					}
 				},
 				'accordion-up': {
-					from: { height: 'var(--radix-accordion-content-height)' },
-					to: { height: '0' }
+					from: {
+						height: 'var(--radix-accordion-content-height)'
+					},
+					to: {
+						height: '0'
+					}
 				}
 			},
 			animation: {
