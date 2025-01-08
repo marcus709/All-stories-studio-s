@@ -8,6 +8,7 @@ import { usePlotEvents } from "./plot/usePlotEvents";
 import { PlotStructure } from "./plot/types";
 import { Button } from "./ui/button";
 import { Plus, PanelLeftClose, PanelLeft } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import {
   ResizablePanel,
   ResizablePanelGroup,
@@ -48,12 +49,14 @@ export const PlotDevelopmentView = () => {
     (structure) => structure.id === selectedStructure
   );
 
+  // Calculate plot development score based on events
+  const plotScore = plotEvents ? Math.min(Math.floor((plotEvents.length / 10) * 100), 100) : 0;
+
   return (
     <div className="h-[calc(100vh-4rem)] overflow-hidden">
       <div className="flex items-center justify-between px-8 py-4 border-b">
         <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-bold">Plot Development</h1>
-          <p className="text-gray-500">Plan and structure your story</p>
+          <h1 className="text-2xl font-bold font-instagram-draft">Plot Development</h1>
         </div>
         <div className="flex items-center gap-2">
           {!showSidebar && (
@@ -68,8 +71,66 @@ export const PlotDevelopmentView = () => {
           )}
           <Button className="bg-violet-500 hover:bg-violet-600">
             <Plus className="h-4 w-4 mr-2" />
-            Add Plot Event
+            Add Plot Point
           </Button>
+        </div>
+      </div>
+
+      <div className="p-6 bg-gray-50">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-instagram-draft">Plot Development Score</h2>
+              <span className="text-lg font-instagram-draft text-violet-600">{plotScore}/100</span>
+            </div>
+            <Progress value={plotScore} className="h-2 bg-violet-100" indicatorClassName="bg-violet-500" />
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow-sm">
+            <h3 className="font-instagram-draft text-gray-600 mb-2">Improvement Tips:</h3>
+            <ul className="space-y-2 text-gray-500">
+              <li className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-violet-500"></div>
+                Integrate characters into your plot points to create more engaging story arcs
+              </li>
+            </ul>
+          </div>
+
+          <div className="flex justify-between items-center mt-8">
+            <div className="flex items-center gap-8">
+              <div className="text-center">
+                <div className="w-4 h-4 rounded-full bg-blue-500 mx-auto mb-2"></div>
+                <p className="text-sm font-instagram-draft">Opening Scene</p>
+              </div>
+              <div className="text-center">
+                <div className="w-4 h-4 rounded-full bg-yellow-500 mx-auto mb-2"></div>
+                <p className="text-sm font-instagram-draft">First Challenge</p>
+              </div>
+              <div className="text-center">
+                <div className="w-4 h-4 rounded-full bg-red-500 mx-auto mb-2"></div>
+                <p className="text-sm font-instagram-draft">Major Confrontation</p>
+              </div>
+              <div className="text-center">
+                <div className="w-4 h-4 rounded-full bg-green-500 mx-auto mb-2"></div>
+                <p className="text-sm font-instagram-draft">Story Conclusion</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-6 mt-8">
+            <div className="bg-white rounded-xl p-6 shadow-sm">
+              <h3 className="font-instagram-draft text-lg mb-4">Story Structure</h3>
+              <p className="text-gray-500">
+                Follow your story's progression through setup, conflict, climax, and resolution.
+              </p>
+            </div>
+            <div className="bg-white rounded-xl p-6 shadow-sm">
+              <h3 className="font-instagram-draft text-lg mb-4">Pacing Analysis</h3>
+              <p className="text-gray-500">
+                The plot points are well-distributed, maintaining steady pacing throughout the story.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -82,7 +143,7 @@ export const PlotDevelopmentView = () => {
             className="border-r"
           >
             <div className="flex justify-between items-center p-4 border-b">
-              <h2 className="font-semibold">Story Structure</h2>
+              <h2 className="font-semibold font-instagram-draft">Story Structure</h2>
               <Button
                 variant="ghost"
                 size="icon"
