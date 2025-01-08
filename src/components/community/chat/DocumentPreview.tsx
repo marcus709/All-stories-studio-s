@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileText, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Heading1, Heading2 } from "lucide-react";
-import { Toggle } from "@/components/ui/toggle";
-import { Separator } from "@/components/ui/separator";
+import { FileText } from "lucide-react";
+import { EditorToolbar } from "@/components/editor/EditorToolbar";
+import { RichTextEditor } from "@/components/editor/RichTextEditor";
 
 interface DocumentPreviewProps {
   document: {
@@ -16,6 +16,7 @@ interface DocumentPreviewProps {
 
 export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [content, setContent] = useState(document.content);
 
   return (
     <>
@@ -44,72 +45,14 @@ export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps)
                 {document.title}
               </DialogTitle>
             </DialogHeader>
-
-            <div className="border-b border-input bg-white px-4">
-              <div className="flex flex-wrap gap-2 py-2">
-                <Toggle size="sm" disabled>
-                  <Bold className="h-4 w-4" />
-                </Toggle>
-                <Toggle size="sm" disabled>
-                  <Italic className="h-4 w-4" />
-                </Toggle>
-                <Toggle size="sm" disabled>
-                  <Underline className="h-4 w-4" />
-                </Toggle>
-
-                <Separator orientation="vertical" className="mx-1 h-8" />
-
-                <Toggle size="sm" disabled>
-                  <AlignLeft className="h-4 w-4" />
-                </Toggle>
-                <Toggle size="sm" disabled>
-                  <AlignCenter className="h-4 w-4" />
-                </Toggle>
-                <Toggle size="sm" disabled>
-                  <AlignRight className="h-4 w-4" />
-                </Toggle>
-
-                <Separator orientation="vertical" className="mx-1 h-8" />
-
-                <Toggle size="sm" disabled>
-                  <List className="h-4 w-4" />
-                </Toggle>
-                <Toggle size="sm" disabled>
-                  <ListOrdered className="h-4 w-4" />
-                </Toggle>
-
-                <Separator orientation="vertical" className="mx-1 h-8" />
-
-                <Toggle size="sm" disabled>
-                  <Heading1 className="h-4 w-4" />
-                </Toggle>
-                <Toggle size="sm" disabled>
-                  <Heading2 className="h-4 w-4" />
-                </Toggle>
-              </div>
-            </div>
             
-            <ScrollArea className="flex-1 p-12">
-              <div className="max-w-[750px] mx-auto">
-                <div 
-                  dangerouslySetInnerHTML={{ __html: document.content }} 
-                  className="prose prose-slate prose-lg max-w-none
-                    prose-headings:font-semibold
-                    prose-h1:text-3xl prose-h1:mb-8
-                    prose-h2:text-2xl prose-h2:mb-6
-                    prose-p:leading-relaxed prose-p:mb-6
-                    prose-li:leading-relaxed
-                    prose-img:rounded-lg
-                    prose-blockquote:border-l-4 prose-blockquote:border-gray-300
-                    prose-blockquote:pl-4 prose-blockquote:italic
-                    prose-pre:bg-gray-100 prose-pre:p-4 prose-pre:rounded-lg
-                    prose-code:text-violet-600 prose-code:bg-violet-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md
-                    prose-strong:text-gray-900
-                    prose-a:text-violet-600 prose-a:no-underline hover:prose-a:underline
-                  "
-                />
-              </div>
-            </ScrollArea>
+            <div className="flex-1 overflow-hidden">
+              <RichTextEditor 
+                content={content} 
+                onChange={setContent}
+                className="bg-white rounded-none border-0"
+              />
+            </div>
           </div>
         </DialogContent>
       </Dialog>
