@@ -172,6 +172,48 @@ export type Database = {
           },
         ]
       }
+      character_shares: {
+        Row: {
+          character_id: string
+          created_at: string | null
+          id: string
+          shared_by: string
+          shared_with_group: string | null
+          shared_with_user: string | null
+        }
+        Insert: {
+          character_id: string
+          created_at?: string | null
+          id?: string
+          shared_by: string
+          shared_with_group?: string | null
+          shared_with_user?: string | null
+        }
+        Update: {
+          character_id?: string
+          created_at?: string | null
+          id?: string
+          shared_by?: string
+          shared_with_group?: string | null
+          shared_with_user?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "character_shares_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "character_shares_shared_with_group_fkey"
+            columns: ["shared_with_group"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       characters: {
         Row: {
           backstory: string | null

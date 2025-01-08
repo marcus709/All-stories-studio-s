@@ -1,0 +1,171 @@
+import { useState } from "react";
+import { useSession } from "@supabase/auth-helpers-react";
+import { useQuery } from "@tanstack/react-query";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Character } from "@/integrations/supabase/types/tables.types";
+
+interface ShareCharacterDialogProps {
+  character: Character;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function ShareCharacterDialog({ character, isOpen, onOpenChange }: ShareCharacterDialogProps) {
+  const session = useSession();
+  const { toast } = useToast();
+  const [isSharing, setIsSharing] = useState(false);
+  const [selectedTab, setSelectedTab] = useState<"friends" | "groups">("friends");
+
+  const { data: friends } = useQuery({
+    queryKey: ["friends", session?.user?.id],
+    queryFn: async () => {
+      const { data: friendships, error } = await supabase
+        .from("friendships")
+        .select(`
+          id,
+          friend:profiles!friendships_friend_id_fkey_profiles(
+            id,
+            username,
+            avatar_url
+          )
+        `)
+        .eq("user_id", session?.user?.id)
+        .eq("status", "accepted");
+
+      if (error) throw error;
+      return friendships;
+    },
+    enabled: !!session?.user?.id,
+  });
+
+  const { data: groups } = useQuery({
+    queryKey: ["my-groups", session?.user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("groups")
+        .select(`
+          *,
+          group_members!inner(user_id)
+        `)
+        .eq("group_members.user_id", session?.user?.id);
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!session?.user?.id,
+  });
+
+  const handleShare = async (targetId: string, type: "user" | "group") => {
+    if (!session?.user?.id) return;
+
+    setIsSharing(true);
+    try {
+      const { error } = await supabase.from("character_shares").insert({
+        character_id: character.id,
+        shared_by: session.user.id,
+        ...(type === "user" 
+          ? { shared_with_user: targetId }
+          : { shared_with_group: targetId }
+        ),
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Character shared successfully`,
+      });
+
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error sharing character:", error);
+      toast({
+        title: "Error",
+        description: "Failed to share character. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Share Character</DialogTitle>
+        </DialogHeader>
+
+        <Tabs value={selectedTab} onValueChange={(value) => setSelectedTab(value as "friends" | "groups")}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="friends">Friends</TabsTrigger>
+            <TabsTrigger value="groups">Groups</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="friends" className="mt-4">
+            <div className="space-y-4">
+              {friends?.map((friendship) => (
+                <div key={friendship.id} className="flex items-center justify-between p-2 rounded-lg border">
+                  <div className="flex items-center gap-3">
+                    <Avatar>
+                      {friendship.friend?.avatar_url ? (
+                        <AvatarImage src={friendship.friend.avatar_url} />
+                      ) : (
+                        <AvatarFallback>
+                          {friendship.friend?.username?.[0]?.toUpperCase() || "U"}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <span className="font-medium">@{friendship.friend?.username}</span>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => handleShare(friendship.friend?.id || "", "user")}
+                    disabled={isSharing}
+                  >
+                    Share
+                  </Button>
+                </div>
+              ))}
+              {!friends?.length && (
+                <p className="text-center text-muted-foreground">No friends to share with.</p>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="groups" className="mt-4">
+            <div className="space-y-4">
+              {groups?.map((group) => (
+                <div key={group.id} className="flex items-center justify-between p-2 rounded-lg border">
+                  <div className="flex items-center gap-3">
+                    <Avatar>
+                      <AvatarFallback>
+                        {group.name[0].toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium">{group.name}</span>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => handleShare(group.id, "group")}
+                    disabled={isSharing}
+                  >
+                    Share
+                  </Button>
+                </div>
+              ))}
+              {!groups?.length && (
+                <p className="text-center text-muted-foreground">No groups to share with.</p>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </DialogContent>
+    </Dialog>
+  );
+}
