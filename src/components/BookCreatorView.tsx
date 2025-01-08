@@ -49,6 +49,7 @@ export const BookCreatorView = () => {
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [bookSize, setBookSize] = useState<BookSize>({ width: 6, height: 9, name: "Trade Paperback (6\" × 9\")" });
   const [previewScene, setPreviewScene] = useState("none");
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const { data: bookStructures } = useQuery({
     queryKey: ["bookStructures"],
@@ -76,6 +77,10 @@ export const BookCreatorView = () => {
 
   const handleImageUpload = (url: string) => {
     setCoverImage(url);
+  };
+
+  const handleToggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
   };
 
   const renderBookPages = () => {
@@ -128,6 +133,26 @@ export const BookCreatorView = () => {
 
     return pages;
   };
+
+  if (isFullscreen) {
+    return (
+      <div className="fixed inset-0 bg-gray-50 z-50">
+        <div className="h-full p-8">
+          <PreviewScene 
+            onSceneChange={setPreviewScene} 
+            onToggleFullscreen={handleToggleFullscreen}
+            isFullscreen={true}
+            className="h-full"
+          >
+            <PageTurner 
+              pages={renderBookPages()} 
+              className="max-w-[800px] mx-auto h-full" 
+            />
+          </PreviewScene>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
@@ -183,7 +208,12 @@ export const BookCreatorView = () => {
         {/* Center Panel - Book Preview */}
         <div className="flex-1 bg-gray-50 overflow-y-auto">
           <div className="h-full p-8">
-            <PreviewScene onSceneChange={setPreviewScene} className="h-full">
+            <PreviewScene 
+              onSceneChange={setPreviewScene} 
+              onToggleFullscreen={handleToggleFullscreen}
+              isFullscreen={false}
+              className="h-full"
+            >
               <PageTurner pages={renderBookPages()} className="max-w-[600px] mx-auto" />
             </PreviewScene>
           </div>
