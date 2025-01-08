@@ -34,6 +34,9 @@ export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps)
 
     try {
       setIsSaving(true);
+      console.log("Saving document with ID:", document.id);
+      console.log("New content:", content);
+
       const { error } = await supabase
         .from('documents')
         .update({ 
@@ -51,6 +54,9 @@ export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps)
         title: "Success",
         description: "Document saved successfully",
       });
+      
+      // Close the dialog after successful save
+      setIsOpen(false);
     } catch (error) {
       console.error("Error saving document:", error);
       toast({
@@ -82,7 +88,7 @@ export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps)
       </div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-4xl h-[85vh] p-0">
+        <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0">
           <DialogHeader className="px-6 py-4 border-b bg-white">
             <DialogTitle className="flex items-center gap-2 text-xl font-semibold">
               <FileText className="h-5 w-5 text-violet-500" />
@@ -90,27 +96,21 @@ export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps)
             </DialogTitle>
           </DialogHeader>
           
-          <div className="flex flex-col h-[calc(100%-4rem)] bg-white">
-            <div className="border-b">
-              <EditorToolbar editor={null} />
-            </div>
+          <div className="flex-1 overflow-hidden flex flex-col">
+            <RichTextEditor 
+              content={content} 
+              onChange={setContent}
+              className="flex-1"
+            />
             
-            <div className="flex-1 overflow-hidden relative">
-              <RichTextEditor 
-                content={content} 
-                onChange={setContent}
-                className="h-full"
-              />
-              
-              <div className="absolute bottom-0 right-0 p-4 bg-white border-t border-l rounded-tl-lg">
-                <Button 
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="bg-violet-600 hover:bg-violet-700"
-                >
-                  {isSaving ? "Saving..." : "Save"}
-                </Button>
-              </div>
+            <div className="p-4 bg-white border-t">
+              <Button 
+                onClick={handleSave}
+                disabled={isSaving}
+                className="bg-violet-600 hover:bg-violet-700 ml-auto"
+              >
+                {isSaving ? "Saving..." : "Save"}
+              </Button>
             </div>
           </div>
         </DialogContent>

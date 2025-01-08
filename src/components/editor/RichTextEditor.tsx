@@ -26,17 +26,15 @@ export function RichTextEditor({ content, onChange, className = '' }: RichTextEd
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none h-full px-8 py-6 focus:outline-none',
+        class: 'prose prose-sm max-w-none flex-1 px-8 py-6 focus:outline-none overflow-y-auto',
       },
     },
   });
 
   return (
-    <div className={`flex flex-col border rounded-lg bg-white overflow-hidden ${className}`}>
+    <div className={`flex flex-col ${className}`}>
       <EditorToolbar editor={editor} />
-      <div className="flex-1 overflow-y-auto">
-        <EditorContent editor={editor} />
-      </div>
+      <EditorContent editor={editor} className="flex-1 overflow-y-auto" />
     </div>
   );
 }
