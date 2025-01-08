@@ -68,6 +68,7 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
         if (shareError) throw shareError;
         
         setSharedCharacter(undefined);
+        setDraftMessage("");
       }
     } catch (error) {
       console.error("Error sending message:", error);

@@ -6,30 +6,30 @@ import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate, useParams } from "react-router-dom";
-
-type Message = {
-  id: string;
-  content: string;
-  sender_id: string;
-  receiver_id: string;
-  created_at: string;
-  updated_at: string;
-  profiles?: {
-    username: string | null;
-    avatar_url: string | null;
-  } | null;
-};
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { Character } from "@/integrations/supabase/types/tables.types";
+import { CharacterPreview } from "./CharacterPreview";
 
 export const PrivateChat = () => {
   const { friendId } = useParams();
   const session = useSession();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [messages, setMessages] = useState<Message[]>([]);
+  const location = useLocation();
+  const [messages, setMessages] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [friend, setFriend] = useState<any>(null);
   const [isFriend, setIsFriend] = useState(false);
+  const [sharedCharacter, setSharedCharacter] = useState<Character | undefined>(
+    location.state?.sharedCharacter
+  );
+  const [draftMessage, setDraftMessage] = useState("");
+
+  useEffect(() => {
+    if (sharedCharacter) {
+      setDraftMessage("I'd like to share a character with you:");
+    }
+  }, [sharedCharacter]);
 
   useEffect(() => {
     const checkFriendship = async () => {
@@ -176,13 +176,39 @@ export const PrivateChat = () => {
     }
 
     try {
-      const { error } = await supabase.from("private_messages").insert({
+      let messageData: any = {
         content,
         sender_id: session?.user?.id,
         receiver_id: friendId,
-      });
+      };
+
+      if (sharedCharacter) {
+        messageData.metadata = {
+          type: 'character_share',
+          character: sharedCharacter
+        };
+      }
+
+      const { error } = await supabase
+        .from("private_messages")
+        .insert(messageData);
 
       if (error) throw error;
+
+      if (sharedCharacter) {
+        const { error: shareError } = await supabase
+          .from("character_shares")
+          .insert({
+            character_id: sharedCharacter.id,
+            shared_by: session?.user?.id,
+            shared_with_user: friendId
+          });
+
+        if (shareError) throw shareError;
+        
+        setSharedCharacter(undefined);
+        setDraftMessage("");
+      }
     } catch (error) {
       console.error("Error sending message:", error);
       toast({
@@ -232,4 +258,3 @@ export const PrivateChat = () => {
       </div>
     </div>
   );
-};
