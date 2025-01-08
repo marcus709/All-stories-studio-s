@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileText } from "lucide-react";
 import { EditorToolbar } from "@/components/editor/EditorToolbar";
 import { RichTextEditor } from "@/components/editor/RichTextEditor";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DocumentPreviewProps {
   document: {
@@ -17,6 +19,34 @@ interface DocumentPreviewProps {
 export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [content, setContent] = useState(document.content);
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
+
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+      const { error } = await supabase
+        .from('documents')
+        .update({ content })
+        .eq('id', document.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Document saved successfully",
+      });
+    } catch (error) {
+      console.error("Error saving document:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save document",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <>
@@ -39,11 +69,18 @@ export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps)
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-4xl h-[85vh] p-0 gap-0">
           <div className="flex flex-col h-full bg-zinc-50">
-            <DialogHeader className="px-6 py-4 border-b bg-white">
+            <DialogHeader className="px-6 py-4 border-b bg-white flex flex-row items-center justify-between">
               <DialogTitle className="flex items-center gap-2 text-xl font-semibold">
                 <FileText className="h-5 w-5 text-violet-500" />
                 {document.title}
               </DialogTitle>
+              <Button 
+                onClick={handleSave}
+                disabled={isSaving}
+                size="sm"
+              >
+                {isSaving ? "Saving..." : "Save"}
+              </Button>
             </DialogHeader>
             
             <div className="flex-1 overflow-hidden">
