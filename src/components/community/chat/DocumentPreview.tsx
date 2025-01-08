@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FileText } from "lucide-react";
-import { EditorToolbar } from "@/components/editor/EditorToolbar";
-import { RichTextEditor } from "@/components/editor/RichTextEditor";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { RichTextEditor } from "@/components/editor/RichTextEditor";
 
 interface DocumentPreviewProps {
   document: {
@@ -34,28 +33,30 @@ export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps)
 
     try {
       setIsSaving(true);
-      console.log("Saving document with ID:", document.id);
-      console.log("New content:", content);
+      console.log("Attempting to save document:", document.id);
 
       const { error } = await supabase
-        .from('documents')
+        .from("documents")
         .update({ 
-          content,
+          content: content,
           updated_at: new Date().toISOString()
         })
-        .eq('id', document.id);
+        .eq("id", document.id)
+        .select()
+        .single();
 
       if (error) {
         console.error("Supabase error:", error);
         throw error;
       }
 
+      console.log("Document saved successfully");
+      
       toast({
         title: "Success",
         description: "Document saved successfully",
       });
       
-      // Close the dialog after successful save
       setIsOpen(false);
     } catch (error) {
       console.error("Error saving document:", error);
