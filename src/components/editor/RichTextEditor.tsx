@@ -4,7 +4,7 @@ import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import { EditorToolbar } from './EditorToolbar';
 import { TextSuggestionsMenu } from './TextSuggestionsMenu';
-import { useState, useCallback, useEffect } from 'react';
+import { useState } from 'react';
 
 interface RichTextEditorProps {
   content: string;
@@ -31,7 +31,7 @@ export function RichTextEditor({ content, onChange, className = '' }: RichTextEd
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none h-full min-h-[500px] px-8 py-6 focus:outline-none font-instagram-draft',
+        class: 'prose prose-sm max-w-none h-full min-h-[500px] px-8 py-6 focus:outline-none',
       },
       handleDOMEvents: {
         mouseup: (view, event) => {

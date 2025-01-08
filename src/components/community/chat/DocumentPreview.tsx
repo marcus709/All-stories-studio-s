@@ -25,16 +25,19 @@ export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps)
   const handleSave = async () => {
     try {
       setIsSaving(true);
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('documents')
         .update({ 
           content,
           updated_at: new Date().toISOString()
         })
         .eq('id', document.id)
-        .select();
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       toast({
         title: "Success",
@@ -44,7 +47,7 @@ export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps)
       console.error("Error saving document:", error);
       toast({
         title: "Error",
-        description: "Failed to save document",
+        description: "Failed to save document. Please try again.",
         variant: "destructive",
       });
     } finally {
