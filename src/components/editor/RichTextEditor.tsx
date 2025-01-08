@@ -31,7 +31,7 @@ export function RichTextEditor({ content, onChange, className = '' }: RichTextEd
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none h-full min-h-[500px] px-8 py-6 focus:outline-none',
+        class: 'prose prose-sm max-w-none h-full min-h-[500px] px-8 py-6 focus:outline-none font-instagram-draft',
       },
       handleDOMEvents: {
         mouseup: (view, event) => {
@@ -41,7 +41,6 @@ export function RichTextEditor({ content, onChange, className = '' }: RichTextEd
             return false;
           }
 
-          // Get the coordinates of the selection
           const { top, right } = view.coordsAtPos(to);
           const domRect = view.dom.getBoundingClientRect();
           
@@ -53,12 +52,10 @@ export function RichTextEditor({ content, onChange, className = '' }: RichTextEd
           return false;
         },
         blur: () => {
-          // Hide menu when editor loses focus
           setShowMenu(false);
           return false;
         },
         keyup: (view) => {
-          // Check if there's any text selected
           const { from, to } = view.state.selection;
           if (from === to) {
             setShowMenu(false);
@@ -66,7 +63,6 @@ export function RichTextEditor({ content, onChange, className = '' }: RichTextEd
           return false;
         },
         mousedown: () => {
-          // Hide menu when starting a new selection
           setShowMenu(false);
           return false;
         },

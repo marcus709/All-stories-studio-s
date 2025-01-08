@@ -14,7 +14,7 @@ export function DialogPreview({ generatedDialog, isSaving, onSave }: DialogPrevi
       {generatedDialog ? (
         <>
           <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-6 min-h-[300px] max-h-[500px] overflow-y-auto">
-            <pre className="whitespace-pre-wrap font-sans text-sm">{generatedDialog}</pre>
+            <pre className="whitespace-pre-wrap font-instagram-draft text-sm">{generatedDialog}</pre>
           </div>
           <Button
             onClick={onSave}
@@ -33,7 +33,7 @@ export function DialogPreview({ generatedDialog, isSaving, onSave }: DialogPrevi
           </Button>
         </>
       ) : (
-        <div className="flex items-center justify-center h-[300px] text-gray-500">
+        <div className="flex items-center justify-center h-[300px] text-gray-500 font-instagram-draft">
           Generated dialog will appear here
         </div>
       )}
