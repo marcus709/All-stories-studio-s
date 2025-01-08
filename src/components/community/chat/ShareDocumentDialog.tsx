@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useGroups } from "@/hooks/useGroups";
 import { useFriendsList } from "@/hooks/useFriendsList";
 
@@ -29,64 +30,85 @@ export const ShareDocumentDialog = ({ document, open, onOpenChange }: ShareDocum
     onOpenChange(false);
   };
 
-  const handleShareWithGroup = (groupId: string) => {
-    navigate(`/community/groups/${groupId}`, {
-      state: { sharedDocument: document }
+  const handleShareWithGroup = (group: any) => {
+    navigate(`/community/groups`, { 
+      state: { 
+        selectedGroup: group,
+        sharedDocument: document 
+      }
     });
     onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Share Document</DialogTitle>
         </DialogHeader>
-        
-        <div className="flex gap-2 mb-4">
-          <Button
-            variant={selectedTab === "friends" ? "default" : "outline"}
-            onClick={() => setSelectedTab("friends")}
-          >
-            Friends
-          </Button>
-          <Button
-            variant={selectedTab === "groups" ? "default" : "outline"}
-            onClick={() => setSelectedTab("groups")}
-          >
-            Groups
-          </Button>
-        </div>
 
-        <ScrollArea className="h-[300px] pr-4">
-          {selectedTab === "friends" ? (
-            <div className="space-y-2">
-              {friends?.map((friend) => (
-                <Button
-                  key={friend.friend.id}
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => handleShareWithFriend(friend.friend.id)}
-                >
-                  {friend.friend.username || "Unknown User"}
-                </Button>
+        <Tabs value={selectedTab} onValueChange={(value) => setSelectedTab(value as "friends" | "groups")}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="friends">Friends</TabsTrigger>
+            <TabsTrigger value="groups">Groups</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="friends" className="mt-4">
+            <div className="space-y-4">
+              {friends?.map((friendship) => (
+                <div key={friendship.id} className="flex items-center justify-between p-2 rounded-lg border">
+                  <div className="flex items-center gap-3">
+                    <Avatar>
+                      {friendship.friend?.avatar_url ? (
+                        <AvatarImage src={friendship.friend.avatar_url} />
+                      ) : (
+                        <AvatarFallback>
+                          {friendship.friend?.username?.[0]?.toUpperCase() || "U"}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <span className="font-medium">@{friendship.friend?.username}</span>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => handleShareWithFriend(friendship.friend?.id || "")}
+                  >
+                    Share
+                  </Button>
+                </div>
               ))}
+              {!friends?.length && (
+                <p className="text-center text-muted-foreground">No friends to share with.</p>
+              )}
             </div>
-          ) : (
-            <div className="space-y-2">
+          </TabsContent>
+
+          <TabsContent value="groups" className="mt-4">
+            <div className="space-y-4">
               {groups?.map((group) => (
-                <Button
-                  key={group.id}
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => handleShareWithGroup(group.id)}
-                >
-                  {group.name}
-                </Button>
+                <div key={group.id} className="flex items-center justify-between p-2 rounded-lg border">
+                  <div className="flex items-center gap-3">
+                    <Avatar>
+                      <AvatarFallback>
+                        {group.name[0].toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium">{group.name}</span>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => handleShareWithGroup(group)}
+                  >
+                    Share
+                  </Button>
+                </div>
               ))}
+              {!groups?.length && (
+                <p className="text-center text-muted-foreground">No groups to share with.</p>
+              )}
             </div>
-          )}
-        </ScrollArea>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

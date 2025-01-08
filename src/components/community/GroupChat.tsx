@@ -7,6 +7,7 @@ import { GroupHeader } from "./chat/GroupHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { Character } from "@/integrations/supabase/types/tables.types";
 import { CharacterPreview } from "./chat/CharacterPreview";
+import { DocumentPreview } from "./chat/DocumentPreview";
 import { useGroupMessages } from "./chat/hooks/useGroupMessages";
 import { useGroupMembership } from "./chat/hooks/useGroupMembership";
 import { X } from "lucide-react";
@@ -24,14 +25,19 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
   const [sharedCharacter, setSharedCharacter] = useState<Character | undefined>(
     location.state?.sharedCharacter
   );
+  const [sharedDocument, setSharedDocument] = useState<any>(
+    location.state?.sharedDocument
+  );
   const { messages, isLoading } = useGroupMessages(group.id);
   const { isMember, isLoading: membershipLoading } = useGroupMembership(group.id);
 
   useEffect(() => {
     if (sharedCharacter) {
       setDraftMessage("I'd like to share a character with the group:");
+    } else if (sharedDocument) {
+      setDraftMessage("I'd like to share a document with the group:");
     }
-  }, [sharedCharacter]);
+  }, [sharedCharacter, sharedDocument]);
 
   const handleSendMessage = async (content: string) => {
     if (!session?.user?.id || !isMember) return;
@@ -47,6 +53,11 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
         messageData.metadata = {
           type: 'character_share',
           character: sharedCharacter
+        };
+      } else if (sharedDocument) {
+        messageData.metadata = {
+          type: 'document_share',
+          document: sharedDocument
         };
       }
 
@@ -66,17 +77,29 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
           });
 
         if (shareError) throw shareError;
-        
         setSharedCharacter(undefined);
-        setDraftMessage("");
+      } else if (sharedDocument) {
+        const { error: shareError } = await supabase
+          .from("document_shares")
+          .insert({
+            document_id: sharedDocument.id,
+            shared_by: session.user.id,
+            shared_with_group: group.id
+          });
+
+        if (shareError) throw shareError;
+        setSharedDocument(undefined);
       }
+      
+      setDraftMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
     }
   };
 
-  const handleRemoveCharacter = () => {
+  const handleRemoveShared = () => {
     setSharedCharacter(undefined);
+    setSharedDocument(undefined);
     setDraftMessage("");
   };
 
@@ -103,17 +126,18 @@ export const GroupChat = ({ group, onBack }: GroupChatProps) => {
       <div className="flex-1 overflow-y-auto">
         <MessageList messages={messages} isLoading={isLoading} />
       </div>
-      {sharedCharacter && (
+      {(sharedCharacter || sharedDocument) && (
         <div className="p-4 border-t border-gray-100 bg-gray-50/50 backdrop-blur-sm relative">
           <Button
             variant="ghost"
             size="icon"
             className="absolute -top-3 -right-3 h-7 w-7 rounded-full bg-white shadow-sm hover:bg-gray-100 border transition-colors"
-            onClick={handleRemoveCharacter}
+            onClick={handleRemoveShared}
           >
             <X className="h-4 w-4 text-gray-600" />
           </Button>
-          <CharacterPreview character={sharedCharacter} />
+          {sharedCharacter && <CharacterPreview character={sharedCharacter} />}
+          {sharedDocument && <DocumentPreview document={sharedDocument} isInMessage={true} />}
         </div>
       )}
       <MessageInput 
