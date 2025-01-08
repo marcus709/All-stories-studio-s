@@ -33,36 +33,46 @@ export const DocumentPreview = ({ document, isInMessage }: DocumentPreviewProps)
 
     try {
       setIsSaving(true);
-      console.log("Attempting to save document:", document.id);
-
-      const { error } = await supabase
+      
+      // First, verify the document exists and get its current state
+      const { data: existingDoc, error: fetchError } = await supabase
         .from("documents")
-        .update({ 
-          content: content,
-          updated_at: new Date().toISOString()
-        })
+        .select("id")
         .eq("id", document.id)
-        .select()
-        .single();
+        .maybeSingle();
 
-      if (error) {
-        console.error("Supabase error:", error);
-        throw error;
+      if (fetchError) {
+        throw new Error("Failed to verify document existence");
       }
 
-      console.log("Document saved successfully");
-      
+      if (!existingDoc) {
+        throw new Error("Document not found");
+      }
+
+      // Then perform the update
+      const { error: updateError } = await supabase
+        .from("documents")
+        .update({
+          content: content,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", document.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
       toast({
         title: "Success",
         description: "Document saved successfully",
       });
-      
+
       setIsOpen(false);
     } catch (error) {
       console.error("Error saving document:", error);
       toast({
         title: "Error",
-        description: "Failed to save document. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to save document",
         variant: "destructive",
       });
     } finally {
