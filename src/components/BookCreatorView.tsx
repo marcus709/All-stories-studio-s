@@ -130,63 +130,69 @@ export const BookCreatorView = () => {
   };
 
   return (
-    <div className="h-[calc(100vh-4rem)] overflow-hidden bg-gray-50">
+    <div className="flex flex-col h-screen overflow-hidden">
       <DesignHeader
         onResetDesign={handleResetDesign}
         onSaveDesign={handleSaveDesign}
       />
 
-      <div className="flex h-[calc(100vh-8rem)]">
+      <div className="flex flex-1 overflow-hidden">
         {/* Left Panel - Design Tools */}
-        <div className="w-80 border-r bg-white p-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-6">
-              <TabsTrigger value="templates">
-                <BookCopy className="h-4 w-4 mr-2" />
-                Templates
-              </TabsTrigger>
-              <TabsTrigger value="images">
-                <ImagePlus className="h-4 w-4 mr-2" />
-                Images
-              </TabsTrigger>
-              <TabsTrigger value="text">
-                <Type className="h-4 w-4 mr-2" />
-                Text
-              </TabsTrigger>
-            </TabsList>
+        <div className="w-80 border-r bg-white overflow-y-auto">
+          <div className="p-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-3 mb-6">
+                <TabsTrigger value="templates">
+                  <BookCopy className="h-4 w-4 mr-2" />
+                  Templates
+                </TabsTrigger>
+                <TabsTrigger value="images">
+                  <ImagePlus className="h-4 w-4 mr-2" />
+                  Images
+                </TabsTrigger>
+                <TabsTrigger value="text">
+                  <Type className="h-4 w-4 mr-2" />
+                  Text
+                </TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="templates" className="mt-0">
-              <TemplatePanel
-                templates={templates}
-                selectedTemplate={selectedTemplate}
-                onTemplateSelect={handleTemplateSelect}
-              />
-              <div className="mt-6">
-                <BookSizeSelector onSizeChange={setBookSize} />
-              </div>
-            </TabsContent>
+              <TabsContent value="templates" className="mt-0">
+                <TemplatePanel
+                  templates={templates}
+                  selectedTemplate={selectedTemplate}
+                  onTemplateSelect={handleTemplateSelect}
+                />
+                <div className="mt-6">
+                  <BookSizeSelector onSizeChange={setBookSize} />
+                </div>
+              </TabsContent>
 
-            <TabsContent value="images" className="mt-0">
-              <ImageUploadPanel onImageUpload={handleImageUpload} />
-            </TabsContent>
+              <TabsContent value="images" className="mt-0">
+                <ImageUploadPanel onImageUpload={handleImageUpload} />
+              </TabsContent>
 
-            <TabsContent value="text" className="mt-0">
-              <div className="space-y-4">
-                {/* Text editing functionality will be implemented next */}
-              </div>
-            </TabsContent>
-          </Tabs>
+              <TabsContent value="text" className="mt-0">
+                <div className="space-y-4">
+                  {/* Text editing functionality will be implemented next */}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
 
         {/* Center Panel - Book Preview */}
-        <div className="flex-1 p-8 flex items-center justify-center bg-gray-100">
-          <PreviewScene onSceneChange={setPreviewScene} className="w-full h-full">
-            <PageTurner pages={renderBookPages()} className="max-w-[600px] mx-auto" />
-          </PreviewScene>
+        <div className="flex-1 bg-gray-50 overflow-y-auto">
+          <div className="h-full p-8">
+            <PreviewScene onSceneChange={setPreviewScene} className="h-full">
+              <PageTurner pages={renderBookPages()} className="max-w-[600px] mx-auto" />
+            </PreviewScene>
+          </div>
         </div>
 
         {/* Right Panel - Properties */}
-        <PropertiesPanel selectedTemplate={selectedTemplate} />
+        <div className="w-80 border-l bg-white overflow-y-auto">
+          <PropertiesPanel selectedTemplate={selectedTemplate} />
+        </div>
       </div>
     </div>
   );
