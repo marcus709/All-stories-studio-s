@@ -18,7 +18,7 @@ interface ShareDocumentDialogProps {
 
 export const ShareDocumentDialog = ({ document, open, onOpenChange }: ShareDocumentDialogProps) => {
   const navigate = useNavigate();
-  const { groups } = useGroups();
+  const { data: groups } = useGroups();
   const { friends } = useFriendsList();
   const [selectedTab, setSelectedTab] = useState<"friends" | "groups">("friends");
 
