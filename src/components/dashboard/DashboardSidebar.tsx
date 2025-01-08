@@ -55,7 +55,8 @@ export const DashboardSidebar = ({ currentView, setCurrentView }: DashboardSideb
   return (
     <div className="fixed left-0 top-16 w-72 h-[calc(100vh-4rem)] border-r bg-white">
       <div className="flex flex-col h-full">
-        <div className="flex items-center gap-3 p-8">
+        {/* Profile Section - Fixed */}
+        <div className="flex items-center gap-3 mb-12 px-8 mt-8">
           <div className="w-11 h-11 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-lg font-medium">
             {profile?.username?.[0]?.toUpperCase() || "?"}
           </div>
@@ -66,10 +67,12 @@ export const DashboardSidebar = ({ currentView, setCurrentView }: DashboardSideb
           </div>
         </div>
 
-        <div className="px-8 mb-6">
+        {/* Stories Section - Fixed */}
+        <div className="space-y-4 mb-6 px-8">
           <StoriesDialog />
         </div>
 
+        {/* Navigation - Scrollable */}
         <ScrollArea className="flex-1 px-4">
           <nav className="space-y-3 pr-4">
             {navigationItems.map(({ id, icon: Icon, label }) => (
