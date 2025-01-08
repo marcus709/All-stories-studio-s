@@ -1,125 +1,58 @@
 import { useState } from "react";
-import { MoreVertical, Trash2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Share } from "lucide-react";
+import { ShareDocumentDialog } from "@/components/community/chat/ShareDocumentDialog";
 
-interface DocumentsListProps {
-  documents: any[];
-  selectedDocId: string | null;
-  onSelectDocument: (id: string) => void;
-  onRefresh: () => void;
+interface Document {
+  id: string;
+  title: string;
+  content: string;
 }
 
-export const DocumentsList = ({
-  documents,
-  selectedDocId,
-  onSelectDocument,
-  onRefresh,
-}: DocumentsListProps) => {
-  const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
-  const { toast } = useToast();
+interface DocumentsListProps {
+  documents: Document[];
+  onSelectDocument: (id: string) => void;
+  selectedDocumentId: string | null;
+}
 
-  const handleDelete = async () => {
-    if (!documentToDelete) return;
-
-    const { error } = await supabase
-      .from("documents")
-      .delete()
-      .eq("id", documentToDelete);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete document",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "Success",
-      description: "Document deleted successfully",
-    });
-
-    if (selectedDocId === documentToDelete) {
-      onSelectDocument("");
-    }
-    onRefresh();
-    setDocumentToDelete(null);
-  };
+export const DocumentsList = ({ documents, onSelectDocument, selectedDocumentId }: DocumentsListProps) => {
+  const [shareDocument, setShareDocument] = useState<Document | null>(null);
 
   return (
     <div className="space-y-2">
       {documents.map((doc) => (
         <div
           key={doc.id}
-          className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
-            selectedDocId === doc.id
-              ? "bg-purple-100"
-              : "hover:bg-gray-50"
-          }`}
-          onClick={() => onSelectDocument(doc.id)}
+          className={`flex items-center justify-between p-3 rounded-lg transition-colors cursor-pointer ${
+            selectedDocumentId === doc.id
+              ? "bg-purple-50 border-purple-200"
+              : "hover:bg-gray-50 border-transparent"
+          } border`}
         >
-          <div className="flex-1 min-w-0">
-            <h3 className="font-medium text-gray-900 truncate">{doc.title}</h3>
-            <p className="text-sm text-gray-500">
-              {new Date(doc.created_at).toLocaleDateString()}
-            </p>
+          <div
+            className="flex-1"
+            onClick={() => onSelectDocument(doc.id)}
+          >
+            <h3 className="font-medium">{doc.title}</h3>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger className="focus:outline-none">
-              <MoreVertical className="w-4 h-4 text-gray-500" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                className="text-red-600"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDocumentToDelete(doc.id);
-                }}
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShareDocument(doc);
+            }}
+          >
+            <Share className="h-4 w-4" />
+          </Button>
         </div>
       ))}
 
-      <AlertDialog
-        open={!!documentToDelete}
-        onOpenChange={() => setDocumentToDelete(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              document and all its content.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ShareDocumentDialog
+        document={shareDocument!}
+        open={!!shareDocument}
+        onOpenChange={(open) => !open && setShareDocument(null)}
+      />
     </div>
   );
 };
