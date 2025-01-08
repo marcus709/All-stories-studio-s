@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Editor } from '@tiptap/react';
 import { Button } from '../ui/button';
 import {
@@ -22,8 +22,29 @@ interface TextSuggestionsMenuProps {
 export function TextSuggestionsMenu({ editor, isOpen, top, left }: TextSuggestionsMenuProps) {
   const { generateContent, isLoading } = useAI();
   const { toast } = useToast();
+  const [showMenu, setShowMenu] = useState(false);
+  const menuWidth = 200; // Approximate width of the menu in pixels
 
-  if (!isOpen) return null;
+  // Add a slight delay before showing the menu to ensure the user has finished selecting
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    if (isOpen) {
+      timeoutId = setTimeout(() => {
+        setShowMenu(true);
+      }, 200); // 200ms delay
+    } else {
+      setShowMenu(false);
+    }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [isOpen]);
+
+  if (!isOpen || !showMenu) return null;
 
   const getSelectedText = () => {
     return editor?.state.doc.cut(
@@ -65,16 +86,19 @@ export function TextSuggestionsMenu({ editor, isOpen, top, left }: TextSuggestio
     }
   };
 
-  // Calculate the width of the menu to offset it correctly
-  const menuWidth = 200; // Approximate width of the menu in pixels
+  // Calculate position to avoid menu being cut off at screen edges
+  const menuLeft = Math.min(
+    left + menuWidth,
+    window.innerWidth - menuWidth - 20 // 20px padding from right edge
+  );
 
   return (
     <div
       className="absolute z-50 flex flex-col gap-2 p-4 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-purple-500/20"
       style={{
         top: `${top}px`,
-        left: `${left + menuWidth}px`, // Add the menu width to position it on the right
-        transform: 'translateX(-100%)', // Move it back by its full width
+        left: `${menuLeft}px`,
+        transform: 'translateX(-100%)',
       }}
     >
       <Button
