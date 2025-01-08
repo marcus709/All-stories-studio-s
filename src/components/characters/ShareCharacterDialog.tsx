@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { supabase } from "@/integrations/supabase/client";
 import { Character } from "@/integrations/supabase/types/tables.types";
 
 interface ShareCharacterDialogProps {
@@ -17,8 +17,7 @@ interface ShareCharacterDialogProps {
 
 export function ShareCharacterDialog({ character, isOpen, onOpenChange }: ShareCharacterDialogProps) {
   const session = useSession();
-  const { toast } = useToast();
-  const [isSharing, setIsSharing] = useState(false);
+  const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState<"friends" | "groups">("friends");
 
   const { data: friends } = useQuery({
@@ -60,38 +59,21 @@ export function ShareCharacterDialog({ character, isOpen, onOpenChange }: ShareC
     enabled: !!session?.user?.id,
   });
 
-  const handleShare = async (targetId: string, type: "user" | "group") => {
-    if (!session?.user?.id) return;
+  const handleShareWithFriend = (friendId: string) => {
+    onOpenChange(false);
+    navigate(`/community/chat/${friendId}`, { 
+      state: { sharedCharacter: character }
+    });
+  };
 
-    setIsSharing(true);
-    try {
-      const { error } = await supabase.from("character_shares").insert({
-        character_id: character.id,
-        shared_by: session.user.id,
-        ...(type === "user" 
-          ? { shared_with_user: targetId }
-          : { shared_with_group: targetId }
-        ),
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: `Character shared successfully`,
-      });
-
-      onOpenChange(false);
-    } catch (error) {
-      console.error("Error sharing character:", error);
-      toast({
-        title: "Error",
-        description: "Failed to share character. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSharing(false);
-    }
+  const handleShareWithGroup = (group: any) => {
+    onOpenChange(false);
+    navigate(`/community/groups`, { 
+      state: { 
+        selectedGroup: group,
+        sharedCharacter: character 
+      }
+    });
   };
 
   return (
@@ -125,8 +107,7 @@ export function ShareCharacterDialog({ character, isOpen, onOpenChange }: ShareC
                   </div>
                   <Button
                     size="sm"
-                    onClick={() => handleShare(friendship.friend?.id || "", "user")}
-                    disabled={isSharing}
+                    onClick={() => handleShareWithFriend(friendship.friend?.id || "")}
                   >
                     Share
                   </Button>
@@ -152,8 +133,7 @@ export function ShareCharacterDialog({ character, isOpen, onOpenChange }: ShareC
                   </div>
                   <Button
                     size="sm"
-                    onClick={() => handleShare(group.id, "group")}
-                    disabled={isSharing}
+                    onClick={() => handleShareWithGroup(group)}
                   >
                     Share
                   </Button>

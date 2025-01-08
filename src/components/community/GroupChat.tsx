@@ -7,26 +7,40 @@ import { supabase } from "@/integrations/supabase/client";
 import { RealtimeChannel } from "@supabase/supabase-js";
 import { Character } from "@/integrations/supabase/types/tables.types";
 import { CharacterPreview } from "./chat/CharacterPreview";
+import { useLocation } from "react-router-dom";
 
 interface GroupChatProps {
   group: any;
   onBack: () => void;
-  sharedCharacter?: Character;
 }
 
-export const GroupChat = ({ group, onBack, sharedCharacter }: GroupChatProps) => {
+export const GroupChat = ({ group, onBack }: GroupChatProps) => {
   const session = useSession();
+  const location = useLocation();
   const [messages, setMessages] = useState<any[]>([]);
   const [isMember, setIsMember] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [draftMessage, setDraftMessage] = useState("");
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const sharedCharacter = location.state?.sharedCharacter as Character | undefined;
 
   useEffect(() => {
     if (sharedCharacter) {
-      setDraftMessage(`I'd like to share a character with the group:`);
+      setDraftMessage("I'd like to share a character with the group:");
     }
   }, [sharedCharacter]);
+
+  useEffect(() => {
+    checkMembership();
+    fetchMessages();
+    setupRealtimeSubscription();
+
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+      }
+    };
+  }, [group.id, session?.user?.id]);
 
   const checkMembership = async () => {
     try {
