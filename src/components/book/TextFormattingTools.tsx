@@ -145,26 +145,28 @@ export const TextFormattingTools = ({
 
   return (
     <div className="flex-1 flex">
-      <div className="w-[21cm] mx-auto my-4 overflow-hidden">
-        <ScrollArea className="h-[calc(100vh-8rem)]">
-          <div className={cn(
-            "relative mx-auto transition-all duration-300",
-            getDeviceFrame()
-          )}>
-            <div className="relative" style={getPreviewStyle()}>
-              <div className="prose prose-sm max-w-none">
-                <h2 className="text-2xl font-serif mb-6">
-                  {getSectionTitle(currentSection)}
-                </h2>
-                <div 
-                  contentEditable
-                  suppressContentEditableWarning
-                  className="focus:outline-none min-h-[200px] font-serif"
-                  dangerouslySetInnerHTML={{ 
-                    __html: editableContent
-                  }}
-                  onInput={handleContentChange}
-                />
+      <div className="w-[21cm] mx-auto my-4 overflow-hidden flex-1">
+        <ScrollArea className="h-[calc(100vh-8rem)] border-r">
+          <div className="min-h-full pb-20">
+            <div className={cn(
+              "relative mx-auto transition-all duration-300",
+              getDeviceFrame()
+            )}>
+              <div className="relative" style={getPreviewStyle()}>
+                <div className="prose prose-sm max-w-none">
+                  <h2 className="text-2xl font-serif mb-6">
+                    {getSectionTitle(currentSection)}
+                  </h2>
+                  <div 
+                    contentEditable
+                    suppressContentEditableWarning
+                    className="focus:outline-none min-h-[calc(100vh-16rem)] font-serif"
+                    dangerouslySetInnerHTML={{ 
+                      __html: editableContent
+                    }}
+                    onInput={handleContentChange}
+                  />
+                </div>
               </div>
             </div>
           </div>
