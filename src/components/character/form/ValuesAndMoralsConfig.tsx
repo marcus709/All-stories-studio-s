@@ -18,13 +18,17 @@ export function ValuesAndMoralsConfig({ values, onChange }: ValuesAndMoralsConfi
   const handleValueChange = (field: string, value: number[]) => {
     if (field.includes('.')) {
       const [parent, child] = field.split('.');
-      onChange({
-        ...values,
-        [parent]: {
-          ...values[parent as keyof typeof values],
-          [child]: value[0]
-        }
-      });
+      const parentKey = parent as keyof typeof values;
+      
+      if (typeof values[parentKey] === 'object' && values[parentKey] !== null) {
+        onChange({
+          ...values,
+          [parent]: {
+            ...values[parentKey],
+            [child]: value[0]
+          }
+        });
+      }
     } else {
       onChange({
         ...values,
