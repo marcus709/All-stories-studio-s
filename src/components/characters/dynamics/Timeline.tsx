@@ -3,16 +3,11 @@ import { Slider } from "@/components/ui/slider";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useStory } from "@/contexts/StoryContext";
+import { TensionPoint } from "./types";
 
 interface TimelineProps {
   position: number;
   onPositionChange: (value: number[]) => void;
-}
-
-interface TensionPoint {
-  position: number;
-  tension_level: number;
-  description: string;
 }
 
 export function Timeline({ position, onPositionChange }: TimelineProps) {
@@ -30,19 +25,19 @@ export function Timeline({ position, onPositionChange }: TimelineProps) {
         .order('position');
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as TensionPoint[];
     },
     enabled: !!selectedStory?.id,
   });
 
   // Define default tension points if none exist
-  const defaultTensionPoints = [
-    { position: 0, tension_level: 70, description: "High Initial Tension" },
-    { position: 30, tension_level: 40, description: "Building Conflict" },
-    { position: 50, tension_level: 80, description: "Major Crisis" },
-    { position: 70, tension_level: 60, description: "Rising Action" },
-    { position: 85, tension_level: 90, description: "Climax" },
-    { position: 100, tension_level: 30, description: "Resolution" },
+  const defaultTensionPoints: TensionPoint[] = [
+    { id: '1', story_id: selectedStory?.id || '', position: 0, tension_level: 70, description: "High Initial Tension", type: 'rising' },
+    { id: '2', story_id: selectedStory?.id || '', position: 30, tension_level: 40, description: "Building Conflict", type: 'rising' },
+    { id: '3', story_id: selectedStory?.id || '', position: 50, tension_level: 80, description: "Major Crisis", type: 'climax' },
+    { id: '4', story_id: selectedStory?.id || '', position: 70, tension_level: 60, description: "Rising Action", type: 'falling' },
+    { id: '5', story_id: selectedStory?.id || '', position: 85, tension_level: 90, description: "Climax", type: 'climax' },
+    { id: '6', story_id: selectedStory?.id || '', position: 100, tension_level: 30, description: "Resolution", type: 'resolution' },
   ];
 
   const points = tensionPoints.length > 0 ? tensionPoints : defaultTensionPoints;
@@ -56,14 +51,14 @@ export function Timeline({ position, onPositionChange }: TimelineProps) {
       
       {/* Tension gradient background */}
       <div className="relative mb-8">
-        <div className="absolute inset-0 h-3 rounded-full bg-gradient-to-r from-red-400 via-yellow-400 to-green-400" />
+        <div className="absolute inset-0 h-3 rounded-full bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 opacity-25" />
         
         {/* Tension points */}
         <div className="relative h-3">
-          {points.map((point, index) => (
+          {points.map((point) => (
             <div
-              key={index}
-              className="absolute w-2 h-2 bg-white border-2 border-gray-600 rounded-full transform -translate-y-1/4 cursor-pointer group"
+              key={point.id}
+              className="absolute w-3 h-3 bg-white border-2 rounded-full transform -translate-y-1/4 -translate-x-1/2 cursor-pointer group"
               style={{ 
                 left: `${point.position}%`,
                 borderColor: point.tension_level > 70 ? '#ef4444' : 
@@ -71,11 +66,13 @@ export function Timeline({ position, onPositionChange }: TimelineProps) {
               }}
             >
               {/* Tooltip */}
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-2 hidden group-hover:block">
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-2 hidden group-hover:block z-50">
                 <div className="bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
                   {point.description}
                   <br />
                   Tension: {point.tension_level}%
+                  <br />
+                  Type: {point.type}
                 </div>
               </div>
             </div>

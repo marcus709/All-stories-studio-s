@@ -3,7 +3,7 @@ import { CharacterDynamicsD3 } from './dynamics/CharacterDynamicsD3';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useStory } from '@/contexts/StoryContext';
-import { CharacterNode, Relationship } from './dynamics/types';
+import { CharacterNode, Relationship, RelationshipType } from './dynamics/types';
 
 interface CharacterDynamicsProps {
   characters: Character[];
@@ -38,19 +38,25 @@ export const CharacterDynamics = ({ characters }: CharacterDynamicsProps) => {
   }));
 
   // Transform the relationships data to match the expected format
-  const relationships: Relationship[] = (relationshipData || []).map(rel => {
-    const source = characterNodes.find(c => c.id === rel.character1_id);
-    const target = characterNodes.find(c => c.id === rel.character2_id);
-    
-    if (!source || !target) return null;
-    
-    return {
-      source,
-      target,
-      type: rel.relationship_type,
-      strength: rel.strength || 50
-    };
-  }).filter((rel): rel is Relationship => rel !== null);
+  const relationships: Relationship[] = (relationshipData || [])
+    .map(rel => {
+      const source = characterNodes.find(c => c.id === rel.character1_id);
+      const target = characterNodes.find(c => c.id === rel.character2_id);
+      
+      if (!source || !target) return null;
+      
+      // Ensure the relationship type is valid
+      const type = rel.relationship_type as RelationshipType;
+      if (!type) return null;
+
+      return {
+        source,
+        target,
+        type,
+        strength: rel.strength || 50
+      };
+    })
+    .filter((rel): rel is Relationship => rel !== null);
 
   return (
     <div className="w-full h-full">
