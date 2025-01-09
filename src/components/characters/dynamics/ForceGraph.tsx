@@ -16,8 +16,7 @@ const relationshipColors = {
   'lover': '#EC4899',      // pink for romance
   'rival': '#F97316',      // orange for rivalry
   'ally': '#06B6D4',       // cyan for alliance
-  'business': '#6366F1',   // indigo for professional
-  'default': '#9CA3AF'     // gray for undefined
+  'neutral': '#9CA3AF'     // gray for undefined
 };
 
 export function ForceGraph({ characters, relationships }: ForceGraphProps) {
@@ -68,7 +67,7 @@ export function ForceGraph({ characters, relationships }: ForceGraphProps) {
       .data(relationships)
       .enter()
       .append("line")
-      .style("stroke", d => relationshipColors[d.type as keyof typeof relationshipColors] || relationshipColors.default)
+      .style("stroke", d => relationshipColors[d.type] || relationshipColors.neutral)
       .style("stroke-width", d => Math.max(1, Math.min(d.strength / 20, 5)))
       .style("opacity", 0.6);
 

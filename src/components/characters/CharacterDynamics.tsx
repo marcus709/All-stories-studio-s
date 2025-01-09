@@ -1,43 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useStory } from "@/contexts/StoryContext";
 import { CharacterDynamicsD3 } from "./dynamics/CharacterDynamicsD3";
 import { Timeline } from "./dynamics/Timeline";
-import { Character } from "@/types/story";
+import { Character } from "@/integrations/supabase/types/tables.types";
+import { CharacterNode, Relationship, RelationshipType } from "./dynamics/types";
 
-type RelationshipType = "friend" | "enemy" | "family" | "mentor" | "student" | "rival" | "lover" | "ally" | "neutral";
-
-interface CharacterNode {
-  id: string;
-  name: string;
-  role: string | null;
+interface CharacterDynamicsProps {
+  characters: Character[];
 }
 
-interface Relationship {
-  source: CharacterNode;
-  target: CharacterNode;
-  type: RelationshipType;
-  strength: number;
-}
-
-export const CharacterDynamics = () => {
+export const CharacterDynamics = ({ characters }: CharacterDynamicsProps) => {
   const { selectedStory } = useStory();
   const [timelinePosition, setTimelinePosition] = useState(0);
-
-  const { data: characters = [] } = useQuery({
-    queryKey: ["characters", selectedStory?.id],
-    queryFn: async () => {
-      if (!selectedStory?.id) return [];
-      const { data, error } = await supabase
-        .from("characters")
-        .select("*")
-        .eq("story_id", selectedStory.id);
-      if (error) throw error;
-      return data as Character[];
-    },
-    enabled: !!selectedStory?.id,
-  });
 
   const { data: relationships = [] } = useQuery({
     queryKey: ["character_relationships", selectedStory?.id],
@@ -74,7 +50,10 @@ export const CharacterDynamics = () => {
         position={timelinePosition}
         onPositionChange={(value) => setTimelinePosition(value[0])}
       />
-      <CharacterDynamicsD3 characters={characterNodes} relationships={relationships} />
+      <CharacterDynamicsD3 
+        characters={characterNodes} 
+        relationships={relationships} 
+      />
     </div>
   );
 };

@@ -1,24 +1,24 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Character } from '@/integrations/supabase/types/tables.types';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, UserPlus } from 'lucide-react';
 import { ForceGraph } from './ForceGraph';
 import { Timeline } from './Timeline';
-import { CharacterNode } from './types';
+import { CharacterNode, Relationship } from './types';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { AddCharacterToMapDialog } from './AddCharacterToMapDialog';
 
 interface CharacterDynamicsD3Props {
-  characters: Character[];
+  characters: CharacterNode[];
+  relationships: Relationship[];
 }
 
-export const CharacterDynamicsD3 = ({ characters }: CharacterDynamicsD3Props) => {
+export const CharacterDynamicsD3 = ({ characters, relationships }: CharacterDynamicsD3Props) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [timelinePosition, setTimelinePosition] = useState(0);
   const [synergy, setSynergy] = useState(75);
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [displayedCharacters, setDisplayedCharacters] = useState<Character[]>([]);
+  const [displayedCharacters, setDisplayedCharacters] = useState<CharacterNode[]>([]);
 
   // Initialize with first few characters
   useEffect(() => {
@@ -27,30 +27,10 @@ export const CharacterDynamicsD3 = ({ characters }: CharacterDynamicsD3Props) =>
     }
   }, [characters]);
 
-  // Add x and y coordinates to characters for D3
-  const characterNodes: CharacterNode[] = displayedCharacters.map(character => ({
-    ...character,
-    x: 0,
-    y: 0
-  }));
-
-  const { data: relationships } = useQuery({
-    queryKey: ['relationships', displayedCharacters.map(c => c.id)],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('character_relationships')
-        .select('*')
-        .in('character1_id', displayedCharacters.map(c => c.id));
-      if (error) throw error;
-      return data;
-    },
-    enabled: displayedCharacters.length > 0,
-  });
-
   // Calculate group synergy based on relationships
   useEffect(() => {
     if (relationships && relationships.length > 0) {
-      const totalStrength = relationships.reduce((sum, rel) => sum + (rel.strength || 0), 0);
+      const totalStrength = relationships.reduce((sum, rel) => sum + rel.strength, 0);
       const avgStrength = totalStrength / relationships.length;
       setSynergy(Math.round(avgStrength));
     }
@@ -87,7 +67,7 @@ export const CharacterDynamicsD3 = ({ characters }: CharacterDynamicsD3Props) =>
     setTimelinePosition(value[0]);
   };
 
-  const handleAddCharacter = (character: Character) => {
+  const handleAddCharacter = (character: CharacterNode) => {
     setDisplayedCharacters(prev => [...prev, character]);
   };
 
@@ -123,13 +103,11 @@ export const CharacterDynamicsD3 = ({ characters }: CharacterDynamicsD3Props) =>
 
       <div className="h-[500px] bg-white rounded-xl shadow-sm relative">
         <ForceGraph 
-          characters={characterNodes}
-          relationships={relationships?.map(rel => ({
-            source: characterNodes.find(c => c.id === rel.character1_id)!,
-            target: characterNodes.find(c => c.id === rel.character2_id)!,
-            type: rel.relationship_type,
-            strength: rel.strength || 50
-          })) || []}
+          characters={displayedCharacters}
+          relationships={relationships.filter(rel => 
+            displayedCharacters.some(c => c.id === rel.source.id) && 
+            displayedCharacters.some(c => c.id === rel.target.id)
+          )}
         />
       </div>
 
