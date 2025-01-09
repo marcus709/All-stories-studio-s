@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useStory } from "@/contexts/StoryContext";
 import { Document } from "@/types/story";
 import { Wand2 } from "lucide-react";
+import { IText } from "fabric";
 
 export const FormattingView = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
@@ -20,7 +21,7 @@ export const FormattingView = () => {
   const [previewScene, setPreviewScene] = useState("none");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [coverTexts, setCoverTexts] = useState<Array<{ text: string; font: string; size: number; x: number; y: number }>>([]);
-  const [selectedText, setSelectedText] = useState<any | null>(null);
+  const [selectedText, setSelectedText] = useState<IText | null>(null);
   const [deviceView, setDeviceView] = useState<'print' | 'kindle' | 'ipad' | 'phone'>('print');
   const [notifications, setNotifications] = useState<Array<{ id: string; message: string }>>([]);
   const [isAIMode, setIsAIMode] = useState(true);
