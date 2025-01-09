@@ -33,7 +33,7 @@ function DashboardLayout() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       <DashboardSidebar currentView={currentView} setCurrentView={setCurrentView} />
-      <div className="ml-72 pt-16">
+      <div className={`pt-16 transition-all duration-200 ${currentView === 'plot' ? 'ml-12' : 'ml-72'}`}>
         <DashboardContent currentView={currentView} />
       </div>
     </div>
