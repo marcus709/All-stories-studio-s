@@ -7,10 +7,10 @@ import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
+  SidebarProvider,
 } from "@/components/ui/sidebar";
 
 export const FormattingView = () => {
-  // Keep all existing state to maintain functionality
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [activeTab, setActiveTab] = useState("templates");
   const [coverImage, setCoverImage] = useState<string | null>(null);
@@ -21,7 +21,6 @@ export const FormattingView = () => {
   const [deviceView, setDeviceView] = useState<'print' | 'kindle' | 'ipad' | 'phone'>('print');
   const [notifications, setNotifications] = useState<Array<{ id: string; message: string }>>([]);
 
-  // Keep existing query to maintain functionality
   const { data: bookStructures } = useQuery({
     queryKey: ["bookStructures"],
     queryFn: async () => {
@@ -33,7 +32,6 @@ export const FormattingView = () => {
     },
   });
 
-  // Keep all handlers to maintain functionality
   const handleTemplateSelect = (template: Template) => {
     setSelectedTemplate(template);
   };
@@ -64,18 +62,20 @@ export const FormattingView = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
-      <Sidebar>
-        <SidebarHeader className="border-b px-6 py-4">
-          <h2 className="text-lg font-semibold">Book Formatting</h2>
-        </SidebarHeader>
-        <SidebarContent className="p-4">
-          {/* We'll add more sidebar content in the next iterations */}
-        </SidebarContent>
-      </Sidebar>
-      <div className="flex-1">
-        {/* Main content area - we'll add this in the next iterations */}
+    <SidebarProvider>
+      <div className="min-h-screen bg-background flex w-full">
+        <Sidebar>
+          <SidebarHeader className="border-b px-6 py-4">
+            <h2 className="text-lg font-semibold">Book Formatting</h2>
+          </SidebarHeader>
+          <SidebarContent className="p-4">
+            {/* We'll add more sidebar content in the next iterations */}
+          </SidebarContent>
+        </Sidebar>
+        <div className="flex-1">
+          {/* Main content area - we'll add this in the next iterations */}
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
