@@ -3,6 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Template } from "@/types/book";
 import { IText } from "fabric";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+} from "@/components/ui/sidebar";
 
 export const FormattingView = () => {
   // Keep all existing state to maintain functionality
@@ -59,10 +64,17 @@ export const FormattingView = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="p-4">
-        <h1 className="text-lg font-semibold">Book Formatting</h1>
-        <p className="text-sm text-muted-foreground">Start designing your book format</p>
+    <div className="min-h-screen bg-background flex">
+      <Sidebar>
+        <SidebarHeader className="border-b px-6 py-4">
+          <h2 className="text-lg font-semibold">Book Formatting</h2>
+        </SidebarHeader>
+        <SidebarContent className="p-4">
+          {/* We'll add more sidebar content in the next iterations */}
+        </SidebarContent>
+      </Sidebar>
+      <div className="flex-1">
+        {/* Main content area - we'll add this in the next iterations */}
       </div>
     </div>
   );
