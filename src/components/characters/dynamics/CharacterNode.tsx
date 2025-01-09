@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 
-const CharacterNode = ({ data }: { data: any }) => {
+export const CharacterNode = ({ data }: { data: any }) => {
   return (
     <div className="px-4 py-2 shadow-lg rounded-lg bg-gray-800 border border-gray-700 min-w-[150px]">
       <Handle type="target" position={Position.Top} className="!bg-purple-500" />

@@ -12,7 +12,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Character } from '@/integrations/supabase/types/tables.types';
-import { CharacterNode } from './CharacterNode';
+import CharacterNode from './CharacterNode';
 
 interface CharacterDynamicsFlowProps {
   characters: Character[];
