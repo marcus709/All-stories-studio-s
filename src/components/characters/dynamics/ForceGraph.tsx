@@ -34,20 +34,10 @@ export function ForceGraph({ characters, relationships }: ForceGraphProps) {
 
     const svg = d3.select(svgRef.current)
       .attr("viewBox", [0, 0, width, height])
-      .style("background", "#1a1a1a"); // Dark background like in the image
-
-    // Add a central "Character" node
-    const centerNode = {
-      id: 'center',
-      name: 'CHARACTER',
-      x: width / 2,
-      y: height / 2
-    };
-
-    const allNodes = [centerNode, ...characters];
+      .style("background", "#1a1a1a");
 
     // Create force simulation
-    const simulation = d3.forceSimulation(allNodes as any)
+    const simulation = d3.forceSimulation(characters as any)
       .force("charge", d3.forceManyBody().strength(-400))
       .force("center", d3.forceCenter(width / 2, height / 2))
       .force("collision", d3.forceCollide().radius(60))
@@ -58,7 +48,6 @@ export function ForceGraph({ characters, relationships }: ForceGraphProps) {
     // Create a gradient for node backgrounds
     const defs = svg.append("defs");
     
-    // Add node background gradients
     defs.append("radialGradient")
       .attr("id", "node-gradient")
       .attr("cx", "50%")
@@ -74,7 +63,7 @@ export function ForceGraph({ characters, relationships }: ForceGraphProps) {
       .attr("offset", d => d.offset)
       .attr("stop-color", d => d.color);
 
-    // Add relationships as links with gradients
+    // Add relationships as links
     const links = svg.selectAll("line")
       .data(relationships)
       .enter()
@@ -85,7 +74,7 @@ export function ForceGraph({ characters, relationships }: ForceGraphProps) {
 
     // Create node groups
     const nodeGroups = svg.selectAll("g")
-      .data(allNodes)
+      .data(characters)
       .enter()
       .append("g")
       .attr("class", "character-node")
@@ -93,19 +82,10 @@ export function ForceGraph({ characters, relationships }: ForceGraphProps) {
 
     // Add circular backgrounds
     nodeGroups.append("circle")
-      .attr("r", d => d.id === 'center' ? 40 : 35)
+      .attr("r", 35)
       .style("fill", "url(#node-gradient)")
-      .style("stroke", d => d.id === 'center' ? "#4B5563" : "#6366F1")
+      .style("stroke", "#6366F1")
       .style("stroke-width", 2);
-
-    // Add silhouette icons
-    nodeGroups.append("circle")
-      .attr("r", 25)
-      .attr("cx", 0)
-      .attr("cy", 0)
-      .style("fill", "#374151")
-      .style("stroke", "#4B5563")
-      .style("stroke-width", 1);
 
     // Add text labels
     nodeGroups.append("text")
