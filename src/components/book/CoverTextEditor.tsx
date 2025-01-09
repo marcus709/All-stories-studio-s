@@ -14,8 +14,8 @@ import {
   Underline,
   Type,
   Plus,
-  LineHeight,
-  LetterSpacing,
+  ArrowUpDown,
+  ArrowLeftRight,
   Heading1,
   Heading2
 } from "lucide-react";
@@ -303,7 +303,7 @@ export const CoverTextEditor = ({ width, height, onTextUpdate }: CoverTextEditor
                 <div className="space-y-2">
                   <Label>Line Height</Label>
                   <div className="flex items-center gap-4">
-                    <LineHeight className="h-4 w-4 text-gray-500" />
+                    <ArrowUpDown className="h-4 w-4 text-gray-500" />
                     <Slider
                       value={[lineHeight]}
                       min={1}
@@ -319,7 +319,7 @@ export const CoverTextEditor = ({ width, height, onTextUpdate }: CoverTextEditor
                 <div className="space-y-2">
                   <Label>Letter Spacing</Label>
                   <div className="flex items-center gap-4">
-                    <LetterSpacing className="h-4 w-4 text-gray-500" />
+                    <ArrowLeftRight className="h-4 w-4 text-gray-500" />
                     <Slider
                       value={[letterSpacing]}
                       min={-20}
