@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { Book, Users, LineChart, Lightbulb, FileText, AlertTriangle, CloudLightning } from "lucide-react";
+import { Book, Users, LineChart, Lightbulb, FileText, AlertTriangle, CloudLightning, ChevronLeft, ChevronRight } from "lucide-react";
 import { StoriesDialog } from "../StoriesDialog";
 import { useStory } from "@/contexts/StoryContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Profile } from "@/integrations/supabase/types/tables.types";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 
 const navigationItems = [
   { id: "story", icon: Book, label: "Story Editor" },
@@ -21,9 +22,11 @@ type View = (typeof navigationItems)[number]["id"];
 interface DashboardSidebarProps {
   currentView: View;
   setCurrentView: (view: View) => void;
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
 }
 
-export const DashboardSidebar = ({ currentView, setCurrentView }: DashboardSidebarProps) => {
+export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onToggleCollapse }: DashboardSidebarProps) => {
   const { selectedStory } = useStory();
   const [profile, setProfile] = useState<Profile | null>(null);
 
@@ -52,9 +55,37 @@ export const DashboardSidebar = ({ currentView, setCurrentView }: DashboardSideb
     fetchProfile();
   }, []);
 
+  if (isCollapsed) {
+    return (
+      <div className="fixed left-0 top-16 w-12 h-[calc(100vh-4rem)] border-r bg-white flex flex-col items-center py-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onToggleCollapse}
+          className="mb-4"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed left-0 top-16 w-72 h-[calc(100vh-4rem)] border-r bg-white">
       <div className="flex flex-col h-full">
+        {currentView === "plot" && (
+          <div className="absolute right-2 top-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggleCollapse}
+              className="hover:bg-gray-100"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+
         {/* Profile Section - Fixed */}
         <div className="flex items-center gap-3 mb-12 px-8 mt-8">
           <div className="w-11 h-11 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-lg font-medium">

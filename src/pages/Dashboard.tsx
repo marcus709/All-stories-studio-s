@@ -11,9 +11,17 @@ type View = "story" | "characters" | "plot" | "dream" | "ideas" | "docs" | "logi
 
 function DashboardLayout() {
   const [currentView, setCurrentView] = useState<View>("story");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const session = useSession();
+
+  // Reset sidebar collapse when changing views
+  useEffect(() => {
+    if (currentView !== 'plot') {
+      setIsSidebarCollapsed(false);
+    }
+  }, [currentView]);
 
   useEffect(() => {
     if (!session) {
@@ -32,8 +40,13 @@ function DashboardLayout() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <DashboardSidebar currentView={currentView} setCurrentView={setCurrentView} />
-      <div className="ml-72 pt-16">
+      <DashboardSidebar 
+        currentView={currentView} 
+        setCurrentView={setCurrentView}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      />
+      <div className={`pt-16 transition-all duration-300 ${isSidebarCollapsed ? 'ml-12' : 'ml-72'}`}>
         <DashboardContent currentView={currentView} />
       </div>
     </div>
