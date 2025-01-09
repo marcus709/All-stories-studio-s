@@ -45,6 +45,13 @@ const edgeTypes: EdgeTypes = {
 
 const DEFAULT_POSITION = { x: 100, y: 100 };
 
+interface CharacterNode {
+  id: string;
+  type: "character";
+  position: { x: number; y: number };
+  data: Record<string, unknown> & Character;
+}
+
 export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDynamicsFlowProps) => {
   const { toast } = useToast();
   const [nextNodePosition, setNextNodePosition] = useState(DEFAULT_POSITION);
@@ -101,9 +108,9 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
   
   const initialNodes = characters.map((char, index) => ({
     id: char.id,
-    type: 'character' as const,
+    type: "character" as const,
     position: positions[index] || DEFAULT_POSITION,
-    data: char, // Pass the entire character object as data
+    data: { ...char } as Record<string, unknown> & Character,
   }));
 
   const initialEdges: Edge<RelationshipEdgeData>[] = relationships.map((rel) => ({
