@@ -17,9 +17,18 @@ import { Character } from '@/integrations/supabase/types/tables.types';
 import CharacterNode from './CharacterNode';
 import RelationshipEdge, { RelationshipEdgeData } from './RelationshipEdge';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Layout } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSession } from '@supabase/auth-helpers-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type LayoutType = 'circular' | 'clustered' | 'timeline' | 'geographic';
 
 interface CharacterDynamicsFlowProps {
   characters: Character[];
@@ -38,20 +47,62 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
   const { toast } = useToast();
   const [nextNodePosition, setNextNodePosition] = useState({ x: 100, y: 100 });
   const session = useSession();
+  const [layoutType, setLayoutType] = useState<LayoutType>('circular');
 
-  const initialNodes = characters.map((char, index) => {
-    const angle = (index * 2 * Math.PI) / characters.length;
-    const radius = 300;
-    return {
-      id: char.id,
-      type: 'character',
-      position: {
-        x: 400 + radius * Math.cos(angle),
-        y: 300 + radius * Math.sin(angle),
-      },
-      data: { ...char },
-    };
-  });
+  const getNodePositions = (chars: Character[], layout: LayoutType) => {
+    switch (layout) {
+      case 'clustered':
+        // Group characters by their traits/factions
+        return chars.map((char, index) => {
+          const group = char.traits?.[0] || 'unknown';
+          const groupIndex = [...new Set(chars.map(c => c.traits?.[0] || 'unknown'))].indexOf(group);
+          const radius = 300;
+          const angleOffset = (groupIndex * Math.PI) / 3;
+          const angle = angleOffset + (index * 2 * Math.PI) / chars.length;
+          
+          return {
+            x: 400 + radius * Math.cos(angle),
+            y: 300 + radius * Math.sin(angle),
+          };
+        });
+
+      case 'timeline':
+        // Arrange characters in a horizontal timeline
+        return chars.map((_, index) => ({
+          x: 200 + (index * 200),
+          y: 300 + (Math.sin(index) * 100), // Slight wave pattern
+        }));
+
+      case 'geographic':
+        // Arrange in a map-like grid
+        const cols = Math.ceil(Math.sqrt(chars.length));
+        return chars.map((_, index) => ({
+          x: 200 + (index % cols) * 250,
+          y: 200 + Math.floor(index / cols) * 250,
+        }));
+
+      case 'circular':
+      default:
+        // Original circular layout
+        return chars.map((_, index) => {
+          const angle = (index * 2 * Math.PI) / chars.length;
+          const radius = 300;
+          return {
+            x: 400 + radius * Math.cos(angle),
+            y: 300 + radius * Math.sin(angle),
+          };
+        });
+    }
+  };
+
+  const positions = getNodePositions(characters, layoutType);
+  
+  const initialNodes = characters.map((char, index) => ({
+    id: char.id,
+    type: 'character',
+    position: positions[index],
+    data: { ...char },
+  }));
 
   const initialEdges: Edge<RelationshipEdgeData>[] = relationships.map((rel) => ({
     id: rel.id,
@@ -121,9 +172,30 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
     });
   }, [nextNodePosition, setNodes, toast, session]);
 
+  const handleLayoutChange = (newLayout: LayoutType) => {
+    setLayoutType(newLayout);
+    const newPositions = getNodePositions(characters, newLayout);
+    setNodes(nodes.map((node, index) => ({
+      ...node,
+      position: newPositions[index],
+    })));
+  };
+
   return (
     <div className="w-full h-[600px] relative">
-      <div className="absolute top-4 right-4 z-10">
+      <div className="absolute top-4 right-4 z-10 flex gap-2">
+        <Select value={layoutType} onValueChange={(value: LayoutType) => handleLayoutChange(value)}>
+          <SelectTrigger className="w-[180px] bg-white">
+            <Layout className="w-4 h-4 mr-2" />
+            <SelectValue placeholder="Select layout" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="circular">Circular Layout</SelectItem>
+            <SelectItem value="clustered">Clustered View</SelectItem>
+            <SelectItem value="timeline">Timeline View</SelectItem>
+            <SelectItem value="geographic">Geographic View</SelectItem>
+          </SelectContent>
+        </Select>
         <Button 
           onClick={handleAddNode}
           className="bg-purple-500 hover:bg-purple-600 gap-2"
