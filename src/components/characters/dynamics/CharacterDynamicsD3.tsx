@@ -21,40 +21,29 @@ export const CharacterDynamicsD3 = ({ characters, relationships }: CharacterDyna
 
     const svg = d3.select(svgRef.current)
       .attr("width", width)
-      .attr("height", height)
-      .style("background-color", "#18181b");
+      .attr("height", height);
 
-    // Create gradients for nodes
+    // Create a gradient for nodes
     const defs = svg.append("defs");
-    
-    // Create gradients for different relationship types
-    const colors = {
-      trust: "#22c55e",
-      conflict: "#ef4444",
-      neutral: "#3b82f6"
-    };
+    const gradient = defs.append("radialGradient")
+      .attr("id", "node-gradient")
+      .attr("cx", "50%")
+      .attr("cy", "50%")
+      .attr("r", "50%");
 
-    Object.entries(colors).forEach(([type, color]) => {
-      const gradient = defs.append("radialGradient")
-        .attr("id", `node-gradient-${type}`)
-        .attr("cx", "50%")
-        .attr("cy", "50%")
-        .attr("r", "50%");
+    gradient.append("stop")
+      .attr("offset", "0%")
+      .attr("stop-color", "#8b5cf6");
 
-      gradient.append("stop")
-        .attr("offset", "0%")
-        .attr("stop-color", color);
-
-      gradient.append("stop")
-        .attr("offset", "100%")
-        .attr("stop-color", d3.color(color)?.darker(0.8));
-    });
+    gradient.append("stop")
+      .attr("offset", "100%")
+      .attr("stop-color", "#6d28d9");
 
     // Create force simulation
     const simulation = d3.forceSimulation(characters)
-      .force("charge", d3.forceManyBody().strength(-400))
+      .force("charge", d3.forceManyBody().strength(-300))
       .force("center", d3.forceCenter(width / 2, height / 2))
-      .force("collision", d3.forceCollide().radius(70));
+      .force("collision", d3.forceCollide().radius(60));
 
     if (relationships.length > 0) {
       simulation.force("link", d3.forceLink(relationships)
@@ -62,43 +51,14 @@ export const CharacterDynamicsD3 = ({ characters, relationships }: CharacterDyna
         .distance(200));
     }
 
-    // Create container for center logo
-    const centerGroup = svg.append("g")
-      .attr("transform", `translate(${width/2},${height/2})`);
-
-    centerGroup.append("circle")
-      .attr("r", 40)
-      .style("fill", "#27272a")
-      .style("stroke", "#6b7280")
-      .style("stroke-width", "2px");
-
-    centerGroup.append("text")
-      .attr("text-anchor", "middle")
-      .attr("dy", "-0.5em")
-      .attr("class", "text-sm font-medium text-gray-300")
-      .text("CHARACTER");
-
-    centerGroup.append("text")
-      .attr("text-anchor", "middle")
-      .attr("dy", "1em")
-      .attr("class", "text-sm font-medium text-gray-300")
-      .text("DYNAMICS");
-
     // Draw relationships
     const links = svg.append("g")
       .selectAll("line")
       .data(relationships)
       .enter()
       .append("line")
-      .style("stroke", (d: any) => {
-        switch(d.relationship_type) {
-          case 'trust': return colors.trust;
-          case 'conflict': return colors.conflict;
-          default: return colors.neutral;
-        }
-      })
-      .style("stroke-width", (d: any) => (d.strength || 50) / 25)
-      .style("opacity", 0.6);
+      .style("stroke", "#e5e7eb")
+      .style("stroke-width", (d: any) => (d.strength || 50) / 25);
 
     // Create node groups
     const nodes = svg.append("g")
@@ -111,28 +71,23 @@ export const CharacterDynamicsD3 = ({ characters, relationships }: CharacterDyna
         .on("drag", dragged)
         .on("end", dragended));
 
-    // Add character circles
+    // Add circles to nodes
     nodes.append("circle")
-      .attr("r", 35)
-      .style("fill", (d: any) => {
-        const relationshipType = relationships.find((r: any) => 
-          r.character1_id === d.id || r.character2_id === d.id
-        )?.relationship_type || 'neutral';
-        return `url(#node-gradient-${relationshipType})`;
-      })
-      .style("stroke", "#fff")
+      .attr("r", 30)
+      .style("fill", "url(#node-gradient)")
+      .style("stroke", "#4c1d95")
       .style("stroke-width", "2px");
 
     // Add role labels
     nodes.append("text")
-      .attr("dy", -45)
+      .attr("dy", -35)
       .attr("text-anchor", "middle")
-      .attr("class", "text-xs text-gray-400 uppercase tracking-wider")
+      .attr("class", "text-xs text-gray-500")
       .text((d: any) => d.role || "Unknown Role");
 
     // Add name labels
     nodes.append("text")
-      .attr("dy", 50)
+      .attr("dy", 5)
       .attr("text-anchor", "middle")
       .attr("class", "text-sm font-medium text-white")
       .text((d: any) => d.name);
@@ -184,6 +139,7 @@ export const CharacterDynamicsD3 = ({ characters, relationships }: CharacterDyna
     <svg 
       ref={svgRef} 
       className="w-full h-full"
+      style={{ background: 'white' }}
     />
   );
 };
