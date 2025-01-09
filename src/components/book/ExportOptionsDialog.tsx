@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { FileDown, AlertCircle, Check, Loader2 } from "lucide-react";
+import { FileDown, AlertCircle, Check, Loader2, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ExportOptionsDialogProps {
@@ -22,6 +22,7 @@ export function ExportOptionsDialog({ documentId, disabled }: ExportOptionsDialo
   const [isExporting, setIsExporting] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<string>("");
   const [validationResults, setValidationResults] = useState<ValidationResult[]>([]);
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
   const formats = {
@@ -53,6 +54,8 @@ export function ExportOptionsDialog({ documentId, disabled }: ExportOptionsDialo
     }
 
     setIsExporting(true);
+    setDownloadUrl(null);
+    
     // Simulate validation checks
     const results = platforms.map(platform => ({
       platform: platform.name,
@@ -74,14 +77,34 @@ export function ExportOptionsDialog({ documentId, disabled }: ExportOptionsDialo
       ]);
     }
 
-    // Simulate export process
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsExporting(false);
+    try {
+      // Call the formatting edge function
+      const { data, error } = await supabase.functions.invoke('format-document', {
+        body: { 
+          documentId,
+          format: selectedFormat
+        }
+      });
 
-    toast({
-      title: "Export Complete",
-      description: `Document exported as ${selectedFormat}`,
-    });
+      if (error) throw error;
+
+      // Set the download URL from the response
+      setDownloadUrl(data.downloadUrl);
+
+      toast({
+        title: "Export Complete",
+        description: `Document exported as ${selectedFormat}. Click the download button to save your file.`,
+      });
+    } catch (error) {
+      console.error("Export error:", error);
+      toast({
+        title: "Export Failed",
+        description: "There was an error exporting your document. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const getValidationIcon = (status: ValidationResult["status"]) => {
@@ -171,14 +194,24 @@ export function ExportOptionsDialog({ documentId, disabled }: ExportOptionsDialo
         </div>
 
         <div className="mt-4 flex justify-end gap-2">
-          <Button
-            onClick={handleExport}
-            disabled={!selectedFormat || isExporting}
-            className="gap-2"
-          >
-            {isExporting && <Loader2 className="h-4 w-4 animate-spin" />}
-            {isExporting ? "Exporting..." : "Export"}
-          </Button>
+          {downloadUrl ? (
+            <Button
+              onClick={() => window.open(downloadUrl, '_blank')}
+              className="gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Download
+            </Button>
+          ) : (
+            <Button
+              onClick={handleExport}
+              disabled={!selectedFormat || isExporting}
+              className="gap-2"
+            >
+              {isExporting && <Loader2 className="h-4 w-4 animate-spin" />}
+              {isExporting ? "Exporting..." : "Export"}
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>
