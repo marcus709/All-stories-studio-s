@@ -114,6 +114,41 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_submissions: {
+        Row: {
+          challenge_id: string | null
+          content: string
+          id: string
+          submitted_at: string | null
+          user_id: string | null
+          word_count: number | null
+        }
+        Insert: {
+          challenge_id?: string | null
+          content: string
+          id?: string
+          submitted_at?: string | null
+          user_id?: string | null
+          word_count?: number | null
+        }
+        Update: {
+          challenge_id?: string | null
+          content?: string
+          id?: string
+          submitted_at?: string | null
+          user_id?: string | null
+          word_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_submissions_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "daily_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       character_relationships: {
         Row: {
           character1_id: string
@@ -361,6 +396,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      daily_challenges: {
+        Row: {
+          active_date: string
+          created_at: string | null
+          description: string
+          difficulty: Database["public"]["Enums"]["challenge_difficulty"]
+          id: string
+          prompt: string
+          tips: string[] | null
+          title: string
+          word_count_goal: number | null
+        }
+        Insert: {
+          active_date: string
+          created_at?: string | null
+          description: string
+          difficulty?: Database["public"]["Enums"]["challenge_difficulty"]
+          id?: string
+          prompt: string
+          tips?: string[] | null
+          title: string
+          word_count_goal?: number | null
+        }
+        Update: {
+          active_date?: string
+          created_at?: string | null
+          description?: string
+          difficulty?: Database["public"]["Enums"]["challenge_difficulty"]
+          id?: string
+          prompt?: string
+          tips?: string[] | null
+          title?: string
+          word_count_goal?: number | null
+        }
+        Relationships: []
       }
       document_references: {
         Row: {
@@ -1342,6 +1413,7 @@ export type Database = {
     }
     Enums: {
       ai_model_type: "gpt-4o" | "gpt-4o-mini"
+      challenge_difficulty: "easy" | "medium" | "hard"
       document_section_type: "chapter" | "scene" | "note"
       group_privacy: "public" | "private"
       relationship_type:

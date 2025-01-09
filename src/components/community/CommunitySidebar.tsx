@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
-import { MessageSquare, Users, Hash, Bookmark, Settings, UserPlus } from "lucide-react";
+import { MessageSquare, Users, Hash, Bookmark, Settings, UserPlus, PenLine } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AddFriendsDialog } from "./AddFriendsDialog";
@@ -8,6 +8,8 @@ import { useSubscription } from "@/contexts/SubscriptionContext";
 import { capitalize } from "lodash";
 import { FriendRequestsList } from "./FriendRequestsList";
 import { FriendsList } from "./FriendsList";
+import { DailyChallengeDialog } from "./DailyChallengeDialog";
+import { useState } from "react";
 
 const navItems = [
   { icon: MessageSquare, label: "Feed", href: "/community" },
@@ -20,6 +22,7 @@ const navItems = [
 export const CommunitySidebar = () => {
   const session = useSession();
   const { plan } = useSubscription();
+  const [showChallengeDialog, setShowChallengeDialog] = useState(false);
 
   const { data: profile } = useQuery({
     queryKey: ["profile"],
@@ -49,6 +52,20 @@ export const CommunitySidebar = () => {
       return data;
     },
     enabled: !!session?.user?.id,
+  });
+
+  const { data: dailyChallenge } = useQuery({
+    queryKey: ["daily-challenge"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("daily_challenges")
+        .select("*")
+        .eq("active_date", new Date().toISOString().split("T")[0])
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
   });
 
   const hasPendingRequests = friendRequests && friendRequests.length > 0;
@@ -97,6 +114,17 @@ export const CommunitySidebar = () => {
             <span>{label}</span>
           </NavLink>
         ))}
+        
+        {dailyChallenge && (
+          <button
+            onClick={() => setShowChallengeDialog(true)}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 text-gray-600 hover:bg-purple-50/50 hover:text-gray-900"
+          >
+            <PenLine className="h-5 w-5" />
+            <span>Daily Challenge</span>
+          </button>
+        )}
+
         <AddFriendsDialog>
           <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 text-gray-600 hover:bg-purple-50/50 hover:text-gray-900 relative">
             <UserPlus className="h-5 w-5" />
@@ -114,6 +142,8 @@ export const CommunitySidebar = () => {
         <h3 className="text-sm font-medium text-gray-900 mb-3">Friends</h3>
         <FriendsList />
       </div>
+
+      {showChallengeDialog && <DailyChallengeDialog />}
     </div>
   );
 };

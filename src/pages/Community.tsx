@@ -9,6 +9,7 @@ import { TrendingTopics } from "@/components/community/TrendingTopics";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { PrivateChat } from "@/components/community/chat/PrivateChat";
+import { DailyChallengeDialog } from "@/components/community/DailyChallengeDialog";
 
 const Community = () => {
   const navigate = useNavigate();
@@ -71,6 +72,7 @@ const Community = () => {
           </div>
         </div>
       </div>
+      <DailyChallengeDialog />
     </div>
   );
 };
