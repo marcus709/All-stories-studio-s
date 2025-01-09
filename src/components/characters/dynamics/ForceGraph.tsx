@@ -35,6 +35,18 @@ export function ForceGraph({ characters, relationships }: ForceGraphProps) {
       .attr("viewBox", [0, 0, width, height])
       .style("background", "#1a1a1a");
 
+    // Add zoom behavior
+    const zoom = d3.zoom()
+      .scaleExtent([0.1, 4])
+      .on("zoom", (event) => {
+        g.attr("transform", event.transform);
+      });
+
+    svg.call(zoom as any);
+
+    // Create a container for the graph
+    const g = svg.append("g");
+
     // Create force simulation
     const simulation = d3.forceSimulation(characters as any)
       .force("charge", d3.forceManyBody().strength(-400))
@@ -63,7 +75,7 @@ export function ForceGraph({ characters, relationships }: ForceGraphProps) {
       .attr("stop-color", d => d.color);
 
     // Add relationships as links
-    const links = svg.selectAll("line")
+    const links = g.selectAll("line")
       .data(relationships)
       .enter()
       .append("line")
@@ -72,7 +84,7 @@ export function ForceGraph({ characters, relationships }: ForceGraphProps) {
       .style("opacity", 0.6);
 
     // Create node groups
-    const nodeGroups = svg.selectAll("g")
+    const nodeGroups = g.selectAll("g")
       .data(characters)
       .enter()
       .append("g")
@@ -94,6 +106,14 @@ export function ForceGraph({ characters, relationships }: ForceGraphProps) {
       .style("fill", "#E5E7EB")
       .style("font-size", "12px")
       .style("font-weight", "500");
+
+    // Add role labels
+    nodeGroups.append("text")
+      .text(d => d.role || "")
+      .attr("text-anchor", "middle")
+      .attr("dy", -40)
+      .style("fill", "#9CA3AF")
+      .style("font-size", "10px");
 
     // Add drag behavior
     const drag = d3.drag<SVGGElement, any>()
