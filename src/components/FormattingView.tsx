@@ -78,7 +78,7 @@ export const FormattingView = () => {
             {/* Book preview will be added here */}
           </div>
           {/* Bottom Controls */}
-          <div className="h-24 mt-4 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-100">
+          <div className="h-32 mt-4 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-100">
             {/* Control buttons will be added here */}
           </div>
         </div>
