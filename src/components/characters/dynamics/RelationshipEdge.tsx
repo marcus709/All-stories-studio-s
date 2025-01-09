@@ -4,6 +4,7 @@ import {
   EdgeLabelRenderer,
   EdgeProps,
   getBezierPath,
+  Edge,
 } from '@xyflow/react';
 import {
   HoverCard,
@@ -11,14 +12,14 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 
-export interface RelationshipEdgeData {
+export interface RelationshipEdgeData extends Edge {
   type: string;
   strength: number;
   notes?: string;
   trust: number;
   conflict: number;
   chemistry: string;
-  [key: string]: unknown; // Add index signature to satisfy Record<string, unknown>
+  [key: string]: unknown;
 }
 
 const RelationshipEdge = ({
