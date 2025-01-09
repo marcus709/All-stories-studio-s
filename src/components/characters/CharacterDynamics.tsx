@@ -16,33 +16,31 @@ export const CharacterDynamics = ({ characters }: CharacterDynamicsProps) => {
 
   // Sample characters for demonstration
   const sampleCharacters: CharacterNode[] = [
-    { id: "1", name: "Frodo", role: "Protagonist" },
-    { id: "2", name: "Sam", role: "Deuteragonist" },
-    { id: "3", name: "Gandalf", role: "Mentor" },
-    { id: "4", name: "Aragorn", role: "Ally" },
-    { id: "5", name: "Gollum", role: "Antagonist" },
-    { id: "6", name: "Bilbo", role: "Mentor" },
-    { id: "7", name: "Merry", role: "Supporting" },
-    { id: "8", name: "Pippin", role: "Supporting" },
-    { id: "9", name: "Saruman", role: "Antagonist" },
-    { id: "10", name: "Boromir", role: "Supporting" },
+    { id: "1", name: "Hero", role: "Protagonist" },
+    { id: "2", name: "Mentor", role: "Guide" },
+    { id: "3", name: "Ally", role: "Support" },
+    { id: "4", name: "Rival", role: "Antagonist" },
+    { id: "5", name: "Friend", role: "Support" },
+    { id: "6", name: "Enemy", role: "Antagonist" },
+    { id: "7", name: "Sidekick", role: "Support" },
+    { id: "8", name: "Love", role: "Interest" },
+    { id: "9", name: "Nemesis", role: "Villain" }
   ];
 
-  // Sample relationships for demonstration
+  // Sample relationships with varying types and strengths
   const sampleRelationships: Relationship[] = [
-    { source: sampleCharacters[0], target: sampleCharacters[1], type: "friend", strength: 90 },
-    { source: sampleCharacters[0], target: sampleCharacters[2], type: "mentor", strength: 75 },
-    { source: sampleCharacters[0], target: sampleCharacters[4], type: "enemy", strength: 85 },
+    { source: sampleCharacters[0], target: sampleCharacters[1], type: "mentor", strength: 85 },
+    { source: sampleCharacters[0], target: sampleCharacters[2], type: "ally", strength: 75 },
+    { source: sampleCharacters[0], target: sampleCharacters[3], type: "rival", strength: 90 },
+    { source: sampleCharacters[0], target: sampleCharacters[4], type: "friend", strength: 95 },
+    { source: sampleCharacters[0], target: sampleCharacters[5], type: "enemy", strength: 80 },
     { source: sampleCharacters[1], target: sampleCharacters[2], type: "ally", strength: 60 },
-    { source: sampleCharacters[2], target: sampleCharacters[3], type: "ally", strength: 80 },
-    { source: sampleCharacters[3], target: sampleCharacters[0], type: "ally", strength: 70 },
-    { source: sampleCharacters[5], target: sampleCharacters[0], type: "family", strength: 85 },
-    { source: sampleCharacters[6], target: sampleCharacters[7], type: "friend", strength: 95 },
-    { source: sampleCharacters[8], target: sampleCharacters[2], type: "rival", strength: 88 },
-    { source: sampleCharacters[9], target: sampleCharacters[0], type: "ally", strength: 65 },
-    { source: sampleCharacters[9], target: sampleCharacters[3], type: "ally", strength: 75 },
-    { source: sampleCharacters[6], target: sampleCharacters[0], type: "friend", strength: 80 },
-    { source: sampleCharacters[7], target: sampleCharacters[0], type: "friend", strength: 80 },
+    { source: sampleCharacters[2], target: sampleCharacters[4], type: "friend", strength: 70 },
+    { source: sampleCharacters[3], target: sampleCharacters[5], type: "ally", strength: 65 },
+    { source: sampleCharacters[6], target: sampleCharacters[0], type: "friend", strength: 85 },
+    { source: sampleCharacters[7], target: sampleCharacters[0], type: "lover", strength: 95 },
+    { source: sampleCharacters[8], target: sampleCharacters[0], type: "enemy", strength: 100 },
+    { source: sampleCharacters[4], target: sampleCharacters[7], type: "friend", strength: 55 }
   ];
 
   const { data: relationships = [] } = useQuery({
