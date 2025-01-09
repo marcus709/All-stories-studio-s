@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -31,12 +32,12 @@ const PRINT_FORMATS = {
 };
 
 export function AIFormattingDialog({ onConfigSubmit }: AIFormattingDialogProps) {
-  const [format, setFormat] = React.useState<string>(Object.keys(PRINT_FORMATS)[0]);
-  const [size, setSize] = React.useState<string>(PRINT_FORMATS[Object.keys(PRINT_FORMATS)[0]][0]);
-  const [customWidth, setCustomWidth] = React.useState<string>("");
-  const [customHeight, setCustomHeight] = React.useState<string>("");
-  const [bleed, setBleed] = React.useState<string>("0.125");
-  const [gutterMargin, setGutterMargin] = React.useState<string>("0.5");
+  const [format, setFormat] = useState<string>(Object.keys(PRINT_FORMATS)[0]);
+  const [size, setSize] = useState<string>(PRINT_FORMATS[Object.keys(PRINT_FORMATS)[0]][0]);
+  const [customWidth, setCustomWidth] = useState<string>("");
+  const [customHeight, setCustomHeight] = useState<string>("");
+  const [bleed, setBleed] = useState<string>("0.125");
+  const [gutterMargin, setGutterMargin] = useState<string>("0.5");
 
   const handleSubmit = () => {
     onConfigSubmit({
