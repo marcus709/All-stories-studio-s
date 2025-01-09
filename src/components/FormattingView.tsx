@@ -6,7 +6,7 @@ import { IText } from "fabric";
 import { TextFormattingTools } from "./book/TextFormattingTools";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ToggleLeft, ToggleRight } from "lucide-react";
+import { ToggleLeft, ToggleRight, ZoomIn, ZoomOut } from "lucide-react";
 import { AIFormattingDialog } from "./book/AIFormattingDialog";
 import { DocumentSelector } from "./book/DocumentSelector";
 import { ExportOptionsDialog } from "./book/ExportOptionsDialog";
@@ -14,22 +14,28 @@ import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescript
 import { useToast } from "@/hooks/use-toast";
 import { useStory } from "@/contexts/StoryContext";
 import { Document } from "@/types/story";
+import { PreviewScene } from "./book/PreviewScene";
+import { DevicePreview } from "./book/DevicePreview";
+import { Button } from "./ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { Slider } from "./ui/slider";
 
 export const FormattingView = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
-  const [activeTab, setActiveTab] = useState("templates");
+  const [activeTab, setActiveTab] = useState("print");
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [previewScene, setPreviewScene] = useState("none");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [coverTexts, setCoverTexts] = useState<Array<{ text: string; font: string; size: number; x: number; y: number }>>([]);
   const [selectedText, setSelectedText] = useState<IText | null>(null);
-  const [deviceView, setDeviceView] = useState<'print' | 'kindle' | 'ipad' | 'phone'>('print');
+  const [deviceView, setDeviceView] = useState<'kindle' | 'ipad' | 'phone' | 'print'>('print');
   const [notifications, setNotifications] = useState<Array<{ id: string; message: string }>>([]);
   const [isAIMode, setIsAIMode] = useState(true);
   const [showManualModeAlert, setShowManualModeAlert] = useState(false);
   const [showDocumentSelector, setShowDocumentSelector] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [hasFormattedDocument, setHasFormattedDocument] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(100);
   const { toast } = useToast();
   const { selectedStory } = useStory();
 
@@ -48,94 +54,8 @@ export const FormattingView = () => {
     enabled: !!selectedStory?.id,
   });
 
-  const handleFormatConfig = async (config: any) => {
-    if (!selectedDocument) {
-      toast({
-        title: "No document selected",
-        description: "Please select a document to format",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      // Simulate formatting process
-      toast({
-        title: "Formatting document",
-        description: "Please wait while we format your document...",
-      });
-
-      // Simulate processing time
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      setHasFormattedDocument(true);
-      toast({
-        title: "Document formatted",
-        description: "Your document has been formatted successfully. Click the Export button to download.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to format document. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleTemplateSelect = (template: Template) => {
-    setSelectedTemplate(template);
-  };
-
-  const handleResetDesign = () => {
-    setSelectedTemplate(null);
-    setCoverImage(null);
-    setHasFormattedDocument(false);
-  };
-
-  const handleSaveDesign = () => {
-    // Implementation for saving the design will be added later
-  };
-
-  const handleImageUpload = (url: string) => {
-    setCoverImage(url);
-  };
-
-  const handleToggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
-  };
-
-  const handleTextUpdate = (texts: Array<{ text: string; font: string; size: number; x: number; y: number }>) => {
-    setCoverTexts(texts);
-  };
-
-  const handleTextSelect = (text: IText | null) => {
-    setSelectedText(text);
-  };
-
-  const handleAIModeToggle = (checked: boolean) => {
-    if (!checked) {
-      setShowManualModeAlert(true);
-    }
-  };
-
-  const handleDocumentSelect = (docId: string) => {
-    const doc = documents.find(d => d.id === docId);
-    setSelectedDocument(doc || null);
-    setShowDocumentSelector(false);
-    setHasFormattedDocument(false);
-    
-    toast({
-      title: "Document selected",
-      description: `Selected "${doc?.title}". Configure formatting options to proceed.`,
-    });
-  };
-
-  const handleUploadComplete = () => {
-    toast({
-      title: "Success",
-      description: "Document uploaded successfully",
-    });
-    setShowDocumentSelector(false);
+  const handleZoomChange = (value: number[]) => {
+    setZoomLevel(value[0]);
   };
 
   return (
@@ -153,27 +73,27 @@ export const FormattingView = () => {
             <Switch
               id="ai-mode"
               checked={true}
-              onCheckedChange={handleAIModeToggle}
+              onCheckedChange={() => setIsAIMode(!isAIMode)}
               className="data-[state=checked]:bg-purple-500"
             />
           </div>
         </div>
       </div>
 
-      {/* Main Content - Always AI Mode */}
+      {/* Main Content - Split Screen Preview */}
       <div className="flex-1 p-6">
-        <div className="max-w-3xl mx-auto h-full bg-white/40 backdrop-blur-md rounded-lg p-4 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] border border-gray-200/60">
+        <div className="max-w-7xl mx-auto h-full">
           <div className="flex justify-between mb-4">
             <DocumentSelector
               documents={documents}
               showDocumentSelector={showDocumentSelector}
               setShowDocumentSelector={setShowDocumentSelector}
-              handleDocumentSelect={handleDocumentSelect}
-              handleUploadComplete={handleUploadComplete}
+              handleDocumentSelect={(doc) => setSelectedDocument(doc)}
+              handleUploadComplete={() => toast({ title: "Success", description: "Document uploaded successfully" })}
             />
             <div className="flex gap-2 items-center">
               <AIFormattingDialog 
-                onConfigSubmit={handleFormatConfig}
+                onConfigSubmit={() => {}}
                 disabled={!selectedDocument}
               />
               <div className="relative">
@@ -187,7 +107,82 @@ export const FormattingView = () => {
               </div>
             </div>
           </div>
-          <TextFormattingTools isAIMode={true} />
+
+          <Tabs defaultValue="print" className="w-full" onValueChange={(value) => setActiveTab(value)}>
+            <TabsList className="mb-4">
+              <TabsTrigger value="print">Print Preview</TabsTrigger>
+              <TabsTrigger value="digital">Digital Devices</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="print" className="space-y-4">
+              <div className="flex justify-between items-center mb-4">
+                <div className="flex items-center space-x-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setZoomLevel(Math.min(zoomLevel + 10, 200))}
+                  >
+                    <ZoomIn className="h-4 w-4" />
+                  </Button>
+                  <Slider
+                    value={[zoomLevel]}
+                    onValueChange={handleZoomChange}
+                    min={50}
+                    max={200}
+                    step={10}
+                    className="w-32"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setZoomLevel(Math.max(zoomLevel - 10, 50))}
+                  >
+                    <ZoomOut className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 bg-gray-100 p-8 rounded-lg overflow-hidden" style={{ height: 'calc(100vh - 300px)' }}>
+                <div className="bg-white shadow-lg rounded-lg p-8" style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top left' }}>
+                  <div className="text-center text-sm text-gray-500 mb-2">Left Page</div>
+                  {/* Page content */}
+                </div>
+                <div className="bg-white shadow-lg rounded-lg p-8" style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top left' }}>
+                  <div className="text-center text-sm text-gray-500 mb-2">Right Page</div>
+                  {/* Page content */}
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="digital">
+              <div className="space-y-4">
+                <div className="flex justify-start space-x-4 mb-4">
+                  <Button
+                    variant={deviceView === 'kindle' ? 'default' : 'outline'}
+                    onClick={() => setDeviceView('kindle')}
+                  >
+                    Kindle
+                  </Button>
+                  <Button
+                    variant={deviceView === 'ipad' ? 'default' : 'outline'}
+                    onClick={() => setDeviceView('ipad')}
+                  >
+                    iPad
+                  </Button>
+                  <Button
+                    variant={deviceView === 'phone' ? 'default' : 'outline'}
+                    onClick={() => setDeviceView('phone')}
+                  >
+                    Phone
+                  </Button>
+                </div>
+                <DevicePreview
+                  device={deviceView}
+                  content={selectedDocument?.content || ''}
+                  zoomLevel={zoomLevel}
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 
