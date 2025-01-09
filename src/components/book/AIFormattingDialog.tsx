@@ -20,20 +20,49 @@ interface AIFormattingDialogProps {
   onConfigSubmit: (config: FormatConfig) => void;
 }
 
-const PRINT_FORMATS = {
-  "Trade Paperback": ["5 x 8", "5.5 x 8.5", "6 x 9"],
-  "Mass Market": ["4.25 x 6.87"],
-  "Hardcover": ["6 x 9", "6.14 x 9.21", "7 x 10"],
-  "Non-Fiction": ["7 x 10", "8.5 x 11"],
-  "Photo Books": ["8 x 10", "8.5 x 8.5", "11 x 8.5"],
-  "Children's Books": ["8 x 8", "8.5 x 8.5", "11 x 8.5"],
-  "Global (ISO)": ["5.83 x 8.27 (A5)", "8.27 x 11.69 (A4)", "6.93 x 9.84 (B5)"],
-  "Custom": ["custom"]
+interface FormatInfo {
+  sizes: string[];
+  digitalFormats: string[];
+}
+
+const PRINT_FORMATS: Record<string, FormatInfo> = {
+  "Trade Paperback": {
+    sizes: ["5 x 8", "5.5 x 8.5", "6 x 9"],
+    digitalFormats: ["EPUB", "MOBI", "PDF"]
+  },
+  "Mass Market": {
+    sizes: ["4.25 x 6.87"],
+    digitalFormats: ["EPUB", "MOBI"]
+  },
+  "Hardcover": {
+    sizes: ["6 x 9", "6.14 x 9.21", "7 x 10"],
+    digitalFormats: ["EPUB", "MOBI"]
+  },
+  "Non-Fiction": {
+    sizes: ["7 x 10", "8.5 x 11"],
+    digitalFormats: ["PDF"]
+  },
+  "Photo Books": {
+    sizes: ["8 x 10", "8.5 x 8.5", "11 x 8.5"],
+    digitalFormats: ["PDF (Fixed Layout)"]
+  },
+  "Children's Books": {
+    sizes: ["8 x 8", "8.5 x 8.5", "11 x 8.5"],
+    digitalFormats: ["EPUB"]
+  },
+  "Global (ISO)": {
+    sizes: ["5.83 x 8.27 (A5)", "8.27 x 11.69 (A4)", "6.93 x 9.84 (B5)"],
+    digitalFormats: ["EPUB", "PDF"]
+  },
+  "Custom": {
+    sizes: ["custom"],
+    digitalFormats: ["EPUB", "PDF", "MOBI"]
+  }
 };
 
 export function AIFormattingDialog({ onConfigSubmit }: AIFormattingDialogProps) {
   const [format, setFormat] = useState<string>(Object.keys(PRINT_FORMATS)[0]);
-  const [size, setSize] = useState<string>(PRINT_FORMATS[Object.keys(PRINT_FORMATS)[0]][0]);
+  const [size, setSize] = useState<string>(PRINT_FORMATS[Object.keys(PRINT_FORMATS)[0]].sizes[0]);
   const [customWidth, setCustomWidth] = useState<string>("");
   const [customHeight, setCustomHeight] = useState<string>("");
   const [bleed, setBleed] = useState<string>("0.125");
@@ -78,6 +107,9 @@ export function AIFormattingDialog({ onConfigSubmit }: AIFormattingDialogProps) 
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-sm text-muted-foreground">
+                Available digital formats: {PRINT_FORMATS[format].digitalFormats.join(", ")}
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -87,7 +119,7 @@ export function AIFormattingDialog({ onConfigSubmit }: AIFormattingDialogProps) 
                   <SelectValue placeholder="Select size" />
                 </SelectTrigger>
                 <SelectContent>
-                  {PRINT_FORMATS[format].map((s) => (
+                  {PRINT_FORMATS[format].sizes.map((s) => (
                     <SelectItem key={s} value={s}>
                       {s}
                     </SelectItem>
