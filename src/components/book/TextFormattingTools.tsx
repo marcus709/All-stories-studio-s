@@ -4,9 +4,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 interface TextFormattingToolsProps {
   isAIMode: boolean;
   currentSection: string;
+  sectionContent?: string;
 }
 
-export const TextFormattingTools = ({ isAIMode, currentSection = 'content' }: TextFormattingToolsProps) => {
+export const TextFormattingTools = ({ 
+  isAIMode, 
+  currentSection = 'content',
+  sectionContent
+}: TextFormattingToolsProps) => {
   const getSectionTitle = (section: string) => {
     if (!section) return 'Content';
     
@@ -27,7 +32,11 @@ export const TextFormattingTools = ({ isAIMode, currentSection = 'content' }: Te
             {getSectionTitle(currentSection)}
           </h2>
           <div className="prose max-w-none">
-            <p>Edit your {currentSection} content here...</p>
+            {sectionContent ? (
+              <div dangerouslySetInnerHTML={{ __html: sectionContent.split('\n').join('<br />') }} />
+            ) : (
+              <p>Edit your {currentSection} content here...</p>
+            )}
           </div>
         </div>
       </div>

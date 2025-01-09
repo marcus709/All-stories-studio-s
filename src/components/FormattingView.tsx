@@ -29,6 +29,7 @@ export const FormattingView = () => {
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [hasFormattedDocument, setHasFormattedDocument] = useState(false);
   const [currentSection, setCurrentSection] = useState("content");
+  const [currentSectionContent, setCurrentSectionContent] = useState<string | undefined>();
   const { toast } = useToast();
   const { selectedStory } = useStory();
 
@@ -149,8 +150,9 @@ export const FormattingView = () => {
     setShowDocumentSelector(false);
   };
 
-  const handleSectionSelect = (section: string) => {
+  const handleSectionSelect = (section: string, content?: string) => {
     setCurrentSection(section);
+    setCurrentSectionContent(content);
   };
 
   return (
@@ -199,6 +201,7 @@ export const FormattingView = () => {
         <TextFormattingTools 
           isAIMode={isAIMode}
           currentSection={currentSection}
+          sectionContent={currentSectionContent}
         />
       </div>
     </div>
