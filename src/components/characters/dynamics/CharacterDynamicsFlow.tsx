@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { 
+import {
   ReactFlow,
   Background,
   Controls,
@@ -11,7 +11,7 @@ import {
   MarkerType,
   Panel,
   Edge,
-  EdgeTypes
+  EdgeTypes,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Character } from '@/integrations/supabase/types/tables.types';
@@ -47,7 +47,6 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
     };
   });
 
-  // Transform relationships into edges with enhanced styling
   const initialEdges: Edge<RelationshipEdgeData>[] = relationships.map((rel) => ({
     id: rel.id,
     source: rel.character1_id,
@@ -80,7 +79,6 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
     [setEdges],
   );
 
-  // Add zoom controls
   const onZoomIn = useCallback(() => {
     setNodes((nds) =>
       nds.map((node) => ({
