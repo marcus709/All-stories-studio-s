@@ -167,6 +167,65 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
         user_id: session.user.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        psychology: {
+          fears: [],
+          mental_health: null,
+          coping_mechanisms: [],
+          emotional_tendencies: []
+        },
+        values_and_morals: {
+          honesty: 50,
+          loyalty: 50,
+          alignment: {
+            lawful_chaotic: 0,
+            selfless_selfish: 0
+          },
+          risk_taking: 50
+        },
+        skills: [],
+        flaws: [],
+        archetype: null,
+        psychological_traits: {
+          trust: 50,
+          resilience: 50,
+          impulsiveness: 50,
+          emotional_intelligence: 50
+        },
+        internal_motivations: [],
+        external_goals: [],
+        core_beliefs: [],
+        social_masks: [],
+        group_roles: [],
+        behavioral_quirks: [],
+        body_language: null,
+        cultural_background: {
+          taboos: [],
+          traditions: [],
+          religious_beliefs: []
+        },
+        life_events: {
+          losses: [],
+          formative: [],
+          turning_points: []
+        },
+        ancestry: null,
+        skill_trees: [],
+        expertise: {
+          areas: [],
+          limitations: []
+        },
+        training_history: [],
+        dialogue_style: {
+          tone: [],
+          patterns: [],
+          formality: "neutral"
+        },
+        iconic_phrases: [],
+        linguistic_traits: {
+          accent: null,
+          quirks: [],
+          languages: []
+        }
       },
     };
 
@@ -188,10 +247,72 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
     setLayoutType(newLayout);
     const newPositions = getNodePositions(characters, newLayout);
     
-    setNodes((nds) => 
-      nds.map((node, index) => ({
+    setNodes((prevNodes) => 
+      prevNodes.map((node, index) => ({
         ...node,
         position: newPositions[index] || node.position || DEFAULT_POSITION,
+        data: {
+          ...node.data,
+          psychology: node.data.psychology || {
+            fears: [],
+            mental_health: null,
+            coping_mechanisms: [],
+            emotional_tendencies: []
+          },
+          values_and_morals: node.data.values_and_morals || {
+            honesty: 50,
+            loyalty: 50,
+            alignment: {
+              lawful_chaotic: 0,
+              selfless_selfish: 0
+            },
+            risk_taking: 50
+          },
+          skills: node.data.skills || [],
+          flaws: node.data.flaws || [],
+          archetype: node.data.archetype || null,
+          psychological_traits: node.data.psychological_traits || {
+            trust: 50,
+            resilience: 50,
+            impulsiveness: 50,
+            emotional_intelligence: 50
+          },
+          internal_motivations: node.data.internal_motivations || [],
+          external_goals: node.data.external_goals || [],
+          core_beliefs: node.data.core_beliefs || [],
+          social_masks: node.data.social_masks || [],
+          group_roles: node.data.group_roles || [],
+          behavioral_quirks: node.data.behavioral_quirks || [],
+          body_language: node.data.body_language || null,
+          cultural_background: node.data.cultural_background || {
+            taboos: [],
+            traditions: [],
+            religious_beliefs: []
+          },
+          life_events: node.data.life_events || {
+            losses: [],
+            formative: [],
+            turning_points: []
+          },
+          ancestry: node.data.ancestry || null,
+          skill_trees: node.data.skill_trees || [],
+          expertise: node.data.expertise || {
+            areas: [],
+            limitations: []
+          },
+          training_history: node.data.training_history || [],
+          dialogue_style: node.data.dialogue_style || {
+            tone: [],
+            patterns: [],
+            formality: "neutral"
+          },
+          iconic_phrases: node.data.iconic_phrases || [],
+          linguistic_traits: node.data.linguistic_traits || {
+            accent: null,
+            quirks: [],
+            languages: []
+          }
+        }
       }))
     );
   };

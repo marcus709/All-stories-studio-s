@@ -51,13 +51,16 @@ export const CoverTextEditor = ({ width, height, onTextUpdate }: CoverTextEditor
   const updateTextData = () => {
     if (!fabricRef.current) return;
     
-    const texts = fabricRef.current.getObjects("i-text").map((obj) => ({
-      text: obj.text || "",
-      font: obj.fontFamily || "Arial",
-      size: obj.fontSize || 20,
-      x: obj.left || 0,
-      y: obj.top || 0,
-    }));
+    const texts = fabricRef.current.getObjects("i-text").map((obj) => {
+      const textObj = obj as IText;
+      return {
+        text: textObj.text || "",
+        font: textObj.fontFamily || "Arial",
+        size: textObj.fontSize || 20,
+        x: textObj.left || 0,
+        y: textObj.top || 0,
+      };
+    });
 
     onTextUpdate(texts);
   };
