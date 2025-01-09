@@ -50,9 +50,10 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
   const [layoutType, setLayoutType] = useState<LayoutType>('circular');
 
   const getNodePositions = (chars: Character[], layout: LayoutType) => {
+    if (!chars.length) return [];
+    
     switch (layout) {
       case 'clustered':
-        // Group characters by their traits/factions
         return chars.map((char, index) => {
           const group = char.traits?.[0] || 'unknown';
           const groupIndex = [...new Set(chars.map(c => c.traits?.[0] || 'unknown'))].indexOf(group);
@@ -67,14 +68,12 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
         });
 
       case 'timeline':
-        // Arrange characters in a horizontal timeline
         return chars.map((_, index) => ({
           x: 200 + (index * 200),
-          y: 300 + (Math.sin(index) * 100), // Slight wave pattern
+          y: 300 + (Math.sin(index) * 100),
         }));
 
       case 'geographic':
-        // Arrange in a map-like grid
         const cols = Math.ceil(Math.sqrt(chars.length));
         return chars.map((_, index) => ({
           x: 200 + (index % cols) * 250,
@@ -83,7 +82,6 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
 
       case 'circular':
       default:
-        // Original circular layout
         return chars.map((_, index) => {
           const angle = (index * 2 * Math.PI) / chars.length;
           const radius = 300;
@@ -100,7 +98,7 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
   const initialNodes = characters.map((char, index) => ({
     id: char.id,
     type: 'character',
-    position: positions[index],
+    position: positions[index] || { x: 0, y: 0 }, // Fallback position
     data: { ...char },
   }));
 
@@ -140,6 +138,8 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
   );
 
   const handleAddNode = useCallback(() => {
+    if (!session?.user?.id) return;
+
     const newNodeId = `character-${Date.now()}`;
     const newNode = {
       id: newNodeId,
@@ -153,10 +153,9 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
         goals: null,
         backstory: null,
         story_id: null,
-        user_id: session?.user?.id || '',
+        user_id: session.user.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        isNew: true
       },
     };
 
@@ -173,11 +172,14 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
   }, [nextNodePosition, setNodes, toast, session]);
 
   const handleLayoutChange = (newLayout: LayoutType) => {
+    if (!characters.length) return;
+    
     setLayoutType(newLayout);
     const newPositions = getNodePositions(characters, newLayout);
+    
     setNodes(nodes.map((node, index) => ({
       ...node,
-      position: newPositions[index],
+      position: newPositions[index] || node.position, // Fallback to current position
     })));
   };
 
