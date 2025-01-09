@@ -3,13 +3,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DocumentUpload } from "@/components/story-logic/DocumentUpload";
-import { Document } from "@/types/story";
 
 interface DocumentSelectorProps {
-  documents: Document[];
+  documents: any[];
   showDocumentSelector: boolean;
   setShowDocumentSelector: (show: boolean) => void;
-  handleDocumentSelect: (doc: Document) => void;
+  handleDocumentSelect: (docId: string) => void;
   handleUploadComplete: () => void;
 }
 
@@ -42,7 +41,7 @@ export const DocumentSelector = ({
                     key={doc.id}
                     variant="ghost"
                     className="w-full justify-start"
-                    onClick={() => handleDocumentSelect(doc)}
+                    onClick={() => handleDocumentSelect(doc.id)}
                   >
                     {doc.title}
                   </Button>
