@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useStory } from "@/contexts/StoryContext";
-import { CharacterDynamicsD3 } from "./dynamics/CharacterDynamicsD3";
 import { TensionTimeline } from "./dynamics/TensionTimeline";
+import { CharacterDynamicsFlow } from "./dynamics/CharacterDynamicsFlow";
 
 export const CharacterDynamics = () => {
   const { selectedStory } = useStory();
@@ -51,9 +51,9 @@ export const CharacterDynamics = () => {
   });
 
   return (
-    <div className="flex flex-col h-full bg-gray-900">
+    <div className="flex flex-col h-[calc(100vh-8rem)] bg-gray-900">
       <div className="flex-1 min-h-0">
-        <CharacterDynamicsD3 
+        <CharacterDynamicsFlow 
           characters={characters || []} 
           relationships={relationships || []} 
         />
