@@ -239,8 +239,13 @@ export const CoverTextEditor = ({ width, height, onTextUpdate }: CoverTextEditor
   };
 
   return (
-    <div className="space-y-4">
-      <div className="bg-white p-4 rounded-lg shadow-sm border space-y-4">
+    <div className="relative w-full h-full">
+      <div className="border rounded-lg overflow-hidden bg-white h-full">
+        <canvas ref={canvasRef} />
+      </div>
+
+      {/* Floating Controls Panel */}
+      <div className="absolute top-4 right-4 w-80 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg border p-4 space-y-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="typography">
@@ -417,9 +422,11 @@ export const CoverTextEditor = ({ width, height, onTextUpdate }: CoverTextEditor
         </Tabs>
       </div>
 
-      <div className="border rounded-lg overflow-hidden bg-white">
-        <canvas ref={canvasRef} />
-      </div>
+      {!selectedObject && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <p className="text-gray-400 text-lg">Click 'Add Text' to start editing</p>
+        </div>
+      )}
     </div>
   );
 };
