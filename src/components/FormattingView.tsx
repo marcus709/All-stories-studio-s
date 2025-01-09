@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Template } from "@/types/book";
 import { IText } from "fabric";
+import { TextFormattingTools } from "./book/TextFormattingTools";
 
 export const FormattingView = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
@@ -69,7 +70,7 @@ export const FormattingView = () => {
       <div className="flex-1 p-6 grid grid-cols-12 gap-6">
         {/* Left Tools Panel */}
         <div className="col-span-3 bg-white/40 backdrop-blur-md rounded-lg p-4 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] border border-gray-200/60">
-          {/* Tools will be added here */}
+          <TextFormattingTools />
         </div>
 
         {/* Center Book Preview */}
