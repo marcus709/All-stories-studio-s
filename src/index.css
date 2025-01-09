@@ -92,6 +92,10 @@
     border-radius: 50%;
     animation: map-ripple 2s ease-out forwards;
   }
+
+  .transform-style-3d {
+    transform-style: preserve-3d;
+  }
 }
 
 @keyframes text {
