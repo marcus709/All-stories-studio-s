@@ -1,13 +1,11 @@
-import { Character } from '@/integrations/supabase/types/tables.types';
+import { Character } from "@/integrations/supabase/types/tables.types";
 
 export interface CharacterNode extends Character {
-  x?: number;
-  y?: number;
-  fx?: number | null;
-  fy?: number | null;
+  x: number;
+  y: number;
 }
 
-export interface RelationshipLink {
+export interface Relationship {
   source: CharacterNode;
   target: CharacterNode;
   type: string;
@@ -16,13 +14,5 @@ export interface RelationshipLink {
 
 export interface CharacterDynamicsD3Props {
   characters: Character[];
-  relationships: {
-    id: string;
-    story_id: string;
-    character1_id: string;
-    character2_id: string;
-    relationship_type: string;
-    strength: number;
-    created_at: string;
-  }[];
+  relationships: Relationship[];
 }
