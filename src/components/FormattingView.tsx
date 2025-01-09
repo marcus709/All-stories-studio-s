@@ -2,7 +2,17 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { BookCopy, ImagePlus, Type } from "lucide-react";
+import { 
+  BookCopy, 
+  ImagePlus, 
+  Type, 
+  Globe, 
+  Palette,
+  BookOpen,
+  FileText,
+  Settings,
+  PenTool
+} from "lucide-react";
 import { Template } from "@/types/book";
 import { DesignHeader } from "./book/DesignHeader";
 import { TemplatePanel } from "./book/TemplatePanel";
@@ -13,6 +23,7 @@ import { BookSizeSelector, BookSize } from "./book/BookSizeSelector";
 import { PreviewScene } from "./book/PreviewScene";
 import { CoverTextEditor } from "./book/CoverTextEditor";
 import { IText } from "fabric";
+import { cn } from "@/lib/utils";
 
 const templates: Template[] = [
   {
@@ -182,58 +193,83 @@ export const FormattingView = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
+    <div className="flex flex-col h-screen overflow-hidden bg-background text-foreground">
       <DesignHeader
         onResetDesign={handleResetDesign}
         onSaveDesign={handleSaveDesign}
       />
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Left Panel - Design Tools */}
-        <div className="w-80 border-r bg-white overflow-y-auto">
-          <div className="p-6">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-6">
-                <TabsTrigger value="templates">
-                  <BookCopy className="h-4 w-4 mr-2" />
-                  Templates
-                </TabsTrigger>
-                <TabsTrigger value="images">
-                  <ImagePlus className="h-4 w-4 mr-2" />
-                  Images
-                </TabsTrigger>
-                <TabsTrigger value="text">
-                  <Type className="h-4 w-4 mr-2" />
-                  Text
-                </TabsTrigger>
-              </TabsList>
+        {/* Left Sidebar - Design Tools */}
+        <div className="w-72 border-r border-border bg-card">
+          <div className="p-4">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Globe className="w-5 h-5" />
+                <h2 className="text-lg font-semibold">Templates</h2>
+              </div>
+              
+              <nav className="space-y-1">
+                <button className="w-full flex items-center space-x-2 px-3 py-2 text-sm rounded-lg hover:bg-accent">
+                  <BookCopy className="w-4 h-4" />
+                  <span>Fiction</span>
+                </button>
+                <button className="w-full flex items-center space-x-2 px-3 py-2 text-sm rounded-lg hover:bg-accent">
+                  <FileText className="w-4 h-4" />
+                  <span>Non-Fiction</span>
+                </button>
+                <button className="w-full flex items-center space-x-2 px-3 py-2 text-sm rounded-lg hover:bg-accent">
+                  <Palette className="w-4 h-4" />
+                  <span>Art Books</span>
+                </button>
+                <button className="w-full flex items-center space-x-2 px-3 py-2 text-sm rounded-lg hover:bg-accent">
+                  <BookOpen className="w-4 h-4" />
+                  <span>Academic</span>
+                </button>
+              </nav>
 
-              <TabsContent value="templates" className="mt-0">
-                <TemplatePanel
-                  templates={templates}
-                  selectedTemplate={selectedTemplate}
-                  onTemplateSelect={handleTemplateSelect}
-                />
-                <div className="mt-6">
-                  <BookSizeSelector onSizeChange={setBookSize} />
-                </div>
-              </TabsContent>
+              <div className="pt-4">
+                <Tabs defaultValue="templates" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="templates">
+                      <PenTool className="h-4 w-4" />
+                    </TabsTrigger>
+                    <TabsTrigger value="images">
+                      <ImagePlus className="h-4 w-4" />
+                    </TabsTrigger>
+                    <TabsTrigger value="text">
+                      <Type className="h-4 w-4" />
+                    </TabsTrigger>
+                  </TabsList>
 
-              <TabsContent value="images" className="mt-0">
-                <ImageUploadPanel onImageUpload={handleImageUpload} />
-              </TabsContent>
+                  <TabsContent value="templates" className="mt-4">
+                    <TemplatePanel
+                      templates={templates}
+                      selectedTemplate={selectedTemplate}
+                      onTemplateSelect={handleTemplateSelect}
+                    />
+                    <div className="mt-6">
+                      <BookSizeSelector onSizeChange={setBookSize} />
+                    </div>
+                  </TabsContent>
 
-              <TabsContent value="text" className="mt-0">
-                <div className="space-y-4">
-                  {/* Text editing functionality will be implemented next */}
-                </div>
-              </TabsContent>
-            </Tabs>
+                  <TabsContent value="images" className="mt-4">
+                    <ImageUploadPanel onImageUpload={handleImageUpload} />
+                  </TabsContent>
+
+                  <TabsContent value="text" className="mt-4">
+                    <div className="space-y-4">
+                      {/* Text editing functionality will be implemented next */}
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Center Panel - Book Preview */}
-        <div className="flex-1 bg-gray-50 overflow-y-auto">
+        <div className="flex-1 bg-background">
           <div className="h-full p-8">
             <PreviewScene 
               onSceneChange={setPreviewScene} 
@@ -246,12 +282,32 @@ export const FormattingView = () => {
           </div>
         </div>
 
-        {/* Right Panel - Properties */}
-        <div className="w-80 border-l bg-white overflow-y-auto">
-          <PropertiesPanel 
-            selectedTemplate={selectedTemplate}
-            selectedText={selectedText}
-          />
+        {/* Right Sidebar - Properties */}
+        <div className="w-80 border-l border-border bg-card">
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold">Book Formatting</h2>
+              <Settings className="w-5 h-5" />
+            </div>
+            
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <span className="text-sm text-muted-foreground">Chapters</span>
+                  <p className="text-2xl font-semibold">12</p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-sm text-muted-foreground">Fonts</span>
+                  <p className="text-2xl font-semibold">23</p>
+                </div>
+              </div>
+              
+              <PropertiesPanel 
+                selectedTemplate={selectedTemplate}
+                selectedText={selectedText}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>

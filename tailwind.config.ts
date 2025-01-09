@@ -18,9 +18,6 @@ export default {
 			}
 		},
 		extend: {
-			fontFamily: {
-				'instagram-draft': ['Instagram Sans Draft', 'sans-serif'],
-			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -54,16 +51,6 @@ export default {
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
-				},
-				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
 				}
 			},
 			borderRadius: {
@@ -92,41 +79,6 @@ export default {
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out'
-			},
-			typography: {
-				DEFAULT: {
-					css: {
-						maxWidth: 'none',
-						color: 'inherit',
-						a: {
-							color: 'inherit',
-							textDecoration: 'none',
-							fontWeight: '500',
-						},
-						strong: {
-							color: 'inherit',
-						},
-						h1: {
-							color: 'inherit',
-						},
-						h2: {
-							color: 'inherit',
-						},
-						h3: {
-							color: 'inherit',
-						},
-						h4: {
-							color: 'inherit',
-						},
-						code: {
-							color: 'inherit',
-						},
-						pre: {
-							color: 'inherit',
-							backgroundColor: 'transparent',
-						},
-					},
-				},
 			},
 		}
 	},
