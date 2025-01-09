@@ -116,6 +116,24 @@
   .relationship-edge.new {
     animation: edge-pulse 2s ease-in-out;
   }
+
+  .character-node {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .character-node.affected {
+    animation: glow 1s ease-in-out;
+  }
+
+  .character-node.new {
+    animation: ripple 1s ease-out;
+  }
+
+  .map-ripple {
+    position: absolute;
+    border-radius: 50%;
+    animation: map-ripple 2s ease-out forwards;
+  }
 }
 
 @keyframes text {
@@ -129,11 +147,57 @@
   }
 }
 
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 0 rgba(139, 92, 246, 0));
+  }
+  50% {
+    filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.5));
+  }
+}
+
 @keyframes edge-pulse {
   0%, 100% {
     filter: brightness(1);
   }
   50% {
     filter: brightness(1.5);
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.3);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 20px rgba(139, 92, 246, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
+  }
+}
+
+@keyframes map-ripple {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 0.5;
+  }
+  100% {
+    width: 500px;
+    height: 500px;
+    opacity: 0;
   }
 }

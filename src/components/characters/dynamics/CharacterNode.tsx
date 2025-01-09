@@ -8,6 +8,8 @@ interface NodeData {
   traits?: string[];
   archetype?: string;
   relationship_type?: string;
+  isAffected?: boolean;
+  isNew?: boolean;
 }
 
 const CharacterNode = ({ data }: { data: NodeData }) => {
@@ -17,8 +19,15 @@ const CharacterNode = ({ data }: { data: NodeData }) => {
     return 'border-purple-500';
   };
 
+  const getNodeClasses = () => {
+    let classes = 'character-node';
+    if (data.isAffected) classes += ' affected';
+    if (data.isNew) classes += ' new';
+    return classes;
+  };
+
   return (
-    <div className={`group px-4 py-2 shadow-lg rounded-full bg-gray-800 border-2 ${getBorderColor(data.traits)} 
+    <div className={`${getNodeClasses()} group px-4 py-2 shadow-lg rounded-full bg-gray-800 border-2 ${getBorderColor(data.traits)} 
                     min-w-[120px] min-h-[120px] flex flex-col items-center justify-center
                     transition-shadow duration-200 hover:shadow-[0_0_20px_rgba(139,92,246,0.3)]`}>
       <Handle type="target" position={Position.Top} className="!bg-purple-500" />
