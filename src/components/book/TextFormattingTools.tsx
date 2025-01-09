@@ -14,7 +14,7 @@ export const TextFormattingTools = ({ isAIMode }: TextFormattingToolsProps) => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 h-full flex flex-col">
       <div className="flex items-center space-x-2 p-2 bg-white rounded-md border border-gray-200">
         <div className="flex items-center space-x-1">
           <Toggle aria-label="Toggle bold">
@@ -75,16 +75,16 @@ export const TextFormattingTools = ({ isAIMode }: TextFormattingToolsProps) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-4">
-          <div className="prose max-w-none">
-            <div contentEditable className="min-h-[500px] p-4 bg-white rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+      <div className="grid grid-cols-2 gap-4 flex-1 min-h-0">
+        <div className="flex flex-col space-y-4 min-h-0">
+          <div className="prose max-w-none flex-1">
+            <div contentEditable className="h-full p-4 bg-white rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
               Start writing your content here...
             </div>
           </div>
         </div>
         
-        <div className="space-y-4">
+        <div className="flex flex-col space-y-4 min-h-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Select defaultValue="ipad">
@@ -111,7 +111,7 @@ export const TextFormattingTools = ({ isAIMode }: TextFormattingToolsProps) => {
             </div>
           </div>
           
-          <div className="bg-white rounded-lg border border-gray-200 p-4 aspect-[3/4] flex items-center justify-center">
+          <div className="bg-white rounded-lg border border-gray-200 flex-1 flex items-center justify-center">
             <div className="max-w-sm mx-auto">
               Preview will appear here
             </div>
