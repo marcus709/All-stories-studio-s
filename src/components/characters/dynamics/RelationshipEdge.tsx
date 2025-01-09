@@ -14,10 +14,11 @@ import {
 export interface RelationshipEdgeData {
   type: string;
   strength: number;
-  notes: string;
+  notes?: string;
   trust: number;
   conflict: number;
   chemistry: string;
+  [key: string]: unknown; // Add index signature to satisfy Record<string, unknown>
 }
 
 const RelationshipEdge = ({
@@ -60,7 +61,7 @@ const RelationshipEdge = ({
                           flex items-center justify-center cursor-pointer
                           hover:bg-gray-700 transition-colors"
               >
-                <div className="w-2 h-2 rounded-full bg-current" style={{ color: style?.stroke }} />
+                <div className="w-2 h-2 rounded-full bg-current" style={{ color: typeof style?.stroke === 'string' ? style.stroke : undefined }} />
               </div>
             </HoverCardTrigger>
             <HoverCardContent className="w-80 bg-gray-800 border-gray-700 text-white p-4">
