@@ -216,40 +216,106 @@ export type Database = {
       }
       characters: {
         Row: {
+          ancestry: string | null
+          archetype: string | null
           backstory: string | null
+          behavioral_quirks: string[] | null
+          body_language: string | null
+          core_beliefs: string[] | null
           created_at: string | null
+          cultural_background: Json | null
+          dialogue_style: Json | null
+          expertise: Json | null
+          external_goals: string[] | null
+          flaws: string[] | null
           goals: string | null
+          group_roles: string[] | null
+          iconic_phrases: string[] | null
           id: string
+          internal_motivations: string[] | null
+          life_events: Json | null
+          linguistic_traits: Json | null
           name: string
+          psychological_traits: Json | null
+          psychology: Json | null
           role: string | null
+          skill_trees: Json | null
+          skills: Json | null
+          social_masks: Json | null
           story_id: string | null
+          training_history: string[] | null
           traits: string[] | null
           updated_at: string | null
           user_id: string
+          values_and_morals: Json | null
         }
         Insert: {
+          ancestry?: string | null
+          archetype?: string | null
           backstory?: string | null
+          behavioral_quirks?: string[] | null
+          body_language?: string | null
+          core_beliefs?: string[] | null
           created_at?: string | null
+          cultural_background?: Json | null
+          dialogue_style?: Json | null
+          expertise?: Json | null
+          external_goals?: string[] | null
+          flaws?: string[] | null
           goals?: string | null
+          group_roles?: string[] | null
+          iconic_phrases?: string[] | null
           id?: string
+          internal_motivations?: string[] | null
+          life_events?: Json | null
+          linguistic_traits?: Json | null
           name: string
+          psychological_traits?: Json | null
+          psychology?: Json | null
           role?: string | null
+          skill_trees?: Json | null
+          skills?: Json | null
+          social_masks?: Json | null
           story_id?: string | null
+          training_history?: string[] | null
           traits?: string[] | null
           updated_at?: string | null
           user_id: string
+          values_and_morals?: Json | null
         }
         Update: {
+          ancestry?: string | null
+          archetype?: string | null
           backstory?: string | null
+          behavioral_quirks?: string[] | null
+          body_language?: string | null
+          core_beliefs?: string[] | null
           created_at?: string | null
+          cultural_background?: Json | null
+          dialogue_style?: Json | null
+          expertise?: Json | null
+          external_goals?: string[] | null
+          flaws?: string[] | null
           goals?: string | null
+          group_roles?: string[] | null
+          iconic_phrases?: string[] | null
           id?: string
+          internal_motivations?: string[] | null
+          life_events?: Json | null
+          linguistic_traits?: Json | null
           name?: string
+          psychological_traits?: Json | null
+          psychology?: Json | null
           role?: string | null
+          skill_trees?: Json | null
+          skills?: Json | null
+          social_masks?: Json | null
           story_id?: string | null
+          training_history?: string[] | null
           traits?: string[] | null
           updated_at?: string | null
           user_id?: string
+          values_and_morals?: Json | null
         }
         Relationships: [
           {

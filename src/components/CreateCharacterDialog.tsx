@@ -23,7 +23,39 @@ export function CreateCharacterDialog({ isOpen, onOpenChange }: CreateCharacterD
     role: "",
     traits: "brave, loyal, intelligent",
     goals: "",
-    backstory: ""
+    backstory: "",
+    psychology: {
+      emotional_tendencies: [],
+      fears: [],
+      coping_mechanisms: [],
+      mental_health: null
+    },
+    psychological_traits: {
+      emotional_intelligence: 50,
+      impulsiveness: 50,
+      trust: 50,
+      resilience: 50
+    },
+    values_and_morals: {
+      loyalty: 50,
+      honesty: 50,
+      risk_taking: 50,
+      alignment: {
+        lawful_chaotic: 0,
+        selfless_selfish: 0
+      }
+    },
+    cultural_background: {
+      traditions: [],
+      taboos: [],
+      religious_beliefs: []
+    },
+    life_events: {
+      formative: [],
+      turning_points: [],
+      losses: []
+    },
+    ancestry: ""
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -77,6 +109,12 @@ export function CreateCharacterDialog({ isOpen, onOpenChange }: CreateCharacterD
           traits: formData.traits.split(",").map((trait) => trait.trim()),
           goals: formData.goals,
           backstory: formData.backstory,
+          psychology: formData.psychology,
+          psychological_traits: formData.psychological_traits,
+          values_and_morals: formData.values_and_morals,
+          cultural_background: formData.cultural_background,
+          life_events: formData.life_events,
+          ancestry: formData.ancestry,
           user_id: session.user.id,
           story_id: selectedStory.id
         });
@@ -93,7 +131,39 @@ export function CreateCharacterDialog({ isOpen, onOpenChange }: CreateCharacterD
         role: "",
         traits: "brave, loyal, intelligent",
         goals: "",
-        backstory: ""
+        backstory: "",
+        psychology: {
+          emotional_tendencies: [],
+          fears: [],
+          coping_mechanisms: [],
+          mental_health: null
+        },
+        psychological_traits: {
+          emotional_intelligence: 50,
+          impulsiveness: 50,
+          trust: 50,
+          resilience: 50
+        },
+        values_and_morals: {
+          loyalty: 50,
+          honesty: 50,
+          risk_taking: 50,
+          alignment: {
+            lawful_chaotic: 0,
+            selfless_selfish: 0
+          }
+        },
+        cultural_background: {
+          traditions: [],
+          taboos: [],
+          religious_beliefs: []
+        },
+        life_events: {
+          formative: [],
+          turning_points: [],
+          losses: []
+        },
+        ancestry: ""
       });
       
       queryClient.invalidateQueries({ queryKey: ["characters"] });
@@ -112,11 +182,11 @@ export function CreateCharacterDialog({ isOpen, onOpenChange }: CreateCharacterD
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[725px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Create Character</DialogTitle>
           <DialogDescription>
-            Fill out the form below to create a new character.
+            Fill out the form below to create a new character. Use the tabs to access advanced character details.
           </DialogDescription>
         </DialogHeader>
 
