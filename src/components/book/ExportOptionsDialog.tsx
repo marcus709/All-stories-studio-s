@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FileDown, AlertCircle, Check, Loader2, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ExportOptionsDialogProps {
   documentId?: string;
@@ -53,6 +54,15 @@ export function ExportOptionsDialog({ documentId, disabled }: ExportOptionsDialo
       return;
     }
 
+    if (!documentId) {
+      toast({
+        title: "Export Error",
+        description: "No document selected for export",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsExporting(true);
     setDownloadUrl(null);
     
@@ -63,21 +73,21 @@ export function ExportOptionsDialog({ documentId, disabled }: ExportOptionsDialo
     }));
     setValidationResults(results);
 
-    // Simulate validation process
-    for (let i = 0; i < platforms.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setValidationResults(prev => [
-        ...prev.slice(0, i),
-        {
-          platform: platforms[i].name,
-          status: Math.random() > 0.2 ? "valid" : "invalid",
-          message: Math.random() > 0.2 ? undefined : "Some formatting issues detected"
-        },
-        ...prev.slice(i + 1)
-      ]);
-    }
-
     try {
+      // Simulate validation process
+      for (let i = 0; i < platforms.length; i++) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        setValidationResults(prev => [
+          ...prev.slice(0, i),
+          {
+            platform: platforms[i].name,
+            status: Math.random() > 0.2 ? "valid" : "invalid",
+            message: Math.random() > 0.2 ? undefined : "Some formatting issues detected"
+          },
+          ...prev.slice(i + 1)
+        ]);
+      }
+
       // Call the formatting edge function
       const { data, error } = await supabase.functions.invoke('format-document', {
         body: { 
@@ -87,6 +97,10 @@ export function ExportOptionsDialog({ documentId, disabled }: ExportOptionsDialo
       });
 
       if (error) throw error;
+
+      if (!data?.downloadUrl) {
+        throw new Error('No download URL received from the server');
+      }
 
       // Set the download URL from the response
       setDownloadUrl(data.downloadUrl);
