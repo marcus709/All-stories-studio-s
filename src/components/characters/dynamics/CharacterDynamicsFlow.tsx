@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import {
   ReactFlow,
   Background,
@@ -8,15 +8,17 @@ import {
   useEdgesState,
   addEdge,
   Connection,
-  MarkerType,
-  Panel,
   Edge,
+  MarkerType,
   EdgeTypes,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Character } from '@/integrations/supabase/types/tables.types';
 import CharacterNode from './CharacterNode';
 import RelationshipEdge, { RelationshipEdgeData } from './RelationshipEdge';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface CharacterDynamicsFlowProps {
   characters: Character[];
@@ -32,6 +34,9 @@ const edgeTypes: EdgeTypes = {
 };
 
 export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDynamicsFlowProps) => {
+  const { toast } = useToast();
+  const [nextNodePosition, setNextNodePosition] = useState({ x: 100, y: 100 });
+
   const initialNodes = characters.map((char, index) => {
     const angle = (index * 2 * Math.PI) / characters.length;
     const radius = 300;
@@ -43,7 +48,6 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
         y: 300 + radius * Math.sin(angle),
       },
       data: { ...char },
-      style: { fontSize: 12 }
     };
   });
 
@@ -55,11 +59,14 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
     animated: true,
     data: {
       type: rel.relationship_type,
-      strength: rel.strength || 50,
-      notes: rel.description || '',
-      trust: rel.trust || 60,
-      conflict: rel.conflict || 40,
-      chemistry: rel.chemistry || 'High'
+      strength: rel.strength,
+      notes: rel.description,
+      trust: rel.trust,
+      conflict: rel.conflict,
+      chemistry: rel.chemistry,
+      id: rel.id,
+      source: rel.character1_id,
+      target: rel.character2_id,
     },
     style: { 
       stroke: getRelationshipColor(rel.relationship_type),
@@ -79,73 +86,77 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
     [setEdges],
   );
 
-  const onZoomIn = useCallback(() => {
-    setNodes((nds) =>
-      nds.map((node) => ({
-        ...node,
-        style: { ...node.style, fontSize: (node.style?.fontSize || 12) + 2 },
-      }))
-    );
-  }, [setNodes]);
+  const handleAddNode = useCallback(() => {
+    const newNode = {
+      id: `character-${Date.now()}`,
+      type: 'character',
+      position: nextNodePosition,
+      data: {
+        name: 'New Character',
+        role: 'Unknown',
+        traits: [],
+      },
+    };
 
-  const onZoomOut = useCallback(() => {
-    setNodes((nds) =>
-      nds.map((node) => ({
-        ...node,
-        style: { ...node.style, fontSize: Math.max((node.style?.fontSize || 12) - 2, 8) },
-      }))
-    );
-  }, [setNodes]);
+    setNodes((nds) => [...nds, newNode]);
+    setNextNodePosition(prev => ({
+      x: prev.x + 50,
+      y: prev.y + 50
+    }));
+
+    toast({
+      title: "Character Added",
+      description: "A new character node has been added to the flow.",
+    });
+  }, [nextNodePosition, setNodes, toast]);
 
   return (
-    <ReactFlow
-      nodes={nodes}
-      edges={edges}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      onConnect={onConnect}
-      nodeTypes={nodeTypes}
-      edgeTypes={edgeTypes}
-      fitView
-      minZoom={0.2}
-      maxZoom={4}
-      className="bg-gray-900"
-      snapToGrid={true}
-      snapGrid={[15, 15]}
-    >
-      <Background color="#666" gap={16} />
-      <Controls 
-        className="bg-gray-800 text-white border-gray-700"
-        showInteractive={false}
-        position="top-left"
-      />
-      <Panel position="top-right" className="bg-gray-800 p-2 rounded-lg">
-        <button
-          className="px-3 py-1 bg-purple-600 text-white rounded-lg mr-2 hover:bg-purple-700"
-          onClick={() => onZoomIn()}
+    <div className="w-full h-[600px] relative">
+      <div className="absolute top-4 right-4 z-10">
+        <Button 
+          onClick={handleAddNode}
+          className="bg-purple-500 hover:bg-purple-600 gap-2"
         >
-          Zoom In
-        </button>
-        <button
-          className="px-3 py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-          onClick={() => onZoomOut()}
-        >
-          Zoom Out
-        </button>
-      </Panel>
-      <MiniMap 
-        nodeColor={(node) => {
-          switch (node.type) {
-            case 'character':
-              return '#8b5cf6';
-            default:
-              return '#fff';
-          }
-        }}
-        maskColor="rgba(0, 0, 0, 0.8)"
-        className="bg-gray-800 border-gray-700"
-      />
-    </ReactFlow>
+          <Plus className="h-4 w-4" />
+          Add Character
+        </Button>
+      </div>
+
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
+        fitView
+        minZoom={0.2}
+        maxZoom={4}
+        className="bg-gray-900"
+        snapToGrid={true}
+        snapGrid={[15, 15]}
+      >
+        <Background color="#666" gap={16} />
+        <Controls 
+          className="bg-gray-800 text-white border-gray-700"
+          showInteractive={false}
+          position="top-left"
+        />
+        <MiniMap 
+          nodeColor={(node) => {
+            switch (node.type) {
+              case 'character':
+                return '#8b5cf6';
+              default:
+                return '#fff';
+            }
+          }}
+          maskColor="rgba(0, 0, 0, 0.8)"
+          className="bg-gray-800 border-gray-700"
+        />
+      </ReactFlow>
+    </div>
   );
 };
 
