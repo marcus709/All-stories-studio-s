@@ -1,25 +1,17 @@
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import {
   BaseEdge,
   EdgeLabelRenderer,
   EdgeProps,
   getBezierPath,
-  useReactFlow,
 } from '@xyflow/react';
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
 
-interface RelationshipEdgeData {
+export interface RelationshipEdgeData {
   type: string;
   strength: number;
   notes: string;

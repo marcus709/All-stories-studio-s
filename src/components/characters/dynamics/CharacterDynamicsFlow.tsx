@@ -11,12 +11,12 @@ import {
   MarkerType,
   Panel,
   Edge,
-  EdgeProps
+  EdgeTypes
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Character } from '@/integrations/supabase/types/tables.types';
 import CharacterNode from './CharacterNode';
-import RelationshipEdge from './RelationshipEdge';
+import RelationshipEdge, { RelationshipEdgeData } from './RelationshipEdge';
 
 interface CharacterDynamicsFlowProps {
   characters: Character[];
@@ -27,12 +27,11 @@ const nodeTypes = {
   character: CharacterNode,
 };
 
-const edgeTypes = {
+const edgeTypes: EdgeTypes = {
   relationship: RelationshipEdge,
 };
 
 export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDynamicsFlowProps) => {
-  // Transform characters into nodes with circular layout
   const initialNodes = characters.map((char, index) => {
     const angle = (index * 2 * Math.PI) / characters.length;
     const radius = 300;
@@ -49,7 +48,7 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
   });
 
   // Transform relationships into edges with enhanced styling
-  const initialEdges = relationships.map((rel) => ({
+  const initialEdges: Edge<RelationshipEdgeData>[] = relationships.map((rel) => ({
     id: rel.id,
     source: rel.character1_id,
     target: rel.character2_id,
@@ -71,7 +70,6 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
       type: MarkerType.ArrowClosed,
       color: getRelationshipColor(rel.relationship_type),
     },
-    className: 'relationship-edge',
   }));
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
