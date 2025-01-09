@@ -9,11 +9,14 @@ import {
   addEdge,
   Connection,
   MarkerType,
-  Panel
+  Panel,
+  Edge,
+  EdgeProps
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Character } from '@/integrations/supabase/types/tables.types';
 import CharacterNode from './CharacterNode';
+import RelationshipEdge from './RelationshipEdge';
 
 interface CharacterDynamicsFlowProps {
   characters: Character[];
@@ -22,6 +25,10 @@ interface CharacterDynamicsFlowProps {
 
 const nodeTypes = {
   character: CharacterNode,
+};
+
+const edgeTypes = {
+  relationship: RelationshipEdge,
 };
 
 export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDynamicsFlowProps) => {
@@ -41,13 +48,21 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
     };
   });
 
-  // Transform relationships into edges
+  // Transform relationships into edges with enhanced styling
   const initialEdges = relationships.map((rel) => ({
     id: rel.id,
     source: rel.character1_id,
     target: rel.character2_id,
-    type: 'smoothstep',
+    type: 'relationship',
     animated: true,
+    data: {
+      type: rel.relationship_type,
+      strength: rel.strength || 50,
+      notes: rel.description || '',
+      trust: rel.trust || 60,
+      conflict: rel.conflict || 40,
+      chemistry: rel.chemistry || 'High'
+    },
     style: { 
       stroke: getRelationshipColor(rel.relationship_type),
       strokeWidth: Math.max(1, Math.min(rel.strength / 20, 5)),
@@ -56,7 +71,7 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
       type: MarkerType.ArrowClosed,
       color: getRelationshipColor(rel.relationship_type),
     },
-    label: rel.relationship_type,
+    className: 'relationship-edge',
   }));
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -94,6 +109,7 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
       nodeTypes={nodeTypes}
+      edgeTypes={edgeTypes}
       fitView
       minZoom={0.2}
       maxZoom={4}

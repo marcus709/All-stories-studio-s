@@ -104,6 +104,18 @@
   .animate-text {
     animation: text 8s ease infinite;
   }
+
+  .relationship-edge {
+    @apply transition-all duration-300;
+  }
+
+  .relationship-edge:hover {
+    filter: brightness(1.5);
+  }
+
+  .relationship-edge.new {
+    animation: edge-pulse 2s ease-in-out;
+  }
 }
 
 @keyframes text {
@@ -114,5 +126,14 @@
   50% {
     background-size: 200% 200%;
     background-position: right center;
+  }
+}
+
+@keyframes edge-pulse {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.5);
   }
 }
