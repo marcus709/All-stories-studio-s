@@ -8,8 +8,10 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ToggleLeft, ToggleRight } from "lucide-react";
 import { AIFormattingDialog } from "./book/AIFormattingDialog";
+import { DocumentSelector } from "./book/DocumentSelector";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useStory } from "@/contexts/StoryContext";
 
 export const FormattingView = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
@@ -23,17 +25,24 @@ export const FormattingView = () => {
   const [notifications, setNotifications] = useState<Array<{ id: string; message: string }>>([]);
   const [isAIMode, setIsAIMode] = useState(true);
   const [showManualModeAlert, setShowManualModeAlert] = useState(false);
+  const [showDocumentSelector, setShowDocumentSelector] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<string | null>(null);
   const { toast } = useToast();
+  const { selectedStory } = useStory();
 
-  const { data: bookStructures } = useQuery({
-    queryKey: ["bookStructures"],
+  const { data: documents = [] } = useQuery({
+    queryKey: ["documents", selectedStory?.id],
     queryFn: async () => {
+      if (!selectedStory?.id) return [];
       const { data, error } = await supabase
-        .from("plot_structures")
-        .select("*");
+        .from("documents")
+        .select("*")
+        .eq("story_id", selectedStory.id)
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
+    enabled: !!selectedStory?.id,
   });
 
   const handleFormatConfig = (config: any) => {
@@ -76,6 +85,19 @@ export const FormattingView = () => {
     }
   };
 
+  const handleDocumentSelect = (docId: string) => {
+    setSelectedDocument(docId);
+    setShowDocumentSelector(false);
+  };
+
+  const handleUploadComplete = () => {
+    toast({
+      title: "Success",
+      description: "Document uploaded successfully",
+    });
+    setShowDocumentSelector(false);
+  };
+
   return (
     <div className="min-h-screen bg-white/90 flex flex-col">
       {/* Top Navigation Bar */}
@@ -101,7 +123,14 @@ export const FormattingView = () => {
       {/* Main Content - Always AI Mode */}
       <div className="flex-1 p-6">
         <div className="max-w-3xl mx-auto h-full bg-white/40 backdrop-blur-md rounded-lg p-4 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] border border-gray-200/60">
-          <div className="flex justify-end mb-4">
+          <div className="flex justify-between mb-4">
+            <DocumentSelector
+              documents={documents}
+              showDocumentSelector={showDocumentSelector}
+              setShowDocumentSelector={setShowDocumentSelector}
+              handleDocumentSelect={handleDocumentSelect}
+              handleUploadComplete={handleUploadComplete}
+            />
             <AIFormattingDialog onConfigSubmit={handleFormatConfig} />
           </div>
           <TextFormattingTools isAIMode={true} />
