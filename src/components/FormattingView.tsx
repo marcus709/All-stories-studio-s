@@ -11,7 +11,15 @@ import {
   BookOpen,
   FileText,
   Settings,
-  PenTool
+  PenTool,
+  ChevronLeft,
+  ChevronRight,
+  Laptop,
+  Tablet,
+  Smartphone,
+  Printer,
+  Download,
+  AlertCircle
 } from "lucide-react";
 import { Template } from "@/types/book";
 import { DesignHeader } from "./book/DesignHeader";
@@ -24,6 +32,9 @@ import { PreviewScene } from "./book/PreviewScene";
 import { CoverTextEditor } from "./book/CoverTextEditor";
 import { IText } from "fabric";
 import { cn } from "@/lib/utils";
+import { Button } from "./ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Alert, AlertDescription } from "./ui/alert";
 
 const templates: Template[] = [
   {
@@ -65,6 +76,8 @@ export const FormattingView = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [coverTexts, setCoverTexts] = useState<Array<{ text: string; font: string; size: number; x: number; y: number }>>([]);
   const [selectedText, setSelectedText] = useState<IText | null>(null);
+  const [deviceView, setDeviceView] = useState<'print' | 'kindle' | 'ipad' | 'phone'>('print');
+  const [notifications, setNotifications] = useState<Array<{ id: string; message: string }>>([]);
 
   const { data: bookStructures } = useQuery({
     queryKey: ["bookStructures"],
@@ -194,83 +207,78 @@ export const FormattingView = () => {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background text-foreground">
-      <DesignHeader
-        onResetDesign={handleResetDesign}
-        onSaveDesign={handleSaveDesign}
-      />
+      {/* Top Toolbar */}
+      <div className="border-b border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="flex items-center justify-between px-4 h-14">
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" size="sm">
+              <BookCopy className="h-4 w-4 mr-2" />
+              Templates
+            </Button>
+            <Button variant="ghost" size="sm">
+              <Type className="h-4 w-4 mr-2" />
+              Fonts
+            </Button>
+            <Button variant="ghost" size="sm">
+              <Settings className="h-4 w-4 mr-2" />
+              Margins
+            </Button>
+            <Button variant="ghost" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+          </div>
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar - Design Tools */}
-        <div className="w-72 border-r border-border bg-card">
-          <div className="p-4">
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Globe className="w-5 h-5" />
-                <h2 className="text-lg font-semibold">Templates</h2>
-              </div>
-              
-              <nav className="space-y-1">
-                <button className="w-full flex items-center space-x-2 px-3 py-2 text-sm rounded-lg hover:bg-accent">
-                  <BookCopy className="w-4 h-4" />
-                  <span>Fiction</span>
-                </button>
-                <button className="w-full flex items-center space-x-2 px-3 py-2 text-sm rounded-lg hover:bg-accent">
-                  <FileText className="w-4 h-4" />
-                  <span>Non-Fiction</span>
-                </button>
-                <button className="w-full flex items-center space-x-2 px-3 py-2 text-sm rounded-lg hover:bg-accent">
-                  <Palette className="w-4 h-4" />
-                  <span>Art Books</span>
-                </button>
-                <button className="w-full flex items-center space-x-2 px-3 py-2 text-sm rounded-lg hover:bg-accent">
-                  <BookOpen className="w-4 h-4" />
-                  <span>Academic</span>
-                </button>
-              </nav>
+          <Select value={deviceView} onValueChange={(value: any) => setDeviceView(value)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select view" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="print">
+                <Printer className="h-4 w-4 mr-2 inline-block" />
+                Print View
+              </SelectItem>
+              <SelectItem value="kindle">
+                <Tablet className="h-4 w-4 mr-2 inline-block" />
+                Kindle
+              </SelectItem>
+              <SelectItem value="ipad">
+                <Laptop className="h-4 w-4 mr-2 inline-block" />
+                iPad
+              </SelectItem>
+              <SelectItem value="phone">
+                <Smartphone className="h-4 w-4 mr-2 inline-block" />
+                Phone
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
-              <div className="pt-4">
-                <Tabs defaultValue="templates" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="templates">
-                      <PenTool className="h-4 w-4" />
-                    </TabsTrigger>
-                    <TabsTrigger value="images">
-                      <ImagePlus className="h-4 w-4" />
-                    </TabsTrigger>
-                    <TabsTrigger value="text">
-                      <Type className="h-4 w-4" />
-                    </TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="templates" className="mt-4">
-                    <TemplatePanel
-                      templates={templates}
-                      selectedTemplate={selectedTemplate}
-                      onTemplateSelect={handleTemplateSelect}
-                    />
-                    <div className="mt-6">
-                      <BookSizeSelector onSizeChange={setBookSize} />
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="images" className="mt-4">
-                    <ImageUploadPanel onImageUpload={handleImageUpload} />
-                  </TabsContent>
-
-                  <TabsContent value="text" className="mt-4">
-                    <div className="space-y-4">
-                      {/* Text editing functionality will be implemented next */}
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </div>
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Sidebar - Chapter Navigation */}
+        <div className="w-64 border-r border-border bg-card flex flex-col">
+          <div className="p-4 border-b border-border">
+            <h2 className="text-lg font-semibold">Chapters</h2>
+          </div>
+          <div className="flex-1 overflow-y-auto p-2">
+            <div className="space-y-1">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <div key={index} className="group">
+                  <button className="w-full flex items-center px-3 py-2 text-sm rounded-lg hover:bg-accent">
+                    <ChevronRight className="h-4 w-4 mr-2" />
+                    <span>Chapter {index + 1}</span>
+                    <span className="ml-auto text-muted-foreground">✓</span>
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Center Panel - Book Preview */}
-        <div className="flex-1 bg-background">
-          <div className="h-full p-8">
+        {/* Center Preview Area */}
+        <div className="flex-1 flex flex-col">
+          <div className="flex-1 p-8 overflow-y-auto">
             <PreviewScene 
               onSceneChange={setPreviewScene} 
               onToggleFullscreen={handleToggleFullscreen}
@@ -280,33 +288,30 @@ export const FormattingView = () => {
               <PageTurner pages={renderBookPages()} className="max-w-[600px] mx-auto" />
             </PreviewScene>
           </div>
+
+          {/* Bottom Notification Bar */}
+          {notifications.length > 0 && (
+            <div className="border-t border-border bg-card/50 p-2 space-y-2">
+              {notifications.map((notification) => (
+                <Alert key={notification.id} variant="default" className="bg-card/50">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{notification.message}</AlertDescription>
+                </Alert>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Right Sidebar - Properties */}
-        <div className="w-80 border-l border-border bg-card">
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold">Book Formatting</h2>
-              <Settings className="w-5 h-5" />
-            </div>
-            
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <span className="text-sm text-muted-foreground">Chapters</span>
-                  <p className="text-2xl font-semibold">12</p>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-sm text-muted-foreground">Fonts</span>
-                  <p className="text-2xl font-semibold">23</p>
-                </div>
-              </div>
-              
-              <PropertiesPanel 
-                selectedTemplate={selectedTemplate}
-                selectedText={selectedText}
-              />
-            </div>
+        {/* Right Customization Panel */}
+        <div className="w-80 border-l border-border bg-card flex flex-col">
+          <div className="p-4 border-b border-border">
+            <h2 className="text-lg font-semibold">Format Settings</h2>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            <PropertiesPanel 
+              selectedTemplate={selectedTemplate}
+              selectedText={selectedText}
+            />
           </div>
         </div>
       </div>
