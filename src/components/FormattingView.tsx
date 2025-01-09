@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Template } from "@/types/book";
-import { IText } from "fabric";
 import { TextFormattingTools } from "./book/TextFormattingTools";
 import { Switch } from "@/components/ui/switch";
 import { AIFormattingDialog } from "./book/AIFormattingDialog";
@@ -149,7 +148,7 @@ export const FormattingView = () => {
 
   return (
     <div className="h-[calc(100vh-4rem)] bg-white/90 flex flex-col">
-      <div className="h-12 px-4 flex items-center justify-between border-b border-gray-200/60 bg-white/50 backdrop-blur-sm">
+      <div className="h-10 px-4 flex items-center justify-between bg-white/50 backdrop-blur-sm border-b border-gray-200/60">
         <DocumentSelector
           documents={documents}
           showDocumentSelector={showDocumentSelector}
@@ -157,15 +156,15 @@ export const FormattingView = () => {
           handleDocumentSelect={handleDocumentSelect}
           handleUploadComplete={handleUploadComplete}
         />
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Switch
               id="ai-mode"
               checked={isAIMode}
               onCheckedChange={handleAIModeToggle}
-              className="data-[state=checked]:bg-purple-500"
+              className="data-[state=checked]:bg-purple-500 h-4 w-7"
             />
-            <Wand2 className="h-4 w-4 text-purple-500" />
+            <Wand2 className="h-3 w-3 text-purple-500" />
           </div>
           {isAIMode && (
             <AIFormattingDialog 
@@ -175,7 +174,7 @@ export const FormattingView = () => {
           )}
           <div className="relative">
             {hasFormattedDocument && (
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-500 rounded-full animate-pulse" />
+              <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-500 rounded-full animate-pulse" />
             )}
             <ExportOptionsDialog 
               documentId={selectedDocument?.id}
@@ -186,9 +185,7 @@ export const FormattingView = () => {
       </div>
 
       <div className="flex-1 overflow-hidden">
-        <div className="h-full">
-          <TextFormattingTools isAIMode={isAIMode} />
-        </div>
+        <TextFormattingTools isAIMode={isAIMode} />
       </div>
     </div>
   );
