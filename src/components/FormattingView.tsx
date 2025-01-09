@@ -4,6 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Template } from "@/types/book";
 import { IText } from "fabric";
 import { TextFormattingTools } from "./book/TextFormattingTools";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { ToggleLeft, ToggleRight } from "lucide-react";
 
 export const FormattingView = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
@@ -15,6 +18,7 @@ export const FormattingView = () => {
   const [selectedText, setSelectedText] = useState<IText | null>(null);
   const [deviceView, setDeviceView] = useState<'print' | 'kindle' | 'ipad' | 'phone'>('print');
   const [notifications, setNotifications] = useState<Array<{ id: string; message: string }>>([]);
+  const [isAIMode, setIsAIMode] = useState(false);
 
   const { data: bookStructures } = useQuery({
     queryKey: ["bookStructures"],
@@ -60,7 +64,22 @@ export const FormattingView = () => {
     <div className="min-h-screen bg-white/90 flex flex-col">
       {/* Top Navigation Bar */}
       <div className="h-16 border-b border-gray-200/60 bg-white/50 backdrop-blur-sm flex items-center px-6 shadow-sm">
-        <div className="flex-1" />
+        <div className="flex-1">
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2">
+              {isAIMode ? <ToggleRight className="h-5 w-5 text-purple-500" /> : <ToggleLeft className="h-5 w-5 text-gray-500" />}
+              <Label htmlFor="ai-mode" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                AI Assistant
+              </Label>
+            </div>
+            <Switch
+              id="ai-mode"
+              checked={isAIMode}
+              onCheckedChange={setIsAIMode}
+              className="data-[state=checked]:bg-purple-500"
+            />
+          </div>
+        </div>
         <div className="flex space-x-4">
           {/* Navigation icons will be added here */}
         </div>
@@ -70,7 +89,7 @@ export const FormattingView = () => {
       <div className="flex-1 p-6 grid grid-cols-12 gap-6">
         {/* Left Tools Panel */}
         <div className="col-span-3 bg-white/40 backdrop-blur-md rounded-lg p-4 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] border border-gray-200/60">
-          <TextFormattingTools />
+          <TextFormattingTools isAIMode={isAIMode} />
         </div>
 
         {/* Center Book Preview */}

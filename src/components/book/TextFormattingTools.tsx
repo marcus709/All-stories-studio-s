@@ -1,34 +1,31 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { 
-  Type, 
-  Heading1, 
-  Heading2, 
-  AlignLeft, 
-  AlignCenter, 
-  AlignRight, 
-  Bold, 
-  Italic, 
+import {
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Bold,
+  Italic,
   Underline,
-  Baseline,
+  Heading1,
+  Heading2,
   Quote,
   List,
   ListOrdered,
-  BookText
+  BookText,
+  Wand2
 } from "lucide-react";
 
 interface FormattingItem {
   id: string;
-  type: string;
+  type: 'block' | 'inline' | 'list';
   icon: React.ReactNode;
   label: string;
 }
 
 const formattingItems: FormattingItem[] = [
-  { id: 'text', type: 'normal', icon: <Type className="h-4 w-4" />, label: 'Normal Text' },
-  { id: 'h1', type: 'heading', icon: <Heading1 className="h-4 w-4" />, label: 'Heading 1' },
-  { id: 'h2', type: 'heading', icon: <Heading2 className="h-4 w-4" />, label: 'Heading 2' },
+  { id: 'heading1', type: 'block', icon: <Heading1 className="h-4 w-4" />, label: 'Heading 1' },
+  { id: 'heading2', type: 'block', icon: <Heading2 className="h-4 w-4" />, label: 'Heading 2' },
   { id: 'quote', type: 'block', icon: <Quote className="h-4 w-4" />, label: 'Quote' },
   { id: 'list', type: 'list', icon: <List className="h-4 w-4" />, label: 'Bullet List' },
   { id: 'ordered-list', type: 'list', icon: <ListOrdered className="h-4 w-4" />, label: 'Numbered List' },
@@ -36,54 +33,79 @@ const formattingItems: FormattingItem[] = [
 ];
 
 const alignmentTools = [
-  { id: 'align-left', icon: <AlignLeft className="h-4 w-4" />, label: 'Left' },
-  { id: 'align-center', icon: <AlignCenter className="h-4 w-4" />, label: 'Center' },
-  { id: 'align-right', icon: <AlignRight className="h-4 w-4" />, label: 'Right' }
+  { id: 'align-left', icon: <AlignLeft className="h-4 w-4" />, label: 'Align Left' },
+  { id: 'align-center', icon: <AlignCenter className="h-4 w-4" />, label: 'Align Center' },
+  { id: 'align-right', icon: <AlignRight className="h-4 w-4" />, label: 'Align Right' },
 ];
 
 const styleTools = [
   { id: 'bold', icon: <Bold className="h-4 w-4" />, label: 'Bold' },
   { id: 'italic', icon: <Italic className="h-4 w-4" />, label: 'Italic' },
-  { id: 'underline', icon: <Underline className="h-4 w-4" />, label: 'Underline' }
+  { id: 'underline', icon: <Underline className="h-4 w-4" />, label: 'Underline' },
 ];
 
-export const TextFormattingTools = () => {
-  const [draggingItem, setDraggingItem] = useState<FormattingItem | null>(null);
+interface TextFormattingToolsProps {
+  isAIMode?: boolean;
+}
 
-  const handleDragStart = (e: React.DragEvent, item: FormattingItem) => {
-    setDraggingItem(item);
-    e.dataTransfer.setData('text/plain', JSON.stringify(item));
-    e.dataTransfer.effectAllowed = 'copy';
-  };
+export const TextFormattingTools = ({ isAIMode = false }: TextFormattingToolsProps) => {
+  const [selectedTool, setSelectedTool] = useState<string | null>(null);
+
+  if (isAIMode) {
+    return (
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold flex items-center gap-2">
+          <Wand2 className="h-5 w-5 text-purple-500" />
+          AI Formatting Assistant
+        </h3>
+        <div className="p-4 bg-purple-50 rounded-lg border border-purple-100">
+          <p className="text-sm text-purple-700 mb-4">
+            Let AI help you format your text. Just describe what you want, and I'll help you achieve it.
+          </p>
+          <textarea
+            className="w-full h-32 p-3 rounded-md border border-purple-200 bg-white/80 text-sm"
+            placeholder="Describe how you want to format your text..."
+          />
+          <Button className="w-full mt-3 bg-purple-500 hover:bg-purple-600">
+            Apply AI Formatting
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="space-y-4">
-        <Label className="text-sm font-medium">Text Elements</Label>
+        <h3 className="text-sm font-medium">Text Elements</h3>
         <div className="grid grid-cols-2 gap-2">
           {formattingItems.map((item) => (
-            <div
+            <Button
               key={item.id}
-              draggable
-              onDragStart={(e) => handleDragStart(e, item)}
-              className="flex items-center gap-2 p-2 bg-white/60 rounded-md border border-gray-200/60 cursor-move hover:bg-gray-50/60 transition-colors"
+              variant="outline"
+              className={`flex items-center gap-2 justify-start ${
+                selectedTool === item.id ? 'border-purple-500 bg-purple-50' : ''
+              }`}
+              onClick={() => setSelectedTool(item.id)}
             >
               {item.icon}
-              <span className="text-sm">{item.label}</span>
-            </div>
+              <span className="text-xs">{item.label}</span>
+            </Button>
           ))}
         </div>
       </div>
 
       <div className="space-y-4">
-        <Label className="text-sm font-medium">Text Alignment</Label>
+        <h3 className="text-sm font-medium">Alignment</h3>
         <div className="flex gap-2">
           {alignmentTools.map((tool) => (
             <Button
               key={tool.id}
               variant="outline"
-              size="icon"
-              className="bg-white/60"
+              className={`flex-1 ${
+                selectedTool === tool.id ? 'border-purple-500 bg-purple-50' : ''
+              }`}
+              onClick={() => setSelectedTool(tool.id)}
             >
               {tool.icon}
             </Button>
@@ -92,25 +114,20 @@ export const TextFormattingTools = () => {
       </div>
 
       <div className="space-y-4">
-        <Label className="text-sm font-medium">Text Style</Label>
+        <h3 className="text-sm font-medium">Style</h3>
         <div className="flex gap-2">
           {styleTools.map((tool) => (
             <Button
               key={tool.id}
               variant="outline"
-              size="icon"
-              className="bg-white/60"
+              className={`flex-1 ${
+                selectedTool === tool.id ? 'border-purple-500 bg-purple-50' : ''
+              }`}
+              onClick={() => setSelectedTool(tool.id)}
             >
               {tool.icon}
             </Button>
           ))}
-        </div>
-      </div>
-
-      <div className="mt-6 p-4 bg-white/40 rounded-md border border-dashed border-gray-300/60">
-        <div className="flex items-center justify-center">
-          <Baseline className="h-4 w-4 text-gray-400 mr-2" />
-          <span className="text-sm text-gray-500">Drag elements to add them to your book</span>
         </div>
       </div>
     </div>
