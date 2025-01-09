@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { CharactersView } from "@/components/CharactersView";
-import { BookCreatorView } from "@/components/BookCreatorView";
+import { FormattingView } from "@/components/FormattingView"; // Updated import
 import { DreamToStory } from "@/components/dream-to-story/DreamToStory";
 import { StoryIdeasView } from "@/components/StoryIdeasView";
 import { StoryDocsView } from "@/components/docs/StoryDocsView";
@@ -50,7 +50,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
           break;
         case "plot":
           if (handleFeatureAccess("Book Creator", "story_docs")) {
-            component = <BookCreatorView />;
+            component = <FormattingView />;
           }
           break;
         case "dream":

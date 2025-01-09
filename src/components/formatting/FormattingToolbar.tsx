@@ -7,7 +7,7 @@ import {
   AlignCenter,
   AlignRight,
   AlignJustify,
-  LineHeight,
+  ArrowDown,
   Indent,
   Outdent,
   Columns,
@@ -37,7 +37,7 @@ export const FormattingToolbar = () => {
       <div className="space-y-2">
         <Label>Line Height</Label>
         <div className="flex items-center gap-4">
-          <LineHeight className="h-4 w-4 text-gray-500" />
+          <ArrowDown className="h-4 w-4 text-gray-500" />
           <Slider defaultValue={[1.5]} max={3} min={1} step={0.1} />
         </div>
       </div>
