@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Character } from '@/integrations/supabase/types/tables.types';
 import { Button } from '@/components/ui/button';
 import { Play, Pause } from 'lucide-react';
@@ -36,6 +36,38 @@ export const CharacterDynamicsD3 = ({ characters }: CharacterDynamicsD3Props) =>
     },
     enabled: characters.length > 0,
   });
+
+  // Calculate group synergy based on relationships
+  useEffect(() => {
+    if (relationships && relationships.length > 0) {
+      const totalStrength = relationships.reduce((sum, rel) => sum + (rel.strength || 0), 0);
+      const avgStrength = totalStrength / relationships.length;
+      setSynergy(Math.round(avgStrength));
+    }
+  }, [relationships]);
+
+  // Handle timeline playback
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (isPlaying) {
+      interval = setInterval(() => {
+        setTimelinePosition(prev => {
+          if (prev >= 100) {
+            setIsPlaying(false);
+            return 100;
+          }
+          return prev + 1;
+        });
+      }, 100);
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [isPlaying]);
 
   const togglePlayback = () => {
     setIsPlaying(!isPlaying);
