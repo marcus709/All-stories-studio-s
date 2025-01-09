@@ -14,7 +14,7 @@ export const TextFormattingTools = ({ isAIMode }: TextFormattingToolsProps) => {
   }
 
   return (
-    <div className="space-y-4 h-full flex flex-col">
+    <div className="space-y-4 h-full flex flex-col p-4">
       <div className="flex items-center space-x-2 p-2 bg-white rounded-md border border-gray-200">
         <div className="flex items-center space-x-1">
           <Toggle aria-label="Toggle bold">
@@ -53,29 +53,21 @@ export const TextFormattingTools = ({ isAIMode }: TextFormattingToolsProps) => {
           </Toggle>
         </div>
         
-        <Separator orientation="vertical" className="h-6" />
-        
-        <div className="flex items-center space-x-1">
-          <Button variant="ghost" size="icon">
-            <RotateCcw className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon">
-            <RotateCw className="h-4 w-4" />
-          </Button>
-        </div>
-        
         <div className="ml-auto flex items-center space-x-2">
-          <Button variant="ghost" size="sm" className="text-xs">
-            <Timer className="h-4 w-4 mr-1" />
-            300 words
-          </Button>
-          <Button variant="ghost" size="sm" className="text-xs">
-            Export docx
-          </Button>
+          <Select defaultValue="palatino">
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="Font" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="palatino">Palatino</SelectItem>
+              <SelectItem value="times">Times New Roman</SelectItem>
+              <SelectItem value="georgia">Georgia</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-8 flex-1 min-h-0 px-12">
+      <div className="grid grid-cols-2 gap-8 flex-1 min-h-0">
         <div className="flex flex-col space-y-4 min-h-0">
           <div className="prose max-w-none flex-1 bg-white rounded-lg shadow-lg">
             <div 
@@ -88,40 +80,13 @@ export const TextFormattingTools = ({ isAIMode }: TextFormattingToolsProps) => {
                 backgroundColor: 'white',
               }}
             >
-              <h1>Chapter 1</h1>
-              <h2>There Is No One Left</h2>
-              <p>Start writing your content here...</p>
+              <h1>The Cry In The Corridor</h1>
+              <p>At first each day which passed by for Mary Lennox was exactly like the others. Every morning she awoke in her tapestried room and found Martha kneeling upon the hearth building her fire; every morning she ate her breakfast in the nursery which had nothing amusing in it...</p>
             </div>
           </div>
         </div>
         
         <div className="flex flex-col space-y-4 min-h-0">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-2">
-              <Select defaultValue="ipad">
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue placeholder="Device" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ipad">iPad</SelectItem>
-                  <SelectItem value="kindle">Kindle</SelectItem>
-                  <SelectItem value="print">Print</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Select defaultValue="palatino">
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue placeholder="Font" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="palatino">Palatino</SelectItem>
-                  <SelectItem value="times">Times New Roman</SelectItem>
-                  <SelectItem value="georgia">Georgia</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
           <div 
             className="bg-white rounded-lg shadow-lg flex-1 overflow-hidden"
             style={{
@@ -131,8 +96,7 @@ export const TextFormattingTools = ({ isAIMode }: TextFormattingToolsProps) => {
             }}
           >
             <div className="h-full p-8 prose max-w-none">
-              <h1>Chapter 1</h1>
-              <h2>There Is No One Left</h2>
+              <h1>The Cry In The Corridor</h1>
               <p>Preview will appear here...</p>
             </div>
           </div>

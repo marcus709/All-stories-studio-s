@@ -5,14 +5,13 @@ import { Template } from "@/types/book";
 import { IText } from "fabric";
 import { TextFormattingTools } from "./book/TextFormattingTools";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { ToggleLeft, ToggleRight } from "lucide-react";
 import { AIFormattingDialog } from "./book/AIFormattingDialog";
 import { DocumentSelector } from "./book/DocumentSelector";
 import { ExportOptionsDialog } from "./book/ExportOptionsDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useStory } from "@/contexts/StoryContext";
 import { Document } from "@/types/story";
+import { Wand2 } from "lucide-react";
 
 export const FormattingView = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
@@ -150,58 +149,45 @@ export const FormattingView = () => {
 
   return (
     <div className="h-[calc(100vh-4rem)] bg-white/90 flex flex-col">
-      <div className="h-16 border-b border-gray-200/60 bg-white/50 backdrop-blur-sm flex items-center px-6 shadow-sm">
-        <div className="flex-1">
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center space-x-2">
-              <ToggleRight className="h-5 w-5 text-purple-500" />
-              <Label htmlFor="ai-mode" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                AI Assistant
-              </Label>
-            </div>
+      <div className="h-12 px-4 flex items-center justify-between border-b border-gray-200/60 bg-white/50 backdrop-blur-sm">
+        <DocumentSelector
+          documents={documents}
+          showDocumentSelector={showDocumentSelector}
+          setShowDocumentSelector={setShowDocumentSelector}
+          handleDocumentSelect={handleDocumentSelect}
+          handleUploadComplete={handleUploadComplete}
+        />
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Switch
               id="ai-mode"
               checked={isAIMode}
               onCheckedChange={handleAIModeToggle}
               className="data-[state=checked]:bg-purple-500"
             />
+            <Wand2 className="h-4 w-4 text-purple-500" />
+          </div>
+          {isAIMode && (
+            <AIFormattingDialog 
+              onConfigSubmit={handleFormatConfig}
+              disabled={!selectedDocument}
+            />
+          )}
+          <div className="relative">
+            {hasFormattedDocument && (
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-500 rounded-full animate-pulse" />
+            )}
+            <ExportOptionsDialog 
+              documentId={selectedDocument?.id}
+              disabled={!hasFormattedDocument}
+            />
           </div>
         </div>
       </div>
 
       <div className="flex-1 overflow-hidden">
-        <div className="h-full p-4">
-          <div className="h-full bg-white/40 backdrop-blur-md rounded-lg shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] border border-gray-200/60">
-            <div className="flex justify-between p-4 border-b border-gray-200/60">
-              <DocumentSelector
-                documents={documents}
-                showDocumentSelector={showDocumentSelector}
-                setShowDocumentSelector={setShowDocumentSelector}
-                handleDocumentSelect={handleDocumentSelect}
-                handleUploadComplete={handleUploadComplete}
-              />
-              <div className="flex gap-2 items-center">
-                {isAIMode && (
-                  <AIFormattingDialog 
-                    onConfigSubmit={handleFormatConfig}
-                    disabled={!selectedDocument}
-                  />
-                )}
-                <div className="relative">
-                  {hasFormattedDocument && (
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-500 rounded-full animate-pulse" />
-                  )}
-                  <ExportOptionsDialog 
-                    documentId={selectedDocument?.id}
-                    disabled={!hasFormattedDocument}
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="p-4 h-[calc(100%-5rem)] overflow-auto">
-              <TextFormattingTools isAIMode={isAIMode} />
-            </div>
-          </div>
+        <div className="h-full">
+          <TextFormattingTools isAIMode={isAIMode} />
         </div>
       </div>
     </div>
