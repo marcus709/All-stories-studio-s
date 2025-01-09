@@ -76,12 +76,17 @@ const config = {
         '3d': 'preserve-3d',
       },
       rotate: {
-        'y-5': 'rotateY(5deg)',
-        'y-10': 'rotateY(10deg)',
-        'y-90': 'rotateY(90deg)',
+        'x-20': 'rotateX(20deg)',
+        'y-20': 'rotateY(20deg)',
+        'y-[-20deg]': 'rotateY(-20deg)',
       },
       perspective: {
         '1000': '1000px',
+        '2000': '2000px',
+      },
+      skew: {
+        '3': 'skewY(3deg)',
+        '-3': 'skewY(-3deg)',
       },
     },
   },

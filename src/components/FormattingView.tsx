@@ -76,42 +76,63 @@ export const FormattingView = () => {
         <div className="col-span-6 bg-white/40 backdrop-blur-md rounded-lg p-4 flex flex-col shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] border border-gray-200/60">
           <div className="flex-1 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-200/60 relative perspective-[2000px] flex items-center justify-center">
             {/* 3D Book Preview */}
-            <div className="w-[300px] h-[400px] transform-style-3d transition-all duration-500 hover:rotate-y-10 group cursor-pointer relative">
-              {/* Front Cover */}
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg shadow-2xl transform origin-left transition-transform duration-500 group-hover:rotate-y-[-20deg]">
-                <div className="absolute inset-[2px] bg-white/90 rounded-lg p-8">
-                  {/* Cover Content */}
-                  <div className="h-full flex flex-col justify-between">
-                    <h1 className="text-2xl font-bold text-gray-800">Book Title</h1>
-                    <p className="text-sm text-gray-600">Author Name</p>
+            <div className="w-[600px] h-[400px] transform-style-3d transition-all duration-500 cursor-pointer relative">
+              {/* Book Container */}
+              <div className="absolute inset-0 transform-style-3d rotate-x-[20deg] rotate-y-[-20deg]">
+                {/* Left Page (verso) */}
+                <div className="absolute left-0 w-[290px] h-full bg-white rounded-l-lg shadow-lg transform origin-right transition-transform">
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-100/80 to-transparent" />
+                  <div className="absolute inset-[16px] flex flex-col">
+                    <div className="text-gray-600 text-sm leading-relaxed">
+                      Left page content goes here. This is where the previous page content will be displayed.
+                    </div>
                   </div>
+                  {/* Page Curl Shadow */}
+                  <div className="absolute right-0 inset-y-0 w-16 bg-gradient-to-l from-black/10 to-transparent transform skew-y-3" />
+                </div>
+
+                {/* Book Gutter */}
+                <div className="absolute left-1/2 -translate-x-[4px] inset-y-0 w-[8px] bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300 transform-gpu">
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/5 to-transparent" />
+                </div>
+
+                {/* Right Page (recto) */}
+                <div className="absolute right-0 w-[290px] h-full bg-white rounded-r-lg shadow-lg transform origin-left transition-transform">
+                  <div className="absolute inset-0 bg-gradient-to-l from-gray-100/80 to-transparent" />
+                  <div className="absolute inset-[16px] flex flex-col">
+                    <div className="text-gray-600 text-sm leading-relaxed">
+                      Right page content goes here. This is where the current page content will be displayed.
+                    </div>
+                  </div>
+                  {/* Page Curl Shadow */}
+                  <div className="absolute left-0 inset-y-0 w-16 bg-gradient-to-r from-black/10 to-transparent transform -skew-y-3" />
+                </div>
+
+                {/* Page Edges (Right) */}
+                <div className="absolute -right-1 inset-y-0 w-1 bg-gradient-to-l from-gray-200 to-gray-300 transform translate-x-full">
+                  {Array.from({ length: 20 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="absolute inset-0 bg-white border-t border-gray-300"
+                      style={{ height: '1px', top: `${(i * 5)}%` }}
+                    />
+                  ))}
+                </div>
+
+                {/* Page Edges (Left) */}
+                <div className="absolute -left-1 inset-y-0 w-1 bg-gradient-to-r from-gray-200 to-gray-300 transform -translate-x-full">
+                  {Array.from({ length: 20 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="absolute inset-0 bg-white border-t border-gray-300"
+                      style={{ height: '1px', top: `${(i * 5)}%` }}
+                    />
+                  ))}
                 </div>
               </div>
-              
-              {/* Pages */}
-              <div className="absolute inset-0 bg-white transform translate-x-[1px] origin-left">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="absolute inset-0 bg-white border-r border-gray-100 rounded-r-sm transform origin-left transition-transform"
-                    style={{
-                      transformStyle: 'preserve-3d',
-                      transform: `rotateY(${-i * 0.5}deg)`,
-                    }}
-                  />
-                ))}
-              </div>
-              
-              {/* Back Cover */}
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 transform translate-x-[8px] rounded-lg shadow-2xl">
-                <div className="absolute inset-[2px] bg-white/90 rounded-lg" />
-              </div>
-              
-              {/* Spine */}
-              <div className="absolute left-0 top-0 bottom-0 w-[8px] bg-gradient-to-b from-blue-700 to-purple-700 transform -translate-x-[8px] origin-right rounded-l-sm shadow-[-2px_0_4px_rgba(0,0,0,0.2)]" />
-              
+
               {/* Book Shadow */}
-              <div className="absolute -bottom-8 left-4 right-4 h-[20px] bg-black/20 blur-xl rounded-full transform-gpu scale-[0.95] transition-transform group-hover:scale-[0.9] group-hover:translate-x-8" />
+              <div className="absolute -bottom-8 inset-x-8 h-[32px] bg-black/20 blur-xl rounded-full transform-gpu scale-95" />
             </div>
           </div>
           
