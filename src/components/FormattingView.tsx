@@ -43,7 +43,7 @@ const templates: Template[] = [
   }
 ];
 
-export const BookCreatorView = () => {
+export const FormattingView = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [activeTab, setActiveTab] = useState("templates");
   const [coverImage, setCoverImage] = useState<string | null>(null);
