@@ -47,7 +47,7 @@ interface TextFormattingToolsProps {
 
 export const TextFormattingTools = ({ 
   isAIMode, 
-  currentSection = 'content',
+  currentSection,
   sectionContent,
   onContentChange
 }: TextFormattingToolsProps) => {
@@ -83,38 +83,94 @@ export const TextFormattingTools = ({
 
   const getPreviewStyle = () => {
     const format = BOOK_FORMATS[selectedFormat];
-    return {
+    const baseStyles = {
       padding: format.margins,
       fontSize: fontSize,
-      maxWidth: deviceView === 'phone' ? '320px' : 
-                deviceView === 'kindle' ? '500px' :
-                deviceView === 'ipad' ? '768px' : '100%',
-      margin: '0 auto'
+      lineHeight: '1.6',
+      fontFamily: '"Times New Roman", serif',
+      color: '#1a1a1a',
+      textAlign: 'left' as const,
     };
+
+    if (deviceView === 'kindle') {
+      return {
+        ...baseStyles,
+        maxWidth: '500px',
+        backgroundColor: '#f8f9fa',
+        padding: '2rem',
+        margin: '0 auto',
+        minHeight: '90%',
+        boxShadow: 'inset 0 0 10px rgba(0,0,0,0.1)',
+      };
+    } else if (deviceView === 'ipad') {
+      return {
+        ...baseStyles,
+        maxWidth: '768px',
+        backgroundColor: '#ffffff',
+        padding: '3rem',
+        margin: '0 auto',
+        minHeight: '90%',
+      };
+    } else if (deviceView === 'phone') {
+      return {
+        ...baseStyles,
+        maxWidth: '320px',
+        backgroundColor: '#ffffff',
+        padding: '1rem',
+        margin: '0 auto',
+        minHeight: '90%',
+      };
+    }
+    
+    return {
+      ...baseStyles,
+      maxWidth: '100%',
+      backgroundColor: '#ffffff',
+      padding: '2.5rem',
+      margin: '0 auto',
+      minHeight: '90%',
+    };
+  };
+
+  const getDeviceFrame = () => {
+    if (deviceView === 'kindle') {
+      return "rounded-lg border-8 border-gray-800 bg-gray-100 shadow-xl";
+    } else if (deviceView === 'ipad') {
+      return "rounded-2xl border-[16px] border-gray-700 bg-white shadow-xl";
+    } else if (deviceView === 'phone') {
+      return "rounded-[32px] border-[12px] border-gray-900 bg-white shadow-xl";
+    }
+    return "rounded-none border border-gray-200 bg-white shadow-lg";
   };
 
   return (
     <div className="flex-1 flex">
-      <div className="w-[21cm] mx-auto bg-white shadow-lg my-4 rounded-lg overflow-hidden border">
-        <ScrollArea className="h-[calc(100vh-16rem)]">
-          <div className="p-8" style={getPreviewStyle()}>
-            <h2 className="text-2xl font-semibold mb-4">
-              {getSectionTitle(currentSection)}
-            </h2>
-            <div className="prose max-w-none">
-              <div 
-                contentEditable
-                suppressContentEditableWarning
-                className="focus:outline-none min-h-[200px]"
-                dangerouslySetInnerHTML={{ 
-                  __html: editableContent
-                }}
-                onInput={handleContentChange}
-              />
+      <div className="w-[21cm] mx-auto my-4 overflow-hidden">
+        <ScrollArea className="h-[calc(100vh-8rem)]">
+          <div className={cn(
+            "relative mx-auto transition-all duration-300",
+            getDeviceFrame()
+          )}>
+            <div className="relative" style={getPreviewStyle()}>
+              <div className="prose prose-sm max-w-none">
+                <h2 className="text-2xl font-serif mb-6">
+                  {getSectionTitle(currentSection)}
+                </h2>
+                <div 
+                  contentEditable
+                  suppressContentEditableWarning
+                  className="focus:outline-none min-h-[200px] font-serif"
+                  dangerouslySetInnerHTML={{ 
+                    __html: editableContent
+                  }}
+                  onInput={handleContentChange}
+                />
+              </div>
             </div>
           </div>
         </ScrollArea>
       </div>
+
       <div className="w-[400px] border-l">
         <Collapsible
           open={isFormatSettingsOpen}
@@ -234,13 +290,10 @@ export const TextFormattingTools = ({
 
         <div className="p-4">
           <div className={cn(
-            "aspect-[3/4] bg-white rounded-lg border shadow-lg relative",
-            deviceView === 'phone' ? 'max-w-[320px] mx-auto' :
-            deviceView === 'kindle' ? 'max-w-[500px] mx-auto' :
-            deviceView === 'ipad' ? 'max-w-[768px] mx-auto' :
-            'w-full'
+            "aspect-[3/4] relative transition-all duration-300",
+            getDeviceFrame()
           )}>
-            <div className="absolute inset-0 m-8" style={getPreviewStyle()}>
+            <div className="absolute inset-0 m-4" style={getPreviewStyle()}>
               <div className="prose prose-sm max-w-none">
                 {editableContent ? (
                   <div dangerouslySetInnerHTML={{ __html: editableContent }} />
