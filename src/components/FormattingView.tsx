@@ -58,7 +58,7 @@ export const FormattingView = () => {
   return (
     <div className="min-h-screen bg-white/90 flex flex-col">
       {/* Top Navigation Bar */}
-      <div className="h-16 border-b border-gray-200 bg-white/50 backdrop-blur-sm flex items-center px-6 shadow-sm">
+      <div className="h-16 border-b border-gray-300 bg-white/50 backdrop-blur-sm flex items-center px-6 shadow-sm">
         <div className="flex-1" />
         <div className="flex space-x-4">
           {/* Navigation icons will be added here */}
@@ -68,23 +68,23 @@ export const FormattingView = () => {
       {/* Main Content Grid */}
       <div className="flex-1 p-6 grid grid-cols-12 gap-6">
         {/* Left Tools Panel */}
-        <div className="col-span-3 bg-white/40 backdrop-blur-md rounded-lg p-4 shadow-lg border border-gray-100">
+        <div className="col-span-3 bg-white/40 backdrop-blur-md rounded-lg p-4 shadow-lg border border-gray-300">
           {/* Tools will be added here */}
         </div>
 
         {/* Center Book Preview */}
-        <div className="col-span-6 bg-white/40 backdrop-blur-md rounded-lg p-4 flex flex-col shadow-lg border border-gray-100">
-          <div className="flex-1 bg-white/60 backdrop-blur-sm rounded-lg">
+        <div className="col-span-6 bg-white/40 backdrop-blur-md rounded-lg p-4 flex flex-col shadow-lg border border-gray-300">
+          <div className="flex-1 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-200">
             {/* Book preview will be added here */}
           </div>
           {/* Bottom Controls */}
-          <div className="h-32 mt-4 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-100">
+          <div className="h-32 mt-4 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-300">
             {/* Control buttons will be added here */}
           </div>
         </div>
 
         {/* Right Settings Panel */}
-        <div className="col-span-3 bg-white/40 backdrop-blur-md rounded-lg p-4 shadow-lg border border-gray-100">
+        <div className="col-span-3 bg-white/40 backdrop-blur-md rounded-lg p-4 shadow-lg border border-gray-300">
           {/* Settings will be added here */}
         </div>
       </div>
