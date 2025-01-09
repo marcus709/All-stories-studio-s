@@ -25,7 +25,7 @@ const nodeTypes = {
 };
 
 export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDynamicsFlowProps) => {
-  // Transform characters into nodes
+  // Transform characters into nodes with circular layout
   const initialNodes = characters.map((char, index) => {
     const angle = (index * 2 * Math.PI) / characters.length;
     const radius = 300;
@@ -37,6 +37,7 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
         y: 300 + radius * Math.sin(angle),
       },
       data: { ...char },
+      style: { fontSize: 12 }
     };
   });
 
