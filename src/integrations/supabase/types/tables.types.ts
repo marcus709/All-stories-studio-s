@@ -1,4 +1,5 @@
 import { Database } from "./database.types";
+import { Json } from "./database.types";
 
 type Tables = Database["public"]["Tables"];
 
@@ -28,7 +29,7 @@ export type Character = {
     };
     risk_taking: number;
   } | null;
-  skills: any[] | null;
+  skills: Json | null;
   flaws: string[] | null;
   archetype: string | null;
   psychological_traits: {
@@ -40,7 +41,7 @@ export type Character = {
   internal_motivations: string[] | null;
   external_goals: string[] | null;
   core_beliefs: string[] | null;
-  social_masks: any[] | null;
+  social_masks: Json | null;
   group_roles: string[] | null;
   behavioral_quirks: string[] | null;
   body_language: string | null;
@@ -55,7 +56,7 @@ export type Character = {
     turning_points: string[];
   } | null;
   ancestry: string | null;
-  skill_trees: any[] | null;
+  skill_trees: Json | null;
   expertise: {
     areas: string[];
     limitations: string[];
