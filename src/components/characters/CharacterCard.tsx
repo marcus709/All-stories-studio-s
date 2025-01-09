@@ -16,7 +16,7 @@ export const CharacterCard = ({ character, onDeleteClick }: CharacterCardProps) 
   const [showEditDialog, setShowEditDialog] = useState(false);
 
   return (
-    <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg shadow-purple-100/50 p-6 hover:shadow-purple-200/50 transition-all duration-300 relative group transform hover:scale-[1.02]">
+    <div className="bg-white/80 rounded-xl shadow-lg shadow-purple-100/50 p-6 hover:shadow-purple-200/50 transition-all duration-300 relative group transform hover:scale-[1.02]">
       <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
         <Button
           variant="ghost"
