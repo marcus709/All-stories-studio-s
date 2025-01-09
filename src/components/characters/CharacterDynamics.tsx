@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useStory } from "@/contexts/StoryContext";
 import { TensionTimeline } from "./dynamics/TensionTimeline";
 import { CharacterDynamicsFlow } from "./dynamics/CharacterDynamicsFlow";
+import { Character } from "@/types/character";
 
 export const CharacterDynamics = () => {
   const { selectedStory } = useStory();
@@ -16,7 +17,19 @@ export const CharacterDynamics = () => {
         .eq("story_id", selectedStory?.id);
 
       if (error) throw error;
-      return data || [];
+      
+      // Parse JSON fields to ensure correct typing
+      return (data || []).map(char => ({
+        ...char,
+        psychology: char.psychology as Character['psychology'],
+        values_and_morals: char.values_and_morals as Character['values_and_morals'],
+        cultural_background: char.cultural_background as Character['cultural_background'],
+        psychological_traits: char.psychological_traits as Character['psychological_traits'],
+        dialogue_style: char.dialogue_style as Character['dialogue_style'],
+        linguistic_traits: char.linguistic_traits as Character['linguistic_traits'],
+        life_events: char.life_events as Character['life_events'],
+        expertise: char.expertise as Character['expertise']
+      })) as Character[];
     },
     enabled: !!selectedStory?.id,
   });
