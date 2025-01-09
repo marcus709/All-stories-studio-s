@@ -19,6 +19,7 @@ import RelationshipEdge, { RelationshipEdgeData } from './RelationshipEdge';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@supabase/auth-helpers-react';
 
 interface CharacterDynamicsFlowProps {
   characters: Character[];
@@ -36,6 +37,7 @@ const edgeTypes: EdgeTypes = {
 export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDynamicsFlowProps) => {
   const { toast } = useToast();
   const [nextNodePosition, setNextNodePosition] = useState({ x: 100, y: 100 });
+  const { user } = useAuth();
 
   const initialNodes = characters.map((char, index) => {
     const angle = (index * 2 * Math.PI) / characters.length;
@@ -87,14 +89,23 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
   );
 
   const handleAddNode = useCallback(() => {
+    const newNodeId = `character-${Date.now()}`;
     const newNode = {
-      id: `character-${Date.now()}`,
+      id: newNodeId,
       type: 'character',
       position: nextNodePosition,
       data: {
+        id: newNodeId,
         name: 'New Character',
         role: 'Unknown',
         traits: [],
+        goals: null,
+        backstory: null,
+        story_id: null,
+        user_id: user?.id || '',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        isNew: true
       },
     };
 
@@ -108,7 +119,7 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
       title: "Character Added",
       description: "A new character node has been added to the flow.",
     });
-  }, [nextNodePosition, setNodes, toast]);
+  }, [nextNodePosition, setNodes, toast, user]);
 
   return (
     <div className="w-full h-[600px] relative">
