@@ -2,13 +2,13 @@ export interface CharacterNode {
   id: string;
   name: string;
   role: string | null;
-  backstory?: string | null;
-  goals?: string | null;
-  traits?: string[] | null;
-  story_id?: string | null;
-  created_at?: string | null;
-  updated_at?: string | null;
-  user_id?: string;
+  backstory: string;
+  goals: string;
+  traits: string[];
+  story_id: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export type RelationshipType = 'friend' | 'enemy' | 'family' | 'mentor' | 'student' | 'lover' | 'rival' | 'ally' | 'neutral';

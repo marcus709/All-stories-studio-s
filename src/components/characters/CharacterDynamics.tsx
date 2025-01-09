@@ -16,15 +16,114 @@ export const CharacterDynamics = ({ characters }: CharacterDynamicsProps) => {
 
   // Sample characters for demonstration
   const sampleCharacters: CharacterNode[] = [
-    { id: "1", name: "Hero", role: "Protagonist" },
-    { id: "2", name: "Mentor", role: "Guide" },
-    { id: "3", name: "Ally", role: "Support" },
-    { id: "4", name: "Rival", role: "Antagonist" },
-    { id: "5", name: "Friend", role: "Support" },
-    { id: "6", name: "Enemy", role: "Antagonist" },
-    { id: "7", name: "Sidekick", role: "Support" },
-    { id: "8", name: "Love", role: "Interest" },
-    { id: "9", name: "Nemesis", role: "Villain" }
+    { 
+      id: "1", 
+      name: "Hero", 
+      role: "Protagonist",
+      backstory: "A humble beginning",
+      goals: "Save the world",
+      traits: ["brave", "determined"],
+      story_id: "sample-story",
+      user_id: "sample-user",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    { 
+      id: "2", 
+      name: "Mentor", 
+      role: "Guide",
+      backstory: "Ancient wisdom keeper",
+      goals: "Guide the hero",
+      traits: ["wise", "mysterious"],
+      story_id: "sample-story",
+      user_id: "sample-user",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    { 
+      id: "3", 
+      name: "Ally", 
+      role: "Support",
+      backstory: "Always by the hero's side",
+      goals: "Assist the hero",
+      traits: ["loyal", "courageous"],
+      story_id: "sample-story",
+      user_id: "sample-user",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    { 
+      id: "4", 
+      name: "Rival", 
+      role: "Antagonist",
+      backstory: "A fierce competitor",
+      goals: "Defeat the hero",
+      traits: ["ambitious", "clever"],
+      story_id: "sample-story",
+      user_id: "sample-user",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    { 
+      id: "5", 
+      name: "Friend", 
+      role: "Support",
+      backstory: "A trusted companion",
+      goals: "Support the hero",
+      traits: ["friendly", "helpful"],
+      story_id: "sample-story",
+      user_id: "sample-user",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    { 
+      id: "6", 
+      name: "Enemy", 
+      role: "Antagonist",
+      backstory: "A dark force",
+      goals: "Stop the hero",
+      traits: ["malicious", "powerful"],
+      story_id: "sample-story",
+      user_id: "sample-user",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    { 
+      id: "7", 
+      name: "Sidekick", 
+      role: "Support",
+      backstory: "The hero's loyal friend",
+      goals: "Help the hero succeed",
+      traits: ["funny", "brave"],
+      story_id: "sample-story",
+      user_id: "sample-user",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    { 
+      id: "8", 
+      name: "Love", 
+      role: "Interest",
+      backstory: "The hero's love interest",
+      goals: "Support the hero emotionally",
+      traits: ["caring", "supportive"],
+      story_id: "sample-story",
+      user_id: "sample-user",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    { 
+      id: "9", 
+      name: "Nemesis", 
+      role: "Villain",
+      backstory: "The hero's greatest foe",
+      goals: "Defeat the hero",
+      traits: ["ruthless", "intelligent"],
+      story_id: "sample-story",
+      user_id: "sample-user",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
   ];
 
   // Sample relationships with varying types and strengths
@@ -54,8 +153,8 @@ export const CharacterDynamics = ({ characters }: CharacterDynamicsProps) => {
           id,
           relationship_type,
           strength,
-          character1:characters!character1_id(id, name, role),
-          character2:characters!character2_id(id, name, role)
+          character1:characters!character1_id(id, name, role, backstory, goals, traits, story_id, user_id, created_at, updated_at),
+          character2:characters!character2_id(id, name, role, backstory, goals, traits, story_id, user_id, created_at, updated_at)
         `)
         .eq("story_id", selectedStory.id);
 
