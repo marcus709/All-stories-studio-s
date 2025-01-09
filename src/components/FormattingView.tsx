@@ -68,12 +68,12 @@ export const FormattingView = () => {
       {/* Main Content Grid */}
       <div className="flex-1 p-6 grid grid-cols-12 gap-6">
         {/* Left Tools Panel */}
-        <div className="col-span-2 bg-white/40 backdrop-blur-md rounded-lg p-4 shadow-lg border border-gray-100">
+        <div className="col-span-3 bg-white/40 backdrop-blur-md rounded-lg p-4 shadow-lg border border-gray-100">
           {/* Tools will be added here */}
         </div>
 
         {/* Center Book Preview */}
-        <div className="col-span-7 bg-white/40 backdrop-blur-md rounded-lg p-4 flex flex-col shadow-lg border border-gray-100">
+        <div className="col-span-6 bg-white/40 backdrop-blur-md rounded-lg p-4 flex flex-col shadow-lg border border-gray-100">
           <div className="flex-1 bg-white/60 backdrop-blur-sm rounded-lg">
             {/* Book preview will be added here */}
           </div>
