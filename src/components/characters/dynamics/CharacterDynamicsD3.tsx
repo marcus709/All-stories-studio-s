@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Character } from '@/integrations/supabase/types/tables.types';
 import { Button } from '@/components/ui/button';
-import { Play, Pause } from 'lucide-react';
+import { Play, Pause, UserPlus } from 'lucide-react';
 import { ForceGraph } from './ForceGraph';
 import { Timeline } from './Timeline';
 import { CharacterNode } from './types';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { AddCharacterToMapDialog } from './AddCharacterToMapDialog';
 
 interface CharacterDynamicsD3Props {
   characters: Character[];
@@ -16,25 +17,34 @@ export const CharacterDynamicsD3 = ({ characters }: CharacterDynamicsD3Props) =>
   const [isPlaying, setIsPlaying] = useState(false);
   const [timelinePosition, setTimelinePosition] = useState(0);
   const [synergy, setSynergy] = useState(75);
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [displayedCharacters, setDisplayedCharacters] = useState<Character[]>([]);
+
+  // Initialize with first few characters
+  useEffect(() => {
+    if (characters.length > 0 && displayedCharacters.length === 0) {
+      setDisplayedCharacters(characters.slice(0, 3));
+    }
+  }, [characters]);
 
   // Add x and y coordinates to characters for D3
-  const characterNodes: CharacterNode[] = characters.map(character => ({
+  const characterNodes: CharacterNode[] = displayedCharacters.map(character => ({
     ...character,
     x: 0,
     y: 0
   }));
 
   const { data: relationships } = useQuery({
-    queryKey: ['relationships', characters.map(c => c.id)],
+    queryKey: ['relationships', displayedCharacters.map(c => c.id)],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('character_relationships')
         .select('*')
-        .in('character1_id', characters.map(c => c.id));
+        .in('character1_id', displayedCharacters.map(c => c.id));
       if (error) throw error;
       return data;
     },
-    enabled: characters.length > 0,
+    enabled: displayedCharacters.length > 0,
   });
 
   // Calculate group synergy based on relationships
@@ -77,6 +87,10 @@ export const CharacterDynamicsD3 = ({ characters }: CharacterDynamicsD3Props) =>
     setTimelinePosition(value[0]);
   };
 
+  const handleAddCharacter = (character: Character) => {
+    setDisplayedCharacters(prev => [...prev, character]);
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm">
@@ -84,17 +98,27 @@ export const CharacterDynamicsD3 = ({ characters }: CharacterDynamicsD3Props) =>
           <div className="text-lg font-semibold">Group Synergy</div>
           <div className="text-2xl font-bold text-purple-600">{synergy}%</div>
         </div>
-        <Button variant="outline" onClick={togglePlayback} className="gap-2">
-          {isPlaying ? (
-            <>
-              <Pause className="h-4 w-4" /> Pause
-            </>
-          ) : (
-            <>
-              <Play className="h-4 w-4" /> Play Timeline
-            </>
-          )}
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowAddDialog(true)}
+            className="gap-2"
+          >
+            <UserPlus className="h-4 w-4" />
+            Add Character
+          </Button>
+          <Button variant="outline" onClick={togglePlayback} className="gap-2">
+            {isPlaying ? (
+              <>
+                <Pause className="h-4 w-4" /> Pause
+              </>
+            ) : (
+              <>
+                <Play className="h-4 w-4" /> Play Timeline
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       <div className="h-[500px] bg-white rounded-xl shadow-sm relative">
@@ -112,6 +136,14 @@ export const CharacterDynamicsD3 = ({ characters }: CharacterDynamicsD3Props) =>
       <Timeline 
         position={timelinePosition}
         onPositionChange={handleTimelineChange}
+      />
+
+      <AddCharacterToMapDialog
+        isOpen={showAddDialog}
+        onClose={() => setShowAddDialog(false)}
+        onAddCharacter={handleAddCharacter}
+        characters={characters}
+        existingCharacters={displayedCharacters}
       />
     </div>
   );
