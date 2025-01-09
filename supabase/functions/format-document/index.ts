@@ -1,51 +1,60 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { corsHeaders } from '../_shared/cors.ts'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-serve(async (req) => {
+Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    const { documentId, config, content } = await req.json()
-    
-    console.log('Formatting document:', { documentId, config })
+    const { documentId, config } = await req.json()
+    console.log('Processing document:', documentId)
 
     if (!documentId) {
       throw new Error('Document ID is required')
     }
 
-    // Create Supabase client
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    // Initialize Supabase client with environment variables
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
-    // If content is provided, use it directly
-    const formattedContent = content ? await formatContent(content, config) : null
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Missing Supabase environment variables')
+    }
+
+    const supabaseClient = createClient(supabaseUrl, supabaseKey)
+    console.log('Supabase client initialized')
+
+    // Fetch the document
+    const { data: document, error: fetchError } = await supabaseClient
+      .from('documents')
+      .select('content')
+      .eq('id', documentId)
+      .single()
+
+    if (fetchError || !document) {
+      console.error('Error fetching document:', fetchError)
+      throw new Error('Failed to fetch document')
+    }
+
+    // Format the content
+    const formattedContent = await formatContent(document.content, config)
     console.log('Content formatted successfully')
 
-    if (formattedContent) {
-      // Update the document with formatted content
-      const { error: updateError } = await supabaseClient
-        .from('documents')
-        .update({ content: formattedContent })
-        .eq('id', documentId)
+    // Update the document with formatted content
+    const { error: updateError } = await supabaseClient
+      .from('documents')
+      .update({ content: formattedContent })
+      .eq('id', documentId)
 
-      if (updateError) {
-        console.error('Error updating document:', updateError)
-        throw updateError
-      }
+    if (updateError) {
+      console.error('Error updating document:', updateError)
+      throw updateError
     }
 
     // Generate download URL
-    const downloadUrl = `${Deno.env.get('SUPABASE_URL')}/storage/v1/object/public/formatted-docs/${documentId}.pdf`
+    const downloadUrl = `${supabaseUrl}/storage/v1/object/public/formatted-docs/${documentId}.pdf`
     
     console.log('Document processed successfully')
 
@@ -59,19 +68,18 @@ serve(async (req) => {
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
-      },
+      }
     )
   } catch (error) {
-    console.error('Error in format-document function:', error)
-    
+    console.error('Error:', error)
     return new Response(
       JSON.stringify({
         error: error.message || 'An error occurred while processing the document',
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
-      },
+        status: 500,
+      }
     )
   }
 })
