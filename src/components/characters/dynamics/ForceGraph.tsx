@@ -44,43 +44,46 @@ export function ForceGraph({ characters, relationships }: ForceGraphProps) {
         .id((d: any) => d.id)
         .distance(150));
 
-    // Add relationships as links with animations
+    // Add relationships as links
     const links = svg.selectAll("line")
       .data(relationships)
       .enter()
       .append("line")
       .style("stroke", d => relationshipColors[d.type as keyof typeof relationshipColors] || relationshipColors.default)
       .style("stroke-width", d => Math.max(1, Math.min(d.strength / 20, 5)))
-      .style("opacity", 0)
-      .transition()
+      .style("opacity", 0);
+
+    links.transition()
       .duration(800)
       .style("opacity", 1);
 
-    // Create node groups with animations
-    const nodes = svg.selectAll("g")
+    // Create node groups
+    const nodeGroups = svg.selectAll("g")
       .data(characters)
       .enter()
       .append("g")
       .attr("class", "character-node")
-      .style("opacity", 0)
-      .transition()
-      .duration(800)
-      .style("opacity", 1);
+      .style("opacity", 0);
 
     // Add circles for nodes
-    nodes.append("circle")
+    nodeGroups.append("circle")
       .attr("r", 30)
       .style("fill", "white")
       .style("stroke", "#000")
       .style("stroke-width", 2);
 
     // Add text labels
-    nodes.append("text")
+    nodeGroups.append("text")
       .text(d => d.name)
       .attr("text-anchor", "middle")
       .attr("dy", ".3em")
       .style("font-size", "12px")
       .style("pointer-events", "none");
+
+    // Apply transition to node groups
+    nodeGroups.transition()
+      .duration(800)
+      .style("opacity", 1);
 
     // Add drag behavior
     const drag = d3.drag<SVGGElement, CharacterNode>()
@@ -88,7 +91,7 @@ export function ForceGraph({ characters, relationships }: ForceGraphProps) {
       .on("drag", dragged)
       .on("end", dragended);
 
-    svg.selectAll("g").call(drag as any);
+    nodeGroups.call(drag as any);
 
     // Update positions on simulation tick
     simulation.on("tick", () => {
