@@ -12,7 +12,8 @@ import {
   Bold, 
   Italic, 
   Underline,
-  Type
+  Type,
+  Plus
 } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Slider } from "@/components/ui/slider";
@@ -71,6 +72,19 @@ export const CoverTextEditor = ({ width, height, onTextUpdate }: CoverTextEditor
       updateTextData();
     });
 
+    // Add initial helper text
+    const helperText = new IText("Click 'Add Text' to start editing", {
+      left: width / 2,
+      top: height / 2,
+      fontFamily: "Arial",
+      fontSize: 20,
+      fill: "#666666",
+      originX: "center",
+      originY: "center",
+      selectable: false,
+    });
+    canvas.add(helperText);
+
     return () => {
       canvas.dispose();
     };
@@ -79,22 +93,31 @@ export const CoverTextEditor = ({ width, height, onTextUpdate }: CoverTextEditor
   const updateTextData = () => {
     if (!fabricRef.current) return;
     
-    const texts = fabricRef.current.getObjects("i-text").map((obj) => {
-      const textObj = obj as IText;
-      return {
+    const texts = fabricRef.current.getObjects("i-text")
+      .filter((obj): obj is IText => obj instanceof IText && obj.selectable !== false)
+      .map((textObj) => ({
         text: textObj.text || "",
         font: textObj.fontFamily || "Arial",
         size: textObj.fontSize || 20,
         x: textObj.left || 0,
         y: textObj.top || 0,
-      };
-    });
+      }));
 
     onTextUpdate(texts);
   };
 
   const addNewText = () => {
     if (!fabricRef.current) return;
+
+    // Remove helper text if it exists
+    const helperText = fabricRef.current.getObjects().find(
+      (obj): obj is IText => 
+        obj instanceof IText && 
+        obj.selectable === false
+    );
+    if (helperText) {
+      fabricRef.current.remove(helperText);
+    }
 
     const text = new IText("Your Text Here", {
       left: 50,
@@ -111,12 +134,12 @@ export const CoverTextEditor = ({ width, height, onTextUpdate }: CoverTextEditor
 
     toast({
       title: "Text added",
-      description: "Click and drag to move, double click to edit",
+      description: "Double click to edit, drag to move",
     });
   };
 
   const updateSelectedText = (property: string, value: string | number) => {
-    if (!selectedObject) return;
+    if (!selectedObject || !fabricRef.current) return;
 
     switch (property) {
       case "font":
@@ -143,104 +166,130 @@ export const CoverTextEditor = ({ width, height, onTextUpdate }: CoverTextEditor
         break;
     }
 
-    fabricRef.current?.renderAll();
+    fabricRef.current.renderAll();
     updateTextData();
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-4 items-end">
-        <div className="space-y-2">
-          <Label>Font Family</Label>
-          <Select 
-            value={selectedObject?.fontFamily || undefined}
-            onValueChange={(value) => updateSelectedText("font", value)}
+      <div className="bg-white p-4 rounded-lg shadow-sm border space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-medium">Text Editor</h3>
+          <Button 
+            onClick={addNewText} 
+            className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700"
           >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select font" />
-            </SelectTrigger>
-            <SelectContent>
-              {FONTS.map((font) => (
-                <SelectItem key={font.value} value={font.value}>
-                  {font.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            <Plus className="h-4 w-4" />
+            Add Text
+          </Button>
         </div>
 
-        <div className="space-y-2">
-          <Label>Font Size</Label>
-          <Select 
-            value={selectedObject?.fontSize?.toString() || undefined}
-            onValueChange={(value) => updateSelectedText("size", value)}
-          >
-            <SelectTrigger className="w-[100px]">
-              <SelectValue placeholder="Size" />
-            </SelectTrigger>
-            <SelectContent>
-              {FONT_SIZES.map((size) => (
-                <SelectItem key={size} value={size.toString()}>
-                  {size}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {selectedObject && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Font Family</Label>
+                <Select 
+                  value={selectedObject.fontFamily || undefined}
+                  onValueChange={(value) => updateSelectedText("font", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select font" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {FONTS.map((font) => (
+                      <SelectItem key={font.value} value={font.value}>
+                        {font.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-        <div className="space-y-2">
-          <Label>Text Color</Label>
-          <Input
-            type="color"
-            value={textColor}
-            onChange={(e) => updateSelectedText("color", e.target.value)}
-            className="w-[100px] h-10"
-          />
-        </div>
+              <div className="space-y-2">
+                <Label>Font Size</Label>
+                <Select 
+                  value={selectedObject.fontSize?.toString() || undefined}
+                  onValueChange={(value) => updateSelectedText("size", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {FONT_SIZES.map((size) => (
+                      <SelectItem key={size} value={size.toString()}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
 
-        <ToggleGroup type="single" className="flex gap-1">
-          <ToggleGroupItem value="left" onClick={() => updateSelectedText("align", "left")}>
-            <AlignLeft className="h-4 w-4" />
-          </ToggleGroupItem>
-          <ToggleGroupItem value="center" onClick={() => updateSelectedText("align", "center")}>
-            <AlignCenter className="h-4 w-4" />
-          </ToggleGroupItem>
-          <ToggleGroupItem value="right" onClick={() => updateSelectedText("align", "right")}>
-            <AlignRight className="h-4 w-4" />
-          </ToggleGroupItem>
-        </ToggleGroup>
+            <div className="flex items-end gap-4">
+              <div className="space-y-2">
+                <Label>Text Color</Label>
+                <Input
+                  type="color"
+                  value={textColor}
+                  onChange={(e) => updateSelectedText("color", e.target.value)}
+                  className="w-[100px] h-10"
+                />
+              </div>
 
-        <ToggleGroup type="multiple" className="flex gap-1">
-          <ToggleGroupItem 
-            value="bold" 
-            onClick={() => updateSelectedText("bold", "")}
-            data-state={selectedObject?.fontWeight === "bold" ? "on" : "off"}
-          >
-            <Bold className="h-4 w-4" />
-          </ToggleGroupItem>
-          <ToggleGroupItem 
-            value="italic" 
-            onClick={() => updateSelectedText("italic", "")}
-            data-state={selectedObject?.fontStyle === "italic" ? "on" : "off"}
-          >
-            <Italic className="h-4 w-4" />
-          </ToggleGroupItem>
-          <ToggleGroupItem 
-            value="underline" 
-            onClick={() => updateSelectedText("underline", "")}
-            data-state={selectedObject?.underline ? "on" : "off"}
-          >
-            <Underline className="h-4 w-4" />
-          </ToggleGroupItem>
-        </ToggleGroup>
+              <ToggleGroup type="single" className="flex gap-1">
+                <ToggleGroupItem 
+                  value="left" 
+                  onClick={() => updateSelectedText("align", "left")}
+                  data-state={selectedObject.textAlign === "left" ? "on" : "off"}
+                >
+                  <AlignLeft className="h-4 w-4" />
+                </ToggleGroupItem>
+                <ToggleGroupItem 
+                  value="center" 
+                  onClick={() => updateSelectedText("align", "center")}
+                  data-state={selectedObject.textAlign === "center" ? "on" : "off"}
+                >
+                  <AlignCenter className="h-4 w-4" />
+                </ToggleGroupItem>
+                <ToggleGroupItem 
+                  value="right" 
+                  onClick={() => updateSelectedText("align", "right")}
+                  data-state={selectedObject.textAlign === "right" ? "on" : "off"}
+                >
+                  <AlignRight className="h-4 w-4" />
+                </ToggleGroupItem>
+              </ToggleGroup>
 
-        <Button onClick={addNewText} className="flex items-center gap-2">
-          <Type className="h-4 w-4" />
-          Add Text
-        </Button>
+              <ToggleGroup type="multiple" className="flex gap-1">
+                <ToggleGroupItem 
+                  value="bold" 
+                  onClick={() => updateSelectedText("bold", "")}
+                  data-state={selectedObject.fontWeight === "bold" ? "on" : "off"}
+                >
+                  <Bold className="h-4 w-4" />
+                </ToggleGroupItem>
+                <ToggleGroupItem 
+                  value="italic" 
+                  onClick={() => updateSelectedText("italic", "")}
+                  data-state={selectedObject.fontStyle === "italic" ? "on" : "off"}
+                >
+                  <Italic className="h-4 w-4" />
+                </ToggleGroupItem>
+                <ToggleGroupItem 
+                  value="underline" 
+                  onClick={() => updateSelectedText("underline", "")}
+                  data-state={selectedObject.underline ? "on" : "off"}
+                >
+                  <Underline className="h-4 w-4" />
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="border rounded-lg overflow-hidden">
+      <div className="border rounded-lg overflow-hidden bg-white">
         <canvas ref={canvasRef} />
       </div>
     </div>
