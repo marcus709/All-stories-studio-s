@@ -56,9 +56,9 @@ export const FormattingView = () => {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-900 flex flex-col">
+    <div className="min-h-screen bg-white/90 flex flex-col">
       {/* Top Navigation Bar */}
-      <div className="h-16 border-b border-zinc-800 flex items-center px-6">
+      <div className="h-16 border-b border-gray-200 bg-white/50 backdrop-blur-sm flex items-center px-6 shadow-sm">
         <div className="flex-1" />
         <div className="flex space-x-4">
           {/* Navigation icons will be added here */}
@@ -68,23 +68,23 @@ export const FormattingView = () => {
       {/* Main Content Grid */}
       <div className="flex-1 p-6 grid grid-cols-12 gap-6">
         {/* Left Tools Panel */}
-        <div className="col-span-2 bg-zinc-800/50 rounded-lg p-4">
+        <div className="col-span-2 bg-white/40 backdrop-blur-md rounded-lg p-4 shadow-lg border border-gray-100">
           {/* Tools will be added here */}
         </div>
 
         {/* Center Book Preview */}
-        <div className="col-span-7 bg-zinc-800/50 rounded-lg p-4 flex flex-col">
-          <div className="flex-1 bg-zinc-900/50 rounded-lg">
+        <div className="col-span-7 bg-white/40 backdrop-blur-md rounded-lg p-4 flex flex-col shadow-lg border border-gray-100">
+          <div className="flex-1 bg-white/60 backdrop-blur-sm rounded-lg">
             {/* Book preview will be added here */}
           </div>
           {/* Bottom Controls */}
-          <div className="h-24 mt-4 bg-zinc-800/80 rounded-lg">
+          <div className="h-24 mt-4 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-100">
             {/* Control buttons will be added here */}
           </div>
         </div>
 
         {/* Right Settings Panel */}
-        <div className="col-span-3 bg-zinc-800/50 rounded-lg p-4">
+        <div className="col-span-3 bg-white/40 backdrop-blur-md rounded-lg p-4 shadow-lg border border-gray-100">
           {/* Settings will be added here */}
         </div>
       </div>
