@@ -6,7 +6,7 @@ interface TensionPoint {
   position: number;
   tension_level: number;
   description: string;
-  type: 'rising' | 'falling' | 'peak' | 'valley';
+  type: 'rising' | 'falling' | 'climax' | 'resolution';
 }
 
 interface TensionTimelineProps {
