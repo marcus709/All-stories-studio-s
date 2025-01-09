@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { ToggleLeft, ToggleRight } from "lucide-react";
 import { AIFormattingDialog } from "./book/AIFormattingDialog";
 import { DocumentSelector } from "./book/DocumentSelector";
+import { ExportOptionsDialog } from "./book/ExportOptionsDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useStory } from "@/contexts/StoryContext";
@@ -131,7 +132,10 @@ export const FormattingView = () => {
               handleDocumentSelect={handleDocumentSelect}
               handleUploadComplete={handleUploadComplete}
             />
-            <AIFormattingDialog onConfigSubmit={handleFormatConfig} />
+            <div className="flex gap-2">
+              <AIFormattingDialog onConfigSubmit={handleFormatConfig} />
+              <ExportOptionsDialog documentId={selectedDocument?.id} />
+            </div>
           </div>
           <TextFormattingTools isAIMode={true} />
         </div>
