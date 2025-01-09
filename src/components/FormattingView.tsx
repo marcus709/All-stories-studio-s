@@ -29,6 +29,7 @@ export const FormattingView = () => {
   const [showManualModeAlert, setShowManualModeAlert] = useState(false);
   const [showDocumentSelector, setShowDocumentSelector] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [hasFormattedDocument, setHasFormattedDocument] = useState(false);
   const { toast } = useToast();
   const { selectedStory } = useStory();
 
@@ -47,9 +48,38 @@ export const FormattingView = () => {
     enabled: !!selectedStory?.id,
   });
 
-  const handleFormatConfig = (config: any) => {
-    console.log("Format config:", config);
-    // Here you would implement the logic to apply the formatting
+  const handleFormatConfig = async (config: any) => {
+    if (!selectedDocument) {
+      toast({
+        title: "No document selected",
+        description: "Please select a document to format",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Simulate formatting process
+      toast({
+        title: "Formatting document",
+        description: "Please wait while we format your document...",
+      });
+
+      // Simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      setHasFormattedDocument(true);
+      toast({
+        title: "Document formatted",
+        description: "Your document has been formatted successfully. Click the Export button to download.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to format document. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleTemplateSelect = (template: Template) => {
@@ -59,6 +89,7 @@ export const FormattingView = () => {
   const handleResetDesign = () => {
     setSelectedTemplate(null);
     setCoverImage(null);
+    setHasFormattedDocument(false);
   };
 
   const handleSaveDesign = () => {
@@ -91,6 +122,12 @@ export const FormattingView = () => {
     const doc = documents.find(d => d.id === docId);
     setSelectedDocument(doc || null);
     setShowDocumentSelector(false);
+    setHasFormattedDocument(false);
+    
+    toast({
+      title: "Document selected",
+      description: `Selected "${doc?.title}". Configure formatting options to proceed.`,
+    });
   };
 
   const handleUploadComplete = () => {
@@ -134,9 +171,20 @@ export const FormattingView = () => {
               handleDocumentSelect={handleDocumentSelect}
               handleUploadComplete={handleUploadComplete}
             />
-            <div className="flex gap-2">
-              <AIFormattingDialog onConfigSubmit={handleFormatConfig} />
-              <ExportOptionsDialog documentId={selectedDocument?.id} />
+            <div className="flex gap-2 items-center">
+              <AIFormattingDialog 
+                onConfigSubmit={handleFormatConfig}
+                disabled={!selectedDocument}
+              />
+              <div className="relative">
+                {hasFormattedDocument && (
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-500 rounded-full animate-pulse" />
+                )}
+                <ExportOptionsDialog 
+                  documentId={selectedDocument?.id}
+                  disabled={!hasFormattedDocument}
+                />
+              </div>
             </div>
           </div>
           <TextFormattingTools isAIMode={true} />

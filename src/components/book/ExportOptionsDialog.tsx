@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface ExportOptionsDialogProps {
   documentId?: string;
+  disabled?: boolean;
 }
 
 interface ValidationResult {
@@ -17,7 +18,7 @@ interface ValidationResult {
   message?: string;
 }
 
-export function ExportOptionsDialog({ documentId }: ExportOptionsDialogProps) {
+export function ExportOptionsDialog({ documentId, disabled }: ExportOptionsDialogProps) {
   const [isExporting, setIsExporting] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<string>("");
   const [validationResults, setValidationResults] = useState<ValidationResult[]>([]);
@@ -97,7 +98,11 @@ export function ExportOptionsDialog({ documentId }: ExportOptionsDialogProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="gap-2">
+        <Button 
+          variant="outline" 
+          className="gap-2"
+          disabled={disabled}
+        >
           <FileDown className="h-4 w-4" />
           Export
         </Button>
