@@ -15,7 +15,7 @@ export interface RelationshipLink {
 }
 
 export interface CharacterDynamicsD3Props {
-  characters: CharacterNode[];
+  characters: Character[];
   relationships: {
     id: string;
     story_id: string;
