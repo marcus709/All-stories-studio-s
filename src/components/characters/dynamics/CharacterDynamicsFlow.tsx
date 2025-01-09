@@ -8,7 +8,8 @@ import {
   useEdgesState,
   addEdge,
   Connection,
-  MarkerType
+  MarkerType,
+  Panel
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Character } from '@/integrations/supabase/types/tables.types';
@@ -65,6 +66,25 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
     [setEdges],
   );
 
+  // Add zoom controls
+  const onZoomIn = useCallback(() => {
+    setNodes((nds) =>
+      nds.map((node) => ({
+        ...node,
+        style: { ...node.style, fontSize: (node.style?.fontSize || 12) + 2 },
+      }))
+    );
+  }, [setNodes]);
+
+  const onZoomOut = useCallback(() => {
+    setNodes((nds) =>
+      nds.map((node) => ({
+        ...node,
+        style: { ...node.style, fontSize: Math.max((node.style?.fontSize || 12) - 2, 8) },
+      }))
+    );
+  }, [setNodes]);
+
   return (
     <ReactFlow
       nodes={nodes}
@@ -77,9 +97,29 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
       minZoom={0.2}
       maxZoom={4}
       className="bg-gray-900"
+      snapToGrid={true}
+      snapGrid={[15, 15]}
     >
       <Background color="#666" gap={16} />
-      <Controls className="bg-gray-800 text-white border-gray-700" />
+      <Controls 
+        className="bg-gray-800 text-white border-gray-700"
+        showInteractive={false}
+        position="top-left"
+      />
+      <Panel position="top-right" className="bg-gray-800 p-2 rounded-lg">
+        <button
+          className="px-3 py-1 bg-purple-600 text-white rounded-lg mr-2 hover:bg-purple-700"
+          onClick={() => onZoomIn()}
+        >
+          Zoom In
+        </button>
+        <button
+          className="px-3 py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+          onClick={() => onZoomOut()}
+        >
+          Zoom Out
+        </button>
+      </Panel>
       <MiniMap 
         nodeColor={(node) => {
           switch (node.type) {
