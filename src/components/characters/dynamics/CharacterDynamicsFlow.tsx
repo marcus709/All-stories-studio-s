@@ -9,8 +9,8 @@ import {
   addEdge,
   Connection,
   Edge,
-  MarkerType,
   EdgeTypes,
+  MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Character } from '@/integrations/supabase/types/tables.types';
@@ -43,14 +43,18 @@ const edgeTypes: EdgeTypes = {
   relationship: RelationshipEdge,
 };
 
+const DEFAULT_POSITION = { x: 100, y: 100 };
+
 export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDynamicsFlowProps) => {
   const { toast } = useToast();
-  const [nextNodePosition, setNextNodePosition] = useState({ x: 100, y: 100 });
+  const [nextNodePosition, setNextNodePosition] = useState(DEFAULT_POSITION);
   const session = useSession();
   const [layoutType, setLayoutType] = useState<LayoutType>('circular');
 
   const getNodePositions = (chars: Character[], layout: LayoutType) => {
-    if (!chars.length) return [];
+    if (!chars || chars.length === 0) {
+      return [DEFAULT_POSITION];
+    }
     
     switch (layout) {
       case 'clustered':
@@ -62,22 +66,22 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
           const angle = angleOffset + (index * 2 * Math.PI) / chars.length;
           
           return {
-            x: 400 + radius * Math.cos(angle),
-            y: 300 + radius * Math.sin(angle),
+            x: Math.max(400 + radius * Math.cos(angle), 0),
+            y: Math.max(300 + radius * Math.sin(angle), 0),
           };
         });
 
       case 'timeline':
         return chars.map((_, index) => ({
-          x: 200 + (index * 200),
-          y: 300 + (Math.sin(index) * 100),
+          x: Math.max(200 + (index * 200), 0),
+          y: Math.max(300 + (Math.sin(index) * 100), 0),
         }));
 
       case 'geographic':
         const cols = Math.ceil(Math.sqrt(chars.length));
         return chars.map((_, index) => ({
-          x: 200 + (index % cols) * 250,
-          y: 200 + Math.floor(index / cols) * 250,
+          x: Math.max(200 + (index % cols) * 250, 0),
+          y: Math.max(200 + Math.floor(index / cols) * 250, 0),
         }));
 
       case 'circular':
@@ -86,8 +90,8 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
           const angle = (index * 2 * Math.PI) / chars.length;
           const radius = 300;
           return {
-            x: 400 + radius * Math.cos(angle),
-            y: 300 + radius * Math.sin(angle),
+            x: Math.max(400 + radius * Math.cos(angle), 0),
+            y: Math.max(300 + radius * Math.sin(angle), 0),
           };
         });
     }
@@ -97,8 +101,8 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
   
   const initialNodes = characters.map((char, index) => ({
     id: char.id,
-    type: 'character',
-    position: positions[index] || { x: 0, y: 0 }, // Fallback position
+    type: 'character' as const,
+    position: positions[index] || DEFAULT_POSITION,
     data: { ...char },
   }));
 
@@ -143,7 +147,7 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
     const newNodeId = `character-${Date.now()}`;
     const newNode = {
       id: newNodeId,
-      type: 'character',
+      type: 'character' as const,
       position: nextNodePosition,
       data: {
         id: newNodeId,
@@ -161,8 +165,8 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
 
     setNodes((nds) => [...nds, newNode]);
     setNextNodePosition(prev => ({
-      x: prev.x + 50,
-      y: prev.y + 50
+      x: Math.max(prev.x + 50, 0),
+      y: Math.max(prev.y + 50, 0),
     }));
 
     toast({
@@ -172,14 +176,14 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
   }, [nextNodePosition, setNodes, toast, session]);
 
   const handleLayoutChange = (newLayout: LayoutType) => {
-    if (!characters.length) return;
+    if (!characters || characters.length === 0) return;
     
     setLayoutType(newLayout);
     const newPositions = getNodePositions(characters, newLayout);
     
     setNodes(nodes.map((node, index) => ({
       ...node,
-      position: newPositions[index] || node.position, // Fallback to current position
+      position: newPositions[index] || node.position || DEFAULT_POSITION,
     })));
   };
 
