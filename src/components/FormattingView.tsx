@@ -149,7 +149,7 @@ export const FormattingView = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white/90 flex flex-col">
+    <div className="h-[calc(100vh-4rem)] bg-white/90 flex flex-col">
       <div className="h-16 border-b border-gray-200/60 bg-white/50 backdrop-blur-sm flex items-center px-6 shadow-sm">
         <div className="flex-1">
           <div className="flex items-center space-x-2">
@@ -169,35 +169,39 @@ export const FormattingView = () => {
         </div>
       </div>
 
-      <div className="flex-1 p-6">
-        <div className="max-w-3xl mx-auto h-full bg-white/40 backdrop-blur-md rounded-lg p-4 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] border border-gray-200/60">
-          <div className="flex justify-between mb-4">
-            <DocumentSelector
-              documents={documents}
-              showDocumentSelector={showDocumentSelector}
-              setShowDocumentSelector={setShowDocumentSelector}
-              handleDocumentSelect={handleDocumentSelect}
-              handleUploadComplete={handleUploadComplete}
-            />
-            <div className="flex gap-2 items-center">
-              {isAIMode && (
-                <AIFormattingDialog 
-                  onConfigSubmit={handleFormatConfig}
-                  disabled={!selectedDocument}
-                />
-              )}
-              <div className="relative">
-                {hasFormattedDocument && (
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-500 rounded-full animate-pulse" />
+      <div className="flex-1 overflow-hidden">
+        <div className="h-full p-4">
+          <div className="h-full bg-white/40 backdrop-blur-md rounded-lg shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] border border-gray-200/60">
+            <div className="flex justify-between p-4 border-b border-gray-200/60">
+              <DocumentSelector
+                documents={documents}
+                showDocumentSelector={showDocumentSelector}
+                setShowDocumentSelector={setShowDocumentSelector}
+                handleDocumentSelect={handleDocumentSelect}
+                handleUploadComplete={handleUploadComplete}
+              />
+              <div className="flex gap-2 items-center">
+                {isAIMode && (
+                  <AIFormattingDialog 
+                    onConfigSubmit={handleFormatConfig}
+                    disabled={!selectedDocument}
+                  />
                 )}
-                <ExportOptionsDialog 
-                  documentId={selectedDocument?.id}
-                  disabled={!hasFormattedDocument}
-                />
+                <div className="relative">
+                  {hasFormattedDocument && (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-500 rounded-full animate-pulse" />
+                  )}
+                  <ExportOptionsDialog 
+                    documentId={selectedDocument?.id}
+                    disabled={!hasFormattedDocument}
+                  />
+                </div>
               </div>
             </div>
+            <div className="p-4 h-[calc(100%-5rem)] overflow-auto">
+              <TextFormattingTools isAIMode={isAIMode} />
+            </div>
           </div>
-          <TextFormattingTools isAIMode={isAIMode} />
         </div>
       </div>
     </div>
