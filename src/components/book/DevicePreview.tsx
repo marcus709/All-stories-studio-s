@@ -10,13 +10,15 @@ interface DevicePreviewProps {
 const deviceDimensions = {
   kindle: { width: 600, height: 800, padding: '24px' },
   ipad: { width: 768, height: 1024, padding: '32px' },
-  phone: { width: 375, height: 667, padding: '16px' }
+  phone: { width: 375, height: 667, padding: '16px' },
+  print: { width: 595, height: 842, padding: '24px' } // A4 size in pixels
 };
 
 const deviceStyles = {
   kindle: "bg-gray-100",
   ipad: "bg-gray-200",
-  phone: "bg-black"
+  phone: "bg-black",
+  print: "bg-white"
 };
 
 export const DevicePreview: React.FC<DevicePreviewProps> = ({

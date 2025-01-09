@@ -39,6 +39,10 @@ export const FormattingView = () => {
   const { toast } = useToast();
   const { selectedStory } = useStory();
 
+  const handleDocumentSelect = (doc: Document) => {
+    setSelectedDocument(doc);
+  };
+
   const { data: documents = [] } = useQuery({
     queryKey: ["documents", selectedStory?.id],
     queryFn: async () => {
