@@ -7,7 +7,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Add better error logging
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -23,7 +22,17 @@ serve(async (req) => {
     // Get the user from the authorization header
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
-      throw new Error('No authorization header')
+      console.error('No authorization header provided');
+      return new Response(
+        JSON.stringify({ 
+          plan: 'free',
+          error: 'No authorization header'
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200
+        }
+      )
     }
 
     const token = authHeader.replace('Bearer ', '')
@@ -31,7 +40,16 @@ serve(async (req) => {
     
     if (userError) {
       console.error('Error getting user:', userError)
-      throw userError
+      return new Response(
+        JSON.stringify({ 
+          plan: 'free',
+          error: userError.message
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200
+        }
+      )
     }
 
     if (!user) {
