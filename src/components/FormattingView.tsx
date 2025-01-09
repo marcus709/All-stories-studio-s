@@ -59,14 +59,29 @@ export const FormattingView = () => {
     }
 
     try {
-      // Simulate formatting process
       toast({
         title: "Formatting document",
         description: "Please wait while we format your document...",
       });
 
-      // Simulate processing time
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Call the formatting edge function with the config
+      const { data, error } = await supabase.functions.invoke('format-document', {
+        body: { 
+          documentId: selectedDocument.id,
+          config: config,
+          content: selectedDocument.content
+        }
+      });
+
+      if (error) throw error;
+
+      // Update the document with the formatted content
+      const { error: updateError } = await supabase
+        .from('documents')
+        .update({ content: data.formattedContent })
+        .eq('id', selectedDocument.id);
+
+      if (updateError) throw updateError;
 
       setHasFormattedDocument(true);
       toast({
@@ -74,6 +89,7 @@ export const FormattingView = () => {
         description: "Your document has been formatted successfully. Click the Export button to download.",
       });
     } catch (error) {
+      console.error("Formatting error:", error);
       toast({
         title: "Error",
         description: "Failed to format document. Please try again.",
