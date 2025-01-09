@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FileDown, AlertCircle, Check, Loader2, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -19,36 +17,24 @@ interface ValidationResult {
   message?: string;
 }
 
+const platforms = [
+  { name: "Kindle", format: "mobi" },
+  { name: "Apple Books", format: "epub" },
+  { name: "PDF", format: "pdf" },
+];
+
 export function ExportOptionsDialog({ documentId, disabled }: ExportOptionsDialogProps) {
+  const [isOpen, setIsOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [selectedFormat, setSelectedFormat] = useState<string>("");
-  const [validationResults, setValidationResults] = useState<ValidationResult[]>([]);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  const [validationResults, setValidationResults] = useState<ValidationResult[]>([]);
   const { toast } = useToast();
 
-  const formats = {
-    print: [
-      { id: "pdf-print", name: "PDF (Print-ready)", description: "Includes embedded fonts and bleed settings" }
-    ],
-    digital: [
-      { id: "epub", name: "EPUB", description: "Compatible with most eReaders" },
-      { id: "mobi", name: "MOBI/KPF", description: "Optimized for Kindle devices" },
-      { id: "html5", name: "HTML5", description: "For web-based reading platforms" }
-    ]
-  };
-
-  const platforms = [
-    { id: "kdp", name: "Amazon KDP" },
-    { id: "ingram", name: "IngramSpark" },
-    { id: "smashwords", name: "Smashwords" },
-    { id: "apple", name: "Apple Books" }
-  ];
-
   const handleExport = async () => {
-    if (!selectedFormat) {
+    if (disabled) {
       toast({
-        title: "Export Error",
-        description: "Please select a format to export",
+        title: "Export not available",
+        description: "Please format your document first before exporting",
         variant: "destructive",
       });
       return;
@@ -66,12 +52,11 @@ export function ExportOptionsDialog({ documentId, disabled }: ExportOptionsDialo
     setIsExporting(true);
     setDownloadUrl(null);
     
-    // Simulate validation checks
-    const results = platforms.map(platform => ({
-      platform: platform.name,
-      status: "pending" as const,
-    }));
-    setValidationResults(results);
+    // Initialize validation results
+    setValidationResults(platforms.map(p => ({
+      platform: p.name,
+      status: "pending"
+    })));
 
     try {
       // Simulate validation process
@@ -92,11 +77,14 @@ export function ExportOptionsDialog({ documentId, disabled }: ExportOptionsDialo
       const { data, error } = await supabase.functions.invoke('format-document', {
         body: { 
           documentId,
-          format: selectedFormat
+          format: 'pdf' // Default format for now
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Export error:', error);
+        throw new Error(error.message || 'Failed to export document');
+      }
 
       if (!data?.downloadUrl) {
         throw new Error('No download URL received from the server');
@@ -104,36 +92,31 @@ export function ExportOptionsDialog({ documentId, disabled }: ExportOptionsDialo
 
       // Set the download URL from the response
       setDownloadUrl(data.downloadUrl);
-
+      
       toast({
-        title: "Export Complete",
-        description: `Document exported as ${selectedFormat}. Click the download button to save your file.`,
+        title: "Export successful",
+        description: "Your document has been exported successfully",
       });
     } catch (error) {
-      console.error("Export error:", error);
+      console.error('Export error:', error);
       toast({
-        title: "Export Failed",
-        description: "There was an error exporting your document. Please try again.",
-        variant: "destructive"
+        title: "Export failed",
+        description: error instanceof Error ? error.message : "Failed to export document",
+        variant: "destructive",
       });
     } finally {
       setIsExporting(false);
     }
   };
 
-  const getValidationIcon = (status: ValidationResult["status"]) => {
-    switch (status) {
-      case "valid":
-        return <Check className="h-4 w-4 text-green-500" />;
-      case "invalid":
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
-      case "pending":
-        return <Loader2 className="h-4 w-4 animate-spin" />;
+  const handleDownload = () => {
+    if (downloadUrl) {
+      window.open(downloadUrl, '_blank');
     }
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button 
           variant="outline" 
@@ -144,88 +127,64 @@ export function ExportOptionsDialog({ documentId, disabled }: ExportOptionsDialo
           Export
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle>Export Options</DialogTitle>
+          <DialogTitle>Export Document</DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="print" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="print">Print</TabsTrigger>
-            <TabsTrigger value="digital">Digital</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="print">
-            <ScrollArea className="h-[200px] rounded-md border p-4">
-              {formats.print.map(format => (
-                <div
-                  key={format.id}
-                  className={`mb-2 rounded-lg border p-4 cursor-pointer transition-colors ${
-                    selectedFormat === format.id ? "border-purple-500 bg-purple-50" : "hover:border-gray-400"
-                  }`}
-                  onClick={() => setSelectedFormat(format.id)}
-                >
-                  <h3 className="font-medium">{format.name}</h3>
-                  <p className="text-sm text-gray-500">{format.description}</p>
-                </div>
-              ))}
-            </ScrollArea>
-          </TabsContent>
-
-          <TabsContent value="digital">
-            <ScrollArea className="h-[200px] rounded-md border p-4">
-              {formats.digital.map(format => (
-                <div
-                  key={format.id}
-                  className={`mb-2 rounded-lg border p-4 cursor-pointer transition-colors ${
-                    selectedFormat === format.id ? "border-purple-500 bg-purple-50" : "hover:border-gray-400"
-                  }`}
-                  onClick={() => setSelectedFormat(format.id)}
-                >
-                  <h3 className="font-medium">{format.name}</h3>
-                  <p className="text-sm text-gray-500">{format.description}</p>
-                </div>
-              ))}
-            </ScrollArea>
-          </TabsContent>
-        </Tabs>
-
-        <div className="space-y-4">
-          <h3 className="text-sm font-medium">Compatibility Check</h3>
-          <div className="space-y-2">
-            {validationResults.map((result) => (
-              <div key={result.platform} className="flex items-center justify-between rounded-lg border p-3">
-                <span className="text-sm">{result.platform}</span>
-                <div className="flex items-center gap-2">
-                  {getValidationIcon(result.status)}
-                  {result.message && (
-                    <span className="text-sm text-red-500">{result.message}</span>
-                  )}
-                </div>
+        <div className="space-y-4 py-4">
+          {platforms.map((platform, index) => (
+            <div key={platform.name} className="flex items-center justify-between">
+              <span>{platform.name}</span>
+              <div className="flex items-center gap-2">
+                {validationResults[index]?.status === "pending" && (
+                  <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+                )}
+                {validationResults[index]?.status === "valid" && (
+                  <Check className="h-4 w-4 text-green-500" />
+                )}
+                {validationResults[index]?.status === "invalid" && (
+                  <AlertCircle className="h-4 w-4 text-red-500" />
+                )}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
+          ))}
 
-        <div className="mt-4 flex justify-end gap-2">
-          {downloadUrl ? (
-            <Button
-              onClick={() => window.open(downloadUrl, '_blank')}
-              className="gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Download
-            </Button>
-          ) : (
-            <Button
-              onClick={handleExport}
-              disabled={!selectedFormat || isExporting}
-              className="gap-2"
-            >
-              {isExporting && <Loader2 className="h-4 w-4 animate-spin" />}
-              {isExporting ? "Exporting..." : "Export"}
-            </Button>
+          {validationResults.some(r => r.status === "invalid") && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Some formatting issues were detected. Please review and fix them before exporting.
+              </AlertDescription>
+            </Alert>
           )}
+
+          <div className="flex justify-end gap-2">
+            {downloadUrl ? (
+              <Button onClick={handleDownload} className="gap-2">
+                <Download className="h-4 w-4" />
+                Download
+              </Button>
+            ) : (
+              <Button 
+                onClick={handleExport}
+                disabled={isExporting || disabled}
+                className="gap-2"
+              >
+                {isExporting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Exporting...
+                  </>
+                ) : (
+                  <>
+                    <FileDown className="h-4 w-4" />
+                    Start Export
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
