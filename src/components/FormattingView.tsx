@@ -11,6 +11,7 @@ import { PropertiesPanel } from "./book/PropertiesPanel";
 import { PageTurner } from "./book/PageTurner";
 import { BookSizeSelector, BookSize } from "./book/BookSizeSelector";
 import { PreviewScene } from "./book/PreviewScene";
+import { CoverTextEditor } from "./book/CoverTextEditor";
 
 const templates: Template[] = [
   {
@@ -50,6 +51,7 @@ export const FormattingView = () => {
   const [bookSize, setBookSize] = useState<BookSize>({ width: 6, height: 9, name: "Trade Paperback (6\" × 9\")" });
   const [previewScene, setPreviewScene] = useState("none");
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [coverTexts, setCoverTexts] = useState<Array<{ text: string; font: string; size: number; x: number; y: number }>>([]);
 
   const { data: bookStructures } = useQuery({
     queryKey: ["bookStructures"],
@@ -83,32 +85,49 @@ export const FormattingView = () => {
     setIsFullscreen(!isFullscreen);
   };
 
+  const handleTextUpdate = (texts: Array<{ text: string; font: string; size: number; x: number; y: number }>) => {
+    setCoverTexts(texts);
+  };
+
   const renderBookPages = () => {
     const pages = [
       // Cover
       <div
         key="cover"
-        className="w-full h-full bg-white rounded-lg shadow-lg overflow-hidden"
+        className="w-full h-full bg-white rounded-lg shadow-lg overflow-hidden relative"
         style={{
           aspectRatio: `${bookSize.width} / ${bookSize.height}`,
         }}
       >
         {coverImage ? (
-          <img
-            src={coverImage}
-            alt="Book Cover"
-            className="w-full h-full object-cover"
-          />
+          <div className="relative w-full h-full">
+            <img
+              src={coverImage}
+              alt="Book Cover"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0">
+              <CoverTextEditor
+                width={bookSize.width * 100}
+                height={bookSize.height * 100}
+                onTextUpdate={handleTextUpdate}
+              />
+            </div>
+          </div>
         ) : selectedTemplate ? (
           <div
-            className="w-full h-full bg-gradient-to-br flex items-center justify-center"
+            className="w-full h-full bg-gradient-to-br flex items-center justify-center relative"
             style={{
               background: `linear-gradient(to bottom right, ${selectedTemplate.colors.join(
                 ", "
               )})`,
             }}
           >
-            <p className="text-white text-xl font-bold">Your Book Title</p>
+            <CoverTextEditor
+              width={bookSize.width * 100}
+              height={bookSize.height * 100}
+              onTextUpdate={handleTextUpdate}
+            />
           </div>
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400">
