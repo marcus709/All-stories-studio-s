@@ -1,69 +1,80 @@
-import { Character } from '@/integrations/supabase/types/tables.types';
-import { CharacterDynamicsD3 } from './dynamics/CharacterDynamicsD3';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useStory } from '@/contexts/StoryContext';
-import { CharacterNode, Relationship, RelationshipType } from './dynamics/types';
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useStory } from "@/contexts/StoryContext";
+import { CharacterDynamicsD3 } from "./dynamics/CharacterDynamicsD3";
+import { Timeline } from "./dynamics/Timeline";
+import { Character } from "@/types/story";
 
-interface CharacterDynamicsProps {
-  characters: Character[];
+type RelationshipType = "friend" | "enemy" | "family" | "mentor" | "student" | "rival" | "lover" | "ally" | "neutral";
+
+interface CharacterNode {
+  id: string;
+  name: string;
+  role: string | null;
 }
 
-export const CharacterDynamics = ({ characters }: CharacterDynamicsProps) => {
-  const { selectedStory } = useStory();
+interface Relationship {
+  source: CharacterNode;
+  target: CharacterNode;
+  type: RelationshipType;
+  strength: number;
+}
 
-  const { data: relationshipData } = useQuery({
-    queryKey: ['character-relationships', selectedStory?.id],
+export const CharacterDynamics = () => {
+  const { selectedStory } = useStory();
+  const [timelinePosition, setTimelinePosition] = useState(0);
+
+  const { data: characters = [] } = useQuery({
+    queryKey: ["characters", selectedStory?.id],
     queryFn: async () => {
       if (!selectedStory?.id) return [];
-      
       const { data, error } = await supabase
-        .from('character_relationships')
-        .select('*')
-        .eq('story_id', selectedStory.id);
-
+        .from("characters")
+        .select("*")
+        .eq("story_id", selectedStory.id);
       if (error) throw error;
-      return data || [];
+      return data as Character[];
     },
     enabled: !!selectedStory?.id,
   });
 
-  // Transform characters into nodes with initial positions
-  const characterNodes: CharacterNode[] = characters.map(char => ({
-    ...char,
-    x: 0,
-    y: 0,
-    fx: null,
-    fy: null
+  const { data: relationships = [] } = useQuery({
+    queryKey: ["character_relationships", selectedStory?.id],
+    queryFn: async () => {
+      if (!selectedStory?.id) return [];
+      const { data, error } = await supabase
+        .from("character_relationships")
+        .select(`
+          *,
+          character1:character1_id(id, name, role),
+          character2:character2_id(id, name, role)
+        `)
+        .eq("story_id", selectedStory.id);
+      if (error) throw error;
+      return data.map((rel) => ({
+        source: rel.character1 as CharacterNode,
+        target: rel.character2 as CharacterNode,
+        type: rel.relationship_type as RelationshipType,
+        strength: rel.strength || 50,
+      }));
+    },
+    enabled: !!selectedStory?.id,
+  });
+
+  const characterNodes: CharacterNode[] = characters.map((char) => ({
+    id: char.id,
+    name: char.name,
+    role: char.role,
   }));
 
-  // Transform the relationships data to match the expected format
-  const relationships: Relationship[] = (relationshipData || [])
-    .map(rel => {
-      const source = characterNodes.find(c => c.id === rel.character1_id);
-      const target = characterNodes.find(c => c.id === rel.character2_id);
-      
-      if (!source || !target) return null;
-      
-      // Ensure the relationship type is valid
-      const type = rel.relationship_type as RelationshipType;
-      if (!type) return null;
-
-      return {
-        source,
-        target,
-        type,
-        strength: rel.strength || 50
-      };
-    })
-    .filter((rel): rel is Relationship => rel !== null);
-
   return (
-    <div className="w-full h-full">
-      <CharacterDynamicsD3 
-        characters={characterNodes}
-        relationships={relationships}
+    <div className="space-y-8 p-6">
+      <Timeline
+        position={timelinePosition}
+        onPositionChange={(value) => setTimelinePosition(value[0])}
       />
+      <CharacterDynamicsD3 characters={characterNodes} relationships={relationships} />
     </div>
   );
 };
