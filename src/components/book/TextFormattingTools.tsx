@@ -34,11 +34,14 @@ export const TextFormattingTools = ({
             {getSectionTitle(currentSection)}
           </h2>
           <div className="prose max-w-none">
-            {sectionContent ? (
-              <div dangerouslySetInnerHTML={{ __html: sectionContent.split('\n').join('<br />') }} />
-            ) : (
-              <p>Edit your {currentSection} content here...</p>
-            )}
+            <div 
+              contentEditable
+              suppressContentEditableWarning
+              className="focus:outline-none min-h-[200px]"
+              dangerouslySetInnerHTML={{ 
+                __html: sectionContent ? sectionContent.split('\n').join('<br />') : 'Edit your content here...'
+              }}
+            />
           </div>
         </div>
       </div>
