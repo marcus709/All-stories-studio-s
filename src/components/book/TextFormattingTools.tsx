@@ -3,7 +3,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { X, Type, Search, RotateCcw, Quote, ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 interface BookFormat {
@@ -42,12 +42,14 @@ interface TextFormattingToolsProps {
   isAIMode: boolean;
   currentSection: string;
   sectionContent?: string;
+  onContentChange: (content: string) => void;
 }
 
 export const TextFormattingTools = ({ 
   isAIMode, 
   currentSection = 'content',
-  sectionContent
+  sectionContent,
+  onContentChange
 }: TextFormattingToolsProps) => {
   const [selectedFormat, setSelectedFormat] = useState<string>("trade-paperback");
   const [selectedSize, setSelectedSize] = useState<string>(BOOK_FORMATS["trade-paperback"].printSizes[0]);
@@ -55,6 +57,17 @@ export const TextFormattingTools = ({
   const [deviceView, setDeviceView] = useState<'print' | 'kindle' | 'ipad' | 'phone'>('print');
   const [fontSize, setFontSize] = useState<string>(BOOK_FORMATS["trade-paperback"].fontSizes[0]);
   const [isFormatSettingsOpen, setIsFormatSettingsOpen] = useState(true);
+  const [editableContent, setEditableContent] = useState(sectionContent || '');
+
+  useEffect(() => {
+    setEditableContent(sectionContent || '');
+  }, [sectionContent]);
+
+  const handleContentChange = (event: React.FormEvent<HTMLDivElement>) => {
+    const newContent = event.currentTarget.innerHTML;
+    setEditableContent(newContent);
+    onContentChange(newContent);
+  };
 
   const getSectionTitle = (section: string) => {
     if (!section) return 'Content';
@@ -83,21 +96,24 @@ export const TextFormattingTools = ({
   return (
     <div className="flex-1 flex">
       <div className="w-[21cm] mx-auto bg-white shadow-lg my-4 rounded-lg overflow-hidden border">
-        <div className="p-8" style={getPreviewStyle()}>
-          <h2 className="text-2xl font-semibold mb-4">
-            {getSectionTitle(currentSection)}
-          </h2>
-          <div className="prose max-w-none">
-            <div 
-              contentEditable
-              suppressContentEditableWarning
-              className="focus:outline-none min-h-[200px]"
-              dangerouslySetInnerHTML={{ 
-                __html: sectionContent ? sectionContent.split('\n').join('<br />') : 'Edit your content here...'
-              }}
-            />
+        <ScrollArea className="h-[calc(100vh-16rem)]">
+          <div className="p-8" style={getPreviewStyle()}>
+            <h2 className="text-2xl font-semibold mb-4">
+              {getSectionTitle(currentSection)}
+            </h2>
+            <div className="prose max-w-none">
+              <div 
+                contentEditable
+                suppressContentEditableWarning
+                className="focus:outline-none min-h-[200px]"
+                dangerouslySetInnerHTML={{ 
+                  __html: editableContent
+                }}
+                onInput={handleContentChange}
+              />
+            </div>
           </div>
-        </div>
+        </ScrollArea>
       </div>
       <div className="w-[400px] border-l">
         <Collapsible
@@ -226,8 +242,8 @@ export const TextFormattingTools = ({
           )}>
             <div className="absolute inset-0 m-8" style={getPreviewStyle()}>
               <div className="prose prose-sm max-w-none">
-                {sectionContent ? (
-                  <div dangerouslySetInnerHTML={{ __html: sectionContent.split('\n').join('<br />') }} />
+                {editableContent ? (
+                  <div dangerouslySetInnerHTML={{ __html: editableContent }} />
                 ) : (
                   <div className="text-center text-gray-400">
                     Preview will appear here

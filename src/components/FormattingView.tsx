@@ -32,6 +32,7 @@ export const FormattingView = () => {
   const [currentSectionContent, setCurrentSectionContent] = useState<string | undefined>();
   const { toast } = useToast();
   const { selectedStory } = useStory();
+  const [currentContent, setCurrentContent] = useState<string>('');
 
   const { data: documents = [] } = useQuery({
     queryKey: ["documents", selectedStory?.id],
@@ -155,6 +156,10 @@ export const FormattingView = () => {
     setCurrentSectionContent(content);
   };
 
+  const handleContentChange = (content: string) => {
+    setCurrentContent(content);
+  };
+
   return (
     <div className="h-[calc(100vh-4rem)] bg-white/90 flex flex-col">
       <div className="h-10 px-4 flex items-center justify-between bg-white/50 backdrop-blur-sm border-b border-gray-200/60">
@@ -197,11 +202,13 @@ export const FormattingView = () => {
         <FormattingSidebar 
           document={selectedDocument}
           onSectionSelect={handleSectionSelect}
+          currentContent={currentContent}
         />
         <TextFormattingTools 
           isAIMode={isAIMode}
           currentSection={currentSection}
           sectionContent={currentSectionContent}
+          onContentChange={handleContentChange}
         />
       </div>
     </div>

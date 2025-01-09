@@ -7,6 +7,7 @@ import { Document } from "@/types/story";
 interface FormattingSidebarProps {
   document: Document | null;
   onSectionSelect: (section: string, content?: string) => void;
+  currentContent?: string;
 }
 
 interface Chapter {
@@ -16,7 +17,7 @@ interface Chapter {
   startIndex: number;
 }
 
-export const FormattingSidebar = ({ document, onSectionSelect }: FormattingSidebarProps) => {
+export const FormattingSidebar = ({ document, onSectionSelect, currentContent }: FormattingSidebarProps) => {
   const [selectedSection, setSelectedSection] = useState<string>("content");
   const [detectedChapters, setDetectedChapters] = useState<Chapter[]>([]);
 
@@ -26,11 +27,11 @@ export const FormattingSidebar = ({ document, onSectionSelect }: FormattingSideb
   };
 
   useEffect(() => {
-    if (document?.content) {
-      const chapters = detectChapters(document.content);
+    if (currentContent) {
+      const chapters = detectChapters(currentContent);
       setDetectedChapters(chapters);
     }
-  }, [document?.content]);
+  }, [currentContent]);
 
   const detectChapters = (content: string): Chapter[] => {
     // This regex matches common chapter headings like "Chapter 1", "CHAPTER ONE", etc.
@@ -102,7 +103,7 @@ export const FormattingSidebar = ({ document, onSectionSelect }: FormattingSideb
             );
           })}
           
-          {document?.content && detectedChapters.length > 0 && (
+          {currentContent && detectedChapters.length > 0 && (
             <div className="pt-4 space-y-1">
               <h4 className="text-xs font-medium text-gray-500 px-2">Chapters</h4>
               {detectedChapters.map((chapter) => (
