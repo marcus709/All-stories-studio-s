@@ -1,9 +1,8 @@
-import { Character } from "@/integrations/supabase/types";
+import { Character } from "@/types/character";
 import { UserRound } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+import { CharacterForm } from "@/components/character/CharacterForm";
 
 interface CharacterPreviewProps {
   character: Character;
@@ -12,33 +11,6 @@ interface CharacterPreviewProps {
 
 export const CharacterPreview = ({ character, isInMessage }: CharacterPreviewProps) => {
   const [showDetails, setShowDetails] = useState(false);
-
-  const renderTraitList = (traits: string[] | null | undefined) => {
-    if (!traits || traits.length === 0) return "None";
-    return traits.map((trait, index) => (
-      <span
-        key={index}
-        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-purple-100 text-purple-800 mr-2 mb-2"
-      >
-        {trait}
-      </span>
-    ));
-  };
-
-  const renderJsonSection = (data: any, title: string) => {
-    if (!data) return null;
-    return (
-      <div className="space-y-2">
-        <h3 className="text-sm font-medium">{title}</h3>
-        {Object.entries(data).map(([key, value]) => (
-          <div key={key} className="text-sm">
-            <span className="font-medium">{key.replace(/_/g, " ")}: </span>
-            {Array.isArray(value) ? renderTraitList(value) : value?.toString()}
-          </div>
-        ))}
-      </div>
-    );
-  };
 
   return (
     <>
@@ -76,47 +48,12 @@ export const CharacterPreview = ({ character, isInMessage }: CharacterPreviewPro
       </div>
 
       <Dialog open={showDetails} onOpenChange={setShowDetails}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh]">
-          <ScrollArea className="h-[80vh] pr-4">
-            <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                  <UserRound className="w-8 h-8 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    {character.name}
-                  </h2>
-                  <p className="text-gray-500">{character.role}</p>
-                </div>
-              </div>
-
-              {character.traits && character.traits.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Traits</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {renderTraitList(character.traits)}
-                  </div>
-                </div>
-              )}
-
-              {character.goals && (
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Goals</h3>
-                  <p className="text-sm text-gray-600">{character.goals}</p>
-                </div>
-              )}
-
-              {character.backstory && (
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Backstory</h3>
-                  <p className="text-sm text-gray-600">{character.backstory}</p>
-                </div>
-              )}
-
-              <Separator />
-            </div>
-          </ScrollArea>
+        <DialogContent className="sm:max-w-[725px] max-h-[90vh] overflow-y-auto">
+          <CharacterForm
+            formData={character}
+            isReadOnly={true}
+            onCancel={() => setShowDetails(false)}
+          />
         </DialogContent>
       </Dialog>
     </>
