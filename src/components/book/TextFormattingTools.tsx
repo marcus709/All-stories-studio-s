@@ -15,7 +15,7 @@ import {
   Quote,
   List,
   ListOrdered,
-  Footnotes
+  BookText
 } from "lucide-react";
 
 interface FormattingItem {
@@ -32,7 +32,7 @@ const formattingItems: FormattingItem[] = [
   { id: 'quote', type: 'block', icon: <Quote className="h-4 w-4" />, label: 'Quote' },
   { id: 'list', type: 'list', icon: <List className="h-4 w-4" />, label: 'Bullet List' },
   { id: 'ordered-list', type: 'list', icon: <ListOrdered className="h-4 w-4" />, label: 'Numbered List' },
-  { id: 'footnote', type: 'inline', icon: <Footnotes className="h-4 w-4" />, label: 'Footnote' }
+  { id: 'footnote', type: 'inline', icon: <BookText className="h-4 w-4" />, label: 'Footnote' }
 ];
 
 const alignmentTools = [
