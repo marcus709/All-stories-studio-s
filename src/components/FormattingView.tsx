@@ -80,93 +80,96 @@ export const FormattingView = () => {
             />
           </div>
         </div>
-        <div className="flex space-x-4">
-          {/* Navigation icons will be added here */}
-        </div>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="flex-1 p-6 grid grid-cols-12 gap-6">
-        {/* Left Tools Panel */}
-        <div className="col-span-3 bg-white/40 backdrop-blur-md rounded-lg p-4 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] border border-gray-200/60">
-          <TextFormattingTools isAIMode={isAIMode} />
+      {/* Main Content */}
+      {isAIMode ? (
+        <div className="flex-1 p-6">
+          <div className="max-w-3xl mx-auto h-full bg-white/40 backdrop-blur-md rounded-lg p-4 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] border border-gray-200/60">
+            <TextFormattingTools isAIMode={isAIMode} />
+          </div>
         </div>
+      ) : (
+        <div className="flex-1 p-6 grid grid-cols-12 gap-6">
+          {/* Left Tools Panel */}
+          <div className="col-span-3 bg-white/40 backdrop-blur-md rounded-lg p-4 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] border border-gray-200/60">
+            <TextFormattingTools isAIMode={isAIMode} />
+          </div>
 
-        {/* Center Book Preview */}
-        <div className="col-span-6 bg-white/40 backdrop-blur-md rounded-lg p-4 flex flex-col shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] border border-gray-200/60">
-          <div className="flex-1 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-200/60 relative perspective-[2000px] flex items-center justify-center">
-            {/* 3D Book Preview */}
-            <div className="w-[600px] h-[400px] transform-style-3d transition-all duration-500 cursor-pointer relative">
-              {/* Book Container */}
-              <div className="absolute inset-0 transform-style-3d rotate-x-[20deg] rotate-y-[-20deg]">
-                {/* Left Page (verso) */}
-                <div className="absolute left-0 w-[290px] h-full bg-white rounded-l-lg shadow-lg transform origin-right transition-transform">
-                  <div className="absolute inset-0 bg-gradient-to-r from-gray-100/80 to-transparent" />
-                  <div className="absolute inset-[16px] flex flex-col">
-                    <div className="text-gray-600 text-sm leading-relaxed">
-                      Left page content goes here. This is where the previous page content will be displayed.
+          {/* Center Book Preview */}
+          <div className="col-span-6 bg-white/40 backdrop-blur-md rounded-lg p-4 flex flex-col shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] border border-gray-200/60">
+            <div className="flex-1 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-200/60 relative perspective-[2000px] flex items-center justify-center">
+              {/* 3D Book Preview */}
+              <div className="w-[600px] h-[400px] transform-style-3d transition-all duration-500 cursor-pointer relative">
+                {/* Book Container */}
+                <div className="absolute inset-0 transform-style-3d rotate-x-[20deg] rotate-y-[-20deg]">
+                  {/* Left Page (verso) */}
+                  <div className="absolute left-0 w-[290px] h-full bg-white rounded-l-lg shadow-lg transform origin-right transition-transform">
+                    <div className="absolute inset-0 bg-gradient-to-r from-gray-100/80 to-transparent" />
+                    <div className="absolute inset-[16px] flex flex-col">
+                      <div className="text-gray-600 text-sm leading-relaxed">
+                        Left page content goes here. This is where the previous page content will be displayed.
+                      </div>
                     </div>
+                    {/* Page Curl Shadow */}
+                    <div className="absolute right-0 inset-y-0 w-16 bg-gradient-to-l from-black/10 to-transparent transform skew-y-3" />
                   </div>
-                  {/* Page Curl Shadow */}
-                  <div className="absolute right-0 inset-y-0 w-16 bg-gradient-to-l from-black/10 to-transparent transform skew-y-3" />
-                </div>
 
-                {/* Book Gutter */}
-                <div className="absolute left-1/2 -translate-x-[4px] inset-y-0 w-[8px] bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300 transform-gpu">
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/5 to-transparent" />
-                </div>
+                  {/* Book Gutter */}
+                  <div className="absolute left-1/2 -translate-x-[4px] inset-y-0 w-[8px] bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300 transform-gpu">
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/5 to-transparent" />
+                  </div>
 
-                {/* Right Page (recto) */}
-                <div className="absolute right-0 w-[290px] h-full bg-white rounded-r-lg shadow-lg transform origin-left transition-transform">
-                  <div className="absolute inset-0 bg-gradient-to-l from-gray-100/80 to-transparent" />
-                  <div className="absolute inset-[16px] flex flex-col">
-                    <div className="text-gray-600 text-sm leading-relaxed">
-                      Right page content goes here. This is where the current page content will be displayed.
+                  {/* Right Page (recto) */}
+                  <div className="absolute right-0 w-[290px] h-full bg-white rounded-r-lg shadow-lg transform origin-left transition-transform">
+                    <div className="absolute inset-0 bg-gradient-to-l from-gray-100/80 to-transparent" />
+                    <div className="absolute inset-[16px] flex flex-col">
+                      <div className="text-gray-600 text-sm leading-relaxed">
+                        Right page content goes here. This is where the current page content will be displayed.
+                      </div>
                     </div>
+                    {/* Page Curl Shadow */}
+                    <div className="absolute left-0 inset-y-0 w-16 bg-gradient-to-r from-black/10 to-transparent transform -skew-y-3" />
                   </div>
-                  {/* Page Curl Shadow */}
-                  <div className="absolute left-0 inset-y-0 w-16 bg-gradient-to-r from-black/10 to-transparent transform -skew-y-3" />
+
+                  {/* Page Edges */}
+                  <div className="absolute -right-1 inset-y-0 w-1 bg-gradient-to-l from-gray-200 to-gray-300 transform translate-x-full">
+                    {Array.from({ length: 20 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="absolute inset-0 bg-white border-t border-gray-300"
+                        style={{ height: '1px', top: `${(i * 5)}%` }}
+                      />
+                    ))}
+                  </div>
+                  <div className="absolute -left-1 inset-y-0 w-1 bg-gradient-to-r from-gray-200 to-gray-300 transform -translate-x-full">
+                    {Array.from({ length: 20 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="absolute inset-0 bg-white border-t border-gray-300"
+                        style={{ height: '1px', top: `${(i * 5)}%` }}
+                      />
+                    ))}
+                  </div>
                 </div>
 
-                {/* Page Edges (Right) */}
-                <div className="absolute -right-1 inset-y-0 w-1 bg-gradient-to-l from-gray-200 to-gray-300 transform translate-x-full">
-                  {Array.from({ length: 20 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="absolute inset-0 bg-white border-t border-gray-300"
-                      style={{ height: '1px', top: `${(i * 5)}%` }}
-                    />
-                  ))}
-                </div>
-
-                {/* Page Edges (Left) */}
-                <div className="absolute -left-1 inset-y-0 w-1 bg-gradient-to-r from-gray-200 to-gray-300 transform -translate-x-full">
-                  {Array.from({ length: 20 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="absolute inset-0 bg-white border-t border-gray-300"
-                      style={{ height: '1px', top: `${(i * 5)}%` }}
-                    />
-                  ))}
-                </div>
+                {/* Book Shadow */}
+                <div className="absolute -bottom-8 inset-x-8 h-[32px] bg-black/20 blur-xl rounded-full transform-gpu scale-95" />
               </div>
-
-              {/* Book Shadow */}
-              <div className="absolute -bottom-8 inset-x-8 h-[32px] bg-black/20 blur-xl rounded-full transform-gpu scale-95" />
+            </div>
+            
+            {/* Bottom Controls */}
+            <div className="h-32 mt-4 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-200/60 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)]">
+              {/* Control buttons will be added here */}
             </div>
           </div>
-          
-          {/* Bottom Controls */}
-          <div className="h-32 mt-4 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-200/60 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)]">
-            {/* Control buttons will be added here */}
+
+          {/* Right Settings Panel */}
+          <div className="col-span-3 bg-white/40 backdrop-blur-md rounded-lg p-4 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] border border-gray-200/60">
+            {/* Settings will be added here */}
           </div>
         </div>
-
-        {/* Right Settings Panel */}
-        <div className="col-span-3 bg-white/40 backdrop-blur-md rounded-lg p-4 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] border border-gray-200/60">
-          {/* Settings will be added here */}
-        </div>
-      </div>
+      )}
     </div>
   );
 };
