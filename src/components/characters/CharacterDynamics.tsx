@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useStory } from "@/contexts/StoryContext";
 import { CharacterDynamicsD3 } from "./dynamics/CharacterDynamicsD3";
+import { TensionTimeline } from "./dynamics/TensionTimeline";
 
 export const CharacterDynamics = () => {
   const { selectedStory } = useStory();
@@ -35,11 +36,16 @@ export const CharacterDynamics = () => {
   });
 
   return (
-    <div className="w-full h-[calc(100vh-12rem)] bg-white rounded-lg shadow-sm">
-      <CharacterDynamicsD3 
-        characters={characters || []} 
-        relationships={relationships || []} 
-      />
+    <div className="flex flex-col gap-6 w-full h-[calc(100vh-12rem)]">
+      <div className="flex-1 bg-zinc-900 rounded-lg shadow-xl overflow-hidden">
+        <CharacterDynamicsD3 
+          characters={characters || []} 
+          relationships={relationships || []} 
+        />
+      </div>
+      <div className="h-48 bg-zinc-900 rounded-lg shadow-xl p-4">
+        <TensionTimeline storyId={selectedStory?.id} />
+      </div>
     </div>
   );
 };
