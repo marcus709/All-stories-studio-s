@@ -12,6 +12,7 @@ import { PageTurner } from "./book/PageTurner";
 import { BookSizeSelector, BookSize } from "./book/BookSizeSelector";
 import { PreviewScene } from "./book/PreviewScene";
 import { CoverTextEditor } from "./book/CoverTextEditor";
+import { IText } from "fabric";
 
 const templates: Template[] = [
   {
@@ -52,6 +53,7 @@ export const FormattingView = () => {
   const [previewScene, setPreviewScene] = useState("none");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [coverTexts, setCoverTexts] = useState<Array<{ text: string; font: string; size: number; x: number; y: number }>>([]);
+  const [selectedText, setSelectedText] = useState<IText | null>(null);
 
   const { data: bookStructures } = useQuery({
     queryKey: ["bookStructures"],
@@ -89,6 +91,10 @@ export const FormattingView = () => {
     setCoverTexts(texts);
   };
 
+  const handleTextSelect = (text: IText | null) => {
+    setSelectedText(text);
+  };
+
   const renderBookPages = () => {
     const pages = [
       // Cover
@@ -111,6 +117,7 @@ export const FormattingView = () => {
                 width={bookSize.width * 100}
                 height={bookSize.height * 100}
                 onTextUpdate={handleTextUpdate}
+                onTextSelect={handleTextSelect}
               />
             </div>
           </div>
@@ -127,6 +134,7 @@ export const FormattingView = () => {
               width={bookSize.width * 100}
               height={bookSize.height * 100}
               onTextUpdate={handleTextUpdate}
+              onTextSelect={handleTextSelect}
             />
           </div>
         ) : (
@@ -240,7 +248,10 @@ export const FormattingView = () => {
 
         {/* Right Panel - Properties */}
         <div className="w-80 border-l bg-white overflow-y-auto">
-          <PropertiesPanel selectedTemplate={selectedTemplate} />
+          <PropertiesPanel 
+            selectedTemplate={selectedTemplate}
+            selectedText={selectedText}
+          />
         </div>
       </div>
     </div>
