@@ -75,17 +75,28 @@ export const TextFormattingTools = ({ isAIMode }: TextFormattingToolsProps) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 flex-1 min-h-0">
+      <div className="grid grid-cols-2 gap-8 flex-1 min-h-0 px-12">
         <div className="flex flex-col space-y-4 min-h-0">
-          <div className="prose max-w-none flex-1">
-            <div contentEditable className="h-full p-4 bg-white rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-              Start writing your content here...
+          <div className="prose max-w-none flex-1 bg-white rounded-lg shadow-lg">
+            <div 
+              contentEditable 
+              className="h-full p-8 focus:outline-none focus:ring-0 prose-h1:text-3xl prose-h2:text-2xl prose-p:text-base prose-p:leading-relaxed"
+              style={{
+                minHeight: '842px',  // A4 height ratio
+                maxWidth: '595px',   // A4 width ratio
+                margin: '0 auto',
+                backgroundColor: 'white',
+              }}
+            >
+              <h1>Chapter 1</h1>
+              <h2>There Is No One Left</h2>
+              <p>Start writing your content here...</p>
             </div>
           </div>
         </div>
         
         <div className="flex flex-col space-y-4 min-h-0">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
               <Select defaultValue="ipad">
                 <SelectTrigger className="w-[120px]">
@@ -111,13 +122,22 @@ export const TextFormattingTools = ({ isAIMode }: TextFormattingToolsProps) => {
             </div>
           </div>
           
-          <div className="bg-white rounded-lg border border-gray-200 flex-1 flex items-center justify-center">
-            <div className="max-w-sm mx-auto">
-              Preview will appear here
+          <div 
+            className="bg-white rounded-lg shadow-lg flex-1 overflow-hidden"
+            style={{
+              minHeight: '842px',  // A4 height ratio
+              maxWidth: '595px',   // A4 width ratio
+              margin: '0 auto',
+            }}
+          >
+            <div className="h-full p-8 prose max-w-none">
+              <h1>Chapter 1</h1>
+              <h2>There Is No One Left</h2>
+              <p>Preview will appear here...</p>
             </div>
           </div>
           
-          <div className="flex justify-between">
+          <div className="flex justify-between mt-4">
             <Button variant="outline">← Chapter</Button>
             <Button variant="outline">Chapter →</Button>
           </div>
