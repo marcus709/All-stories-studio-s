@@ -9,20 +9,6 @@ import {
   SidebarHeader,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { 
-  Globe2,
-  Type,
-  Layout,
-  Palette,
-  BookOpen,
-  AlignLeft,
-  List,
-  Settings,
-  BookMarked,
-  FileText,
-  PenTool,
-  Baseline
-} from "lucide-react";
 
 export const FormattingView = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
@@ -75,83 +61,15 @@ export const FormattingView = () => {
     setSelectedText(text);
   };
 
-  const sidebarSections = [
-    {
-      title: "Templates",
-      icon: Layout,
-      items: ["Basic", "Modern", "Classic", "Custom"]
-    },
-    {
-      title: "Design",
-      icon: Palette,
-      items: ["Colors", "Spacing", "Borders"]
-    },
-    {
-      title: "Typography",
-      icon: Type,
-      items: ["Headings", "Body", "Lists", "Links"]
-    },
-    {
-      title: "Page Format",
-      icon: FileText,
-      items: ["Size", "Margins", "Headers", "Footers"]
-    },
-    {
-      title: "Book Elements",
-      icon: BookOpen,
-      items: ["Chapters", "Sections", "Notes"]
-    },
-    {
-      title: "Text Formatting",
-      icon: AlignLeft,
-      items: ["Alignment", "Indentation", "Line Height"]
-    },
-    {
-      title: "Lists & Tables",
-      icon: List,
-      items: ["Bullet Lists", "Numbered Lists", "Tables"]
-    },
-    {
-      title: "Settings",
-      icon: Settings,
-      items: ["General", "Export", "Preview"]
-    }
-  ];
-
   return (
     <SidebarProvider>
       <div className="min-h-screen bg-background flex w-full">
-        <Sidebar className="bg-zinc-900 text-zinc-100 border-r border-zinc-800 w-64">
-          <SidebarHeader className="border-b border-zinc-800 px-6 py-4">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <BookMarked className="h-5 w-5" />
-              Book Formatting
-            </h2>
+        <Sidebar>
+          <SidebarHeader className="border-b px-6 py-4">
+            <h2 className="text-lg font-semibold">Book Formatting</h2>
           </SidebarHeader>
-          <SidebarContent className="p-2">
-            {sidebarSections.map((section, index) => (
-              <div key={section.title} className="mb-1">
-                <button
-                  className="w-full px-3 py-2 text-sm flex items-center gap-2 hover:bg-zinc-800 rounded-lg transition-colors"
-                  onClick={() => setActiveTab(section.title.toLowerCase())}
-                >
-                  <section.icon className="h-4 w-4 text-zinc-400" />
-                  <span>{section.title}</span>
-                </button>
-                {section.items && (
-                  <div className="ml-9 mt-1 space-y-1">
-                    {section.items.map((item) => (
-                      <button
-                        key={item}
-                        className="w-full px-3 py-1.5 text-sm text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-colors text-left"
-                      >
-                        {item}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+          <SidebarContent className="p-4">
+            {/* We'll add more sidebar content in the next iterations */}
           </SidebarContent>
         </Sidebar>
         <div className="flex-1">
