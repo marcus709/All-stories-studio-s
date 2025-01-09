@@ -10,7 +10,6 @@ import { ToggleLeft, ToggleRight } from "lucide-react";
 import { AIFormattingDialog } from "./book/AIFormattingDialog";
 import { DocumentSelector } from "./book/DocumentSelector";
 import { ExportOptionsDialog } from "./book/ExportOptionsDialog";
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useStory } from "@/contexts/StoryContext";
 import { Document } from "@/types/story";
@@ -26,7 +25,6 @@ export const FormattingView = () => {
   const [deviceView, setDeviceView] = useState<'print' | 'kindle' | 'ipad' | 'phone'>('print');
   const [notifications, setNotifications] = useState<Array<{ id: string; message: string }>>([]);
   const [isAIMode, setIsAIMode] = useState(true);
-  const [showManualModeAlert, setShowManualModeAlert] = useState(false);
   const [showDocumentSelector, setShowDocumentSelector] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [hasFormattedDocument, setHasFormattedDocument] = useState(false);
@@ -64,7 +62,6 @@ export const FormattingView = () => {
         description: "Please wait while we format your document...",
       });
 
-      // Call the formatting edge function with the config
       const { data, error } = await supabase.functions.invoke('format-document', {
         body: { 
           documentId: selectedDocument.id,
@@ -75,7 +72,6 @@ export const FormattingView = () => {
 
       if (error) throw error;
 
-      // Update the document with the formatted content
       const { error: updateError } = await supabase
         .from('documents')
         .update({ content: data.formattedContent })
@@ -129,9 +125,7 @@ export const FormattingView = () => {
   };
 
   const handleAIModeToggle = (checked: boolean) => {
-    if (!checked) {
-      setShowManualModeAlert(true);
-    }
+    setIsAIMode(checked);
   };
 
   const handleDocumentSelect = (docId: string) => {
@@ -156,7 +150,6 @@ export const FormattingView = () => {
 
   return (
     <div className="min-h-screen bg-white/90 flex flex-col">
-      {/* Top Navigation Bar */}
       <div className="h-16 border-b border-gray-200/60 bg-white/50 backdrop-blur-sm flex items-center px-6 shadow-sm">
         <div className="flex-1">
           <div className="flex items-center space-x-2">
@@ -168,7 +161,7 @@ export const FormattingView = () => {
             </div>
             <Switch
               id="ai-mode"
-              checked={true}
+              checked={isAIMode}
               onCheckedChange={handleAIModeToggle}
               className="data-[state=checked]:bg-purple-500"
             />
@@ -176,7 +169,6 @@ export const FormattingView = () => {
         </div>
       </div>
 
-      {/* Main Content - Always AI Mode */}
       <div className="flex-1 p-6">
         <div className="max-w-3xl mx-auto h-full bg-white/40 backdrop-blur-md rounded-lg p-4 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] border border-gray-200/60">
           <div className="flex justify-between mb-4">
@@ -188,10 +180,12 @@ export const FormattingView = () => {
               handleUploadComplete={handleUploadComplete}
             />
             <div className="flex gap-2 items-center">
-              <AIFormattingDialog 
-                onConfigSubmit={handleFormatConfig}
-                disabled={!selectedDocument}
-              />
+              {isAIMode && (
+                <AIFormattingDialog 
+                  onConfigSubmit={handleFormatConfig}
+                  disabled={!selectedDocument}
+                />
+              )}
               <div className="relative">
                 {hasFormattedDocument && (
                   <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-500 rounded-full animate-pulse" />
@@ -203,26 +197,9 @@ export const FormattingView = () => {
               </div>
             </div>
           </div>
-          <TextFormattingTools isAIMode={true} />
+          <TextFormattingTools isAIMode={isAIMode} />
         </div>
       </div>
-
-      {/* Manual Mode Coming Soon Alert */}
-      <AlertDialog open={showManualModeAlert} onOpenChange={setShowManualModeAlert}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Manual Mode Coming Soon</AlertDialogTitle>
-            <AlertDialogDescription>
-              The manual formatting mode is currently under development and will be available soon. For now, please use our AI assistant to help you format your book.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="flex justify-end">
-            <AlertDialogAction onClick={() => setShowManualModeAlert(false)}>
-              Got it
-            </AlertDialogAction>
-          </div>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };
