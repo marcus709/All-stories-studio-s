@@ -6,26 +6,32 @@ interface TextFormattingToolsProps {
   currentSection: string;
 }
 
-export const TextFormattingTools = ({ isAIMode, currentSection }: TextFormattingToolsProps) => {
+export const TextFormattingTools = ({ isAIMode, currentSection = 'content' }: TextFormattingToolsProps) => {
+  const getSectionTitle = (section: string) => {
+    if (!section) return 'Content';
+    
+    if (section === 'title') return 'Title Page';
+    if (section === 'copyright') return 'Copyright Page';
+    if (section === 'dedication') return 'Dedication';
+    if (section === 'contents') return 'Table of Contents';
+    if (section.startsWith('chapter-')) return `Chapter ${section.split('-')[1]}`;
+    
+    return 'Content';
+  };
+
   return (
     <div className="flex-1 flex">
       <div className="w-[21cm] mx-auto bg-white shadow-lg my-4 rounded-lg overflow-hidden border">
         <div className="p-8">
           <h2 className="text-2xl font-semibold mb-4">
-            {currentSection === 'title' && 'Title Page'}
-            {currentSection === 'copyright' && 'Copyright Page'}
-            {currentSection === 'dedication' && 'Dedication'}
-            {currentSection === 'contents' && 'Table of Contents'}
-            {currentSection.startsWith('chapter-') && `Chapter ${currentSection.split('-')[1]}`}
+            {getSectionTitle(currentSection)}
           </h2>
           <div className="prose max-w-none">
-            {/* Content specific to each section would go here */}
             <p>Edit your {currentSection} content here...</p>
           </div>
         </div>
       </div>
       <div className="w-96 border-l">
-        {/* Preview area */}
         <div className="p-4">
           <h3 className="text-sm font-medium mb-2">Preview</h3>
           <div className="aspect-[3/4] bg-gray-100 rounded-lg"></div>
