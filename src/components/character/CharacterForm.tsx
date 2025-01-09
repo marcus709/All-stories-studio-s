@@ -26,7 +26,7 @@ export function CharacterForm({
   isReadOnly 
 }: CharacterFormProps) {
   const handleFieldChange = (field: string, value: any) => {
-    if (handleInputChange) {
+    if (handleInputChange && !isReadOnly) {
       handleInputChange({
         target: {
           id: field,
@@ -118,6 +118,7 @@ export function CharacterForm({
               resilience: 50
             }}
             onChange={handleFieldChange}
+            isReadOnly={isReadOnly}
           />
         </TabsContent>
 
@@ -133,6 +134,7 @@ export function CharacterForm({
               }
             }}
             onChange={(values) => handleFieldChange('values_and_morals', values)}
+            isReadOnly={isReadOnly}
           />
         </TabsContent>
 
@@ -150,6 +152,7 @@ export function CharacterForm({
             }}
             ancestry={formData.ancestry || ''}
             onChange={handleFieldChange}
+            isReadOnly={isReadOnly}
           />
         </TabsContent>
       </Tabs>

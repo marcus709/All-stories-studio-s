@@ -12,24 +12,12 @@ interface ValuesAndMoralsConfigProps {
     };
   };
   onChange: (values: any) => void;
+  isReadOnly?: boolean;
 }
 
-export function ValuesAndMoralsConfig({ values, onChange }: ValuesAndMoralsConfigProps) {
+export function ValuesAndMoralsConfig({ values, onChange, isReadOnly }: ValuesAndMoralsConfigProps) {
   const handleValueChange = (field: string, value: number[]) => {
-    if (field.includes('.')) {
-      const [parent, child] = field.split('.');
-      const parentKey = parent as keyof typeof values;
-      
-      if (typeof values[parentKey] === 'object' && values[parentKey] !== null) {
-        onChange({
-          ...values,
-          [parent]: {
-            ...values[parentKey],
-            [child]: value[0]
-          }
-        });
-      }
-    } else {
+    if (!isReadOnly) {
       onChange({
         ...values,
         [field]: value[0]
@@ -37,70 +25,78 @@ export function ValuesAndMoralsConfig({ values, onChange }: ValuesAndMoralsConfi
     }
   };
 
+  const handleAlignmentChange = (field: string, value: number[]) => {
+    if (!isReadOnly) {
+      onChange({
+        ...values,
+        alignment: {
+          ...values.alignment,
+          [field]: value[0]
+        }
+      });
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <Label className="text-sm">Loyalty ({values.loyalty})</Label>
+    <div className="space-y-8">
+      <div>
+        <Label>Loyalty ({values.loyalty})</Label>
         <Slider
           value={[values.loyalty]}
           onValueChange={(value) => handleValueChange('loyalty', value)}
+          min={0}
           max={100}
           step={1}
+          disabled={isReadOnly}
         />
       </div>
 
-      <div className="space-y-2">
-        <Label className="text-sm">Honesty ({values.honesty})</Label>
+      <div>
+        <Label>Honesty ({values.honesty})</Label>
         <Slider
           value={[values.honesty]}
           onValueChange={(value) => handleValueChange('honesty', value)}
+          min={0}
           max={100}
           step={1}
+          disabled={isReadOnly}
         />
       </div>
 
-      <div className="space-y-2">
-        <Label className="text-sm">Risk Taking ({values.risk_taking})</Label>
+      <div>
+        <Label>Risk Taking ({values.risk_taking})</Label>
         <Slider
           value={[values.risk_taking]}
           onValueChange={(value) => handleValueChange('risk_taking', value)}
+          min={0}
           max={100}
           step={1}
+          disabled={isReadOnly}
         />
       </div>
 
-      <div className="space-y-4">
-        <Label>Alignment</Label>
-        
-        <div className="space-y-2">
-          <Label className="text-sm">Lawful vs Chaotic ({values.alignment.lawful_chaotic})</Label>
-          <Slider
-            value={[values.alignment.lawful_chaotic]}
-            onValueChange={(value) => handleValueChange('alignment.lawful_chaotic', value)}
-            min={-100}
-            max={100}
-            step={1}
-          />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Lawful</span>
-            <span>Chaotic</span>
-          </div>
-        </div>
+      <div>
+        <Label>Lawful vs Chaotic ({values.alignment.lawful_chaotic})</Label>
+        <Slider
+          value={[values.alignment.lawful_chaotic]}
+          onValueChange={(value) => handleAlignmentChange('lawful_chaotic', value)}
+          min={-100}
+          max={100}
+          step={1}
+          disabled={isReadOnly}
+        />
+      </div>
 
-        <div className="space-y-2">
-          <Label className="text-sm">Selfless vs Selfish ({values.alignment.selfless_selfish})</Label>
-          <Slider
-            value={[values.alignment.selfless_selfish]}
-            onValueChange={(value) => handleValueChange('alignment.selfless_selfish', value)}
-            min={-100}
-            max={100}
-            step={1}
-          />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Selfless</span>
-            <span>Selfish</span>
-          </div>
-        </div>
+      <div>
+        <Label>Selfless vs Selfish ({values.alignment.selfless_selfish})</Label>
+        <Slider
+          value={[values.alignment.selfless_selfish]}
+          onValueChange={(value) => handleAlignmentChange('selfless_selfish', value)}
+          min={-100}
+          max={100}
+          step={1}
+          disabled={isReadOnly}
+        />
       </div>
     </div>
   );
