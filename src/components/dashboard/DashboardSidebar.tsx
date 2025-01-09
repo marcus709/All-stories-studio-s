@@ -65,68 +65,57 @@ export const DashboardSidebar = ({ currentView, setCurrentView }: DashboardSideb
     setIsCollapsed(!isCollapsed);
   };
 
-  if (isCollapsed) {
+  if (!isCollapsed) {
     return (
-      <div className="fixed left-0 top-16 w-12 h-[calc(100vh-4rem)] border-r bg-white flex flex-col items-center py-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleSidebar}
-          className="mb-4"
-        >
-          <PanelLeft className="h-4 w-4" />
-        </Button>
+      <div className="fixed left-0 top-16 w-72 h-[calc(100vh-4rem)] border-r bg-white">
+        <div className="flex flex-col h-full">
+          <div className="flex items-center justify-between px-8 mt-8">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-lg font-medium">
+                {profile?.username?.[0]?.toUpperCase() || "?"}
+              </div>
+              <div className="flex flex-col">
+                <h3 className="font-medium text-base text-gray-900">
+                  {profile?.username || "Loading..."}
+                </h3>
+              </div>
+            </div>
+            {currentView === 'plot' && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleSidebar}
+                className="ml-2"
+              >
+                <PanelLeftClose className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+
+          <div className="space-y-4 mb-6 px-8 mt-12">
+            <StoriesDialog />
+          </div>
+
+          <ScrollArea className="flex-1 px-4">
+            <nav className="space-y-3 pr-4">
+              {navigationItems.map(({ id, icon: Icon, label }) => (
+                <button
+                  key={id}
+                  onClick={() => setCurrentView(id)}
+                  disabled={!selectedStory}
+                  className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-lg transition-colors text-gray-700 text-lg
+                    ${currentView === id ? "bg-purple-50 text-purple-600" : "hover:bg-gray-50"}`}
+                >
+                  <Icon className="h-6 w-6" />
+                  <span className="font-medium">{label}</span>
+                </button>
+              ))}
+            </nav>
+          </ScrollArea>
+        </div>
       </div>
     );
   }
 
-  return (
-    <div className="fixed left-0 top-16 w-72 h-[calc(100vh-4rem)] border-r bg-white">
-      <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between px-8 mt-8">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-lg font-medium">
-              {profile?.username?.[0]?.toUpperCase() || "?"}
-            </div>
-            <div className="flex flex-col">
-              <h3 className="font-medium text-base text-gray-900">
-                {profile?.username || "Loading..."}
-              </h3>
-            </div>
-          </div>
-          {currentView === 'plot' && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleSidebar}
-              className="ml-2"
-            >
-              <PanelLeftClose className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-
-        <div className="space-y-4 mb-6 px-8 mt-12">
-          <StoriesDialog />
-        </div>
-
-        <ScrollArea className="flex-1 px-4">
-          <nav className="space-y-3 pr-4">
-            {navigationItems.map(({ id, icon: Icon, label }) => (
-              <button
-                key={id}
-                onClick={() => setCurrentView(id)}
-                disabled={!selectedStory}
-                className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-lg transition-colors text-gray-700 text-lg
-                  ${currentView === id ? "bg-purple-50 text-purple-600" : "hover:bg-gray-50"}`}
-              >
-                <Icon className="h-6 w-6" />
-                <span className="font-medium">{label}</span>
-              </button>
-            ))}
-          </nav>
-        </ScrollArea>
-      </div>
-    </div>
-  );
+  return null;
 };
