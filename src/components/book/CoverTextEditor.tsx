@@ -1,10 +1,21 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Canvas, IText } from "fabric";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { 
+  AlignCenter, 
+  AlignLeft, 
+  AlignRight, 
+  Bold, 
+  Italic, 
+  Underline,
+  Type
+} from "lucide-react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Slider } from "@/components/ui/slider";
 
 interface CoverTextEditorProps {
   width: number;
@@ -20,12 +31,14 @@ const FONTS = [
   { name: "Courier New", value: "Courier New" }
 ];
 
-const FONT_SIZES = Array.from({ length: 20 }, (_, i) => (i + 1) * 4);
+const FONT_SIZES = Array.from({ length: 72 }, (_, i) => i + 8); // 8px to 80px
 
 export const CoverTextEditor = ({ width, height, onTextUpdate }: CoverTextEditorProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricRef = useRef<Canvas | null>(null);
   const { toast } = useToast();
+  const [selectedObject, setSelectedObject] = useState<IText | null>(null);
+  const [textColor, setTextColor] = useState("#000000");
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -38,8 +51,23 @@ export const CoverTextEditor = ({ width, height, onTextUpdate }: CoverTextEditor
 
     const canvas = fabricRef.current;
 
-    // Enable text editing
+    canvas.on("selection:created", (e) => {
+      const selected = e.selected?.[0];
+      if (selected instanceof IText) {
+        setSelectedObject(selected);
+        setTextColor(selected.fill as string || "#000000");
+      }
+    });
+
+    canvas.on("selection:cleared", () => {
+      setSelectedObject(null);
+    });
+
     canvas.on("text:changed", () => {
+      updateTextData();
+    });
+
+    canvas.on("object:modified", () => {
       updateTextData();
     });
 
@@ -73,11 +101,12 @@ export const CoverTextEditor = ({ width, height, onTextUpdate }: CoverTextEditor
       top: 50,
       fontFamily: "Arial",
       fontSize: 20,
-      fill: "black",
+      fill: textColor,
     });
 
     fabricRef.current.add(text);
     fabricRef.current.setActiveObject(text);
+    setSelectedObject(text);
     updateTextData();
 
     toast({
@@ -87,30 +116,46 @@ export const CoverTextEditor = ({ width, height, onTextUpdate }: CoverTextEditor
   };
 
   const updateSelectedText = (property: string, value: string | number) => {
-    if (!fabricRef.current) return;
-
-    const activeObject = fabricRef.current.getActiveObject();
-    if (!activeObject || !(activeObject instanceof IText)) return;
+    if (!selectedObject) return;
 
     switch (property) {
       case "font":
-        activeObject.set("fontFamily", value);
+        selectedObject.set("fontFamily", value);
         break;
       case "size":
-        activeObject.set("fontSize", Number(value));
+        selectedObject.set("fontSize", Number(value));
+        break;
+      case "color":
+        selectedObject.set("fill", value);
+        setTextColor(value as string);
+        break;
+      case "align":
+        selectedObject.set("textAlign", value);
+        break;
+      case "bold":
+        selectedObject.set("fontWeight", selectedObject.fontWeight === "bold" ? "normal" : "bold");
+        break;
+      case "italic":
+        selectedObject.set("fontStyle", selectedObject.fontStyle === "italic" ? "normal" : "italic");
+        break;
+      case "underline":
+        selectedObject.set("underline", !selectedObject.underline);
         break;
     }
 
-    fabricRef.current.renderAll();
+    fabricRef.current?.renderAll();
     updateTextData();
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-4 items-end">
+      <div className="flex flex-wrap gap-4 items-end">
         <div className="space-y-2">
           <Label>Font Family</Label>
-          <Select onValueChange={(value) => updateSelectedText("font", value)}>
+          <Select 
+            value={selectedObject?.fontFamily || undefined}
+            onValueChange={(value) => updateSelectedText("font", value)}
+          >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Select font" />
             </SelectTrigger>
@@ -126,7 +171,10 @@ export const CoverTextEditor = ({ width, height, onTextUpdate }: CoverTextEditor
 
         <div className="space-y-2">
           <Label>Font Size</Label>
-          <Select onValueChange={(value) => updateSelectedText("size", value)}>
+          <Select 
+            value={selectedObject?.fontSize?.toString() || undefined}
+            onValueChange={(value) => updateSelectedText("size", value)}
+          >
             <SelectTrigger className="w-[100px]">
               <SelectValue placeholder="Size" />
             </SelectTrigger>
@@ -140,7 +188,56 @@ export const CoverTextEditor = ({ width, height, onTextUpdate }: CoverTextEditor
           </Select>
         </div>
 
-        <Button onClick={addNewText}>Add Text</Button>
+        <div className="space-y-2">
+          <Label>Text Color</Label>
+          <Input
+            type="color"
+            value={textColor}
+            onChange={(e) => updateSelectedText("color", e.target.value)}
+            className="w-[100px] h-10"
+          />
+        </div>
+
+        <ToggleGroup type="single" className="flex gap-1">
+          <ToggleGroupItem value="left" onClick={() => updateSelectedText("align", "left")}>
+            <AlignLeft className="h-4 w-4" />
+          </ToggleGroupItem>
+          <ToggleGroupItem value="center" onClick={() => updateSelectedText("align", "center")}>
+            <AlignCenter className="h-4 w-4" />
+          </ToggleGroupItem>
+          <ToggleGroupItem value="right" onClick={() => updateSelectedText("align", "right")}>
+            <AlignRight className="h-4 w-4" />
+          </ToggleGroupItem>
+        </ToggleGroup>
+
+        <ToggleGroup type="multiple" className="flex gap-1">
+          <ToggleGroupItem 
+            value="bold" 
+            onClick={() => updateSelectedText("bold", "")}
+            data-state={selectedObject?.fontWeight === "bold" ? "on" : "off"}
+          >
+            <Bold className="h-4 w-4" />
+          </ToggleGroupItem>
+          <ToggleGroupItem 
+            value="italic" 
+            onClick={() => updateSelectedText("italic", "")}
+            data-state={selectedObject?.fontStyle === "italic" ? "on" : "off"}
+          >
+            <Italic className="h-4 w-4" />
+          </ToggleGroupItem>
+          <ToggleGroupItem 
+            value="underline" 
+            onClick={() => updateSelectedText("underline", "")}
+            data-state={selectedObject?.underline ? "on" : "off"}
+          >
+            <Underline className="h-4 w-4" />
+          </ToggleGroupItem>
+        </ToggleGroup>
+
+        <Button onClick={addNewText} className="flex items-center gap-2">
+          <Type className="h-4 w-4" />
+          Add Text
+        </Button>
       </div>
 
       <div className="border rounded-lg overflow-hidden">
