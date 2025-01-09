@@ -74,8 +74,26 @@ export const FormattingView = () => {
 
         {/* Center Book Preview */}
         <div className="col-span-6 bg-white/40 backdrop-blur-md rounded-lg p-4 flex flex-col shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] border border-gray-200/60">
-          <div className="flex-1 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-200/60">
-            {/* Book preview will be added here */}
+          <div className="flex-1 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-200/60 relative perspective-[1000px] flex items-center justify-center">
+            {/* 3D Book Preview */}
+            <div className="relative w-[600px] h-[800px] transform-style-3d transition-transform duration-500 hover:rotate-y-10 group">
+              {/* Left Page */}
+              <div className="absolute inset-0 bg-white rounded-l-lg shadow-2xl border-r border-gray-200/60 transform origin-right transition-transform duration-500 group-hover:rotate-y-[-5deg]">
+                <div className="p-8 text-gray-600">
+                  {/* Book content will be rendered here */}
+                </div>
+              </div>
+              
+              {/* Right Page */}
+              <div className="absolute inset-0 bg-white rounded-r-lg shadow-2xl transform origin-left transition-transform duration-500 group-hover:rotate-y-5">
+                <div className="p-8 text-gray-600">
+                  {/* Book content will be rendered here */}
+                </div>
+              </div>
+              
+              {/* Book Spine */}
+              <div className="absolute left-0 top-0 bottom-0 w-4 bg-gray-200 transform -translate-x-2 rotate-y-90 origin-left"></div>
+            </div>
           </div>
           {/* Bottom Controls */}
           <div className="h-32 mt-4 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-200/60 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)]">
