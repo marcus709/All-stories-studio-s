@@ -13,6 +13,7 @@ import { ExportOptionsDialog } from "./book/ExportOptionsDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useStory } from "@/contexts/StoryContext";
+import { Document } from "@/types/story";
 
 export const FormattingView = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
@@ -27,7 +28,7 @@ export const FormattingView = () => {
   const [isAIMode, setIsAIMode] = useState(true);
   const [showManualModeAlert, setShowManualModeAlert] = useState(false);
   const [showDocumentSelector, setShowDocumentSelector] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<string | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const { toast } = useToast();
   const { selectedStory } = useStory();
 
@@ -41,7 +42,7 @@ export const FormattingView = () => {
         .eq("story_id", selectedStory.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data;
+      return data as Document[];
     },
     enabled: !!selectedStory?.id,
   });
@@ -87,7 +88,8 @@ export const FormattingView = () => {
   };
 
   const handleDocumentSelect = (docId: string) => {
-    setSelectedDocument(docId);
+    const doc = documents.find(d => d.id === docId);
+    setSelectedDocument(doc || null);
     setShowDocumentSelector(false);
   };
 
