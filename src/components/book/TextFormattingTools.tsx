@@ -13,7 +13,8 @@ import {
   List,
   ListOrdered,
   BookText,
-  Wand2
+  Wand2,
+  Send
 } from "lucide-react";
 
 interface FormattingItem {
@@ -50,24 +51,70 @@ interface TextFormattingToolsProps {
 
 export const TextFormattingTools = ({ isAIMode = false }: TextFormattingToolsProps) => {
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
+  const [aiMessage, setAiMessage] = useState("");
+  const [chatHistory, setChatHistory] = useState<Array<{role: 'user' | 'assistant', content: string}>>([
+    {
+      role: 'assistant',
+      content: 'Hello! I\'m your AI formatting assistant. How can I help you format your book today?'
+    }
+  ]);
+
+  const handleSendMessage = () => {
+    if (!aiMessage.trim()) return;
+    
+    // Add user message to chat
+    setChatHistory(prev => [...prev, { role: 'user', content: aiMessage }]);
+    
+    // Simulate AI response (this should be replaced with actual AI integration)
+    setTimeout(() => {
+      setChatHistory(prev => [...prev, {
+        role: 'assistant',
+        content: 'I understand you want to format your text. Could you please provide more details about what kind of formatting you\'re looking for?'
+      }]);
+    }, 1000);
+    
+    setAiMessage("");
+  };
 
   if (isAIMode) {
     return (
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
+      <div className="flex flex-col h-full">
+        <div className="flex items-center gap-2 mb-4">
           <Wand2 className="h-5 w-5 text-purple-500" />
-          AI Formatting Assistant
-        </h3>
-        <div className="p-4 bg-purple-50 rounded-lg border border-purple-100">
-          <p className="text-sm text-purple-700 mb-4">
-            Let AI help you format your text. Just describe what you want, and I'll help you achieve it.
-          </p>
+          <h3 className="text-lg font-semibold">AI Formatting Assistant</h3>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto mb-4 space-y-4">
+          {chatHistory.map((message, index) => (
+            <div
+              key={index}
+              className={`flex ${message.role === 'assistant' ? 'justify-start' : 'justify-end'}`}
+            >
+              <div
+                className={`max-w-[80%] p-3 rounded-lg ${
+                  message.role === 'assistant'
+                    ? 'bg-purple-100 text-purple-900'
+                    : 'bg-gray-100 text-gray-900'
+                }`}
+              >
+                {message.content}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex gap-2 mt-auto">
           <textarea
-            className="w-full h-32 p-3 rounded-md border border-purple-200 bg-white/80 text-sm"
+            value={aiMessage}
+            onChange={(e) => setAiMessage(e.target.value)}
             placeholder="Describe how you want to format your text..."
+            className="flex-1 p-2 rounded-md border border-gray-200 resize-none h-[80px]"
           />
-          <Button className="w-full mt-3 bg-purple-500 hover:bg-purple-600">
-            Apply AI Formatting
+          <Button
+            onClick={handleSendMessage}
+            className="h-[80px] px-4 bg-purple-500 hover:bg-purple-600"
+          >
+            <Send className="h-4 w-4" />
           </Button>
         </div>
       </div>
