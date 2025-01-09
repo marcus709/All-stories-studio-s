@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
-import { CharacterNode, RelationshipLink } from './types';
+import { CharacterNode, Relationship } from './types';
 
 interface ForceGraphProps {
   characters: CharacterNode[];
-  relationships: RelationshipLink[];
+  relationships: Relationship[];
 }
 
 const relationshipColors = {
