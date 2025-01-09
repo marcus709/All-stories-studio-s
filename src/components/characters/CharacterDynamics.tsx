@@ -7,7 +7,7 @@ import { Timeline } from "./dynamics/Timeline";
 import { CharacterNode, Relationship } from "./dynamics/types";
 
 interface CharacterDynamicsProps {
-  characters: any[];
+  characters: CharacterNode[];
 }
 
 export const CharacterDynamics = ({ characters }: CharacterDynamicsProps) => {
@@ -49,21 +49,28 @@ export const CharacterDynamics = ({ characters }: CharacterDynamicsProps) => {
     queryKey: ["character_relationships", selectedStory?.id],
     queryFn: async () => {
       if (!selectedStory?.id) return sampleRelationships;
-      const { data, error } = await supabase
+      
+      const { data: relationshipsData, error } = await supabase
         .from("character_relationships")
         .select(`
-          *,
-          character1:character1_id(id, name, role),
-          character2:character2_id(id, name, role)
+          id,
+          relationship_type,
+          strength,
+          character1:characters!character1_id(id, name, role),
+          character2:characters!character2_id(id, name, role)
         `)
         .eq("story_id", selectedStory.id);
+
       if (error) throw error;
-      return data.length > 0 ? data.map((rel) => ({
-        source: rel.character1 as CharacterNode,
-        target: rel.character2 as CharacterNode,
-        type: rel.relationship_type,
-        strength: rel.strength || 50,
-      })) : sampleRelationships;
+
+      return relationshipsData.length > 0 
+        ? relationshipsData.map((rel) => ({
+            source: rel.character1 as CharacterNode,
+            target: rel.character2 as CharacterNode,
+            type: rel.relationship_type,
+            strength: rel.strength || 50,
+          })) 
+        : sampleRelationships;
     },
     enabled: !!selectedStory?.id,
   });

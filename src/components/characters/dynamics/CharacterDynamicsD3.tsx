@@ -4,8 +4,6 @@ import { Play, Pause, UserPlus } from 'lucide-react';
 import { ForceGraph } from './ForceGraph';
 import { Timeline } from './Timeline';
 import { CharacterNode, Relationship } from './types';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { AddCharacterToMapDialog } from './AddCharacterToMapDialog';
 
 interface CharacterDynamicsD3Props {
