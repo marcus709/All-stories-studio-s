@@ -1,4 +1,4 @@
-import { Plus, MessageSquare, Network } from "lucide-react";
+import { Plus, MessageSquare } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { CreateCharacterDialog } from "./CreateCharacterDialog";
@@ -11,13 +11,12 @@ import { DeleteCharacterDialog } from "./characters/DeleteCharacterDialog";
 import { PaywallAlert } from "./PaywallAlert";
 import { useFeatureAccess } from "@/utils/subscriptionUtils";
 import { DialogAssistant } from "./characters/DialogAssistant";
-import { CharacterDynamics } from "./characters/CharacterDynamics";
 
 export const CharactersView = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [characterToDelete, setCharacterToDelete] = useState<string | null>(null);
   const [showPaywallAlert, setShowPaywallAlert] = useState(false);
-  const [viewMode, setViewMode] = useState<'grid' | 'dialog' | 'dynamics'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'dialog'>('grid');
   const session = useSession();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -86,26 +85,11 @@ export const CharactersView = () => {
         <div className="flex gap-3">
           <Button 
             variant="outline"
-            onClick={() => setViewMode('dialog')}
-            className={`gap-2 ${viewMode === 'dialog' ? 'bg-purple-50' : ''}`}
+            onClick={() => setViewMode(viewMode === 'grid' ? 'dialog' : 'grid')}
+            className="gap-2"
           >
             <MessageSquare className="h-4 w-4" />
-            Dialog Assistant
-          </Button>
-          <Button 
-            variant="outline"
-            onClick={() => setViewMode('dynamics')}
-            className={`gap-2 ${viewMode === 'dynamics' ? 'bg-purple-50' : ''}`}
-          >
-            <Network className="h-4 w-4" />
-            Character Dynamics
-          </Button>
-          <Button 
-            variant="outline"
-            onClick={() => setViewMode('grid')}
-            className={`gap-2 ${viewMode === 'grid' ? 'bg-purple-50' : ''}`}
-          >
-            View Characters
+            {viewMode === 'grid' ? 'Dialog Assistant' : 'View Characters'}
           </Button>
           <Button 
             className="bg-purple-500 hover:bg-purple-600 gap-2"
@@ -137,10 +121,8 @@ export const CharactersView = () => {
             No characters created yet. Add your first character to get started!
           </div>
         )
-      ) : viewMode === 'dialog' ? (
-        <DialogAssistant characters={characters || []} />
       ) : (
-        <CharacterDynamics characters={characters || []} />
+        <DialogAssistant characters={characters || []} />
       )}
 
       <CreateCharacterDialog 

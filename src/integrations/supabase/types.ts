@@ -1201,47 +1201,6 @@ export type Database = {
           },
         ]
       }
-      timeline_tension_points: {
-        Row: {
-          created_at: string | null
-          description: string | null
-          id: string
-          position: number
-          story_id: string
-          tension_level: number
-          type: Database["public"]["Enums"]["tension_point_type"]
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          position: number
-          story_id: string
-          tension_level: number
-          type?: Database["public"]["Enums"]["tension_point_type"]
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          position?: number
-          story_id?: string
-          tension_level?: number
-          type?: Database["public"]["Enums"]["tension_point_type"]
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "timeline_tension_points_story_id_fkey"
-            columns: ["story_id"]
-            isOneToOne: false
-            referencedRelation: "stories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       topics: {
         Row: {
           created_at: string | null
@@ -1361,7 +1320,6 @@ export type Database = {
         | "character_inconsistency"
         | "setting_inconsistency"
         | "logic_flaw"
-      tension_point_type: "rising" | "climax" | "falling" | "resolution"
       topic_privacy: "public" | "private" | "friends"
     }
     CompositeTypes: {
