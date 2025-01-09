@@ -13,7 +13,7 @@ import {
   MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { Character } from '@/integrations/supabase/types/tables.types';
+import { Character } from '@/types/character';
 import CharacterNode from './CharacterNode';
 import RelationshipEdge, { RelationshipEdgeData } from './RelationshipEdge';
 import { Button } from '@/components/ui/button';
@@ -103,7 +103,7 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
     id: char.id,
     type: 'character' as const,
     position: positions[index] || DEFAULT_POSITION,
-    data: { ...char },
+    data: char, // Pass the entire character object as data
   }));
 
   const initialEdges: Edge<RelationshipEdgeData>[] = relationships.map((rel) => ({
@@ -181,10 +181,12 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
     setLayoutType(newLayout);
     const newPositions = getNodePositions(characters, newLayout);
     
-    setNodes(nodes.map((node, index) => ({
-      ...node,
-      position: newPositions[index] || node.position || DEFAULT_POSITION,
-    })));
+    setNodes((nds) => 
+      nds.map((node, index) => ({
+        ...node,
+        position: newPositions[index] || node.position || DEFAULT_POSITION,
+      }))
+    );
   };
 
   return (
