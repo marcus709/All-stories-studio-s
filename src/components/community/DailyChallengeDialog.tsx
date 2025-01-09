@@ -38,9 +38,9 @@ export const DailyChallengeDialog = () => {
         .select("*")
         .eq("challenge_id", challenge.id)
         .eq("user_id", session.user.id)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== "PGRST116") throw error;
+      if (error) throw error;
       return data;
     },
     enabled: !!challenge?.id && !!session?.user?.id,

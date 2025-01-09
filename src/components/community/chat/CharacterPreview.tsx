@@ -1,4 +1,4 @@
-import { Character } from "@/integrations/supabase/types/tables.types";
+import { Character } from "@/integrations/supabase/types";
 import { UserRound } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -91,13 +91,6 @@ export const CharacterPreview = ({ character, isInMessage }: CharacterPreviewPro
                 </div>
               </div>
 
-              {character.archetype && (
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Archetype</h3>
-                  <p className="text-sm text-purple-600">{character.archetype}</p>
-                </div>
-              )}
-
               {character.traits && character.traits.length > 0 && (
                 <div>
                   <h3 className="text-sm font-medium mb-2">Traits</h3>
@@ -122,101 +115,6 @@ export const CharacterPreview = ({ character, isInMessage }: CharacterPreviewPro
               )}
 
               <Separator />
-
-              {renderJsonSection(character.psychology, "Psychology")}
-              {renderJsonSection(character.values_and_morals, "Values and Morals")}
-              {renderJsonSection(character.cultural_background, "Cultural Background")}
-              {renderJsonSection(character.life_events, "Life Events")}
-              {renderJsonSection(character.psychological_traits, "Psychological Traits")}
-              {renderJsonSection(character.dialogue_style, "Dialogue Style")}
-              {renderJsonSection(character.linguistic_traits, "Linguistic Traits")}
-              {renderJsonSection(character.expertise, "Expertise")}
-
-              {character.flaws && character.flaws.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Flaws</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {renderTraitList(character.flaws)}
-                  </div>
-                </div>
-              )}
-
-              {character.internal_motivations && character.internal_motivations.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Internal Motivations</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {renderTraitList(character.internal_motivations)}
-                  </div>
-                </div>
-              )}
-
-              {character.external_goals && character.external_goals.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-medium mb-2">External Goals</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {renderTraitList(character.external_goals)}
-                  </div>
-                </div>
-              )}
-
-              {character.core_beliefs && character.core_beliefs.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Core Beliefs</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {renderTraitList(character.core_beliefs)}
-                  </div>
-                </div>
-              )}
-
-              {character.group_roles && character.group_roles.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Group Roles</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {renderTraitList(character.group_roles)}
-                  </div>
-                </div>
-              )}
-
-              {character.behavioral_quirks && character.behavioral_quirks.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Behavioral Quirks</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {renderTraitList(character.behavioral_quirks)}
-                  </div>
-                </div>
-              )}
-
-              {character.iconic_phrases && character.iconic_phrases.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Iconic Phrases</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {renderTraitList(character.iconic_phrases)}
-                  </div>
-                </div>
-              )}
-
-              {character.training_history && character.training_history.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Training History</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {renderTraitList(character.training_history)}
-                  </div>
-                </div>
-              )}
-
-              {character.body_language && (
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Body Language</h3>
-                  <p className="text-sm text-gray-600">{character.body_language}</p>
-                </div>
-              )}
-
-              {character.ancestry && (
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Ancestry</h3>
-                  <p className="text-sm text-gray-600">{character.ancestry}</p>
-                </div>
-              )}
             </div>
           </ScrollArea>
         </DialogContent>
