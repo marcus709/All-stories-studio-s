@@ -51,14 +51,14 @@ export const CharacterDynamics = () => {
   });
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-gray-900">
       <div className="flex-1 min-h-0">
         <CharacterDynamicsD3 
           characters={characters || []} 
           relationships={relationships || []} 
         />
       </div>
-      <div className="h-32 border-t">
+      <div className="h-32 border-t border-gray-800">
         <TensionTimeline tensionPoints={tensionPoints || []} />
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { Character } from '@/integrations/supabase/types/tables.types';
 
@@ -9,6 +9,7 @@ interface CharacterDynamicsD3Props {
 
 export const CharacterDynamicsD3 = ({ characters, relationships }: CharacterDynamicsD3Props) => {
   const svgRef = useRef<SVGSVGElement>(null);
+  const [selectedNode, setSelectedNode] = useState<Character | null>(null);
 
   useEffect(() => {
     if (!svgRef.current || !characters.length) return;
@@ -21,10 +22,26 @@ export const CharacterDynamicsD3 = ({ characters, relationships }: CharacterDyna
 
     const svg = d3.select(svgRef.current)
       .attr("width", width)
-      .attr("height", height);
+      .attr("height", height)
+      .attr("viewBox", [0, 0, width, height]);
 
-    // Create a gradient for nodes
+    // Create definitions for gradients and markers
     const defs = svg.append("defs");
+
+    // Add arrow marker for relationship lines
+    defs.append("marker")
+      .attr("id", "arrow")
+      .attr("viewBox", "0 -5 10 10")
+      .attr("refX", 20)
+      .attr("refY", 0)
+      .attr("markerWidth", 6)
+      .attr("markerHeight", 6)
+      .attr("orient", "auto")
+      .append("path")
+      .attr("fill", "#64748b")
+      .attr("d", "M0,-5L10,0L0,5");
+
+    // Create radial gradient for nodes
     const gradient = defs.append("radialGradient")
       .attr("id", "node-gradient")
       .attr("cx", "50%")
@@ -41,56 +58,96 @@ export const CharacterDynamicsD3 = ({ characters, relationships }: CharacterDyna
 
     // Create force simulation
     const simulation = d3.forceSimulation(characters)
-      .force("charge", d3.forceManyBody().strength(-300))
+      .force("charge", d3.forceManyBody().strength(-400))
       .force("center", d3.forceCenter(width / 2, height / 2))
-      .force("collision", d3.forceCollide().radius(60));
+      .force("collision", d3.forceCollide().radius(70))
+      .force("x", d3.forceX(width / 2).strength(0.1))
+      .force("y", d3.forceY(height / 2).strength(0.1));
 
     if (relationships.length > 0) {
       simulation.force("link", d3.forceLink(relationships)
         .id((d: any) => d.id)
-        .distance(200));
+        .distance(200)
+        .strength(0.5));
     }
 
+    // Create container for zoom/pan
+    const container = svg.append("g");
+
+    // Add zoom behavior
+    const zoom = d3.zoom()
+      .scaleExtent([0.1, 4])
+      .on("zoom", (event) => {
+        container.attr("transform", event.transform);
+      });
+
+    svg.call(zoom as any);
+
     // Draw relationships
-    const links = svg.append("g")
+    const links = container.append("g")
       .selectAll("line")
       .data(relationships)
       .enter()
       .append("line")
-      .style("stroke", "#e5e7eb")
-      .style("stroke-width", (d: any) => (d.strength || 50) / 25);
+      .attr("class", "relationship-line")
+      .style("stroke", "#64748b")
+      .style("stroke-width", (d: any) => Math.max(1, Math.min((d.strength || 50) / 25, 5)))
+      .attr("marker-end", "url(#arrow)")
+      .style("opacity", 0.6);
 
     // Create node groups
-    const nodes = svg.append("g")
+    const nodes = container.append("g")
       .selectAll("g")
       .data(characters)
       .enter()
       .append("g")
+      .attr("class", "character-node")
       .call(d3.drag()
         .on("start", dragstarted)
         .on("drag", dragged)
-        .on("end", dragended));
+        .on("end", dragended))
+      .on("click", (event, d: any) => {
+        event.stopPropagation();
+        setSelectedNode(selectedNode?.id === d.id ? null : d);
+      });
 
-    // Add circles to nodes
+    // Add node circles
     nodes.append("circle")
-      .attr("r", 30)
+      .attr("r", 35)
       .style("fill", "url(#node-gradient)")
       .style("stroke", "#4c1d95")
-      .style("stroke-width", "2px");
+      .style("stroke-width", "2px")
+      .style("cursor", "pointer")
+      .transition()
+      .duration(800)
+      .attrTween("r", () => {
+        const i = d3.interpolate(0, 35);
+        return (t) => i(t);
+      });
 
     // Add role labels
     nodes.append("text")
-      .attr("dy", -35)
+      .attr("dy", -40)
       .attr("text-anchor", "middle")
-      .attr("class", "text-xs text-gray-500")
-      .text((d: any) => d.role || "Unknown Role");
+      .attr("class", "text-xs text-gray-400")
+      .text((d: any) => d.role || "Unknown Role")
+      .style("pointer-events", "none")
+      .style("opacity", 0)
+      .transition()
+      .duration(500)
+      .style("opacity", 1);
 
     // Add name labels
     nodes.append("text")
-      .attr("dy", 5)
+      .attr("dy", 45)
       .attr("text-anchor", "middle")
-      .attr("class", "text-sm font-medium text-white")
-      .text((d: any) => d.name);
+      .attr("class", "text-sm font-medium text-gray-200")
+      .text((d: any) => d.name)
+      .style("pointer-events", "none")
+      .style("opacity", 0)
+      .transition()
+      .duration(500)
+      .style("opacity", 1);
 
     // Update positions on each tick
     simulation.on("tick", () => {
@@ -121,25 +178,16 @@ export const CharacterDynamicsD3 = ({ characters, relationships }: CharacterDyna
       event.subject.fy = null;
     }
 
-    // Add zoom capabilities
-    const zoom = d3.zoom()
-      .scaleExtent([0.5, 3])
-      .on("zoom", (event) => {
-        svg.selectAll("g").attr("transform", event.transform);
-      });
-
-    svg.call(zoom as any);
-
+    // Cleanup
     return () => {
       simulation.stop();
     };
-  }, [characters, relationships]);
+  }, [characters, relationships, selectedNode]);
 
   return (
     <svg 
       ref={svgRef} 
-      className="w-full h-full"
-      style={{ background: 'white' }}
+      className="w-full h-full bg-gray-900"
     />
   );
 };
