@@ -2,7 +2,6 @@ import { Bold, Italic, Underline, AlignLeft, AlignRight, AlignJustify, List, Lis
 import { Toggle } from "@/components/ui/toggle";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
 
 interface TextFormattingToolsProps {
   isAIMode: boolean;
@@ -109,12 +108,6 @@ export const TextFormattingTools = ({ isAIMode }: TextFormattingToolsProps) => {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Navigation */}
-      <div className="flex justify-between p-4 bg-white border-t">
-        <Button variant="outline">← Chapter</Button>
-        <Button variant="outline">Chapter →</Button>
       </div>
     </div>
   );

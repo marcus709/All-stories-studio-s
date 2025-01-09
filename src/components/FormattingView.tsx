@@ -19,7 +19,7 @@ export const FormattingView = () => {
   const [previewScene, setPreviewScene] = useState("none");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [coverTexts, setCoverTexts] = useState<Array<{ text: string; font: string; size: number; x: number; y: number }>>([]);
-  const [selectedText, setSelectedText] = useState<IText | null>(null);
+  const [selectedText, setSelectedText] = useState<{ text: string; font: string; size: number; x: number; y: number } | null>(null);
   const [deviceView, setDeviceView] = useState<'print' | 'kindle' | 'ipad' | 'phone'>('print');
   const [notifications, setNotifications] = useState<Array<{ id: string; message: string }>>([]);
   const [isAIMode, setIsAIMode] = useState(true);
@@ -118,7 +118,7 @@ export const FormattingView = () => {
     setCoverTexts(texts);
   };
 
-  const handleTextSelect = (text: IText | null) => {
+  const handleTextSelect = (text: { text: string; font: string; size: number; x: number; y: number } | null) => {
     setSelectedText(text);
   };
 
