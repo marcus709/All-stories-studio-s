@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { AIFormattingDialog } from "./book/AIFormattingDialog";
 import { DocumentSelector } from "./book/DocumentSelector";
 import { ExportOptionsDialog } from "./book/ExportOptionsDialog";
+import { FormattingSidebar } from "./book/FormattingSidebar";
 import { useToast } from "@/hooks/use-toast";
 import { useStory } from "@/contexts/StoryContext";
 import { Document } from "@/types/story";
@@ -19,13 +20,14 @@ export const FormattingView = () => {
   const [previewScene, setPreviewScene] = useState("none");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [coverTexts, setCoverTexts] = useState<Array<{ text: string; font: string; size: number; x: number; y: number }>>([]);
-  const [selectedText, setSelectedText] = useState<IText | null>(null);
+  const [selectedText, setSelectedText] = useState<any | null>(null);
   const [deviceView, setDeviceView] = useState<'print' | 'kindle' | 'ipad' | 'phone'>('print');
   const [notifications, setNotifications] = useState<Array<{ id: string; message: string }>>([]);
   const [isAIMode, setIsAIMode] = useState(true);
   const [showDocumentSelector, setShowDocumentSelector] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [hasFormattedDocument, setHasFormattedDocument] = useState(false);
+  const [currentSection, setCurrentSection] = useState("content");
   const { toast } = useToast();
   const { selectedStory } = useStory();
 
@@ -146,6 +148,10 @@ export const FormattingView = () => {
     setShowDocumentSelector(false);
   };
 
+  const handleSectionSelect = (section: string) => {
+    setCurrentSection(section);
+  };
+
   return (
     <div className="h-[calc(100vh-4rem)] bg-white/90 flex flex-col">
       <div className="h-10 px-4 flex items-center justify-between bg-white/50 backdrop-blur-sm border-b border-gray-200/60">
@@ -184,8 +190,15 @@ export const FormattingView = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden">
-        <TextFormattingTools isAIMode={isAIMode} />
+      <div className="flex-1 overflow-hidden flex">
+        <FormattingSidebar 
+          document={selectedDocument}
+          onSectionSelect={handleSectionSelect}
+        />
+        <TextFormattingTools 
+          isAIMode={isAIMode}
+          currentSection={currentSection}
+        />
       </div>
     </div>
   );
