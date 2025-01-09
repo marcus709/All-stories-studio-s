@@ -7,6 +7,19 @@ interface ForceGraphProps {
   relationships: RelationshipLink[];
 }
 
+const relationshipColors = {
+  'friend': '#22C55E',     // green-500
+  'enemy': '#EF4444',      // red-500
+  'family': '#8B5CF6',     // violet-500
+  'mentor': '#F59E0B',     // amber-500
+  'student': '#3B82F6',    // blue-500
+  'lover': '#EC4899',      // pink-500
+  'rival': '#F97316',      // orange-500
+  'ally': '#06B6D4',       // cyan-500
+  'business': '#6366F1',   // indigo-500
+  'default': '#9CA3AF'     // gray-400
+};
+
 export function ForceGraph({ characters, relationships }: ForceGraphProps) {
   const svgRef = useRef<SVGSVGElement>(null);
 
@@ -32,7 +45,7 @@ export function ForceGraph({ characters, relationships }: ForceGraphProps) {
       .data(relationships)
       .enter()
       .append("line")
-      .style("stroke", d => relationshipColors[d.type] || '#999')
+      .style("stroke", d => relationshipColors[d.type as keyof typeof relationshipColors] || relationshipColors.default)
       .style("stroke-width", d => Math.max(1, Math.min(d.strength / 20, 5)));
 
     // Add character nodes
