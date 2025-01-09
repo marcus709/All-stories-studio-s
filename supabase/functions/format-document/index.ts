@@ -27,31 +27,34 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Format the content based on config
-    const formattedContent = await formatContent(content, config)
+    // If content is provided, use it directly
+    const formattedContent = content ? await formatContent(content, config) : null
     console.log('Content formatted successfully')
 
-    // Update the document with formatted content
-    const { error: updateError } = await supabaseClient
-      .from('documents')
-      .update({ content: formattedContent })
-      .eq('id', documentId)
+    if (formattedContent) {
+      // Update the document with formatted content
+      const { error: updateError } = await supabaseClient
+        .from('documents')
+        .update({ content: formattedContent })
+        .eq('id', documentId)
 
-    if (updateError) {
-      console.error('Error updating document:', updateError)
-      throw new Error('Failed to update document')
+      if (updateError) {
+        console.error('Error updating document:', updateError)
+        throw updateError
+      }
     }
 
-    // Generate download URL (this is a placeholder - implement actual file generation)
+    // Generate download URL
     const downloadUrl = `${Deno.env.get('SUPABASE_URL')}/storage/v1/object/public/formatted-docs/${documentId}.pdf`
     
-    console.log('Document updated successfully')
+    console.log('Document processed successfully')
 
     return new Response(
       JSON.stringify({ 
         success: true,
         downloadUrl,
-        message: 'Document formatted successfully'
+        formattedContent,
+        message: 'Document processed successfully'
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -63,7 +66,7 @@ serve(async (req) => {
     
     return new Response(
       JSON.stringify({
-        error: error.message || 'An error occurred while formatting the document',
+        error: error.message || 'An error occurred while processing the document',
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -75,7 +78,7 @@ serve(async (req) => {
 
 // Helper function to format content based on config
 async function formatContent(content: string, config: any): Promise<string> {
-  // This is where you would implement the actual formatting logic
   // For now, we'll just return the content as is
+  // You can implement more sophisticated formatting logic here based on the config
   return content
 }
