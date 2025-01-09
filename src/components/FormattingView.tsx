@@ -7,6 +7,7 @@ import { TextFormattingTools } from "./book/TextFormattingTools";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ToggleLeft, ToggleRight } from "lucide-react";
+import { AIFormattingDialog } from "./book/AIFormattingDialog";
 
 export const FormattingView = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
@@ -30,6 +31,11 @@ export const FormattingView = () => {
       return data;
     },
   });
+
+  const handleFormatConfig = (config: any) => {
+    console.log("Format config:", config);
+    // Here you would implement the logic to apply the formatting
+  };
 
   const handleTemplateSelect = (template: Template) => {
     setSelectedTemplate(template);
@@ -86,6 +92,9 @@ export const FormattingView = () => {
       {isAIMode ? (
         <div className="flex-1 p-6">
           <div className="max-w-3xl mx-auto h-full bg-white/40 backdrop-blur-md rounded-lg p-4 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] border border-gray-200/60">
+            <div className="flex justify-end mb-4">
+              <AIFormattingDialog onConfigSubmit={handleFormatConfig} />
+            </div>
             <TextFormattingTools isAIMode={isAIMode} />
           </div>
         </div>
