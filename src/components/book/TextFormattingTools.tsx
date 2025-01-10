@@ -4,7 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ChevronDown, ChevronUp, AlertCircle, X } from "lucide-react";
+import { ChevronDown, ChevronUp, AlertCircle, X, Smartphone, Tablet, Book } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BOOK_SIZES, DIGITAL_FORMATS, FORMAT_SIZES, BookSize } from "@/lib/formatting-constants";
 import { getPreviewStyles } from "@/lib/preview-constants";
@@ -119,6 +119,19 @@ export const TextFormattingTools = ({
     };
   };
 
+  const getDeviceIcon = (device: string) => {
+    switch (device) {
+      case 'phone':
+        return <Smartphone className="h-4 w-4" />;
+      case 'ipad':
+        return <Tablet className="h-4 w-4" />;
+      case 'kindle':
+        return <Book className="h-4 w-4" />;
+      default:
+        return <Book className="h-4 w-4" />;
+    }
+  };
+
   const deviceStyles = getDeviceFrame();
 
   return (
@@ -200,6 +213,58 @@ export const TextFormattingTools = ({
                   <SelectContent>
                     <SelectItem value="kdp">Amazon KDP</SelectItem>
                     <SelectItem value="ingramSpark">IngramSpark</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600 mb-1 block">Preview Device</label>
+                <Select value={deviceView} onValueChange={(device) => {
+                  setDeviceView(device);
+                  if (device !== 'print') {
+                    setSelectedFormat('digital');
+                  } else {
+                    setSelectedFormat('print');
+                  }
+                }}>
+                  <SelectTrigger>
+                    <SelectValue>
+                      <div className="flex items-center gap-2">
+                        {getDeviceIcon(deviceView)}
+                        <span>
+                          {deviceView === 'print' ? 'Print Preview' :
+                           deviceView === 'kindle' ? 'Kindle E-reader' :
+                           deviceView === 'ipad' ? 'iPad/Tablet' :
+                           'Phone'}
+                        </span>
+                      </div>
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="print">
+                      <div className="flex items-center gap-2">
+                        <Book className="h-4 w-4" />
+                        <span>Print Preview</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="kindle">
+                      <div className="flex items-center gap-2">
+                        <Book className="h-4 w-4" />
+                        <span>Kindle E-reader</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="ipad">
+                      <div className="flex items-center gap-2">
+                        <Tablet className="h-4 w-4" />
+                        <span>iPad/Tablet</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="phone">
+                      <div className="flex items-center gap-2">
+                        <Smartphone className="h-4 w-4" />
+                        <span>Phone</span>
+                      </div>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
