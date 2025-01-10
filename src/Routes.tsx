@@ -6,6 +6,7 @@ import Settings from "./pages/Settings";
 import { PaymentSuccess } from "./pages/PaymentSuccess";
 import { Dashboard } from "./pages/Dashboard";
 import { PrivateChat } from "./components/community/chat/PrivateChat";
+import { ProfileSettings } from "./pages/ProfileSettings";
 
 export const Routes = () => {
   return (
@@ -16,6 +17,7 @@ export const Routes = () => {
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="/community/*" element={<Community />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/profile/settings" element={<ProfileSettings />} />
         <Route path="/payment/success" element={<PaymentSuccess />} />
       </RouterRoutes>
     </>

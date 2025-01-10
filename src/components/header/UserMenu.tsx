@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,8 +14,6 @@ import { Badge } from "@/components/ui/badge";
 import { useSubscription } from "@/contexts/SubscriptionContext";
 import { capitalize } from "lodash";
 import { Crown } from "lucide-react";
-import { useState } from "react";
-import { ProfileSettingsDialog } from "../ProfileSettingsDialog";
 
 interface UserMenuProps {
   session: Session | null;
@@ -30,7 +28,7 @@ interface UserMenuProps {
 
 export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuProps) => {
   const { plan } = useSubscription();
-  const [showSettings, setShowSettings] = useState(false);
+  const navigate = useNavigate();
 
   const getPlanColor = (planType: string) => {
     switch (planType) {
@@ -109,7 +107,7 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
           <DropdownMenuSeparator />
           <DropdownMenuItem 
             className="cursor-pointer"
-            onClick={() => setShowSettings(true)}
+            onClick={() => navigate("/profile/settings")}
           >
             Profile Settings
           </DropdownMenuItem>
@@ -121,10 +119,6 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-
-      {showSettings && (
-        <ProfileSettingsDialog onClose={() => setShowSettings(false)} />
-      )}
     </div>
   );
 };
