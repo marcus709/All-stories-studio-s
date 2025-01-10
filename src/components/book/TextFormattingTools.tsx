@@ -185,6 +185,15 @@ export const TextFormattingTools = ({
                     setEditableContent(content);
                     onContentChange(content);
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Backspace' || e.key === 'Delete') {
+                      const selection = window.getSelection();
+                      const range = selection?.getRangeAt(0);
+                      if (range?.collapsed && range.startOffset === 0) {
+                        e.stopPropagation();
+                      }
+                    }
+                  }}
                 />
               </div>
             </div>
