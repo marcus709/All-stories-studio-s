@@ -9,7 +9,8 @@ import { capitalize } from "lodash";
 import { FriendRequestsList } from "./FriendRequestsList";
 import { FriendsList } from "./FriendsList";
 import { DailyChallengeDialog } from "./DailyChallengeDialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const navItems = [
   { icon: MessageSquare, label: "Feed", href: "/community" },
@@ -23,6 +24,8 @@ export const CommunitySidebar = () => {
   const session = useSession();
   const { plan } = useSubscription();
   const [showChallengeDialog, setShowChallengeDialog] = useState(false);
+  const [hasFeedback, setHasFeedback] = useState(false);
+  const { toast } = useToast();
 
   const { data: profile } = useQuery({
     queryKey: ["profile"],
@@ -67,6 +70,32 @@ export const CommunitySidebar = () => {
       return data;
     },
   });
+
+  const { data: latestSubmission } = useQuery({
+    queryKey: ["latest-submission", session?.user?.id, dailyChallenge?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("challenge_submissions")
+        .select("*")
+        .eq("user_id", session?.user?.id)
+        .eq("challenge_id", dailyChallenge?.id)
+        .order("submitted_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      return data;
+    },
+    enabled: !!session?.user?.id && !!dailyChallenge?.id,
+  });
+
+  useEffect(() => {
+    if (latestSubmission?.score && !latestSubmission?.viewed) {
+      setHasFeedback(true);
+    } else {
+      setHasFeedback(false);
+    }
+  }, [latestSubmission]);
 
   const hasPendingRequests = friendRequests && friendRequests.length > 0;
 
@@ -118,10 +147,13 @@ export const CommunitySidebar = () => {
         {dailyChallenge && (
           <button
             onClick={() => setShowChallengeDialog(true)}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 text-gray-600 hover:bg-purple-50/50 hover:text-gray-900"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 text-gray-600 hover:bg-purple-50/50 hover:text-gray-900 relative"
           >
             <PenLine className="h-5 w-5" />
             <span>Daily Challenge</span>
+            {hasFeedback && (
+              <span className="absolute top-2 left-6 h-2 w-2 rounded-full bg-purple-500 animate-pulse" />
+            )}
           </button>
         )}
 
@@ -144,7 +176,10 @@ export const CommunitySidebar = () => {
       </div>
 
       {showChallengeDialog && (
-        <DailyChallengeDialog onOpenChange={setShowChallengeDialog} />
+        <DailyChallengeDialog 
+          onOpenChange={setShowChallengeDialog} 
+          latestSubmission={latestSubmission}
+        />
       )}
     </div>
   );

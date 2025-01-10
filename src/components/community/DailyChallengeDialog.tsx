@@ -5,18 +5,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { PenLine, GripHorizontal } from "lucide-react";
 
 interface DailyChallengeDialogProps {
   onOpenChange?: (open: boolean) => void;
+  latestSubmission?: any;
 }
 
-export const DailyChallengeDialog = ({ onOpenChange }: DailyChallengeDialogProps) => {
+export const DailyChallengeDialog = ({ onOpenChange, latestSubmission }: DailyChallengeDialogProps) => {
   const [isOpen, setIsOpen] = useState(true);
   const [submission, setSubmission] = useState("");
-  const [height, setHeight] = useState(600); // Default height increased
+  const [height, setHeight] = useState(600);
   const [isDragging, setIsDragging] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const dragStartY = useRef<number>(0);
   const dragStartHeight = useRef<number>(0);
   const session = useSession();
@@ -71,38 +73,21 @@ export const DailyChallengeDialog = ({ onOpenChange }: DailyChallengeDialogProps
     },
   });
 
-  const { data: existingSubmission } = useQuery({
-    queryKey: ["challenge-submission", challenge?.id],
-    queryFn: async () => {
-      if (!challenge?.id || !session?.user?.id) return null;
-      
-      const { data, error } = await supabase
-        .from("challenge_submissions")
-        .select("*")
-        .eq("challenge_id", challenge.id)
-        .eq("user_id", session.user.id)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!challenge?.id && !!session?.user?.id,
-  });
-
   useEffect(() => {
     const lastCheck = localStorage.getItem("lastChallengeCheck");
     const today = new Date().toISOString().split("T")[0];
     
-    if (lastCheck !== today && !existingSubmission && challenge) {
+    if (lastCheck !== today && !latestSubmission && challenge) {
       setIsOpen(true);
       localStorage.setItem("lastChallengeCheck", today);
     }
-  }, [challenge, existingSubmission]);
+  }, [challenge, latestSubmission]);
 
   const handleSubmit = async () => {
     if (!session?.user?.id || !challenge) return;
 
     try {
+      setIsSubmitting(true);
       const wordCount = submission.trim().split(/\s+/).length;
       
       const { error } = await supabase
@@ -118,7 +103,7 @@ export const DailyChallengeDialog = ({ onOpenChange }: DailyChallengeDialogProps
 
       toast({
         title: "Success!",
-        description: "Your submission has been recorded.",
+        description: "Your submission has been recorded. Check back in 5 minutes for feedback!",
       });
       handleClose();
     } catch (error: any) {
@@ -127,10 +112,47 @@ export const DailyChallengeDialog = ({ onOpenChange }: DailyChallengeDialogProps
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   if (!challenge) return null;
+
+  if (latestSubmission?.score) {
+    return (
+      <Dialog open={isOpen} onOpenChange={handleClose}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+              <PenLine className="w-6 h-6 text-purple-500" />
+              Challenge Feedback
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold text-lg">{challenge.title}</h3>
+              <p className="text-gray-600 mt-1">Here's how you did:</p>
+            </div>
+
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-medium text-purple-900">Score:</span>
+                <span className="text-2xl font-bold text-purple-600">{latestSubmission.score}/100</span>
+              </div>
+              <p className="text-purple-800">{latestSubmission.feedback}</p>
+            </div>
+
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h4 className="font-medium mb-2">Your Submission:</h4>
+              <p className="text-gray-600">{latestSubmission.content}</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -195,9 +217,10 @@ export const DailyChallengeDialog = ({ onOpenChange }: DailyChallengeDialogProps
           </Button>
           <Button 
             onClick={handleSubmit}
+            disabled={isSubmitting}
             className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600"
           >
-            Submit Challenge
+            {isSubmitting ? "Submitting..." : "Submit Challenge"}
           </Button>
         </div>
       </DialogContent>

@@ -118,7 +118,9 @@ export type Database = {
         Row: {
           challenge_id: string | null
           content: string
+          feedback: string | null
           id: string
+          score: number | null
           submitted_at: string | null
           user_id: string | null
           word_count: number | null
@@ -126,7 +128,9 @@ export type Database = {
         Insert: {
           challenge_id?: string | null
           content: string
+          feedback?: string | null
           id?: string
+          score?: number | null
           submitted_at?: string | null
           user_id?: string | null
           word_count?: number | null
@@ -134,7 +138,9 @@ export type Database = {
         Update: {
           challenge_id?: string | null
           content?: string
+          feedback?: string | null
           id?: string
+          score?: number | null
           submitted_at?: string | null
           user_id?: string | null
           word_count?: number | null
