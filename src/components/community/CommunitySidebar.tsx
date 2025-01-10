@@ -143,7 +143,9 @@ export const CommunitySidebar = () => {
         <FriendsList />
       </div>
 
-      {showChallengeDialog && <DailyChallengeDialog />}
+      {showChallengeDialog && (
+        <DailyChallengeDialog onOpenChange={setShowChallengeDialog} />
+      )}
     </div>
   );
 };
