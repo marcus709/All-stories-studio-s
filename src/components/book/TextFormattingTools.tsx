@@ -45,13 +45,14 @@ export const TextFormattingTools = ({
   };
 
   const getPreviewStyle = () => {
-    const baseStyles = {
+    const selectedSizeObj = BOOK_SIZES.find(size => size.name === selectedSize);
+    const baseStyles: React.CSSProperties = {
       padding: '1rem',
       fontSize: fontSize,
       lineHeight: '1.6',
       fontFamily: '"Times New Roman", serif',
       color: '#1a1a1a',
-      textAlign: 'left' as const,
+      textAlign: 'left',
     };
 
     if (deviceView === 'kindle') {
@@ -84,13 +85,16 @@ export const TextFormattingTools = ({
       };
     }
     
+    // Print view with actual dimensions
     return {
       ...baseStyles,
-      maxWidth: '100%',
+      width: selectedSizeObj ? `${selectedSizeObj.width * 96}px` : '100%', // Convert inches to pixels (96 DPI)
+      height: selectedSizeObj ? `${selectedSizeObj.height * 96}px` : 'auto',
       backgroundColor: '#ffffff',
       padding: '2.5rem',
       margin: '0 auto',
       minHeight: '90%',
+      boxSizing: 'border-box' as const,
     };
   };
 
