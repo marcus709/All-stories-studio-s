@@ -76,28 +76,12 @@ export const TextFormattingTools = ({
     return 'Content';
   };
 
-  const getDocumentStyle = () => {
-    const selectedSizeObj = BOOK_SIZES.find(size => size.name === selectedSize);
-    return {
-      padding: '1rem',
-      fontSize: fontSize,
-      lineHeight: '1.6',
-      fontFamily: '"Times New Roman", serif',
-      color: '#1a1a1a',
-      textAlign: 'left' as const,
-      width: selectedSizeObj ? `${selectedSizeObj.width * 96}px` : '100%',
-      minHeight: '90vh',
-      backgroundColor: '#ffffff',
-      margin: '0 auto',
-    };
-  };
-
   const getDeviceFrame = () => {
     if (deviceView === 'kindle') {
       return {
-        frame: "rounded-lg border-[24px] border-gray-800 bg-[#F6F6F6] shadow-xl max-w-[600px] mx-auto",
+        frame: "relative w-[600px] mx-auto",
         screen: "aspect-[3/4] overflow-hidden",
-        text: "font-['Bookerly',Georgia,serif] text-[#333] leading-relaxed px-6 py-4"
+        text: "font-['Bookerly',Georgia,serif] text-[#333] leading-relaxed px-6 py-4 bg-[#f6f6f6]"
       };
     } else if (deviceView === 'ipad') {
       return {
@@ -114,22 +98,9 @@ export const TextFormattingTools = ({
     }
     return {
       frame: "rounded-none border border-gray-200 bg-white shadow-lg",
-      screen: "aspect-[1/1.414] overflow-hidden", // A4 aspect ratio
+      screen: "aspect-[1/1.414] overflow-hidden",
       text: "font-serif text-black leading-relaxed px-8 py-6"
     };
-  };
-
-  const getDeviceIcon = (device: string) => {
-    switch (device) {
-      case 'phone':
-        return <Smartphone className="h-4 w-4" />;
-      case 'ipad':
-        return <Tablet className="h-4 w-4" />;
-      case 'kindle':
-        return <Book className="h-4 w-4" />;
-      default:
-        return <Book className="h-4 w-4" />;
-    }
   };
 
   const deviceStyles = getDeviceFrame();
@@ -138,45 +109,21 @@ export const TextFormattingTools = ({
     <div className="flex-1 flex">
       <div className="w-[50%] mx-auto my-4 overflow-auto">
         <ScrollArea className="h-[calc(100vh-8rem)]">
-          {showPlatformAlert && (
-            <Alert className="mb-4 relative">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                {selectedPlatform === 'kdp' 
-                  ? "Amazon KDP requires specific trim sizes and bleed settings. Preview shows safe areas and bleed zones."
-                  : "IngramSpark offers more flexibility but requires higher quality PDF submissions with proper bleed settings."}
-              </AlertDescription>
-              <button 
-                onClick={() => setShowPlatformAlert(false)}
-                className="absolute top-2 right-2 p-1 hover:bg-gray-100 rounded-full"
-              >
-                <X className="h-4 w-4 text-gray-500" />
-              </button>
-            </Alert>
-          )}
-
-          <div className={cn(
-            "relative mx-auto transition-all duration-300",
-            "rounded-lg overflow-hidden"
-          )}>
-            <div style={getDocumentStyle()}>
-              <div className="prose prose-sm max-w-none">
-                <h2 className="text-2xl font-serif mb-6">
-                  {getSectionTitle(currentSection)}
-                </h2>
-                <div 
-                  contentEditable
-                  suppressContentEditableWarning
-                  className="focus:outline-none min-h-[calc(100vh-16rem)] font-serif"
-                  dangerouslySetInnerHTML={{ __html: editableContent }}
-                  onInput={(e) => {
-                    const content = e.currentTarget.innerHTML;
-                    setEditableContent(content);
-                    onContentChange(content);
-                  }}
-                />
-              </div>
-            </div>
+          <div className="prose prose-sm max-w-none">
+            <h2 className="text-2xl font-serif mb-6">
+              {getSectionTitle(currentSection)}
+            </h2>
+            <div 
+              contentEditable
+              suppressContentEditableWarning
+              className="focus:outline-none min-h-[calc(100vh-16rem)] font-serif"
+              dangerouslySetInnerHTML={{ __html: editableContent }}
+              onInput={(e) => {
+                const content = e.currentTarget.innerHTML;
+                setEditableContent(content);
+                onContentChange(content);
+              }}
+            />
           </div>
         </ScrollArea>
       </div>
@@ -336,28 +283,45 @@ export const TextFormattingTools = ({
         </Collapsible>
 
         <div className="flex-1 overflow-auto p-4">
-          <div className={cn(
-            "relative transition-all duration-300",
-            deviceStyles.frame
-          )}>
-            <div className={deviceStyles.screen}>
-              <div 
-                className={cn(
-                  deviceStyles.text,
-                  "preview-container"
-                )}
-                style={getPreviewStyles(selectedPlatform, selectedFormat, selectedSize, deviceView)}
-              >
+          {deviceView === 'kindle' ? (
+            <div className="relative w-full max-w-[600px] mx-auto">
+              <img 
+                src="/lovable-uploads/ef6d596d-15fc-4a39-9bcd-9fccb852f98c.png" 
+                alt="Kindle mockup"
+                className="w-full h-auto"
+              />
+              <div className="absolute inset-[12%] bg-[#f6f6f6] overflow-y-auto">
                 <div 
-                  className="prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ __html: editableContent }} 
+                  className="prose prose-sm max-w-none p-4 font-['Bookerly',Georgia,serif] text-[#333] leading-relaxed"
+                  style={getPreviewStyles(selectedPlatform, selectedFormat, selectedSize, deviceView)}
+                  dangerouslySetInnerHTML={{ __html: editableContent }}
                 />
               </div>
             </div>
-            {deviceView === 'phone' && (
-              <div className="absolute top-[6px] left-1/2 -translate-x-1/2 w-[80px] h-[6px] bg-black rounded-full" />
-            )}
-          </div>
+          ) : (
+            <div className={cn(
+              "relative transition-all duration-300",
+              deviceStyles.frame
+            )}>
+              <div className={deviceStyles.screen}>
+                <div 
+                  className={cn(
+                    deviceStyles.text,
+                    "preview-container"
+                  )}
+                  style={getPreviewStyles(selectedPlatform, selectedFormat, selectedSize, deviceView)}
+                >
+                  <div 
+                    className="prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: editableContent }}
+                  />
+                </div>
+              </div>
+              {deviceView === 'phone' && (
+                <div className="absolute top-[6px] left-1/2 -translate-x-1/2 w-[80px] h-[6px] bg-black rounded-full" />
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
