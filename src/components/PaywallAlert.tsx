@@ -1,6 +1,6 @@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useSubscription } from "@/contexts/SubscriptionContext";
 
 interface PaywallAlertProps {
   isOpen: boolean;
@@ -11,6 +11,7 @@ interface PaywallAlertProps {
 
 export const PaywallAlert = ({ isOpen, onClose, feature, requiredPlan }: PaywallAlertProps) => {
   const navigate = useNavigate();
+  const { isTrialExpired } = useSubscription();
 
   const handleViewPlans = () => {
     onClose();
@@ -23,7 +24,17 @@ export const PaywallAlert = ({ isOpen, onClose, feature, requiredPlan }: Paywall
         <AlertDialogHeader>
           <AlertDialogTitle>Premium Feature</AlertDialogTitle>
           <AlertDialogDescription>
-            {feature} is only available on the {requiredPlan} plan or higher. Upgrade your plan to access this feature and many more!
+            {isTrialExpired ? (
+              <>
+                Your free trial has expired. {feature} is only available on the {requiredPlan} plan or higher. 
+                Upgrade your plan to continue using this feature and many more!
+              </>
+            ) : (
+              <>
+                {feature} is only available on the {requiredPlan} plan or higher. 
+                Upgrade your plan to access this feature and many more!
+              </>
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

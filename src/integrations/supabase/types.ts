@@ -1464,6 +1464,30 @@ export type Database = {
           },
         ]
       }
+      user_trials: {
+        Row: {
+          id: string
+          is_active: boolean | null
+          trial_end_date: string | null
+          trial_start_date: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          is_active?: boolean | null
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          is_active?: boolean | null
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
