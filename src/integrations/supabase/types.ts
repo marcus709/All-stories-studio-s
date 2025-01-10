@@ -114,6 +114,97 @@ export type Database = {
         }
         Relationships: []
       }
+      backwards_planning_milestones: {
+        Row: {
+          character_impacts: Json | null
+          created_at: string | null
+          description: string
+          id: string
+          milestone_type: Database["public"]["Enums"]["milestone_type"]
+          position: number
+          story_id: string
+          theme_connections: string[] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          character_impacts?: Json | null
+          created_at?: string | null
+          description: string
+          id?: string
+          milestone_type: Database["public"]["Enums"]["milestone_type"]
+          position: number
+          story_id: string
+          theme_connections?: string[] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          character_impacts?: Json | null
+          created_at?: string | null
+          description?: string
+          id?: string
+          milestone_type?: Database["public"]["Enums"]["milestone_type"]
+          position?: number
+          story_id?: string
+          theme_connections?: string[] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "backwards_planning_milestones_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      backwards_story_endings: {
+        Row: {
+          achievements: string
+          character_outcomes: string
+          created_at: string | null
+          final_scene: string
+          id: string
+          key_themes: string[]
+          resolution: string
+          story_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          achievements: string
+          character_outcomes: string
+          created_at?: string | null
+          final_scene: string
+          id?: string
+          key_themes?: string[]
+          resolution: string
+          story_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          achievements?: string
+          character_outcomes?: string
+          created_at?: string | null
+          final_scene?: string
+          id?: string
+          key_themes?: string[]
+          resolution?: string
+          story_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "backwards_story_endings_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       challenge_submissions: {
         Row: {
           challenge_id: string | null
@@ -154,6 +245,67 @@ export type Database = {
             columns: ["challenge_id"]
             isOneToOne: false
             referencedRelation: "daily_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      character_arc_points: {
+        Row: {
+          character_id: string
+          conflicts: string[] | null
+          created_at: string | null
+          decisions: string[] | null
+          emotional_state: string
+          goals: string[] | null
+          id: string
+          milestone_id: string | null
+          story_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          character_id: string
+          conflicts?: string[] | null
+          created_at?: string | null
+          decisions?: string[] | null
+          emotional_state: string
+          goals?: string[] | null
+          id?: string
+          milestone_id?: string | null
+          story_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          character_id?: string
+          conflicts?: string[] | null
+          created_at?: string | null
+          decisions?: string[] | null
+          emotional_state?: string
+          goals?: string[] | null
+          id?: string
+          milestone_id?: string | null
+          story_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "character_arc_points_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "character_arc_points_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "backwards_planning_milestones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "character_arc_points_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
             referencedColumns: ["id"]
           },
         ]
@@ -1570,6 +1722,11 @@ export type Database = {
       challenge_difficulty: "easy" | "medium" | "hard"
       document_section_type: "chapter" | "scene" | "note"
       group_privacy: "public" | "private"
+      milestone_type:
+        | "ending"
+        | "major_event"
+        | "character_decision"
+        | "theme_setup"
       relationship_type:
         | "friend"
         | "enemy"
