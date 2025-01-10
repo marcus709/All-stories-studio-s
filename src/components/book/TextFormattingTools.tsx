@@ -107,7 +107,7 @@ export const TextFormattingTools = ({
       };
     } else if (deviceView === 'phone') {
       return {
-        frame: "rounded-[32px] border-[12px] border-gray-900 bg-white shadow-xl max-w-[390px] mx-auto",
+        frame: "rounded-[32px] border-[12px] border-gray-900 bg-white shadow-xl max-w-[320px] mx-auto", // Reduced from 390px to 320px
         screen: "aspect-[9/19.5] overflow-hidden",
         text: "font-['SF Pro Text',system-ui,sans-serif] text-black leading-relaxed px-4 py-3"
       };
