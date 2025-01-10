@@ -15,7 +15,6 @@ interface MarginSettings {
 }
 
 function calculateMargins(bookSize: BookSize): MarginSettings {
-  // Standard margin ratios based on professional book design
   const smallerDimension = Math.min(bookSize.width, bookSize.height);
   
   return {
@@ -30,7 +29,6 @@ function handleWidowsAndOrphans(content: string): string {
   const paragraphs = content.split('\n\n');
   
   return paragraphs.map(paragraph => {
-    // Add non-breaking space between last words to prevent widows
     const words = paragraph.split(' ');
     if (words.length > 1) {
       const lastIndex = words.length - 2;
@@ -49,16 +47,17 @@ function generateHeaderFooter(pageNumber: number, bookTitle: string, authorName:
 }
 
 Deno.serve(async (req) => {
+  // Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    const { documentId, bookSize, content, title = '', author = '' } = await req.json()
+    const { documentId, bookSize, format = 'pdf', content } = await req.json()
     console.log('Processing document:', documentId, 'with size:', bookSize)
 
-    if (!documentId || !bookSize) {
-      throw new Error('Document ID and book size are required')
+    if (!documentId || !bookSize || !content) {
+      throw new Error('Document ID, book size and content are required')
     }
 
     const margins = calculateMargins(bookSize);
@@ -134,11 +133,11 @@ Deno.serve(async (req) => {
     console.log('Supabase client initialized')
 
     // Store the formatted content
-    const fileName = `${documentId}.pdf`
+    const fileName = `${documentId}-${Date.now()}.${format}`
     const { error: uploadError } = await supabaseClient.storage
       .from('formatted-docs')
       .upload(fileName, formattedContent, {
-        contentType: 'application/pdf',
+        contentType: format === 'pdf' ? 'application/pdf' : 'text/html',
         upsert: true
       })
 

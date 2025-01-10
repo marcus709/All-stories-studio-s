@@ -11,7 +11,7 @@ import { DIGITAL_FORMATS } from "@/lib/formatting-constants";
 interface ExportOptionsDialogProps {
   documentId?: string;
   disabled?: boolean;
-  bookSize?: { width: number; height: number; name: string };
+  bookSize?: { width: number; height: number; name: string } | null;
   deviceSettings?: any;
 }
 
@@ -35,19 +35,10 @@ export function ExportOptionsDialog({
   const { toast } = useToast();
 
   const handleExport = async () => {
-    if (disabled) {
-      toast({
-        title: "Export not available",
-        description: "Please format your document first before exporting",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!documentId) {
+    if (!documentId || !bookSize) {
       toast({
         title: "Export Error",
-        description: "No document selected for export",
+        description: "Please select a document and book size before exporting",
         variant: "destructive",
       });
       return;
@@ -63,19 +54,14 @@ export function ExportOptionsDialog({
     })));
 
     try {
-      // Simulate validation process
-      for (let i = 0; i < DIGITAL_FORMATS.length; i++) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setValidationResults(prev => [
-          ...prev.slice(0, i),
-          {
-            platform: DIGITAL_FORMATS[i].name,
-            status: Math.random() > 0.2 ? "valid" : "invalid",
-            message: Math.random() > 0.2 ? undefined : "Some formatting issues detected"
-          },
-          ...prev.slice(i + 1)
-        ]);
-      }
+      // Fetch the document content
+      const { data: document, error: fetchError } = await supabase
+        .from('documents')
+        .select('content')
+        .eq('id', documentId)
+        .single();
+
+      if (fetchError) throw fetchError;
 
       // Call the formatting edge function
       const { data, error } = await supabase.functions.invoke('format-document', {
@@ -83,14 +69,12 @@ export function ExportOptionsDialog({
           documentId,
           format: selectedFormat,
           bookSize,
-          deviceSettings
+          deviceSettings,
+          content: document.content
         }
       });
 
-      if (error) {
-        console.error('Export error:', error);
-        throw new Error(error.message || 'Failed to export document');
-      }
+      if (error) throw error;
 
       if (!data?.downloadUrl) {
         throw new Error('No download URL received from the server');
@@ -98,6 +82,14 @@ export function ExportOptionsDialog({
 
       setDownloadUrl(data.downloadUrl);
       
+      // Update validation results to show success
+      setValidationResults(prev => 
+        prev.map(result => ({
+          ...result,
+          status: "valid"
+        }))
+      );
+
       toast({
         title: "Export successful",
         description: "Your document has been exported successfully",
@@ -109,6 +101,15 @@ export function ExportOptionsDialog({
         description: error instanceof Error ? error.message : "Failed to export document",
         variant: "destructive",
       });
+
+      // Update validation results to show failure
+      setValidationResults(prev => 
+        prev.map(result => ({
+          ...result,
+          status: "invalid",
+          message: "Export failed"
+        }))
+      );
     } finally {
       setIsExporting(false);
     }
@@ -160,7 +161,7 @@ export function ExportOptionsDialog({
             </Select>
           </div>
 
-          {validationResults.map((result, index) => (
+          {validationResults.map((result) => (
             <div key={result.platform} className="flex items-center justify-between">
               <span>{result.platform}</span>
               <div className="flex items-center gap-2">
@@ -195,7 +196,7 @@ export function ExportOptionsDialog({
             ) : (
               <Button 
                 onClick={handleExport}
-                disabled={isExporting || disabled}
+                disabled={isExporting || disabled || !bookSize}
                 className="gap-2"
               >
                 {isExporting ? (
