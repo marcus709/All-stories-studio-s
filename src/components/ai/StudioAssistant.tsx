@@ -81,7 +81,7 @@ export const StudioAssistant = () => {
     return (
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 h-12 w-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg"
+        className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-gradient-to-r from-purple-500/90 to-pink-500/90 hover:from-purple-600 hover:to-pink-600 shadow-xl backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105 p-0 flex items-center justify-center"
       >
         <Bot className="h-6 w-6 text-white" />
       </Button>
@@ -89,29 +89,35 @@ export const StudioAssistant = () => {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 w-96 h-[500px] bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col">
-      <div className="flex items-center justify-between p-4 border-b">
-        <div className="flex items-center gap-2">
-          <Bot className="h-5 w-5 text-purple-500" />
-          <h3 className="font-medium">Studio Assistant</h3>
+    <div className="fixed bottom-6 right-6 w-96 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-gray-800/50 flex flex-col overflow-hidden transition-all duration-300 animate-in slide-in-from-bottom-6">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-purple-500/10 to-pink-500/10">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+            <Bot className="h-4 w-4 text-white" />
+          </div>
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Studio Assistant</h3>
         </div>
-        <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => setIsOpen(false)}
+          className="hover:bg-gray-500/10"
+        >
           <X className="h-4 w-4" />
         </Button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-200 hover:scrollbar-thumb-gray-300 scrollbar-track-transparent">
         {conversation.map((msg, index) => (
           <div
             key={index}
             className={`flex ${msg.role === 'assistant' ? 'justify-start' : 'justify-end'}`}
           >
             <div
-              className={`max-w-[80%] rounded-lg p-3 ${
-                msg.role === 'assistant'
-                  ? 'bg-gray-100 text-gray-800'
-                  : 'bg-purple-500 text-white'
-              }`}
+              className={`max-w-[80%] rounded-2xl p-3.5 shadow-sm
+                ${msg.role === 'assistant' 
+                  ? 'bg-gray-100/80 dark:bg-gray-800/80 text-gray-800 dark:text-gray-200 rounded-tl-sm' 
+                  : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-tr-sm'}`}
             >
               {msg.content}
             </div>
@@ -119,30 +125,30 @@ export const StudioAssistant = () => {
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 rounded-lg p-3 max-w-[80%]">
-              <div className="flex gap-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0.2s]" />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0.4s]" />
+            <div className="bg-gray-100/80 dark:bg-gray-800/80 rounded-2xl rounded-tl-sm p-4 max-w-[80%] shadow-sm">
+              <div className="flex gap-1.5">
+                <div className="w-2 h-2 bg-purple-500/60 rounded-full animate-bounce" />
+                <div className="w-2 h-2 bg-purple-500/60 rounded-full animate-bounce [animation-delay:0.2s]" />
+                <div className="w-2 h-2 bg-purple-500/60 rounded-full animate-bounce [animation-delay:0.4s]" />
               </div>
             </div>
           </div>
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="p-4 border-t">
+      <form onSubmit={handleSubmit} className="p-4 border-t border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-purple-500/5 to-pink-500/5">
         <div className="flex gap-2">
           <Textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Ask me anything about your story..."
-            className="min-h-[60px] resize-none"
+            className="min-h-[60px] resize-none bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border-gray-200/50 dark:border-gray-800/50 focus:border-purple-500/50 focus:ring-purple-500/30"
           />
           <Button 
             type="submit" 
             size="icon"
             disabled={isLoading || !message.trim()}
-            className="bg-purple-500 hover:bg-purple-600"
+            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-md hover:shadow-lg transition-all duration-300"
           >
             <Send className="h-4 w-4" />
           </Button>
