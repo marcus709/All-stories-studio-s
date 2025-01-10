@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { BOOK_SIZES, DIGITAL_FORMATS, BookSize } from "@/lib/formatting-constants";
+import { BOOK_SIZES, DIGITAL_FORMATS, FORMAT_SIZES, BookSize } from "@/lib/formatting-constants";
 
 interface TextFormattingToolsProps {
   isAIMode: boolean;
@@ -25,7 +25,7 @@ export const TextFormattingTools = ({
   onDeviceSettingsChange
 }: TextFormattingToolsProps) => {
   const [selectedFormat, setSelectedFormat] = useState<string>("trade-paperback");
-  const [selectedSize, setSelectedSize] = useState<string>(BOOK_SIZES[0].name);
+  const [selectedSize, setSelectedSize] = useState<string>("");
   const [selectedDigitalFormat, setSelectedDigitalFormat] = useState<string>(DIGITAL_FORMATS[0].name);
   const [deviceView, setDeviceView] = useState<'print' | 'kindle' | 'ipad' | 'phone'>('print');
   const [fontSize, setFontSize] = useState<string>("12pt");
@@ -35,6 +35,29 @@ export const TextFormattingTools = ({
   useEffect(() => {
     setEditableContent(sectionContent || '');
   }, [sectionContent]);
+
+  useEffect(() => {
+    // Reset selected size when format changes and set first available size
+    if (selectedFormat in FORMAT_SIZES) {
+      const sizes = FORMAT_SIZES[selectedFormat as keyof typeof FORMAT_SIZES];
+      setSelectedSize(sizes[0].name);
+      onBookSizeChange(sizes[0]);
+    } else {
+      setSelectedSize("");
+      onBookSizeChange(null);
+    }
+  }, [selectedFormat, onBookSizeChange]);
+
+  const isDigitalFormat = (format: string) => {
+    return DIGITAL_FORMATS.some(df => df.name.toLowerCase() === format.toLowerCase());
+  };
+
+  const getAvailableSizes = () => {
+    if (isDigitalFormat(selectedFormat)) {
+      return [];
+    }
+    return FORMAT_SIZES[selectedFormat as keyof typeof FORMAT_SIZES] || [];
+  };
 
   const getSectionTitle = (section: string) => {
     if (!section) return 'Content';
@@ -210,32 +233,27 @@ export const TextFormattingTools = ({
                 </Select>
               </div>
 
-              <div>
-                <label className="text-sm text-gray-600 mb-1 block">Trim Size</label>
-                <Select value={selectedSize} onValueChange={setSelectedSize}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose size" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(
-                      BOOK_SIZES.reduce((acc, size) => {
-                        if (!acc[size.category]) acc[size.category] = [];
-                        acc[size.category].push(size);
-                        return acc;
-                      }, {} as Record<string, typeof BOOK_SIZES>)
-                    ).map(([category, sizes]) => (
-                      <SelectGroup key={category}>
-                        <SelectLabel>{category}</SelectLabel>
-                        {sizes.map((size) => (
-                          <SelectItem key={size.name} value={size.name}>
-                            {size.name}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {!isDigitalFormat(selectedFormat) && (
+                <div>
+                  <label className="text-sm text-gray-600 mb-1 block">Trim Size</label>
+                  <Select value={selectedSize} onValueChange={(value) => {
+                    setSelectedSize(value);
+                    const size = getAvailableSizes().find(s => s.name === value);
+                    if (size) onBookSizeChange(size);
+                  }}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {getAvailableSizes().map((size) => (
+                        <SelectItem key={size.name} value={size.name}>
+                          {size.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               <div>
                 <label className="text-sm text-gray-600 mb-1 block">Preview Device</label>
