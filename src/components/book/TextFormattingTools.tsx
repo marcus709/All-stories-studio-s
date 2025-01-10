@@ -4,7 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ChevronDown, ChevronUp, AlertCircle, X, Smartphone, Tablet, Book } from "lucide-react";
+import { ChevronDown, ChevronUp, AlertCircle, X, Smartphone, Tablet, Book, Monitor } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BOOK_SIZES, DIGITAL_FORMATS, FORMAT_SIZES, BookSize } from "@/lib/formatting-constants";
 import { getPreviewStyles } from "@/lib/preview-constants";
@@ -19,6 +19,22 @@ interface TextFormattingToolsProps {
   onBookSizeChange: (size: BookSize) => void;
   onDeviceSettingsChange: (settings: any) => void;
 }
+
+// Helper function to get the appropriate icon for each device type
+const getDeviceIcon = (deviceType: string) => {
+  switch (deviceType) {
+    case 'print':
+      return <Book className="h-4 w-4" />;
+    case 'kindle':
+      return <Monitor className="h-4 w-4" />;
+    case 'ipad':
+      return <Tablet className="h-4 w-4" />;
+    case 'phone':
+      return <Smartphone className="h-4 w-4" />;
+    default:
+      return <Book className="h-4 w-4" />;
+  }
+};
 
 export const TextFormattingTools = ({ 
   isAIMode, 
@@ -290,27 +306,23 @@ export const TextFormattingTools = ({
         <div className="flex-1 overflow-auto p-4">
           <div className={cn(
             "relative transition-all duration-300",
-            deviceStyles.frame
+            deviceStyles.previewClass || ''
           )}>
-            <div className={deviceStyles.screen}>
+            <div className={cn(
+              "preview-container whitespace-pre-wrap break-words overflow-x-hidden",
+              deviceStyles.containerClass || ''
+            )}>
               <div 
-                className={cn(
-                  deviceStyles.text,
-                  "preview-container whitespace-pre-wrap break-words overflow-x-hidden"
-                )}
+                className="prose prose-sm max-w-none"
                 style={{
-                  ...getPreviewStyles(selectedPlatform, selectedFormat, selectedSize, deviceView),
+                  ...deviceStyles,
                   wordWrap: 'break-word',
                   overflowWrap: 'break-word',
                   overflowX: 'hidden',
                   maxWidth: '100%'
                 }}
-              >
-                <div 
-                  className="prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ __html: editableContent }} 
-                />
-              </div>
+                dangerouslySetInnerHTML={{ __html: editableContent }} 
+              />
             </div>
             {deviceView === 'phone' && (
               <div className="absolute top-[6px] left-1/2 -translate-x-1/2 w-[80px] h-[6px] bg-black rounded-full" />
