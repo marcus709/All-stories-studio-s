@@ -130,6 +130,7 @@ export const TextFormattingTools = ({
       width: selectedSizeObj ? `${selectedSizeObj.width * 96}px` : '100%',
       height: selectedSizeObj ? `${selectedSizeObj.height * 96}px` : 'auto',
       minHeight: '90vh',
+      maxWidth: '100%',
       backgroundColor: '#ffffff',
       margin: '0 auto',
       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
@@ -137,9 +138,10 @@ export const TextFormattingTools = ({
       border: '1px solid rgba(0, 0, 0, 0.1)',
       transition: 'all 0.2s ease-in-out',
       position: 'relative' as const,
-      overflow: 'hidden',
+      overflow: 'auto',
       wordWrap: 'break-word',
       overflowWrap: 'break-word',
+      overflowX: 'hidden',
     };
   };
 
@@ -176,7 +178,7 @@ export const TextFormattingTools = ({
                 <div 
                   contentEditable
                   suppressContentEditableWarning
-                  className="focus:outline-none min-h-[calc(100vh-16rem)] font-serif whitespace-pre-wrap break-words"
+                  className="focus:outline-none min-h-[calc(100vh-16rem)] font-serif whitespace-pre-wrap break-words overflow-x-hidden"
                   dangerouslySetInnerHTML={{ __html: editableContent }}
                   onInput={(e) => {
                     const content = e.currentTarget.innerHTML;
@@ -353,12 +355,14 @@ export const TextFormattingTools = ({
               <div 
                 className={cn(
                   deviceStyles.text,
-                  "preview-container whitespace-pre-wrap break-words"
+                  "preview-container whitespace-pre-wrap break-words overflow-x-hidden"
                 )}
                 style={{
                   ...getPreviewStyles(selectedPlatform, selectedFormat, selectedSize, deviceView),
                   wordWrap: 'break-word',
                   overflowWrap: 'break-word',
+                  overflowX: 'hidden',
+                  maxWidth: '100%'
                 }}
               >
                 <div 
