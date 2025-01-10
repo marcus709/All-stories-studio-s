@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { BOOK_SIZES, DIGITAL_FORMATS, FORMAT_SIZES, BookSize } from "@/lib/formatting-constants";
 import { getPreviewStyles } from "@/lib/preview-constants";
 import { useToast } from "@/hooks/use-toast";
+import { WYSIWYGEditor } from './WYSIWYGEditor';
 
 interface TextFormattingToolsProps {
   isAIMode: boolean;
@@ -64,59 +65,7 @@ export const TextFormattingTools = ({
     }
   };
 
-  const getSectionTitle = (section: string) => {
-    if (!section) return 'Content';
-    
-    if (section === 'title') return 'Title Page';
-    if (section === 'copyright') return 'Copyright Page';
-    if (section === 'dedication') return 'Dedication';
-    if (section === 'contents') return 'Table of Contents';
-    if (section.startsWith('chapter-')) return `Chapter ${section.split('-')[1]}`;
-    
-    return 'Content';
-  };
-
-  const getDeviceFrame = () => {
-    if (deviceView === 'kindle') {
-      return {
-        frame: "rounded-lg border-[24px] border-gray-800 bg-[#F6F6F6] shadow-xl max-w-[600px] mx-auto",
-        screen: "aspect-[3/4] overflow-hidden",
-        text: "font-['Bookerly',Georgia,serif] text-[#333] leading-relaxed px-6 py-4"
-      };
-    } else if (deviceView === 'ipad') {
-      return {
-        frame: "rounded-2xl border-[24px] border-gray-700 bg-white shadow-xl max-w-[768px] mx-auto",
-        screen: "aspect-[4/3] overflow-hidden",
-        text: "font-['SF Pro Display',system-ui,sans-serif] text-black leading-relaxed px-8 py-6"
-      };
-    } else if (deviceView === 'phone') {
-      return {
-        frame: "rounded-[32px] border-[12px] border-gray-900 bg-white shadow-xl max-w-[320px] mx-auto",
-        screen: "aspect-[9/19.5] overflow-hidden",
-        text: "font-['SF Pro Text',system-ui,sans-serif] text-black leading-relaxed px-4 py-3"
-      };
-    }
-    return {
-      frame: "rounded-none border border-gray-200 bg-white shadow-lg",
-      screen: "aspect-[1/1.414] overflow-hidden", // A4 aspect ratio
-      text: "font-serif text-black leading-relaxed px-8 py-6"
-    };
-  };
-
-  const getDeviceIcon = (device: string) => {
-    switch (device) {
-      case 'phone':
-        return <Smartphone className="h-4 w-4" />;
-      case 'ipad':
-        return <Tablet className="h-4 w-4" />;
-      case 'kindle':
-        return <Book className="h-4 w-4" />;
-      default:
-        return <Book className="h-4 w-4" />;
-    }
-  };
-
-  const deviceStyles = getDeviceFrame();
+  const deviceStyles = getPreviewStyles(selectedPlatform, selectedFormat, selectedSize, deviceView);
 
   const getDocumentStyle = (): React.CSSProperties => {
     const selectedSizeObj = BOOK_SIZES.find(size => size.name === selectedSize);
@@ -138,7 +87,7 @@ export const TextFormattingTools = ({
       border: '1px solid rgba(0, 0, 0, 0.1)',
       transition: 'all 0.2s ease-in-out',
       position: 'relative' as const,
-      overflow: 'auto',
+      overflow: 'hidden',
       wordWrap: 'break-word',
       overflowWrap: 'break-word',
       overflowX: 'hidden',
@@ -171,31 +120,14 @@ export const TextFormattingTools = ({
             "rounded-lg overflow-hidden"
           )}>
             <div style={getDocumentStyle()} className="relative">
-              <div className="prose prose-sm max-w-none">
-                <h2 className="text-2xl font-serif mb-6">
-                  {getSectionTitle(currentSection)}
-                </h2>
-                <div 
-                  contentEditable
-                  suppressContentEditableWarning
-                  className="focus:outline-none min-h-[calc(100vh-16rem)] font-serif whitespace-pre-wrap break-words overflow-x-hidden"
-                  dangerouslySetInnerHTML={{ __html: editableContent }}
-                  onInput={(e) => {
-                    const content = e.currentTarget.innerHTML;
-                    setEditableContent(content);
-                    onContentChange(content);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Backspace' || e.key === 'Delete') {
-                      const selection = window.getSelection();
-                      const range = selection?.getRangeAt(0);
-                      if (range?.collapsed && range.startOffset === 0) {
-                        e.stopPropagation();
-                      }
-                    }
-                  }}
-                />
-              </div>
+              <WYSIWYGEditor
+                content={editableContent}
+                onChange={(content) => {
+                  setEditableContent(content);
+                  onContentChange(content);
+                }}
+                style={getDocumentStyle()}
+              />
             </div>
           </div>
         </ScrollArea>
