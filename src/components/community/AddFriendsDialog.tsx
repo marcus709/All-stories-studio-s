@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Profile } from "@/integrations/supabase/types/tables.types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { UserProfileDialog } from "./UserProfileDialog";
+import { InviteLinkGenerator } from "./InviteLinkGenerator";
 
 interface FriendshipWithProfile {
   id: string;
@@ -87,6 +88,11 @@ export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) =>
           <DialogTitle>Add Friends</DialogTitle>
         </DialogHeader>
         <div className="mt-4 space-y-4">
+          <div className="space-y-4">
+            <h4 className="text-sm font-medium text-gray-500">Invite via Link</h4>
+            <InviteLinkGenerator type="friend" />
+          </div>
+
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
             <Input

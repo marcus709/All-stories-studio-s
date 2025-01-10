@@ -970,6 +970,44 @@ export type Database = {
         }
         Relationships: []
       }
+      invitation_links: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          expires_at: string | null
+          group_id: string | null
+          id: string
+          type: string
+          used: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          expires_at?: string | null
+          group_id?: string | null
+          id?: string
+          type: string
+          used?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          expires_at?: string | null
+          group_id?: string | null
+          id?: string
+          type?: string
+          used?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitation_links_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plot_emotions: {
         Row: {
           analysis_text: string | null

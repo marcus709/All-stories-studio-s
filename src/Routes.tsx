@@ -1,25 +1,16 @@
-import { Route, Routes as RouterRoutes } from "react-router-dom";
-import { Header } from "./components/Header";
-import Index from "./pages/Index";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
 import Community from "./pages/Community";
-import Settings from "./pages/Settings";
-import { PaymentSuccess } from "./pages/PaymentSuccess";
-import { Dashboard } from "./pages/Dashboard";
-import { PrivateChat } from "./components/community/chat/PrivateChat";
-import { ProfileSettings } from "./pages/ProfileSettings";
+import InvitePage from "./pages/InvitePage";
 
-export const Routes = () => {
+export default function AppRoutes() {
   return (
-    <>
-      <Header />
-      <RouterRoutes>
-        <Route path="/" element={<Index />} />
-        <Route path="/dashboard/*" element={<Dashboard />} />
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
         <Route path="/community/*" element={<Community />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/profile/settings" element={<ProfileSettings />} />
-        <Route path="/payment/success" element={<PaymentSuccess />} />
-      </RouterRoutes>
-    </>
+        <Route path="/invite/:inviteId" element={<InvitePage />} />
+      </Routes>
+    </Router>
   );
-};
+}

@@ -11,6 +11,7 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { InviteMembersInput } from "./InviteMembersInput";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { InviteLinkGenerator } from "./InviteLinkGenerator";
 
 interface GroupSettingsDialogProps {
   group: {
@@ -214,6 +215,13 @@ export const GroupSettingsDialog = ({
                 disabled={!isCreator}
               />
             </div>
+
+            {isCreator && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-gray-500">Invite via Link</h4>
+                <InviteLinkGenerator type="group" groupId={group.id} />
+              </div>
+            )}
 
             {isCreator && (
               <div className="flex justify-end gap-3">
