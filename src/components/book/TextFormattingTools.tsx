@@ -3,9 +3,12 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ChevronDown, ChevronUp, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BOOK_SIZES, DIGITAL_FORMATS, FORMAT_SIZES, BookSize } from "@/lib/formatting-constants";
+import { getPreviewStyles } from "@/lib/preview-constants";
+import { useToast } from "@/hooks/use-toast";
 
 interface TextFormattingToolsProps {
   isAIMode: boolean;
@@ -24,39 +27,42 @@ export const TextFormattingTools = ({
   onBookSizeChange,
   onDeviceSettingsChange
 }: TextFormattingToolsProps) => {
-  const [selectedFormat, setSelectedFormat] = useState<string>("trade-paperback");
-  const [selectedSize, setSelectedSize] = useState<string>("");
-  const [selectedDigitalFormat, setSelectedDigitalFormat] = useState<string>(DIGITAL_FORMATS[0].name);
+  const [selectedPlatform, setSelectedPlatform] = useState<'kdp' | 'ingramSpark'>('kdp');
+  const [selectedFormat, setSelectedFormat] = useState<'print' | 'digital'>('print');
+  const [selectedSize, setSelectedSize] = useState<string>('6x9');
   const [deviceView, setDeviceView] = useState<'print' | 'kindle' | 'ipad' | 'phone'>('print');
   const [fontSize, setFontSize] = useState<string>("12pt");
   const [isFormatSettingsOpen, setIsFormatSettingsOpen] = useState(true);
   const [editableContent, setEditableContent] = useState(sectionContent || '');
+  const { toast } = useToast();
 
   useEffect(() => {
     setEditableContent(sectionContent || '');
   }, [sectionContent]);
 
-  useEffect(() => {
-    // Reset selected size when format changes and set first available size
-    if (selectedFormat in FORMAT_SIZES) {
-      const sizes = FORMAT_SIZES[selectedFormat as keyof typeof FORMAT_SIZES];
-      setSelectedSize(sizes[0].name);
-      onBookSizeChange(sizes[0]);
-    } else {
-      setSelectedSize("");
-      onBookSizeChange(null);
-    }
-  }, [selectedFormat, onBookSizeChange]);
-
-  const isDigitalFormat = (format: string) => {
-    return DIGITAL_FORMATS.some(df => df.name.toLowerCase() === format.toLowerCase());
+  const handlePlatformChange = (platform: 'kdp' | 'ingramSpark') => {
+    setSelectedPlatform(platform);
+    // Reset format and size based on platform selection
+    setSelectedFormat('print');
+    setSelectedSize(platform === 'kdp' ? '6x9' : '5x8');
+    
+    toast({
+      title: `${platform === 'kdp' ? 'Amazon KDP' : 'IngramSpark'} Selected`,
+      description: platform === 'kdp' 
+        ? "Using Amazon KDP specifications for formatting"
+        : "Using IngramSpark specifications for formatting",
+    });
   };
 
-  const getAvailableSizes = () => {
-    if (isDigitalFormat(selectedFormat)) {
-      return [];
+  const handleFormatChange = (format: 'print' | 'digital') => {
+    setSelectedFormat(format);
+    // Reset size based on format
+    if (format === 'digital') {
+      setDeviceView('kindle');
+    } else {
+      setDeviceView('print');
+      setSelectedSize('6x9');
     }
-    return FORMAT_SIZES[selectedFormat as keyof typeof FORMAT_SIZES] || [];
   };
 
   const getSectionTitle = (section: string) => {
@@ -135,32 +141,31 @@ export const TextFormattingTools = ({
     return "rounded-none border border-gray-200 bg-white shadow-lg";
   };
 
-  useEffect(() => {
-    if (selectedSize) {
-      const selectedSizeObj = BOOK_SIZES.find(size => size.name === selectedSize);
-      if (selectedSizeObj) {
-        onBookSizeChange(selectedSizeObj);
-      }
-    }
-  }, [selectedSize, onBookSizeChange]);
-
-  useEffect(() => {
-    onDeviceSettingsChange({
-      deviceView,
-      fontSize,
-      selectedDigitalFormat
-    });
-  }, [deviceView, fontSize, selectedDigitalFormat, onDeviceSettingsChange]);
+  const previewStyles = getPreviewStyles(
+    selectedPlatform,
+    selectedFormat,
+    selectedSize,
+    deviceView
+  );
 
   return (
     <div className="flex-1 flex">
       <div className="w-[21cm] mx-auto my-4">
         <ScrollArea className="h-[calc(100vh-8rem)]">
+          <Alert className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {selectedPlatform === 'kdp' 
+                ? "Amazon KDP requires specific trim sizes and bleed settings. Preview shows safe areas and bleed zones."
+                : "IngramSpark offers more flexibility but requires higher quality PDF submissions with proper bleed settings."}
+            </AlertDescription>
+          </Alert>
+
           <div className={cn(
-            "relative mx-auto transition-all duration-300 min-h-[calc(100vh-10rem)]",
-            getDeviceFrame()
+            "relative mx-auto transition-all duration-300",
+            "rounded-lg overflow-hidden"
           )}>
-            <div className="relative" style={getPreviewStyle()}>
+            <div style={previewStyles}>
               <div className="prose prose-sm max-w-none">
                 <h2 className="text-2xl font-serif mb-6">
                   {getSectionTitle(currentSection)}
@@ -203,101 +208,102 @@ export const TextFormattingTools = ({
             </div>
             <CollapsibleContent className="space-y-4">
               <div>
-                <label className="text-sm text-gray-600 mb-1 block">Book Format</label>
+                <label className="text-sm text-gray-600 mb-1 block">Publishing Platform</label>
+                <Select 
+                  value={selectedPlatform}
+                  onValueChange={(value: 'kdp' | 'ingramSpark') => handlePlatformChange(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose platform" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="kdp">Amazon KDP</SelectItem>
+                    <SelectItem value="ingramSpark">IngramSpark</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600 mb-1 block">Format Type</label>
                 <Select 
                   value={selectedFormat}
-                  onValueChange={setSelectedFormat}
+                  onValueChange={(value: 'print' | 'digital') => handleFormatChange(value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Choose format" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Print Formats</SelectLabel>
-                      <SelectItem value="trade-paperback">Trade Paperback</SelectItem>
-                      <SelectItem value="mass-market">Mass Market</SelectItem>
-                      <SelectItem value="hardcover">Hardcover</SelectItem>
-                      <SelectItem value="children">Children's Book</SelectItem>
-                      <SelectItem value="photo-book">Photo Book</SelectItem>
-                      <SelectItem value="international">International</SelectItem>
-                    </SelectGroup>
-                    <SelectGroup>
-                      <SelectLabel>Digital Formats</SelectLabel>
-                      {DIGITAL_FORMATS.map(format => (
-                        <SelectItem key={format.name} value={format.name.toLowerCase()}>
-                          {format.name}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
+                    <SelectItem value="print">Print Book</SelectItem>
+                    {selectedPlatform === 'kdp' && (
+                      <SelectItem value="digital">Digital (Kindle)</SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
 
-              {!isDigitalFormat(selectedFormat) && (
+              {selectedFormat === 'print' && (
                 <div>
                   <label className="text-sm text-gray-600 mb-1 block">Trim Size</label>
-                  <Select value={selectedSize} onValueChange={(value) => {
-                    setSelectedSize(value);
-                    const size = getAvailableSizes().find(s => s.name === value);
-                    if (size) onBookSizeChange(size);
-                  }}>
+                  <Select 
+                    value={selectedSize} 
+                    onValueChange={setSelectedSize}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Choose size" />
                     </SelectTrigger>
                     <SelectContent>
-                      {getAvailableSizes().map((size) => (
-                        <SelectItem key={size.name} value={size.name}>
-                          {size.name}
-                        </SelectItem>
-                      ))}
+                      {selectedPlatform === 'kdp' ? (
+                        <>
+                          <SelectItem value="5x8">5" x 8" (Novel)</SelectItem>
+                          <SelectItem value="6x9">6" x 9" (Standard)</SelectItem>
+                          <SelectItem value="8.5x11">8.5" x 11" (Textbook)</SelectItem>
+                        </>
+                      ) : (
+                        <>
+                          <SelectItem value="5x8">5" x 8" (Novel)</SelectItem>
+                          <SelectItem value="6x9">6" x 9" (Standard)</SelectItem>
+                          <SelectItem value="8.5x8.5">8.5" x 8.5" (Square)</SelectItem>
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
               )}
 
-              <div>
-                <label className="text-sm text-gray-600 mb-1 block">Preview Device</label>
-                <Select value={deviceView} onValueChange={(value: 'print' | 'kindle' | 'ipad' | 'phone') => setDeviceView(value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose device" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="print">Print</SelectItem>
-                    <SelectItem value="kindle">Kindle</SelectItem>
-                    <SelectItem value="ipad">iPad</SelectItem>
-                    <SelectItem value="phone">Phone</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {selectedFormat === 'digital' && (
+                <div>
+                  <label className="text-sm text-gray-600 mb-1 block">Preview Device</label>
+                  <Select value={deviceView} onValueChange={(value: 'kindle' | 'ipad' | 'phone') => setDeviceView(value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose device" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="kindle">Kindle E-reader</SelectItem>
+                      <SelectItem value="ipad">iPad/Tablet</SelectItem>
+                      <SelectItem value="phone">Phone</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               <Button 
                 className="w-full"
-                onClick={() => setIsFormatSettingsOpen(false)}
+                onClick={() => {
+                  setIsFormatSettingsOpen(false);
+                  onDeviceSettingsChange({
+                    platform: selectedPlatform,
+                    format: selectedFormat,
+                    size: selectedSize,
+                    deviceView,
+                    fontSize
+                  });
+                }}
               >
                 Save Format Settings
               </Button>
             </CollapsibleContent>
           </div>
         </Collapsible>
-
-        <div className="p-4">
-          <div className={cn(
-            "aspect-[3/4] relative transition-all duration-300",
-            getDeviceFrame()
-          )}>
-            <div className="absolute inset-0 m-4" style={getPreviewStyle()}>
-              <div className="prose prose-sm max-w-none">
-                {editableContent ? (
-                  <div dangerouslySetInnerHTML={{ __html: editableContent }} />
-                ) : (
-                  <div className="text-center text-gray-400">
-                    Preview will appear here
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
