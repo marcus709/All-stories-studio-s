@@ -107,7 +107,7 @@ export const TextFormattingTools = ({
       };
     } else if (deviceView === 'phone') {
       return {
-        frame: "rounded-[32px] border-[12px] border-gray-900 bg-white shadow-xl max-w-[320px] mx-auto", // Reduced from 390px to 320px
+        frame: "rounded-[32px] border-[12px] border-gray-900 bg-white shadow-xl max-w-[320px] mx-auto",
         screen: "aspect-[9/19.5] overflow-hidden",
         text: "font-['SF Pro Text',system-ui,sans-serif] text-black leading-relaxed px-4 py-3"
       };
@@ -219,9 +219,9 @@ export const TextFormattingTools = ({
 
               <div>
                 <label className="text-sm text-gray-600 mb-1 block">Preview Device</label>
-                <Select value={deviceView} onValueChange={(device) => {
-                  setDeviceView(device);
-                  if (device !== 'print') {
+                <Select value={deviceView} onValueChange={(value: 'print' | 'kindle' | 'ipad' | 'phone') => {
+                  setDeviceView(value);
+                  if (value !== 'print') {
                     setSelectedFormat('digital');
                   } else {
                     setSelectedFormat('print');
@@ -311,22 +311,6 @@ export const TextFormattingTools = ({
                           <SelectItem value="8.5x8.5">8.5" x 8.5" (Square)</SelectItem>
                         </>
                       )}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {selectedFormat === 'digital' && (
-                <div>
-                  <label className="text-sm text-gray-600 mb-1 block">Preview Device</label>
-                  <Select value={deviceView} onValueChange={(value: 'kindle' | 'ipad' | 'phone') => setDeviceView(value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose device" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="kindle">Kindle E-reader</SelectItem>
-                      <SelectItem value="ipad">iPad/Tablet</SelectItem>
-                      <SelectItem value="phone">Phone</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
