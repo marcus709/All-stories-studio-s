@@ -1,4 +1,4 @@
-import { BookOpen, Star } from "lucide-react";
+import { BookOpen, Star, Users } from "lucide-react";
 import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
 
@@ -9,7 +9,8 @@ const stories = [
     author: "Sarah Chen",
     image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&q=80",
     rating: 4.9,
-    category: "Mystery"
+    category: "Mystery",
+    isShared: false
   },
   {
     title: "Beyond the Stars",
@@ -17,7 +18,8 @@ const stories = [
     author: "Marcus Wright",
     image: "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&q=80",
     rating: 4.8,
-    category: "Sci-Fi"
+    category: "Sci-Fi",
+    isShared: true
   }
 ];
 
@@ -38,7 +40,9 @@ export const StoriesSection = () => {
           {stories.map((story, index) => (
             <Card 
               key={story.title}
-              className="group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm"
+              className={`group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm ${
+                story.isShared ? 'border-l-4 border-l-blue-500' : ''
+              }`}
             >
               <div className="relative h-64 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
@@ -47,11 +51,19 @@ export const StoriesSection = () => {
                   alt={story.title}
                   className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
                 />
-                <Badge 
-                  className="absolute top-4 right-4 z-20 bg-white/90 text-purple-600 hover:bg-white"
-                >
-                  {story.category}
-                </Badge>
+                <div className="absolute top-4 right-4 z-20 flex gap-2">
+                  {story.isShared && (
+                    <Badge className="bg-blue-500 text-white hover:bg-blue-600">
+                      <Users className="h-3 w-3 mr-1" />
+                      Shared
+                    </Badge>
+                  )}
+                  <Badge 
+                    className="bg-white/90 text-purple-600 hover:bg-white"
+                  >
+                    {story.category}
+                  </Badge>
+                </div>
               </div>
               
               <CardContent className="relative p-6">

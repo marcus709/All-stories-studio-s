@@ -7,12 +7,16 @@ export interface Story {
   user_id: string;
   created_at: string | null;
   updated_at: string | null;
+  is_shared_space?: boolean;
+  shared_group_id?: string | null;
 }
 
 export interface CreateStoryInput {
   title: string;
   description?: string | null;
   user_id: string;
+  is_shared_space?: boolean;
+  shared_group_id?: string | null;
 }
 
 export interface Document {

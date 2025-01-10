@@ -1335,7 +1335,9 @@ export type Database = {
           created_at: string | null
           description: string | null
           id: string
+          is_shared_space: boolean | null
           privacy: string
+          shared_group_id: string | null
           title: string
           updated_at: string | null
           user_id: string
@@ -1344,7 +1346,9 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          is_shared_space?: boolean | null
           privacy?: string
+          shared_group_id?: string | null
           title: string
           updated_at?: string | null
           user_id: string
@@ -1353,12 +1357,22 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          is_shared_space?: boolean | null
           privacy?: string
+          shared_group_id?: string | null
           title?: string
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "stories_shared_group_id_fkey"
+            columns: ["shared_group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       story_analysis: {
         Row: {
