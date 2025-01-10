@@ -110,6 +110,32 @@ export const TextFormattingTools = ({
     };
   };
 
+  const getDevicePreviewClass = () => {
+    switch (deviceView) {
+      case 'kindle':
+        return 'bg-gray-100 rounded-lg shadow-lg p-4';
+      case 'ipad':
+        return 'bg-gray-200 rounded-xl shadow-xl p-6';
+      case 'phone':
+        return 'bg-black rounded-[2.5rem] shadow-2xl p-4 max-w-[375px] mx-auto';
+      default:
+        return 'bg-white shadow-md';
+    }
+  };
+
+  const getDeviceContainerClass = () => {
+    switch (deviceView) {
+      case 'kindle':
+        return 'bg-gray-50 min-h-[600px]';
+      case 'ipad':
+        return 'bg-white min-h-[800px] rounded-lg';
+      case 'phone':
+        return 'bg-white min-h-[600px] rounded-t-[2rem]';
+      default:
+        return 'bg-white';
+    }
+  };
+
   return (
     <div className="flex-1 flex">
       <div className="w-[50%] mx-auto my-4 overflow-hidden">
@@ -306,11 +332,11 @@ export const TextFormattingTools = ({
         <div className="flex-1 overflow-auto p-4">
           <div className={cn(
             "relative transition-all duration-300",
-            deviceStyles.previewClass || ''
+            getDevicePreviewClass()
           )}>
             <div className={cn(
               "preview-container whitespace-pre-wrap break-words overflow-x-hidden",
-              deviceStyles.containerClass || ''
+              getDeviceContainerClass()
             )}>
               <div 
                 className="prose prose-sm max-w-none"
