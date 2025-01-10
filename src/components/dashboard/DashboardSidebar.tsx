@@ -12,9 +12,11 @@ import {
   Rewind,
 } from "lucide-react";
 
+type View = "story" | "characters" | "plot" | "dream" | "ideas" | "docs" | "logic";
+
 interface DashboardSidebarProps {
-  currentView: string;
-  setCurrentView: (view: string) => void;
+  currentView: View;
+  setCurrentView: (view: View) => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
 }
@@ -27,37 +29,37 @@ export const DashboardSidebar = ({
 }: DashboardSidebarProps) => {
   const items = [
     {
-      id: "story",
+      id: "story" as View,
       label: "Story",
       icon: BookOpen,
     },
     {
-      id: "characters",
+      id: "characters" as View,
       label: "Characters",
       icon: Users,
     },
     {
-      id: "plot",
+      id: "plot" as View,
       label: "Plot",
       icon: GitBranch,
     },
     {
-      id: "dream",
+      id: "dream" as View,
       label: "Backwards Planning",
       icon: Rewind,
     },
     {
-      id: "ideas",
+      id: "ideas" as View,
       label: "Ideas",
       icon: Lightbulb,
     },
     {
-      id: "docs",
+      id: "docs" as View,
       label: "Documents",
       icon: FileText,
     },
     {
-      id: "logic",
+      id: "logic" as View,
       label: "Story Logic",
       icon: AlertTriangle,
     },
