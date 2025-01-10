@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Dialog, DialogContent } from "./ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Plus, AlertCircle, Users } from "lucide-react";
 import { useStory } from "@/contexts/StoryContext";
@@ -17,7 +17,8 @@ import { Story, CreateStoryInput } from "@/types/story";
 import { useToast } from "@/hooks/use-toast";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import { useGroups } from "@/hooks/useGroups";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel, Label } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 export function StoriesDialog() {
   const [isOpen, setIsOpen] = React.useState(false);
