@@ -1,42 +1,11 @@
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { X, Type, Search, RotateCcw, Quote, ChevronDown, ChevronUp } from "lucide-react";
-import { useState, useEffect } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-interface BookFormat {
-  name: string;
-  printSizes: string[];
-  digitalFormats: string[];
-  margins: string;
-  fontSizes: string[];
-}
-
-const BOOK_FORMATS: Record<string, BookFormat> = {
-  "trade-paperback": {
-    name: "Trade Paperback",
-    printSizes: ["5\" x 8\"", "5.5\" x 8.5\"", "6\" x 9\""],
-    digitalFormats: ["EPUB", "MOBI", "PDF"],
-    margins: "0.75in",
-    fontSizes: ["11pt", "12pt", "13pt"]
-  },
-  "mass-market": {
-    name: "Mass Market",
-    printSizes: ["4.25\" x 6.87\""],
-    digitalFormats: ["EPUB", "MOBI"],
-    margins: "0.5in",
-    fontSizes: ["10pt", "11pt"]
-  },
-  "hardcover": {
-    name: "Hardcover",
-    printSizes: ["6\" x 9\"", "6.14\" x 9.21\""],
-    digitalFormats: ["EPUB", "MOBI"],
-    margins: "1in",
-    fontSizes: ["12pt", "13pt", "14pt"]
-  }
-};
+import { BOOK_SIZES, DIGITAL_FORMATS } from "@/lib/formatting-constants";
 
 interface TextFormattingToolsProps {
   isAIMode: boolean;
@@ -52,22 +21,16 @@ export const TextFormattingTools = ({
   onContentChange
 }: TextFormattingToolsProps) => {
   const [selectedFormat, setSelectedFormat] = useState<string>("trade-paperback");
-  const [selectedSize, setSelectedSize] = useState<string>(BOOK_FORMATS["trade-paperback"].printSizes[0]);
-  const [selectedDigitalFormat, setSelectedDigitalFormat] = useState<string>(BOOK_FORMATS["trade-paperback"].digitalFormats[0]);
+  const [selectedSize, setSelectedSize] = useState<string>(BOOK_SIZES[0].name);
+  const [selectedDigitalFormat, setSelectedDigitalFormat] = useState<string>(DIGITAL_FORMATS[0].name);
   const [deviceView, setDeviceView] = useState<'print' | 'kindle' | 'ipad' | 'phone'>('print');
-  const [fontSize, setFontSize] = useState<string>(BOOK_FORMATS["trade-paperback"].fontSizes[0]);
+  const [fontSize, setFontSize] = useState<string>("12pt");
   const [isFormatSettingsOpen, setIsFormatSettingsOpen] = useState(true);
   const [editableContent, setEditableContent] = useState(sectionContent || '');
 
   useEffect(() => {
     setEditableContent(sectionContent || '');
   }, [sectionContent]);
-
-  const handleContentChange = (event: React.FormEvent<HTMLDivElement>) => {
-    const newContent = event.currentTarget.innerHTML;
-    setEditableContent(newContent);
-    onContentChange(newContent);
-  };
 
   const getSectionTitle = (section: string) => {
     if (!section) return 'Content';
@@ -82,9 +45,8 @@ export const TextFormattingTools = ({
   };
 
   const getPreviewStyle = () => {
-    const format = BOOK_FORMATS[selectedFormat];
     const baseStyles = {
-      padding: format.margins,
+      padding: '1rem',
       fontSize: fontSize,
       lineHeight: '1.6',
       fontFamily: '"Times New Roman", serif',
@@ -160,10 +122,12 @@ export const TextFormattingTools = ({
                   contentEditable
                   suppressContentEditableWarning
                   className="focus:outline-none min-h-[calc(100vh-16rem)] font-serif"
-                  dangerouslySetInnerHTML={{ 
-                    __html: editableContent
+                  dangerouslySetInnerHTML={{ __html: editableContent }}
+                  onInput={(e) => {
+                    const content = e.currentTarget.innerHTML;
+                    setEditableContent(content);
+                    onContentChange(content);
                   }}
-                  onInput={handleContentChange}
                 />
               </div>
             </div>
@@ -194,70 +158,56 @@ export const TextFormattingTools = ({
               <div>
                 <label className="text-sm text-gray-600 mb-1 block">Book Format</label>
                 <Select 
-                  value={selectedFormat} 
-                  onValueChange={(value) => {
-                    setSelectedFormat(value);
-                    setSelectedSize(BOOK_FORMATS[value].printSizes[0]);
-                    setSelectedDigitalFormat(BOOK_FORMATS[value].digitalFormats[0]);
-                    setFontSize(BOOK_FORMATS[value].fontSizes[0]);
-                  }}
+                  value={selectedFormat}
+                  onValueChange={setSelectedFormat}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Choose format" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(BOOK_FORMATS).map(([key, format]) => (
-                      <SelectItem key={key} value={key}>
-                        {format.name}
-                      </SelectItem>
-                    ))}
+                    <SelectGroup>
+                      <SelectLabel>Print Formats</SelectLabel>
+                      <SelectItem value="trade-paperback">Trade Paperback</SelectItem>
+                      <SelectItem value="mass-market">Mass Market</SelectItem>
+                      <SelectItem value="hardcover">Hardcover</SelectItem>
+                      <SelectItem value="children">Children's Book</SelectItem>
+                      <SelectItem value="photo-book">Photo Book</SelectItem>
+                      <SelectItem value="international">International</SelectItem>
+                    </SelectGroup>
+                    <SelectGroup>
+                      <SelectLabel>Digital Formats</SelectLabel>
+                      {DIGITAL_FORMATS.map(format => (
+                        <SelectItem key={format.name} value={format.name.toLowerCase()}>
+                          {format.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <label className="text-sm text-gray-600 mb-1 block">Print Size</label>
+                <label className="text-sm text-gray-600 mb-1 block">Trim Size</label>
                 <Select value={selectedSize} onValueChange={setSelectedSize}>
                   <SelectTrigger>
                     <SelectValue placeholder="Choose size" />
                   </SelectTrigger>
                   <SelectContent>
-                    {BOOK_FORMATS[selectedFormat].printSizes.map((size) => (
-                      <SelectItem key={size} value={size}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-600 mb-1 block">Font Size</label>
-                <Select value={fontSize} onValueChange={setFontSize}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose font size" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {BOOK_FORMATS[selectedFormat].fontSizes.map((size) => (
-                      <SelectItem key={size} value={size}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-600 mb-1 block">Digital Format</label>
-                <Select value={selectedDigitalFormat} onValueChange={setSelectedDigitalFormat}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose format" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {BOOK_FORMATS[selectedFormat].digitalFormats.map((format) => (
-                      <SelectItem key={format} value={format}>
-                        {format}
-                      </SelectItem>
+                    {Object.entries(
+                      BOOK_SIZES.reduce((acc, size) => {
+                        if (!acc[size.category]) acc[size.category] = [];
+                        acc[size.category].push(size);
+                        return acc;
+                      }, {} as Record<string, typeof BOOK_SIZES>)
+                    ).map(([category, sizes]) => (
+                      <SelectGroup key={category}>
+                        <SelectLabel>{category}</SelectLabel>
+                        {sizes.map((size) => (
+                          <SelectItem key={size.name} value={size.name}>
+                            {size.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
                     ))}
                   </SelectContent>
                 </Select>
