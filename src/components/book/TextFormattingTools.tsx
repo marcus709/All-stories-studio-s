@@ -76,6 +76,48 @@ export const TextFormattingTools = ({
     return 'Content';
   };
 
+  const getDeviceFrame = () => {
+    if (deviceView === 'kindle') {
+      return {
+        frame: "rounded-lg border-[24px] border-gray-800 bg-[#F6F6F6] shadow-xl max-w-[600px] mx-auto",
+        screen: "aspect-[3/4] overflow-hidden",
+        text: "font-['Bookerly',Georgia,serif] text-[#333] leading-relaxed px-6 py-4"
+      };
+    } else if (deviceView === 'ipad') {
+      return {
+        frame: "rounded-2xl border-[24px] border-gray-700 bg-white shadow-xl max-w-[768px] mx-auto",
+        screen: "aspect-[4/3] overflow-hidden",
+        text: "font-['SF Pro Display',system-ui,sans-serif] text-black leading-relaxed px-8 py-6"
+      };
+    } else if (deviceView === 'phone') {
+      return {
+        frame: "rounded-[32px] border-[12px] border-gray-900 bg-white shadow-xl max-w-[320px] mx-auto",
+        screen: "aspect-[9/19.5] overflow-hidden",
+        text: "font-['SF Pro Text',system-ui,sans-serif] text-black leading-relaxed px-4 py-3"
+      };
+    }
+    return {
+      frame: "rounded-none border border-gray-200 bg-white shadow-lg",
+      screen: "aspect-[1/1.414] overflow-hidden", // A4 aspect ratio
+      text: "font-serif text-black leading-relaxed px-8 py-6"
+    };
+  };
+
+  const getDeviceIcon = (device: string) => {
+    switch (device) {
+      case 'phone':
+        return <Smartphone className="h-4 w-4" />;
+      case 'ipad':
+        return <Tablet className="h-4 w-4" />;
+      case 'kindle':
+        return <Book className="h-4 w-4" />;
+      default:
+        return <Book className="h-4 w-4" />;
+    }
+  };
+
+  const deviceStyles = getDeviceFrame();
+
   const getDocumentStyle = () => {
     const selectedSizeObj = BOOK_SIZES.find(size => size.name === selectedSize);
     return {
