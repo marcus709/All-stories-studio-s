@@ -42,7 +42,6 @@ export const TextFormattingTools = ({
 
   const handlePlatformChange = (platform: 'kdp' | 'ingramSpark') => {
     setSelectedPlatform(platform);
-    // Reset format and size based on platform selection
     setSelectedFormat('print');
     setSelectedSize(platform === 'kdp' ? '6x9' : '5x8');
     
@@ -56,7 +55,6 @@ export const TextFormattingTools = ({
 
   const handleFormatChange = (format: 'print' | 'digital') => {
     setSelectedFormat(format);
-    // Reset size based on format
     if (format === 'digital') {
       setDeviceView('kindle');
     } else {
@@ -77,56 +75,19 @@ export const TextFormattingTools = ({
     return 'Content';
   };
 
-  const getPreviewStyle = () => {
+  const getDocumentStyle = () => {
     const selectedSizeObj = BOOK_SIZES.find(size => size.name === selectedSize);
-    const baseStyles: React.CSSProperties = {
+    return {
       padding: '1rem',
       fontSize: fontSize,
       lineHeight: '1.6',
       fontFamily: '"Times New Roman", serif',
       color: '#1a1a1a',
-      textAlign: 'left',
-    };
-
-    if (deviceView === 'kindle') {
-      return {
-        ...baseStyles,
-        maxWidth: '500px',
-        backgroundColor: '#f8f9fa',
-        padding: '2rem',
-        margin: '0 auto',
-        minHeight: '90%',
-        boxShadow: 'inset 0 0 10px rgba(0,0,0,0.1)',
-      };
-    } else if (deviceView === 'ipad') {
-      return {
-        ...baseStyles,
-        maxWidth: '768px',
-        backgroundColor: '#ffffff',
-        padding: '3rem',
-        margin: '0 auto',
-        minHeight: '90%',
-      };
-    } else if (deviceView === 'phone') {
-      return {
-        ...baseStyles,
-        maxWidth: '320px',
-        backgroundColor: '#ffffff',
-        padding: '1rem',
-        margin: '0 auto',
-        minHeight: '90%',
-      };
-    }
-    
-    return {
-      ...baseStyles,
+      textAlign: 'left' as const,
       width: selectedSizeObj ? `${selectedSizeObj.width * 96}px` : '100%',
-      height: selectedSizeObj ? `${selectedSizeObj.height * 96}px` : 'auto',
+      minHeight: '90vh',
       backgroundColor: '#ffffff',
-      padding: '2.5rem',
       margin: '0 auto',
-      minHeight: '90%',
-      boxSizing: 'border-box' as const,
     };
   };
 
@@ -165,7 +126,7 @@ export const TextFormattingTools = ({
             "relative mx-auto transition-all duration-300",
             "rounded-lg overflow-hidden"
           )}>
-            <div style={previewStyles}>
+            <div style={getDocumentStyle()}>
               <div className="prose prose-sm max-w-none">
                 <h2 className="text-2xl font-serif mb-6">
                   {getSectionTitle(currentSection)}
@@ -304,6 +265,19 @@ export const TextFormattingTools = ({
             </CollapsibleContent>
           </div>
         </Collapsible>
+
+        <div className="p-4">
+          <div className={cn(
+            "relative transition-all duration-300",
+            getDeviceFrame()
+          )}>
+            <div style={previewStyles} className="preview-container">
+              <div className="prose prose-sm max-w-none">
+                <div dangerouslySetInnerHTML={{ __html: editableContent }} />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -111,7 +111,6 @@ export const getPreviewStyles = (
     return value;
   };
 
-  // Apply device-specific modifications
   const styles: React.CSSProperties = {
     width: inToPx(baseStyles.width),
     height: inToPx(baseStyles.height),
