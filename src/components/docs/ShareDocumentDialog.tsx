@@ -97,7 +97,7 @@ export const ShareDocumentDialog = ({
             checked={allowEditing}
             onCheckedChange={setAllowEditing}
           />
-          <label htmlFor="editing-access" className="text-sm font-medium">
+          <label htmlFor="editing-access" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             Editing access
           </label>
         </div>
