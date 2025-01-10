@@ -145,7 +145,7 @@ export const TextFormattingTools = ({
 
   return (
     <div className="flex-1 flex">
-      <div className="w-[21cm] mx-auto my-4 overflow-hidden flex-1">
+      <div className="w-[21cm] mx-auto my-4">
         <ScrollArea className="h-[calc(100vh-8rem)]">
           <div className={cn(
             "relative mx-auto transition-all duration-300 min-h-[calc(100vh-10rem)]",
