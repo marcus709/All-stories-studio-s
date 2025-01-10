@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useStory } from "@/contexts/StoryContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export const ThemeManager = () => {
   const { selectedStory } = useStory();

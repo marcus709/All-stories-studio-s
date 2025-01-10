@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -15,6 +16,8 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
+type MilestoneType = "major_event" | "character_decision" | "theme_setup" | "ending";
+
 export const MilestonesTimeline = () => {
   const { selectedStory } = useStory();
   const { toast } = useToast();
@@ -23,7 +26,7 @@ export const MilestonesTimeline = () => {
   const [newMilestone, setNewMilestone] = useState({
     title: "",
     description: "",
-    milestone_type: "major_event",
+    milestone_type: "major_event" as MilestoneType,
   });
 
   const { data: milestones } = useQuery({
@@ -53,7 +56,9 @@ export const MilestonesTimeline = () => {
         .insert({
           story_id: selectedStory.id,
           position,
-          ...data,
+          title: data.title,
+          description: data.description,
+          milestone_type: data.milestone_type,
         });
 
       if (error) throw error;
@@ -99,7 +104,7 @@ export const MilestonesTimeline = () => {
           
           <Select
             value={newMilestone.milestone_type}
-            onValueChange={value => setNewMilestone(prev => ({ ...prev, milestone_type: value }))}
+            onValueChange={value => setNewMilestone(prev => ({ ...prev, milestone_type: value as MilestoneType }))}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select milestone type" />
