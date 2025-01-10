@@ -51,6 +51,7 @@ export const TextFormattingTools = ({
   const [isFormatSettingsOpen, setIsFormatSettingsOpen] = useState(true);
   const [editableContent, setEditableContent] = useState(sectionContent || '');
   const [showPlatformAlert, setShowPlatformAlert] = useState(true);
+  const [mockupImage, setMockupImage] = useState<string>("/lovable-uploads/ef6d596d-15fc-4a39-9bcd-9fccb852f98c.png");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -77,6 +78,20 @@ export const TextFormattingTools = ({
     } else {
       setDeviceView('print');
       setSelectedSize('6x9');
+    }
+  };
+
+  const handleMockupChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result;
+        if (typeof result === 'string') {
+          setMockupImage(result);
+        }
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -164,6 +179,18 @@ export const TextFormattingTools = ({
               </CollapsibleTrigger>
             </div>
             <CollapsibleContent className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+              {deviceView === 'kindle' && (
+                <div className="mb-4">
+                  <label className="text-sm text-gray-600 mb-1 block">Custom Kindle Mockup</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleMockupChange}
+                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+                  />
+                </div>
+              )}
+              
               <div>
                 <label className="text-sm text-gray-600 mb-1 block">Publishing Platform</label>
                 <Select 
@@ -294,6 +321,7 @@ export const TextFormattingTools = ({
               >
                 Save Format Settings
               </Button>
+              
             </CollapsibleContent>
           </div>
         </Collapsible>
@@ -302,7 +330,7 @@ export const TextFormattingTools = ({
           {deviceView === 'kindle' ? (
             <div className="relative w-full max-w-[600px] mx-auto">
               <img 
-                src="/lovable-uploads/ef6d596d-15fc-4a39-9bcd-9fccb852f98c.png" 
+                src={mockupImage}
                 alt="Kindle mockup"
                 className="w-full h-auto"
               />
