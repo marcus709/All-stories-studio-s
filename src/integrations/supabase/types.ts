@@ -123,6 +123,7 @@ export type Database = {
           score: number | null
           submitted_at: string | null
           user_id: string | null
+          viewed: boolean | null
           word_count: number | null
         }
         Insert: {
@@ -133,6 +134,7 @@ export type Database = {
           score?: number | null
           submitted_at?: string | null
           user_id?: string | null
+          viewed?: boolean | null
           word_count?: number | null
         }
         Update: {
@@ -143,6 +145,7 @@ export type Database = {
           score?: number | null
           submitted_at?: string | null
           user_id?: string | null
+          viewed?: boolean | null
           word_count?: number | null
         }
         Relationships: [

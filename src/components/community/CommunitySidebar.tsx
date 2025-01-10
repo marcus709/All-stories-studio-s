@@ -81,7 +81,7 @@ export const CommunitySidebar = () => {
         .eq("challenge_id", dailyChallenge?.id)
         .order("submitted_at", { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') throw error;
       return data;
