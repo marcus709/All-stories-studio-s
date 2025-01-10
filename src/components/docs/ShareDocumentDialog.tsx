@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useGroups } from "@/hooks/useGroups";
-import { useFriendsList } from "@/hooks/useFriendsList";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Button } from '../ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { useGroups } from '@/hooks/useGroups';
+import { useFriendsList } from '@/hooks/useFriendsList';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ShareDocumentDialogProps {
   document: {
@@ -18,11 +18,14 @@ interface ShareDocumentDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export const ShareDocumentDialog = ({ document, open, onOpenChange }: ShareDocumentDialogProps) => {
-  const navigate = useNavigate();
+export const ShareDocumentDialog = ({ 
+  document, 
+  open, 
+  onOpenChange,
+}: ShareDocumentDialogProps) => {
+  const [selectedTab, setSelectedTab] = useState<"friends" | "groups">("friends");
   const { data: groups } = useGroups();
   const { friends } = useFriendsList();
-  const [selectedTab, setSelectedTab] = useState<"friends" | "groups">("friends");
   const { toast } = useToast();
 
   const handleShareWithFriend = async (friendId: string) => {
