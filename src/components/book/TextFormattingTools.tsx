@@ -5,20 +5,24 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { BOOK_SIZES, DIGITAL_FORMATS } from "@/lib/formatting-constants";
+import { BOOK_SIZES, DIGITAL_FORMATS, BookSize } from "@/lib/formatting-constants";
 
 interface TextFormattingToolsProps {
   isAIMode: boolean;
   currentSection: string;
   sectionContent?: string;
   onContentChange: (content: string) => void;
+  onBookSizeChange: (size: BookSize) => void;
+  onDeviceSettingsChange: (settings: any) => void;
 }
 
 export const TextFormattingTools = ({ 
   isAIMode, 
   currentSection,
   sectionContent,
-  onContentChange
+  onContentChange,
+  onBookSizeChange,
+  onDeviceSettingsChange
 }: TextFormattingToolsProps) => {
   const [selectedFormat, setSelectedFormat] = useState<string>("trade-paperback");
   const [selectedSize, setSelectedSize] = useState<string>(BOOK_SIZES[0].name);
@@ -85,10 +89,9 @@ export const TextFormattingTools = ({
       };
     }
     
-    // Print view with actual dimensions
     return {
       ...baseStyles,
-      width: selectedSizeObj ? `${selectedSizeObj.width * 96}px` : '100%', // Convert inches to pixels (96 DPI)
+      width: selectedSizeObj ? `${selectedSizeObj.width * 96}px` : '100%',
       height: selectedSizeObj ? `${selectedSizeObj.height * 96}px` : 'auto',
       backgroundColor: '#ffffff',
       padding: '2.5rem',
@@ -108,6 +111,23 @@ export const TextFormattingTools = ({
     }
     return "rounded-none border border-gray-200 bg-white shadow-lg";
   };
+
+  useEffect(() => {
+    if (selectedSize) {
+      const selectedSizeObj = BOOK_SIZES.find(size => size.name === selectedSize);
+      if (selectedSizeObj) {
+        onBookSizeChange(selectedSizeObj);
+      }
+    }
+  }, [selectedSize, onBookSizeChange]);
+
+  useEffect(() => {
+    onDeviceSettingsChange({
+      deviceView,
+      fontSize,
+      selectedDigitalFormat
+    });
+  }, [deviceView, fontSize, selectedDigitalFormat, onDeviceSettingsChange]);
 
   return (
     <div className="flex-1 flex">
