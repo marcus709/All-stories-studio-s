@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
 import { MessageSquare, Users, Hash, Bookmark, Settings, UserPlus, PenLine } from "lucide-react";
@@ -9,7 +10,6 @@ import { capitalize } from "lodash";
 import { FriendRequestsList } from "./FriendRequestsList";
 import { FriendsList } from "./FriendsList";
 import { DailyChallengeDialog } from "./DailyChallengeDialog";
-import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 const navItems = [
@@ -30,14 +30,23 @@ export const CommunitySidebar = () => {
   const { data: profile } = useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", session?.user?.id)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", session?.user?.id)
+          .maybeSingle();
 
-      if (error) throw error;
-      return data;
+        if (error) {
+          console.error("Error fetching profile:", error);
+          throw error;
+        }
+
+        return data;
+      } catch (error) {
+        console.error("Error in profile query:", error);
+        return null;
+      }
     },
     enabled: !!session?.user?.id,
   });
@@ -45,14 +54,19 @@ export const CommunitySidebar = () => {
   const { data: friendRequests } = useQuery({
     queryKey: ["friend-requests", session?.user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("friendships")
-        .select("*")
-        .eq("friend_id", session?.user?.id)
-        .eq("status", "pending");
+      try {
+        const { data, error } = await supabase
+          .from("friendships")
+          .select("*")
+          .eq("friend_id", session?.user?.id)
+          .eq("status", "pending");
 
-      if (error) throw error;
-      return data;
+        if (error) throw error;
+        return data || [];
+      } catch (error) {
+        console.error("Error fetching friend requests:", error);
+        return [];
+      }
     },
     enabled: !!session?.user?.id,
   });
@@ -60,33 +74,40 @@ export const CommunitySidebar = () => {
   const { data: dailyChallenge } = useQuery({
     queryKey: ["daily-challenge"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("daily_challenges")
-        .select("*")
-        .eq("active_date", new Date().toISOString().split("T")[0])
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from("daily_challenges")
+          .select("*")
+          .eq("active_date", new Date().toISOString().split("T")[0])
+          .maybeSingle();
 
-      if (error) throw error;
-      return data;
+        if (error) throw error;
+        return data;
+      } catch (error) {
+        console.error("Error fetching daily challenge:", error);
+        return null;
+      }
     },
   });
 
   const { data: latestSubmission } = useQuery({
     queryKey: ["latest-submission", session?.user?.id, dailyChallenge?.id],
     queryFn: async () => {
+      if (!session?.user?.id || !dailyChallenge?.id) return null;
+
       try {
         const { data, error } = await supabase
           .from("challenge_submissions")
           .select("*")
-          .eq("user_id", session?.user?.id)
-          .eq("challenge_id", dailyChallenge?.id)
+          .eq("user_id", session.user.id)
+          .eq("challenge_id", dailyChallenge.id)
           .order("submitted_at", { ascending: false })
           .limit(1)
           .maybeSingle();
 
         if (error) {
           console.error("Error fetching submission:", error);
-          throw error;
+          return null;
         }
         
         return data;
@@ -107,6 +128,8 @@ export const CommunitySidebar = () => {
   }, [latestSubmission]);
 
   const hasPendingRequests = friendRequests && friendRequests.length > 0;
+
+  if (!session) return null;
 
   return (
     <div className="space-y-6">
