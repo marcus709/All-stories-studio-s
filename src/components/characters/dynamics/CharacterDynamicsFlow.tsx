@@ -21,8 +21,9 @@ import { Plus, Layout, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSession } from '@supabase/auth-helpers-react';
 import { TimelineDialog } from './TimelineDialog';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useStory } from '@/contexts/StoryContext';
 import {
   Select,
   SelectContent,
@@ -55,6 +56,7 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
   const [layoutType, setLayoutType] = useState<LayoutType>('circular');
   const [isTimelineDialogOpen, setIsTimelineDialogOpen] = useState(false);
   const { selectedStory } = useStory();
+  const queryClient = useQueryClient();
 
   // Fetch timeline events
   const { data: timelineEvents } = useQuery({
@@ -473,3 +475,4 @@ function getRelationshipColor(type: string): string {
       return '#94a3b8';
   }
 }
+
