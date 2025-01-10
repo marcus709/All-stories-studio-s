@@ -57,10 +57,20 @@ serve(async (req) => {
     }
 
     console.log('Creating portal session for customer:', customer.id)
-    // Create portal session
+    // Create portal session with configuration
     const session = await stripe.billingPortal.sessions.create({
       customer: customer.id,
       return_url: `${req.headers.get('origin')}/settings`,
+      configuration: {
+        features: {
+          subscription_cancel: { enabled: true },
+          subscription_pause: { enabled: true },
+          payment_method_update: { enabled: true }
+        },
+        business_profile: {
+          headline: "Manage your subscription"
+        }
+      }
     })
 
     console.log('Portal session created successfully')
