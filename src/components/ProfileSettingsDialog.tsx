@@ -17,7 +17,6 @@ interface ProfileSettingsDialogProps {
 export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
   const session = useSession();
   const { toast } = useToast();
-  const [isOpen, setIsOpen] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
   const [profile, setProfile] = React.useState({
     username: "",
@@ -30,11 +29,6 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
       getProfile();
     }
   }, [session?.user?.id]);
-
-  const handleDialogClose = () => {
-    setIsOpen(false);
-    onClose?.();
-  };
 
   async function getProfile() {
     try {
@@ -101,7 +95,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
         title: "Success",
         description: "Your profile settings have been saved.",
       });
-      handleDialogClose();
+      onClose?.();
     } catch (error) {
       toast({
         title: "Error",
@@ -137,7 +131,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleDialogClose}>
+    <Dialog open={true} onOpenChange={() => onClose?.()}>
       <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">Profile Settings</DialogTitle>
@@ -176,7 +170,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={handleDialogClose}
+                  onClick={() => onClose?.()}
                   className="px-3 py-1"
                 >
                   Cancel

@@ -14,6 +14,8 @@ import { Badge } from "@/components/ui/badge";
 import { useSubscription } from "@/contexts/SubscriptionContext";
 import { capitalize } from "lodash";
 import { Crown } from "lucide-react";
+import { useState } from "react";
+import { ProfileSettingsDialog } from "../ProfileSettingsDialog";
 
 interface UserMenuProps {
   session: Session | null;
@@ -28,6 +30,7 @@ interface UserMenuProps {
 
 export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuProps) => {
   const { plan } = useSubscription();
+  const [showSettings, setShowSettings] = useState(false);
 
   const getPlanColor = (planType: string) => {
     switch (planType) {
@@ -104,11 +107,12 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <Link to="/settings">
-            <DropdownMenuItem className="cursor-pointer">
-              Profile Settings
-            </DropdownMenuItem>
-          </Link>
+          <DropdownMenuItem 
+            className="cursor-pointer"
+            onClick={() => setShowSettings(true)}
+          >
+            Profile Settings
+          </DropdownMenuItem>
           <DropdownMenuItem 
             onClick={onSignOut}
             className="text-red-500 hover:text-red-600 cursor-pointer"
@@ -117,6 +121,10 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {showSettings && (
+        <ProfileSettingsDialog onClose={() => setShowSettings(false)} />
+      )}
     </div>
   );
 };
