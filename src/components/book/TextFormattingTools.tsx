@@ -94,21 +94,32 @@ export const TextFormattingTools = ({
 
   const getDeviceFrame = () => {
     if (deviceView === 'kindle') {
-      return "rounded-lg border-8 border-gray-800 bg-gray-100 shadow-xl";
+      return {
+        frame: "rounded-lg border-[24px] border-gray-800 bg-[#F6F6F6] shadow-xl max-w-[600px] mx-auto",
+        screen: "aspect-[3/4] overflow-hidden",
+        text: "font-['Bookerly',Georgia,serif] text-[#333] leading-relaxed px-6 py-4"
+      };
     } else if (deviceView === 'ipad') {
-      return "rounded-2xl border-[16px] border-gray-700 bg-white shadow-xl";
+      return {
+        frame: "rounded-2xl border-[24px] border-gray-700 bg-white shadow-xl max-w-[768px] mx-auto",
+        screen: "aspect-[4/3] overflow-hidden",
+        text: "font-['SF Pro Display',system-ui,sans-serif] text-black leading-relaxed px-8 py-6"
+      };
     } else if (deviceView === 'phone') {
-      return "rounded-[32px] border-[12px] border-gray-900 bg-white shadow-xl";
+      return {
+        frame: "rounded-[32px] border-[12px] border-gray-900 bg-white shadow-xl max-w-[390px] mx-auto",
+        screen: "aspect-[9/19.5] overflow-hidden",
+        text: "font-['SF Pro Text',system-ui,sans-serif] text-black leading-relaxed px-4 py-3"
+      };
     }
-    return "rounded-none border border-gray-200 bg-white shadow-lg";
+    return {
+      frame: "rounded-none border border-gray-200 bg-white shadow-lg",
+      screen: "aspect-[1/1.414] overflow-hidden", // A4 aspect ratio
+      text: "font-serif text-black leading-relaxed px-8 py-6"
+    };
   };
 
-  const previewStyles = getPreviewStyles(
-    selectedPlatform,
-    selectedFormat,
-    selectedSize,
-    deviceView
-  );
+  const deviceStyles = getDeviceFrame();
 
   return (
     <div className="flex-1 flex">
@@ -278,13 +289,25 @@ export const TextFormattingTools = ({
         <div className="p-4">
           <div className={cn(
             "relative transition-all duration-300",
-            getDeviceFrame()
+            deviceStyles.frame
           )}>
-            <div style={previewStyles} className="preview-container">
-              <div className="prose prose-sm max-w-none">
-                <div dangerouslySetInnerHTML={{ __html: editableContent }} />
+            <div className={deviceStyles.screen}>
+              <div 
+                className={cn(
+                  deviceStyles.text,
+                  "preview-container"
+                )}
+                style={getPreviewStyles(selectedPlatform, selectedFormat, selectedSize, deviceView)}
+              >
+                <div 
+                  className="prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: editableContent }} 
+                />
               </div>
             </div>
+            {deviceView === 'phone' && (
+              <div className="absolute top-[6px] left-1/2 -translate-x-1/2 w-[80px] h-[6px] bg-black rounded-full" />
+            )}
           </div>
         </div>
       </div>

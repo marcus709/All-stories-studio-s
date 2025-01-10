@@ -112,16 +112,27 @@ export const getPreviewStyles = (
   };
 
   const styles: React.CSSProperties = {
-    width: inToPx(baseStyles.width),
-    height: inToPx(baseStyles.height),
-    padding: inToPx(baseStyles.margins),
+    width: '100%',
+    height: '100%',
     backgroundColor: '#ffffff',
-    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
     margin: '0 auto',
     position: 'relative',
     overflow: 'hidden',
-    fontSize: baseStyles.fontSize,
-    lineHeight: baseStyles.lineHeight,
+    fontSize: format === 'digital' ? (
+      deviceView === 'kindle' ? '16px' :
+      deviceView === 'phone' ? '14px' :
+      '16px'
+    ) : baseStyles.fontSize,
+    lineHeight: format === 'digital' ? (
+      deviceView === 'kindle' ? '1.6' :
+      deviceView === 'phone' ? '1.5' :
+      '1.6'
+    ) : baseStyles.lineHeight,
+    padding: format === 'digital' ? (
+      deviceView === 'kindle' ? '24px' :
+      deviceView === 'phone' ? '16px' :
+      '32px'
+    ) : inToPx(baseStyles.margins),
   };
 
   // Add bleed indicator for print formats
