@@ -17,6 +17,7 @@ export const CommunityFeed = () => {
   const { checkFeatureAccess } = useSubscription();
   const navigate = useNavigate();
   const { data: posts, isLoading: postsLoading, error: postsError } = usePosts();
+  const [showPaywall, setShowPaywall] = useState(false);
 
   console.log("CommunityFeed render - Session:", !!session);
   console.log("CommunityFeed - Posts:", posts?.length);
@@ -53,7 +54,7 @@ export const CommunityFeed = () => {
           .from("profiles")
           .select("*")
           .eq("id", session.user.id)
-          .single();
+          .maybeSingle();
 
         if (fetchError) {
           console.error("Error fetching profile:", fetchError);
@@ -96,14 +97,34 @@ export const CommunityFeed = () => {
     retry: 1,
   });
 
+  useEffect(() => {
+    const hasAccess = checkFeatureAccess("community_access");
+    setShowPaywall(!hasAccess);
+  }, [checkFeatureAccess]);
+
   if (!session) {
     console.log("Rendering null due to no session");
     return null; // Return null since useEffect will handle the redirect
   }
 
-  if (!checkFeatureAccess("community_access")) {
+  if (showPaywall) {
     console.log("No community access");
-    return <PaywallAlert isOpen={true} onClose={() => {}} feature="community features" requiredPlan="creator" />;
+    return (
+      <div className="space-y-4">
+        <PaywallAlert 
+          isOpen={true} 
+          onClose={() => setShowPaywall(false)} 
+          feature="community features" 
+          requiredPlan="creator" 
+        />
+        <div className="p-4 bg-white rounded-lg shadow">
+          <h2 className="text-lg font-medium text-gray-900">Community Preview</h2>
+          <p className="mt-2 text-gray-600">
+            Upgrade your account to interact with the community and access all features.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   if (profileError) {
