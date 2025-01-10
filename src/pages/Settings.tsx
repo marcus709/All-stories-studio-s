@@ -1,6 +1,6 @@
 import { ProfileSettingsDialog } from "@/components/ProfileSettingsDialog";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { Header } from "@/components/Header";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -9,5 +9,14 @@ export default function Settings() {
     navigate("/dashboard");
   };
 
-  return <ProfileSettingsDialog onClose={handleClose} />;
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="container mx-auto px-4 pt-20">
+        <div className="max-w-[500px] mx-auto">
+          <ProfileSettingsDialog onClose={handleClose} />
+        </div>
+      </div>
+    </div>
+  );
 }

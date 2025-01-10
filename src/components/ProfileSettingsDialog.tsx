@@ -1,5 +1,5 @@
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useSession } from "@supabase/auth-helpers-react";
@@ -17,7 +17,6 @@ interface ProfileSettingsDialogProps {
 export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
   const session = useSession();
   const { toast } = useToast();
-  const [isOpen, setIsOpen] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
   const [profile, setProfile] = React.useState({
     username: "",
@@ -30,11 +29,6 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
       getProfile();
     }
   }, [session?.user?.id]);
-
-  const handleDialogClose = () => {
-    setIsOpen(false);
-    onClose?.();
-  };
 
   async function getProfile() {
     try {
@@ -137,66 +131,68 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleDialogClose}>
-      <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
+    <div className="bg-white rounded-lg border shadow-sm">
+      <DialogContent className="p-0 border-0 max-h-none">
+        <DialogHeader className="p-6 pb-2">
           <DialogTitle className="text-lg font-semibold">Profile Settings</DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
+          <TabsList className="grid w-full grid-cols-2 mb-4 px-6">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="friends">Friends</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="profile">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="flex justify-center">
-                <AvatarUpload
-                  avatarUrl={profile.avatar_url}
-                  onAvatarChange={(url) =>
-                    setProfile((prev) => ({ ...prev, avatar_url: url }))
-                  }
-                />
-              </div>
+          <div className="px-6 pb-6">
+            <TabsContent value="profile">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="flex justify-center">
+                  <AvatarUpload
+                    avatarUrl={profile.avatar_url}
+                    onAvatarChange={(url) =>
+                      setProfile((prev) => ({ ...prev, avatar_url: url }))
+                    }
+                  />
+                </div>
 
-              <ProfileForm profile={profile} onChange={handleProfileChange} />
+                <ProfileForm profile={profile} onChange={handleProfileChange} />
 
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={handleManageSubscription}
-              >
-                <CreditCard className="mr-2 h-4 w-4" />
-                Manage Subscription
-              </Button>
-
-              <div className="flex justify-end gap-2">
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={handleDialogClose}
-                  className="px-3 py-1"
+                  className="w-full"
+                  onClick={handleManageSubscription}
                 >
-                  Cancel
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Manage Subscription
                 </Button>
-                <Button 
-                  type="submit" 
-                  disabled={loading}
-                  className="px-3 py-1 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600"
-                >
-                  Save Changes
-                </Button>
-              </div>
-            </form>
-          </TabsContent>
 
-          <TabsContent value="friends">
-            <FriendsManagement />
-          </TabsContent>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={onClose}
+                    className="px-3 py-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={loading}
+                    className="px-3 py-1 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600"
+                  >
+                    Save Changes
+                  </Button>
+                </div>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="friends">
+              <FriendsManagement />
+            </TabsContent>
+          </div>
         </Tabs>
       </DialogContent>
-    </Dialog>
+    </div>
   );
 }
