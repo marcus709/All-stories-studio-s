@@ -1281,6 +1281,44 @@ export type Database = {
           },
         ]
       }
+      story_planning_steps: {
+        Row: {
+          created_at: string | null
+          description: string
+          id: string
+          step_number: number
+          story_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          id?: string
+          step_number: number
+          story_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          id?: string
+          step_number?: number
+          story_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_planning_steps_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       timeline_character_positions: {
         Row: {
           character_id: string
