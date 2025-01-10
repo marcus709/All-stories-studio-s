@@ -91,35 +91,18 @@ export const ShareDocumentDialog = ({
           <DialogTitle>Share Document</DialogTitle>
         </DialogHeader>
 
-        <div className="flex items-center space-x-2 py-4 border-b">
-          <Switch
-            id="editing-access"
-            checked={allowEditing}
-            onCheckedChange={setAllowEditing}
-          />
-          <label htmlFor="editing-access" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            Editing access
-          </label>
-        </div>
-        
-        {allowEditing && (
-          <p className="text-red-500 text-sm mb-4">
-            People you share this document with will have access to edit it
-          </p>
-        )}
-
-        <Tabs value={selectedTab} onValueChange={(value) => setSelectedTab(value as "friends" | "groups")}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="friends">Friends</TabsTrigger>
-            <TabsTrigger value="groups">Groups</TabsTrigger>
+        <Tabs value={selectedTab} onValueChange={(value) => setSelectedTab(value as "friends" | "groups")} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="friends" className="rounded-full">Friends</TabsTrigger>
+            <TabsTrigger value="groups" className="rounded-full">Groups</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="friends" className="mt-4">
+          <TabsContent value="friends" className="mt-0">
             <div className="space-y-4">
               {friends?.map((friendship) => (
-                <div key={friendship.id} className="flex items-center justify-between p-2 rounded-lg border">
+                <div key={friendship.id} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Avatar>
+                    <Avatar className="h-8 w-8">
                       {friendship.friend?.avatar_url ? (
                         <AvatarImage src={friendship.friend.avatar_url} />
                       ) : (
@@ -128,11 +111,12 @@ export const ShareDocumentDialog = ({
                         </AvatarFallback>
                       )}
                     </Avatar>
-                    <span className="font-medium">@{friendship.friend?.username}</span>
+                    <span className="text-sm font-medium">@{friendship.friend?.username}</span>
                   </div>
                   <Button
-                    size="sm"
                     onClick={() => handleShareWithFriend(friendship.friend?.id || "")}
+                    size="sm"
+                    className="rounded-full bg-pink-500 hover:bg-pink-600"
                   >
                     Share
                   </Button>
@@ -144,21 +128,22 @@ export const ShareDocumentDialog = ({
             </div>
           </TabsContent>
 
-          <TabsContent value="groups" className="mt-4">
+          <TabsContent value="groups" className="mt-0">
             <div className="space-y-4">
               {groups?.map((group) => (
-                <div key={group.id} className="flex items-center justify-between p-2 rounded-lg border">
+                <div key={group.id} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Avatar>
+                    <Avatar className="h-8 w-8">
                       <AvatarFallback>
                         {group.name[0].toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="font-medium">{group.name}</span>
+                    <span className="text-sm font-medium">{group.name}</span>
                   </div>
                   <Button
-                    size="sm"
                     onClick={() => handleShareWithGroup(group.id)}
+                    size="sm"
+                    className="rounded-full bg-pink-500 hover:bg-pink-600"
                   >
                     Share
                   </Button>
