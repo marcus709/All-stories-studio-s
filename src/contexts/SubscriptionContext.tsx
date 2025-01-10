@@ -36,18 +36,38 @@ export const SubscriptionProvider = ({ children }: { children: React.ReactNode }
     queryFn: async () => {
       if (!session?.user?.id) return null;
       
-      const { data, error } = await supabase
+      // First try to get existing trial
+      const { data: existingTrial, error: fetchError } = await supabase
         .from('user_trials')
         .select('*')
         .eq('user_id', session.user.id)
-        .maybeSingle();  // Changed from .single() to .maybeSingle()
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching trial status:', error);
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        console.error('Error fetching trial status:', fetchError);
         return null;
       }
 
-      return data;
+      // If trial exists, return it
+      if (existingTrial) {
+        return existingTrial;
+      }
+
+      // If no trial exists, create one
+      const { data: newTrial, error: createError } = await supabase
+        .from('user_trials')
+        .insert([
+          { user_id: session.user.id }
+        ])
+        .select()
+        .single();
+
+      if (createError) {
+        console.error('Error creating trial:', createError);
+        return null;
+      }
+
+      return newTrial;
     },
     enabled: !!session?.user?.id,
   });
