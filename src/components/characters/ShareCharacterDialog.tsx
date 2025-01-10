@@ -6,7 +6,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { Character } from "@/integrations/supabase/types/tables.types";
 
@@ -20,7 +19,6 @@ export function ShareCharacterDialog({ character, isOpen, onOpenChange }: ShareC
   const session = useSession();
   const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState<"friends" | "groups">("friends");
-  const [allowEditing, setAllowEditing] = useState(false);
 
   const { data: friends } = useQuery({
     queryKey: ["friends", session?.user?.id],
@@ -64,10 +62,7 @@ export function ShareCharacterDialog({ character, isOpen, onOpenChange }: ShareC
   const handleShareWithFriend = (friendId: string) => {
     onOpenChange(false);
     navigate(`/community/chat/${friendId}`, { 
-      state: { 
-        sharedCharacter: character,
-        canEdit: allowEditing
-      }
+      state: { sharedCharacter: character }
     });
   };
 
@@ -76,8 +71,7 @@ export function ShareCharacterDialog({ character, isOpen, onOpenChange }: ShareC
     navigate(`/community/groups`, { 
       state: { 
         selectedGroup: group,
-        sharedCharacter: character,
-        canEdit: allowEditing
+        sharedCharacter: character
       }
     });
   };
@@ -88,27 +82,6 @@ export function ShareCharacterDialog({ character, isOpen, onOpenChange }: ShareC
         <DialogHeader>
           <DialogTitle>Share Character</DialogTitle>
         </DialogHeader>
-
-        <div className="flex items-center justify-between py-4 mb-2">
-          <div className="flex items-center gap-2">
-            <Switch
-              id="editing-access"
-              checked={allowEditing}
-              onCheckedChange={setAllowEditing}
-            />
-            <label 
-              htmlFor="editing-access" 
-              className="text-sm text-muted-foreground"
-            >
-              Allow editing
-            </label>
-          </div>
-          {allowEditing && (
-            <span className="text-xs text-red-500">
-              Can make changes
-            </span>
-          )}
-        </div>
 
         <Tabs value={selectedTab} onValueChange={(value) => setSelectedTab(value as "friends" | "groups")}>
           <TabsList className="grid w-full grid-cols-2">
