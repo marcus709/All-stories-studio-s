@@ -30,6 +30,20 @@ export const PLATFORM_PREVIEW_STYLES = {
         margins: '25px',
         fontSize: '16px',
         lineHeight: '1.5',
+      },
+      ipad: {
+        width: '768px',
+        height: '1024px',
+        margins: '20px',
+        fontSize: '16px',
+        lineHeight: '1.5',
+      },
+      phone: {
+        width: '320px',
+        height: '568px',
+        margins: '15px',
+        fontSize: '14px',
+        lineHeight: '1.4',
       }
     }
   },
@@ -60,16 +74,34 @@ export const PLATFORM_PREVIEW_STYLES = {
   }
 };
 
+// Default styles to use as fallback
+const DEFAULT_STYLES = {
+  width: '6in',
+  height: '9in',
+  margins: '0.5in',
+  gutter: '0.125in',
+  bleed: '0.125in',
+  fontSize: '12pt',
+  lineHeight: '1.5',
+};
+
 export const getPreviewStyles = (
   platform: 'kdp' | 'ingramSpark',
   format: 'print' | 'digital',
   size: string,
   deviceView: 'print' | 'kindle' | 'ipad' | 'phone'
 ) => {
-  // Get base styles from platform/format/size
-  const baseStyles = format === 'digital' 
-    ? PLATFORM_PREVIEW_STYLES[platform][format][deviceView]
-    : PLATFORM_PREVIEW_STYLES[platform][format][size];
+  // Get platform styles or use kdp as default
+  const platformStyles = PLATFORM_PREVIEW_STYLES[platform] || PLATFORM_PREVIEW_STYLES.kdp;
+  
+  // Get format styles or use print as default
+  const formatStyles = platformStyles[format] || platformStyles.print;
+  
+  // For digital format, use device view as size
+  const sizeKey = format === 'digital' ? deviceView : size;
+  
+  // Get specific size styles or use default size
+  const baseStyles = (formatStyles && formatStyles[sizeKey]) || DEFAULT_STYLES;
 
   // Convert inches to pixels for display (assuming 96dpi)
   const inToPx = (value: string) => {
@@ -89,6 +121,8 @@ export const getPreviewStyles = (
     margin: '0 auto',
     position: 'relative',
     overflow: 'hidden',
+    fontSize: baseStyles.fontSize,
+    lineHeight: baseStyles.lineHeight,
   };
 
   // Add bleed indicator for print formats
