@@ -17,9 +17,12 @@ import { Character } from '@/types/character';
 import CharacterNode from './CharacterNode';
 import RelationshipEdge, { RelationshipEdgeData } from './RelationshipEdge';
 import { Button } from '@/components/ui/button';
-import { Plus, Layout } from 'lucide-react';
+import { Plus, Layout, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSession } from '@supabase/auth-helpers-react';
+import { TimelineDialog } from './TimelineDialog';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import {
   Select,
   SelectContent,
@@ -45,18 +48,47 @@ const edgeTypes: EdgeTypes = {
 
 const DEFAULT_POSITION = { x: 100, y: 100 };
 
-interface CharacterNode {
-  id: string;
-  type: "character";
-  position: { x: number; y: number };
-  data: Record<string, unknown> & Character;
-}
-
 export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDynamicsFlowProps) => {
   const { toast } = useToast();
   const [nextNodePosition, setNextNodePosition] = useState(DEFAULT_POSITION);
   const session = useSession();
   const [layoutType, setLayoutType] = useState<LayoutType>('circular');
+  const [isTimelineDialogOpen, setIsTimelineDialogOpen] = useState(false);
+  const { selectedStory } = useStory();
+
+  // Fetch timeline events
+  const { data: timelineEvents } = useQuery({
+    queryKey: ['timeline-events', selectedStory?.id],
+    queryFn: async () => {
+      if (!selectedStory?.id) return [];
+      
+      const { data, error } = await supabase
+        .from('timeline_events')
+        .select('*')
+        .eq('story_id', selectedStory.id)
+        .order('position');
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedStory?.id,
+  });
+
+  // Analyze timeline events
+  const { data: timelineAnalysis } = useQuery({
+    queryKey: ['timeline-analysis', selectedStory?.id],
+    queryFn: async () => {
+      if (!selectedStory?.id) return null;
+
+      const { data, error } = await supabase.functions.invoke('analyze-timeline-events', {
+        body: { storyId: selectedStory.id }
+      });
+
+      if (error) throw error;
+      return data.analysis;
+    },
+    enabled: !!selectedStory?.id,
+  });
 
   const getNodePositions = (chars: Character[], layout: LayoutType) => {
     if (!chars || chars.length === 0) {
@@ -333,6 +365,13 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
           </SelectContent>
         </Select>
         <Button 
+          onClick={() => setIsTimelineDialogOpen(true)}
+          className="bg-purple-500 hover:bg-purple-600 gap-2"
+        >
+          <Clock className="h-4 w-4" />
+          Add Timeline Event
+        </Button>
+        <Button 
           onClick={handleAddNode}
           className="bg-purple-500 hover:bg-purple-600 gap-2"
         >
@@ -375,6 +414,41 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
           className="bg-gray-800 border-gray-700"
         />
       </ReactFlow>
+
+      {timelineEvents && timelineEvents.length > 0 && (
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gray-800 border-t border-gray-700 p-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-white font-medium">Timeline</h3>
+            {timelineAnalysis && (
+              <div className="text-sm text-gray-400">
+                AI Analysis Available
+              </div>
+            )}
+          </div>
+          <div className="relative h-16">
+            {timelineEvents.map((event) => (
+              <div
+                key={event.id}
+                className="absolute top-0 bg-purple-500 px-2 py-1 rounded text-white text-xs cursor-pointer hover:bg-purple-600 transition-colors"
+                style={{ left: `${(event.position / timelineEvents.length) * 100}%` }}
+                title={`${event.title} (${event.year})`}
+              >
+                {event.title}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <TimelineDialog
+        isOpen={isTimelineDialogOpen}
+        onClose={() => setIsTimelineDialogOpen(false)}
+        storyId={selectedStory?.id || ''}
+        onEventAdded={() => {
+          // Refetch timeline events
+          queryClient.invalidateQueries({ queryKey: ['timeline-events'] });
+        }}
+      />
     </div>
   );
 };
