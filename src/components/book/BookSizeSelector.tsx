@@ -1,35 +1,42 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
-
-export interface BookSize {
-  width: number;
-  height: number;
-  name: string;
-}
-
-const STANDARD_SIZES: BookSize[] = [
-  { width: 6, height: 9, name: "Trade Paperback (6\" × 9\")" },
-  { width: 5, height: 8, name: "Digest (5\" × 8\")" },
-  { width: 8.27, height: 11.69, name: "A4" },
-  { width: 7, height: 10, name: "Textbook (7\" × 10\")" },
-];
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { BookSize, PLATFORMS } from "@/lib/formatting-constants";
 
 interface BookSizeSelectorProps {
   onSizeChange: (size: BookSize) => void;
+  selectedFormat?: string;
 }
 
-export const BookSizeSelector = ({ onSizeChange }: BookSizeSelectorProps) => {
-  const [customSize, setCustomSize] = useState<BookSize>({ width: 6, height: 9, name: "Custom" });
-  const [selectedSize, setSelectedSize] = useState<string>(STANDARD_SIZES[0].name);
+export const BookSizeSelector = ({ onSizeChange, selectedFormat }: BookSizeSelectorProps) => {
+  const [selectedPlatform, setSelectedPlatform] = useState<string>(PLATFORMS[0].name);
+  const [customSize, setCustomSize] = useState<BookSize>({ width: 6, height: 9, name: "Custom", category: "Custom" });
+  const [selectedSize, setSelectedSize] = useState<string>("");
+
+  useEffect(() => {
+    // Reset size when platform changes
+    if (selectedPlatform) {
+      const platform = PLATFORMS.find(p => p.name === selectedPlatform);
+      if (platform?.trimSizes.length > 0) {
+        handleSizeChange(platform.trimSizes[0].name);
+      }
+    }
+  }, [selectedPlatform]);
+
+  const handlePlatformChange = (value: string) => {
+    setSelectedPlatform(value);
+  };
 
   const handleSizeChange = (value: string) => {
     setSelectedSize(value);
     if (value === "custom") {
       onSizeChange(customSize);
     } else {
-      const size = STANDARD_SIZES.find(s => s.name === value);
+      const platform = PLATFORMS.find(p => p.name === selectedPlatform);
+      const size = platform?.trimSizes.find(s => s.name === value);
       if (size) onSizeChange(size);
     }
   };
@@ -46,18 +53,52 @@ export const BookSizeSelector = ({ onSizeChange }: BookSizeSelectorProps) => {
     }
   };
 
+  const currentPlatform = PLATFORMS.find(p => p.name === selectedPlatform);
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label>Book Size</Label>
+        <Label>Publishing Platform</Label>
+        <Select value={selectedPlatform} onValueChange={handlePlatformChange}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a platform" />
+          </SelectTrigger>
+          <SelectContent>
+            {PLATFORMS.map((platform) => (
+              <SelectItem key={platform.name} value={platform.name}>
+                {platform.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {currentPlatform && (
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            <div className="text-sm">
+              <p className="font-medium mb-1">{currentPlatform.description}</p>
+              <ul className="list-disc list-inside space-y-1">
+                {currentPlatform.requirements.map((req, index) => (
+                  <li key={index}>{req}</li>
+                ))}
+              </ul>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <div className="space-y-2">
+        <Label>Trim Size</Label>
         <Select value={selectedSize} onValueChange={handleSizeChange}>
           <SelectTrigger>
             <SelectValue placeholder="Select a size" />
           </SelectTrigger>
           <SelectContent>
-            {STANDARD_SIZES.map((size) => (
+            {currentPlatform?.trimSizes.map((size) => (
               <SelectItem key={size.name} value={size.name}>
-                {size.name}
+                {size.name} ({size.category})
               </SelectItem>
             ))}
             <SelectItem value="custom">Custom Size</SelectItem>

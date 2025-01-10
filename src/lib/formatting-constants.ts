@@ -12,6 +12,55 @@ export interface DigitalFormat {
   platforms: string[];
 }
 
+export interface Platform {
+  name: string;
+  description: string;
+  supportedFormats: string[];
+  requirements: string[];
+  trimSizes: BookSize[];
+}
+
+export const PLATFORMS: Platform[] = [
+  {
+    name: "Amazon KDP",
+    description: "Amazon's self-publishing platform with wide reach",
+    supportedFormats: ["PDF", "EPUB", "KPF"],
+    requirements: [
+      "PDF must be press-ready for print",
+      "Cover requires bleed settings",
+      "Final size depends on page count",
+      "Embedded fonts required"
+    ],
+    trimSizes: [
+      { width: 5, height: 8, name: "5\" × 8\"", category: "Trade Paperback" },
+      { width: 5.25, height: 8, name: "5.25\" × 8\"", category: "Trade Paperback" },
+      { width: 5.5, height: 8.5, name: "5.5\" × 8.5\"", category: "Trade Paperback" },
+      { width: 6, height: 9, name: "6\" × 9\"", category: "Trade Paperback" },
+      { width: 7, height: 10, name: "7\" × 10\"", category: "Textbook" },
+      { width: 8.5, height: 11, name: "8.5\" × 11\"", category: "Non-Fiction" }
+    ]
+  },
+  {
+    name: "IngramSpark",
+    description: "Professional publishing platform with wide distribution",
+    supportedFormats: ["PDF", "EPUB"],
+    requirements: [
+      "PDF with embedded fonts",
+      "Proper bleed settings required",
+      "More flexible trim size options",
+      "Higher quality requirements"
+    ],
+    trimSizes: [
+      { width: 5, height: 8, name: "5\" × 8\"", category: "Trade Paperback" },
+      { width: 5.5, height: 8.5, name: "5.5\" × 8.5\"", category: "Trade Paperback" },
+      { width: 6, height: 9, name: "6\" × 9\"", category: "Trade Paperback" },
+      { width: 8.5, height: 8.5, name: "8.5\" × 8.5\"", category: "Square" },
+      { width: 8.5, height: 11, name: "8.5\" × 11\"", category: "Non-Fiction" },
+      { width: 11, height: 8.5, name: "11\" × 8.5\"", category: "Landscape" }
+    ]
+  }
+];
+
 export const BOOK_SIZES: BookSize[] = [
   // Trade Paperback
   { width: 5, height: 8, name: "5\" × 8\"", category: "Trade Paperback" },
