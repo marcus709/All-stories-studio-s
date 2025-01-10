@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { CharactersView } from "@/components/CharactersView";
-import { FormattingView } from "@/components/FormattingView"; // Updated import
-import { DreamToStory } from "@/components/dream-to-story/DreamToStory";
+import { FormattingView } from "@/components/FormattingView";
+import { BackwardsStoryPlanningView } from "@/components/backwards-planning/BackwardsStoryPlanningView";
 import { StoryIdeasView } from "@/components/StoryIdeasView";
 import { StoryDocsView } from "@/components/docs/StoryDocsView";
 import { StoryView } from "./views/StoryView";
@@ -54,8 +54,8 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
           }
           break;
         case "dream":
-          if (handleFeatureAccess("Dream to Story", "story_docs")) {
-            component = <DreamToStory />;
+          if (handleFeatureAccess("Backwards Planning", "story_docs")) {
+            component = <BackwardsStoryPlanningView />;
           }
           break;
         case "ideas":
