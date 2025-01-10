@@ -74,17 +74,26 @@ export const CommunitySidebar = () => {
   const { data: latestSubmission } = useQuery({
     queryKey: ["latest-submission", session?.user?.id, dailyChallenge?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("challenge_submissions")
-        .select("*")
-        .eq("user_id", session?.user?.id)
-        .eq("challenge_id", dailyChallenge?.id)
-        .order("submitted_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      try {
+        const { data, error } = await supabase
+          .from("challenge_submissions")
+          .select("*")
+          .eq("user_id", session?.user?.id)
+          .eq("challenge_id", dailyChallenge?.id)
+          .order("submitted_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error;
-      return data;
+        if (error) {
+          console.error("Error fetching submission:", error);
+          throw error;
+        }
+        
+        return data;
+      } catch (error) {
+        console.error("Caught error:", error);
+        return null;
+      }
     },
     enabled: !!session?.user?.id && !!dailyChallenge?.id,
   });
