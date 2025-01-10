@@ -6,41 +6,27 @@ export const useGroups = () => {
   const session = useSession();
 
   return useQuery({
-    queryKey: ["my-groups"],
+    queryKey: ["my-groups", session?.user?.id],
     queryFn: async () => {
-      const { data: memberGroups, error: memberError } = await supabase
-        .from("groups")
+      if (!session?.user?.id) return [];
+
+      const { data: memberGroups, error } = await supabase
+        .from("group_members")
         .select(`
-          *,
-          group_members!inner (
-            user_id,
-            role
+          group:groups (
+            id,
+            name,
+            description,
+            created_by,
+            privacy
           )
         `)
-        .eq("group_members.user_id", session?.user?.id);
+        .eq("user_id", session.user.id);
 
-      if (memberError) throw memberError;
+      if (error) throw error;
 
-      const { data: createdGroups, error: creatorError } = await supabase
-        .from("groups")
-        .select(`
-          *,
-          group_members (
-            user_id,
-            role
-          )
-        `)
-        .eq("created_by", session?.user?.id);
-
-      if (creatorError) throw creatorError;
-
-      const allGroups = [...(memberGroups || []), ...(createdGroups || [])];
-      const uniqueGroups = Array.from(
-        new Map(allGroups.map((group) => [group.id, group])).values()
-      );
-
-      return uniqueGroups;
+      return memberGroups.map(mg => mg.group);
     },
-    enabled: !!session?.user?.id,
+    enabled: !!session?.user?.id
   });
 };

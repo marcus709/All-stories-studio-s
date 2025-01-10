@@ -1332,6 +1332,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           id: string
+          privacy: string
           title: string
           updated_at: string | null
           user_id: string
@@ -1340,6 +1341,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          privacy?: string
           title: string
           updated_at?: string | null
           user_id: string
@@ -1348,6 +1350,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          privacy?: string
           title?: string
           updated_at?: string | null
           user_id?: string
@@ -1502,6 +1505,48 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "story_planning_steps_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_shares: {
+        Row: {
+          created_at: string | null
+          id: string
+          shared_by: string | null
+          shared_with_group: string | null
+          shared_with_user: string | null
+          story_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          shared_by?: string | null
+          shared_with_group?: string | null
+          shared_with_user?: string | null
+          story_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          shared_by?: string | null
+          shared_with_group?: string | null
+          shared_with_user?: string | null
+          story_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_shares_shared_with_group_fkey"
+            columns: ["shared_with_group"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_shares_story_id_fkey"
             columns: ["story_id"]
             isOneToOne: false
             referencedRelation: "stories"
