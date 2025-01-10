@@ -118,7 +118,7 @@ export const TextFormattingTools = ({
 
   const deviceStyles = getDeviceFrame();
 
-  const getDocumentStyle = () => {
+  const getDocumentStyle = (): React.CSSProperties => {
     const selectedSizeObj = BOOK_SIZES.find(size => size.name === selectedSize);
     return {
       padding: '1rem',
@@ -136,7 +136,7 @@ export const TextFormattingTools = ({
       borderRadius: '4px',
       border: '1px solid rgba(0, 0, 0, 0.1)',
       transition: 'all 0.2s ease-in-out',
-      position: 'relative',
+      position: 'relative' as const,
       overflow: 'hidden',
     };
   };
