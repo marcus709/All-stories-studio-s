@@ -145,10 +145,10 @@ export const TextFormattingTools = ({
 
   return (
     <div className="flex-1 flex">
-      <div className="w-[21cm] mx-auto my-4 overflow-hidden">
+      <div className="w-[21cm] mx-auto my-4 overflow-hidden flex-1">
         <ScrollArea className="h-[calc(100vh-8rem)]">
           <div className={cn(
-            "relative mx-auto transition-all duration-300",
+            "relative mx-auto transition-all duration-300 min-h-[calc(100vh-10rem)]",
             getDeviceFrame()
           )}>
             <div className="relative" style={getPreviewStyle()}>
@@ -159,7 +159,7 @@ export const TextFormattingTools = ({
                 <div 
                   contentEditable
                   suppressContentEditableWarning
-                  className="focus:outline-none min-h-[200px] font-serif"
+                  className="focus:outline-none min-h-[calc(100vh-16rem)] font-serif"
                   dangerouslySetInnerHTML={{ 
                     __html: editableContent
                   }}
