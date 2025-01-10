@@ -6,6 +6,7 @@ import { DashboardContent } from "@/components/dashboard/DashboardContent";
 import { StoryProvider } from "@/contexts/StoryContext";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useToast } from "@/hooks/use-toast";
+import { StudioAssistant } from "@/components/ai/StudioAssistant";
 
 type View = "story" | "characters" | "plot" | "dream" | "ideas" | "docs" | "logic";
 
@@ -49,6 +50,7 @@ function DashboardLayout() {
       <div className={`pt-16 transition-all duration-300 ${isSidebarCollapsed ? 'ml-12' : 'ml-72'}`}>
         <DashboardContent currentView={currentView} />
       </div>
+      <StudioAssistant />
     </div>
   );
 }
