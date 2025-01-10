@@ -74,7 +74,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4',
         messages: [
           {
             role: 'system',
@@ -90,7 +90,7 @@ serve(async (req) => {
               - Issue type (exactly one of: plot_hole, timeline_inconsistency, pov_inconsistency, character_inconsistency, setting_inconsistency, logic_flaw)
               - Description
               - Location in the story (approximate)
-              - Severity (1-10)
+              - Severity (must be a number between 1 and 10)
               
               Format your response as a JSON object with an 'issues' array containing objects with these properties.`
           },
@@ -150,8 +150,13 @@ serve(async (req) => {
         console.warn(`Invalid issue type "${rawType}", defaulting to plot_hole`);
       }
 
-      // Validate and normalize severity
-      const severity = Math.min(Math.max(1, parseInt(issue.severity?.toString() || '5') || 5), 10);
+      // Validate and normalize severity - ensure it's between 1 and 10
+      let severity = parseInt(issue.severity?.toString() || '5');
+      if (isNaN(severity)) {
+        severity = 5;
+        console.warn('Invalid severity value, defaulting to 5');
+      }
+      severity = Math.max(1, Math.min(10, severity)); // Clamp between 1 and 10
 
       return {
         analysis_id: analysis.id,
