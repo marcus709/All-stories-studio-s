@@ -127,8 +127,8 @@ export const TextFormattingTools = ({
       fontFamily: '"Times New Roman", serif',
       color: '#1a1a1a',
       textAlign: 'left' as const,
-      width: selectedSizeObj ? `${selectedSizeObj.width * 96}px` : '100%', // Convert inches to pixels
-      height: selectedSizeObj ? `${selectedSizeObj.height * 96}px` : 'auto', // Convert inches to pixels
+      width: selectedSizeObj ? `${selectedSizeObj.width * 96}px` : '100%',
+      height: selectedSizeObj ? `${selectedSizeObj.height * 96}px` : 'auto',
       minHeight: '90vh',
       backgroundColor: '#ffffff',
       margin: '0 auto',
@@ -138,6 +138,8 @@ export const TextFormattingTools = ({
       transition: 'all 0.2s ease-in-out',
       position: 'relative' as const,
       overflow: 'hidden',
+      wordWrap: 'break-word',
+      overflowWrap: 'break-word',
     };
   };
 
@@ -174,7 +176,7 @@ export const TextFormattingTools = ({
                 <div 
                   contentEditable
                   suppressContentEditableWarning
-                  className="focus:outline-none min-h-[calc(100vh-16rem)] font-serif"
+                  className="focus:outline-none min-h-[calc(100vh-16rem)] font-serif whitespace-pre-wrap break-words"
                   dangerouslySetInnerHTML={{ __html: editableContent }}
                   onInput={(e) => {
                     const content = e.currentTarget.innerHTML;
@@ -351,9 +353,13 @@ export const TextFormattingTools = ({
               <div 
                 className={cn(
                   deviceStyles.text,
-                  "preview-container"
+                  "preview-container whitespace-pre-wrap break-words"
                 )}
-                style={getPreviewStyles(selectedPlatform, selectedFormat, selectedSize, deviceView)}
+                style={{
+                  ...getPreviewStyles(selectedPlatform, selectedFormat, selectedSize, deviceView),
+                  wordWrap: 'break-word',
+                  overflowWrap: 'break-word',
+                }}
               >
                 <div 
                   className="prose prose-sm max-w-none"
