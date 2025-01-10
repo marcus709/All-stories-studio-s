@@ -200,7 +200,7 @@ export const TextFormattingTools = ({
                 </Button>
               </CollapsibleTrigger>
             </div>
-            <CollapsibleContent className="space-y-4">
+            <CollapsibleContent className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
               <div>
                 <label className="text-sm text-gray-600 mb-1 block">Publishing Platform</label>
                 <Select 
