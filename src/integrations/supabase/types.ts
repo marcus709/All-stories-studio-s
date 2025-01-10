@@ -1281,6 +1281,89 @@ export type Database = {
           },
         ]
       }
+      timeline_character_positions: {
+        Row: {
+          character_id: string
+          created_at: string | null
+          id: string
+          position: number
+          timeline_event_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          character_id: string
+          created_at?: string | null
+          id?: string
+          position: number
+          timeline_event_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          character_id?: string
+          created_at?: string | null
+          id?: string
+          position?: number
+          timeline_event_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timeline_character_positions_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timeline_character_positions_timeline_event_id_fkey"
+            columns: ["timeline_event_id"]
+            isOneToOne: false
+            referencedRelation: "timeline_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timeline_events: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          position: number
+          story_id: string
+          title: string
+          updated_at: string | null
+          year: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          position: number
+          story_id: string
+          title: string
+          updated_at?: string | null
+          year?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          position?: number
+          story_id?: string
+          title?: string
+          updated_at?: string | null
+          year?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timeline_events_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       timeline_tension_points: {
         Row: {
           created_at: string | null
