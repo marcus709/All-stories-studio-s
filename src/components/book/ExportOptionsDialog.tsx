@@ -5,10 +5,14 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FileDown, AlertCircle, Check, Loader2, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DIGITAL_FORMATS } from "@/lib/formatting-constants";
 
 interface ExportOptionsDialogProps {
   documentId?: string;
   disabled?: boolean;
+  bookSize?: { width: number; height: number; name: string };
+  deviceSettings?: any;
 }
 
 interface ValidationResult {
@@ -17,17 +21,17 @@ interface ValidationResult {
   message?: string;
 }
 
-const platforms = [
-  { name: "Kindle", format: "mobi" },
-  { name: "Apple Books", format: "epub" },
-  { name: "PDF", format: "pdf" },
-];
-
-export function ExportOptionsDialog({ documentId, disabled }: ExportOptionsDialogProps) {
+export function ExportOptionsDialog({ 
+  documentId, 
+  disabled,
+  bookSize,
+  deviceSettings 
+}: ExportOptionsDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [validationResults, setValidationResults] = useState<ValidationResult[]>([]);
+  const [selectedFormat, setSelectedFormat] = useState(DIGITAL_FORMATS[0].name.toLowerCase());
   const { toast } = useToast();
 
   const handleExport = async () => {
@@ -53,19 +57,19 @@ export function ExportOptionsDialog({ documentId, disabled }: ExportOptionsDialo
     setDownloadUrl(null);
     
     // Initialize validation results
-    setValidationResults(platforms.map(p => ({
+    setValidationResults(DIGITAL_FORMATS.map(p => ({
       platform: p.name,
       status: "pending"
     })));
 
     try {
       // Simulate validation process
-      for (let i = 0; i < platforms.length; i++) {
+      for (let i = 0; i < DIGITAL_FORMATS.length; i++) {
         await new Promise(resolve => setTimeout(resolve, 1000));
         setValidationResults(prev => [
           ...prev.slice(0, i),
           {
-            platform: platforms[i].name,
+            platform: DIGITAL_FORMATS[i].name,
             status: Math.random() > 0.2 ? "valid" : "invalid",
             message: Math.random() > 0.2 ? undefined : "Some formatting issues detected"
           },
@@ -77,7 +81,9 @@ export function ExportOptionsDialog({ documentId, disabled }: ExportOptionsDialo
       const { data, error } = await supabase.functions.invoke('format-document', {
         body: { 
           documentId,
-          format: 'pdf' // Default format for now
+          format: selectedFormat,
+          bookSize,
+          deviceSettings
         }
       });
 
@@ -90,7 +96,6 @@ export function ExportOptionsDialog({ documentId, disabled }: ExportOptionsDialo
         throw new Error('No download URL received from the server');
       }
 
-      // Set the download URL from the response
       setDownloadUrl(data.downloadUrl);
       
       toast({
@@ -133,17 +138,39 @@ export function ExportOptionsDialog({ documentId, disabled }: ExportOptionsDialo
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {platforms.map((platform, index) => (
-            <div key={platform.name} className="flex items-center justify-between">
-              <span>{platform.name}</span>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Export Format</label>
+            <Select
+              value={selectedFormat}
+              onValueChange={setSelectedFormat}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select format" />
+              </SelectTrigger>
+              <SelectContent>
+                {DIGITAL_FORMATS.map((format) => (
+                  <SelectItem 
+                    key={format.name.toLowerCase()} 
+                    value={format.name.toLowerCase()}
+                  >
+                    {format.name} ({format.extension})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {validationResults.map((result, index) => (
+            <div key={result.platform} className="flex items-center justify-between">
+              <span>{result.platform}</span>
               <div className="flex items-center gap-2">
-                {validationResults[index]?.status === "pending" && (
+                {result.status === "pending" && (
                   <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
                 )}
-                {validationResults[index]?.status === "valid" && (
+                {result.status === "valid" && (
                   <Check className="h-4 w-4 text-green-500" />
                 )}
-                {validationResults[index]?.status === "invalid" && (
+                {result.status === "invalid" && (
                   <AlertCircle className="h-4 w-4 text-red-500" />
                 )}
               </div>

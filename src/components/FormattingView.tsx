@@ -13,6 +13,7 @@ import { useStory } from "@/contexts/StoryContext";
 import { Document } from "@/types/story";
 import { Wand2 } from "lucide-react";
 import { IText } from "fabric";
+import { BookSize } from "@/lib/formatting-constants";
 
 export const FormattingView = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
@@ -33,6 +34,8 @@ export const FormattingView = () => {
   const { toast } = useToast();
   const { selectedStory } = useStory();
   const [currentContent, setCurrentContent] = useState<string>('');
+  const [selectedBookSize, setSelectedBookSize] = useState<BookSize | null>(null);
+  const [deviceSettings, setDeviceSettings] = useState<any>(null);
 
   const { data: documents = [] } = useQuery({
     queryKey: ["documents", selectedStory?.id],
@@ -160,6 +163,14 @@ export const FormattingView = () => {
     setCurrentContent(content);
   };
 
+  const handleBookSizeChange = (size: BookSize) => {
+    setSelectedBookSize(size);
+  };
+
+  const handleDeviceSettingsChange = (settings: any) => {
+    setDeviceSettings(settings);
+  };
+
   return (
     <div className="h-[calc(100vh-4rem)] bg-white/90 flex flex-col">
       <div className="h-10 px-4 flex items-center justify-between bg-white/50 backdrop-blur-sm border-b border-gray-200/60">
@@ -193,6 +204,8 @@ export const FormattingView = () => {
             <ExportOptionsDialog 
               documentId={selectedDocument?.id}
               disabled={!hasFormattedDocument}
+              bookSize={selectedBookSize}
+              deviceSettings={deviceSettings}
             />
           </div>
         </div>
@@ -209,6 +222,8 @@ export const FormattingView = () => {
           currentSection={currentSection}
           sectionContent={currentSectionContent}
           onContentChange={handleContentChange}
+          onBookSizeChange={handleBookSizeChange}
+          onDeviceSettingsChange={handleDeviceSettingsChange}
         />
       </div>
     </div>

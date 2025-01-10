@@ -8,14 +8,14 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { documentId, config } = await req.json()
-    console.log('Processing document:', documentId)
+    const { documentId, format = 'pdf', bookSize, deviceSettings } = await req.json()
+    console.log('Processing document:', documentId, 'format:', format)
 
     if (!documentId) {
       throw new Error('Document ID is required')
     }
 
-    // Initialize Supabase client with environment variables
+    // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
@@ -38,30 +38,38 @@ Deno.serve(async (req) => {
       throw new Error('Failed to fetch document')
     }
 
-    // Format the content
-    const formattedContent = await formatContent(document.content, config)
-    console.log('Content formatted successfully')
+    // Format the content based on the selected format and settings
+    const formattedContent = await formatContent(document.content, format, bookSize, deviceSettings)
+    console.log('Content formatted successfully for', format)
 
-    // Update the document with formatted content
-    const { error: updateError } = await supabaseClient
-      .from('documents')
-      .update({ content: formattedContent })
-      .eq('id', documentId)
+    // Generate the appropriate file extension
+    const fileExtension = getFileExtension(format)
+    const fileName = `${documentId}.${fileExtension}`
 
-    if (updateError) {
-      console.error('Error updating document:', updateError)
-      throw updateError
+    // Store the formatted content
+    const { error: uploadError } = await supabaseClient.storage
+      .from('formatted-docs')
+      .upload(fileName, formattedContent, {
+        contentType: getContentType(format),
+        upsert: true
+      })
+
+    if (uploadError) {
+      console.error('Error uploading formatted document:', uploadError)
+      throw uploadError
     }
 
-    // Generate download URL
-    const downloadUrl = `${supabaseUrl}/storage/v1/object/public/formatted-docs/${documentId}.pdf`
-    
+    // Get the public URL
+    const { data: { publicUrl } } = supabaseClient.storage
+      .from('formatted-docs')
+      .getPublicUrl(fileName)
+
     console.log('Document processed successfully')
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        downloadUrl,
+        downloadUrl: publicUrl,
         formattedContent,
         message: 'Document processed successfully'
       }),
@@ -84,9 +92,63 @@ Deno.serve(async (req) => {
   }
 })
 
-// Helper function to format content based on config
-async function formatContent(content: string, config: any): Promise<string> {
-  // For now, we'll just return the content as is
-  // You can implement more sophisticated formatting logic here based on the config
-  return content
+// Helper function to format content based on format and settings
+async function formatContent(
+  content: string, 
+  format: string,
+  bookSize?: { width: number, height: number },
+  deviceSettings?: any
+): Promise<string> {
+  // For now, we'll just return HTML content with applied styles
+  // In a production environment, you'd want to use proper libraries for each format
+  const styles = `
+    @page {
+      size: ${bookSize ? `${bookSize.width}in ${bookSize.height}in` : 'auto'};
+      margin: 1in;
+    }
+    body {
+      font-family: "Times New Roman", serif;
+      font-size: 12pt;
+      line-height: 1.6;
+    }
+  `
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>${styles}</style>
+      </head>
+      <body>
+        ${content}
+      </body>
+    </html>
+  `
+}
+
+function getFileExtension(format: string): string {
+  switch (format.toLowerCase()) {
+    case 'epub':
+      return 'epub'
+    case 'mobi':
+    case 'kpf':
+      return 'kpf'
+    case 'html':
+      return 'html'
+    default:
+      return 'pdf'
+  }
+}
+
+function getContentType(format: string): string {
+  switch (format.toLowerCase()) {
+    case 'epub':
+      return 'application/epub+zip'
+    case 'mobi':
+    case 'kpf':
+      return 'application/x-mobipocket-ebook'
+    case 'html':
+      return 'text/html'
+    default:
+      return 'application/pdf'
+  }
 }
