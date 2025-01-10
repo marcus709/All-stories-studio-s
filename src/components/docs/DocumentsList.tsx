@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Share } from "lucide-react";
-import { ShareDocumentDialog } from "@/components/community/chat/ShareDocumentDialog";
+import { Share, FileText } from "lucide-react";
+import { ShareDocumentDialog } from "./ShareDocumentDialog";
 
 interface Document {
   id: string;
   title: string;
   content: string;
+  story_id: string;
 }
 
 interface DocumentsListProps {
@@ -23,7 +24,7 @@ export const DocumentsList = ({ documents, onSelectDocument, selectedDocumentId 
       {documents.map((doc) => (
         <div
           key={doc.id}
-          className={`flex items-center justify-between p-3 rounded-lg transition-colors cursor-pointer ${
+          className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
             selectedDocumentId === doc.id
               ? "bg-purple-50 border-purple-200"
               : "hover:bg-gray-50 border-transparent"
@@ -33,7 +34,10 @@ export const DocumentsList = ({ documents, onSelectDocument, selectedDocumentId 
             className="flex-1"
             onClick={() => onSelectDocument(doc.id)}
           >
-            <h3 className="font-medium">{doc.title}</h3>
+            <div className="flex items-center gap-3">
+              <FileText className="h-4 w-4 text-gray-400" />
+              <h3 className="font-medium">{doc.title}</h3>
+            </div>
           </div>
           <Button
             variant="ghost"
