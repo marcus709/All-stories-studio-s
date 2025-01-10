@@ -679,6 +679,7 @@ export type Database = {
       }
       document_shares: {
         Row: {
+          can_edit: boolean | null
           created_at: string | null
           document_id: string
           id: string
@@ -687,6 +688,7 @@ export type Database = {
           shared_with_user: string | null
         }
         Insert: {
+          can_edit?: boolean | null
           created_at?: string | null
           document_id: string
           id?: string
@@ -695,6 +697,7 @@ export type Database = {
           shared_with_user?: string | null
         }
         Update: {
+          can_edit?: boolean | null
           created_at?: string | null
           document_id?: string
           id?: string
