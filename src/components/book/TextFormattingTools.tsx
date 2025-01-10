@@ -136,7 +136,7 @@ export const TextFormattingTools = ({
 
   return (
     <div className="flex-1 flex">
-      <div className="w-[21cm] mx-auto my-4">
+      <div className="w-[50%] mx-auto my-4 overflow-auto">
         <ScrollArea className="h-[calc(100vh-8rem)]">
           {showPlatformAlert && (
             <Alert className="mb-4 relative">
@@ -181,7 +181,7 @@ export const TextFormattingTools = ({
         </ScrollArea>
       </div>
 
-      <div className="w-[400px] border-l">
+      <div className="w-[350px] border-l flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
         <Collapsible
           open={isFormatSettingsOpen}
           onOpenChange={setIsFormatSettingsOpen}
@@ -335,7 +335,7 @@ export const TextFormattingTools = ({
           </div>
         </Collapsible>
 
-        <div className="p-4">
+        <div className="flex-1 overflow-auto p-4">
           <div className={cn(
             "relative transition-all duration-300",
             deviceStyles.frame
