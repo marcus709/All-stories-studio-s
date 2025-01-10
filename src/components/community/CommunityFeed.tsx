@@ -97,34 +97,17 @@ export const CommunityFeed = () => {
     retry: 1,
   });
 
-  useEffect(() => {
+  // Only show paywall when trying to interact
+  const handleInteraction = () => {
     const hasAccess = checkFeatureAccess("community_access");
-    setShowPaywall(!hasAccess);
-  }, [checkFeatureAccess]);
+    if (!hasAccess) {
+      setShowPaywall(true);
+    }
+  };
 
   if (!session) {
     console.log("Rendering null due to no session");
     return null; // Return null since useEffect will handle the redirect
-  }
-
-  if (showPaywall) {
-    console.log("No community access");
-    return (
-      <div className="space-y-4">
-        <PaywallAlert 
-          isOpen={true} 
-          onClose={() => setShowPaywall(false)} 
-          feature="community features" 
-          requiredPlan="creator" 
-        />
-        <div className="p-4 bg-white rounded-lg shadow">
-          <h2 className="text-lg font-medium text-gray-900">Community Preview</h2>
-          <p className="mt-2 text-gray-600">
-            Upgrade your account to interact with the community and access all features.
-          </p>
-        </div>
-      </div>
-    );
   }
 
   if (profileError) {
@@ -147,10 +130,21 @@ export const CommunityFeed = () => {
 
   return (
     <div className="space-y-6">
-      {profile && (
-        <CreatePostForm userId={session?.user?.id!} profile={profile} />
+      {showPaywall && (
+        <PaywallAlert 
+          isOpen={showPaywall} 
+          onClose={() => setShowPaywall(false)} 
+          feature="community features" 
+          requiredPlan="creator" 
+        />
       )}
-      <PostsList posts={posts || []} />
+      
+      {profile && (
+        <div onClick={handleInteraction}>
+          <CreatePostForm userId={session?.user?.id!} profile={profile} />
+        </div>
+      )}
+      <PostsList posts={posts || []} onInteraction={handleInteraction} />
     </div>
   );
 };

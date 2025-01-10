@@ -2,21 +2,16 @@ import { Post } from "./Post";
 
 interface PostsListProps {
   posts: any[];
+  onInteraction?: () => void;
 }
 
-export const PostsList = ({ posts }: PostsListProps) => {
-  if (!posts?.length) {
-    return (
-      <div className="text-center py-8 bg-white rounded-lg shadow">
-        <p className="text-gray-500">No posts yet. Be the first to share something!</p>
-      </div>
-    );
-  }
-
+export const PostsList = ({ posts, onInteraction }: PostsListProps) => {
   return (
     <div className="space-y-6">
       {posts.map((post) => (
-        <Post key={post.id} post={post} />
+        <div key={post.id} onClick={onInteraction}>
+          <Post post={post} />
+        </div>
       ))}
     </div>
   );
