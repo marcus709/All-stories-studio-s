@@ -4,7 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ChevronDown, ChevronUp, AlertCircle } from "lucide-react";
+import { ChevronDown, ChevronUp, AlertCircle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BOOK_SIZES, DIGITAL_FORMATS, FORMAT_SIZES, BookSize } from "@/lib/formatting-constants";
 import { getPreviewStyles } from "@/lib/preview-constants";
@@ -34,6 +34,7 @@ export const TextFormattingTools = ({
   const [fontSize, setFontSize] = useState<string>("12pt");
   const [isFormatSettingsOpen, setIsFormatSettingsOpen] = useState(true);
   const [editableContent, setEditableContent] = useState(sectionContent || '');
+  const [showPlatformAlert, setShowPlatformAlert] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -113,14 +114,22 @@ export const TextFormattingTools = ({
     <div className="flex-1 flex">
       <div className="w-[21cm] mx-auto my-4">
         <ScrollArea className="h-[calc(100vh-8rem)]">
-          <Alert className="mb-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              {selectedPlatform === 'kdp' 
-                ? "Amazon KDP requires specific trim sizes and bleed settings. Preview shows safe areas and bleed zones."
-                : "IngramSpark offers more flexibility but requires higher quality PDF submissions with proper bleed settings."}
-            </AlertDescription>
-          </Alert>
+          {showPlatformAlert && (
+            <Alert className="mb-4 relative">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                {selectedPlatform === 'kdp' 
+                  ? "Amazon KDP requires specific trim sizes and bleed settings. Preview shows safe areas and bleed zones."
+                  : "IngramSpark offers more flexibility but requires higher quality PDF submissions with proper bleed settings."}
+              </AlertDescription>
+              <button 
+                onClick={() => setShowPlatformAlert(false)}
+                className="absolute top-2 right-2 p-1 hover:bg-gray-100 rounded-full"
+              >
+                <X className="h-4 w-4 text-gray-500" />
+              </button>
+            </Alert>
+          )}
 
           <div className={cn(
             "relative mx-auto transition-all duration-300",
