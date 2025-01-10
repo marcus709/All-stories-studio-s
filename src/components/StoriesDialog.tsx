@@ -19,6 +19,9 @@ import { useSessionContext } from "@supabase/auth-helpers-react";
 import { useGroups } from "@/hooks/useGroups";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useFriendsList } from "@/hooks/useFriendsList";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export function StoriesDialog() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -29,12 +32,15 @@ export function StoriesDialog() {
     description: "",
   });
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+  const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
+  const [sharingType, setSharingType] = useState<"group" | "friends">("group");
   const { selectedStory, setSelectedStory } = useStory();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { session } = useSessionContext();
   const { data: stories, error: storiesError, isLoading, isError } = useStories();
   const { data: groups } = useGroups();
+  const { friends } = useFriendsList();
 
   const createStoryMutation = useCreateStory((story: Story) => {
     const completeStory: Story = {
@@ -47,6 +53,7 @@ export function StoriesDialog() {
     setShowNewStory(false);
     setNewStory({ title: "", description: "" });
     setSelectedGroup(null);
+    setSelectedFriends([]);
   });
 
   useEffect(() => {
@@ -91,7 +98,25 @@ export function StoriesDialog() {
   };
 
   const handleCreateSharedStory = async () => {
-    if (!newStory.title.trim() || !selectedGroup) {
+    if (!newStory.title.trim()) {
+      return;
+    }
+
+    if (sharingType === "group" && !selectedGroup) {
+      toast({
+        title: "Error",
+        description: "Please select a group to share with",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (sharingType === "friends" && selectedFriends.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please select at least one friend to share with",
+        variant: "destructive",
+      });
       return;
     }
     
@@ -105,10 +130,23 @@ export function StoriesDialog() {
         description: newStory.description || null,
         user_id: session.user.id,
         is_shared_space: true,
-        shared_group_id: selectedGroup
+        shared_group_id: sharingType === "group" ? selectedGroup : null
       };
 
-      createStoryMutation.mutate(storyInput);
+      const story = await createStoryMutation.mutateAsync(storyInput);
+
+      // If sharing with friends, create story shares for each selected friend
+      if (sharingType === "friends" && story) {
+        await Promise.all(selectedFriends.map(friendId =>
+          supabase.from("story_shares").insert({
+            story_id: story.id,
+            shared_by: session.user.id,
+            shared_with_user: friendId
+          })
+        ));
+      }
+
+      setShowNewSharedStory(false);
     } catch (error) {
       toast({
         title: "Error",
@@ -120,6 +158,14 @@ export function StoriesDialog() {
 
   const handleNewStoryChange = (field: "title" | "description", value: string) => {
     setNewStory((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const toggleFriendSelection = (friendId: string) => {
+    setSelectedFriends(prev => 
+      prev.includes(friendId)
+        ? prev.filter(id => id !== friendId)
+        : [...prev, friendId]
+    );
   };
 
   if (!session) {
@@ -219,7 +265,7 @@ export function StoriesDialog() {
           <DialogHeader>
             <DialogTitle>Create Shared Story</DialogTitle>
             <DialogDescription>
-              Create a story that can be edited by all members of a group
+              Create a story that can be shared with a group or specific friends
             </DialogDescription>
           </DialogHeader>
 
@@ -230,30 +276,61 @@ export function StoriesDialog() {
                 setShowNewSharedStory(false);
                 setNewStory({ title: "", description: "" });
                 setSelectedGroup(null);
+                setSelectedFriends([]);
               }}
               onChange={handleNewStoryChange}
               onSubmit={handleCreateSharedStory}
               isLoading={createStoryMutation.isPending}
             />
 
-            <div className="space-y-2">
-              <Label>Select Group</Label>
-              <Select
-                value={selectedGroup || ""}
-                onValueChange={setSelectedGroup}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a group" />
-                </SelectTrigger>
-                <SelectContent>
-                  {groups?.map((group) => (
-                    <SelectItem key={group.id} value={group.id}>
-                      {group.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <Tabs value={sharingType} onValueChange={(value) => setSharingType(value as "group" | "friends")}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="group">Share with Group</TabsTrigger>
+                <TabsTrigger value="friends">Share with Friends</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="group" className="space-y-2">
+                <Label>Select Group</Label>
+                <Select
+                  value={selectedGroup || ""}
+                  onValueChange={setSelectedGroup}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a group" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {groups?.map((group) => (
+                      <SelectItem key={group.id} value={group.id}>
+                        {group.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </TabsContent>
+
+              <TabsContent value="friends" className="space-y-2">
+                <Label>Select Friends</Label>
+                <ScrollArea className="h-[200px] w-full rounded-md border p-4">
+                  <div className="space-y-2">
+                    {friends?.map((friendship) => (
+                      <div key={friendship.friend.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={friendship.friend.id}
+                          checked={selectedFriends.includes(friendship.friend.id)}
+                          onCheckedChange={() => toggleFriendSelection(friendship.friend.id)}
+                        />
+                        <label
+                          htmlFor={friendship.friend.id}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          @{friendship.friend.username}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+            </Tabs>
           </div>
         </DialogContent>
       </Dialog>
