@@ -22,6 +22,8 @@ export const StudioAssistant = () => {
   const { generateContent, isLoading } = useAI();
   const { toast } = useToast();
   const session = useSession();
+  const [isDragging, setIsDragging] = useState(false);
+  const [height, setHeight] = useState(500); // Increased default height
 
   // Fetch user's characters for context
   const { data: characters } = useQuery({
@@ -42,7 +44,6 @@ export const StudioAssistant = () => {
     e.preventDefault();
     if (!message.trim() || isLoading) return;
 
-    // Add user message to conversation
     const newMessage: Message = { role: "user", content: message };
     const newConversation = [...conversation, newMessage];
     setConversation(newConversation);
@@ -77,6 +78,32 @@ export const StudioAssistant = () => {
     setMessage("");
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    const newHeight = window.innerHeight - e.clientY;
+    setHeight(Math.max(300, Math.min(newHeight, window.innerHeight - 100))); // Min 300px, max window height - 100px
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove as any);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove as any);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
+
   if (!isOpen) {
     return (
       <Button
@@ -89,8 +116,14 @@ export const StudioAssistant = () => {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 w-96 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-gray-800/50 flex flex-col overflow-hidden transition-all duration-300 animate-in slide-in-from-bottom-6">
-      <div className="flex items-center justify-between p-4 border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-purple-500/10 to-pink-500/10">
+    <div 
+      style={{ height: `${height}px` }}
+      className="fixed bottom-6 right-6 w-96 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-gray-800/50 flex flex-col overflow-hidden transition-all duration-300 animate-in slide-in-from-bottom-6"
+    >
+      <div 
+        onMouseDown={handleMouseDown}
+        className="flex items-center justify-between p-4 border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-purple-500/10 to-pink-500/10 cursor-ns-resize"
+      >
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
             <Bot className="h-4 w-4 text-white" />
