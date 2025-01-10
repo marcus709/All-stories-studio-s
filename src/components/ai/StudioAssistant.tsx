@@ -9,10 +9,16 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Character } from "@/types/character";
 
+type MessageRole = "assistant" | "user";
+type Message = {
+  role: MessageRole;
+  content: string;
+};
+
 export const StudioAssistant = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
-  const [conversation, setConversation] = useState<Array<{ role: 'assistant' | 'user', content: string }>>([]);
+  const [conversation, setConversation] = useState<Message[]>([]);
   const { generateContent, isLoading } = useAI();
   const { toast } = useToast();
   const session = useSession();
@@ -37,7 +43,8 @@ export const StudioAssistant = () => {
     if (!message.trim() || isLoading) return;
 
     // Add user message to conversation
-    const newConversation = [...conversation, { role: 'user', content: message }];
+    const newMessage: Message = { role: "user", content: message };
+    const newConversation = [...conversation, newMessage];
     setConversation(newConversation);
     
     try {
@@ -46,7 +53,7 @@ export const StudioAssistant = () => {
         aiConfig: {
           temperature: 0.7,
           max_tokens: 150,
-          model_type: 'gpt-4o-mini',
+          model_type: "gpt-4o-mini" as const,
           system_prompt: `You are a friendly and helpful writing assistant. You have access to the user's characters and their traits. 
           Keep your responses concise and engaging. Feel free to ask follow-up questions to better understand the user's needs.
           When discussing characters, reference their specific traits and characteristics to provide personalized advice.`
@@ -56,7 +63,8 @@ export const StudioAssistant = () => {
       const response = await generateContent(message, 'suggestions', context);
       
       if (response) {
-        setConversation([...newConversation, { role: 'assistant', content: response }]);
+        const assistantMessage: Message = { role: "assistant", content: response };
+        setConversation([...newConversation, assistantMessage]);
       }
     } catch (error) {
       toast({
