@@ -17,7 +17,7 @@ const navItems = [
   { icon: Users, label: "My Groups", href: "/community/groups" },
   { icon: Hash, label: "Topics", href: "/community/topics" },
   { icon: Bookmark, label: "Saved", href: "/community/saved" },
-  { icon: Settings, label: "Settings", href: "/settings" },
+  { icon: Settings, label: "Settings", href: "/profile/settings" }, // Updated this line
 ];
 
 export const CommunitySidebar = () => {
