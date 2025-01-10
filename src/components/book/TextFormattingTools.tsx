@@ -127,12 +127,17 @@ export const TextFormattingTools = ({
       fontFamily: '"Times New Roman", serif',
       color: '#1a1a1a',
       textAlign: 'left' as const,
-      width: selectedSizeObj ? `${selectedSizeObj.width * 96}px` : '100%',
+      width: selectedSizeObj ? `${selectedSizeObj.width * 96}px` : '100%', // Convert inches to pixels
+      height: selectedSizeObj ? `${selectedSizeObj.height * 96}px` : 'auto', // Convert inches to pixels
       minHeight: '90vh',
       backgroundColor: '#ffffff',
       margin: '0 auto',
-      boxShadow: '0 0 20px rgba(0, 0, 0, 0.05), 0 0 1px rgba(0, 0, 0, 0.1)',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
       borderRadius: '4px',
+      border: '1px solid rgba(0, 0, 0, 0.1)',
+      transition: 'all 0.2s ease-in-out',
+      position: 'relative',
+      overflow: 'hidden',
     };
   };
 
@@ -161,7 +166,7 @@ export const TextFormattingTools = ({
             "relative mx-auto transition-all duration-300",
             "rounded-lg overflow-hidden"
           )}>
-            <div style={getDocumentStyle()}>
+            <div style={getDocumentStyle()} className="relative">
               <div className="prose prose-sm max-w-none">
                 <h2 className="text-2xl font-serif mb-6">
                   {getSectionTitle(currentSection)}
@@ -365,3 +370,5 @@ export const TextFormattingTools = ({
     </div>
   );
 };
+
+export default TextFormattingTools;
