@@ -40,9 +40,9 @@ export const SubscriptionProvider = ({ children }: { children: React.ReactNode }
         .from('user_trials')
         .select('*')
         .eq('user_id', session.user.id)
-        .single();
+        .maybeSingle();  // Changed from .single() to .maybeSingle()
 
-      if (error) {
+      if (error && error.code !== 'PGRST116') {
         console.error('Error fetching trial status:', error);
         return null;
       }
