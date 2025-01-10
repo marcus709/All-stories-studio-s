@@ -100,12 +100,12 @@ export function ShareCharacterDialog({ character, isOpen, onOpenChange }: ShareC
               htmlFor="editing-access" 
               className="text-sm text-muted-foreground"
             >
-              Allow editing
+              Allow recipients to edit this character
             </label>
           </div>
           {allowEditing && (
             <span className="text-xs text-red-500">
-              Can make changes
+              Recipients will be able to modify this character
             </span>
           )}
         </div>
