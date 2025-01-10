@@ -91,6 +91,27 @@ export const ShareDocumentDialog = ({
           <DialogTitle>Share Document</DialogTitle>
         </DialogHeader>
 
+        <div className="flex items-center justify-between py-4 mb-2">
+          <div className="flex items-center gap-2">
+            <Switch
+              id="editing-access"
+              checked={allowEditing}
+              onCheckedChange={setAllowEditing}
+            />
+            <label 
+              htmlFor="editing-access" 
+              className="text-sm text-muted-foreground"
+            >
+              Allow editing
+            </label>
+          </div>
+          {allowEditing && (
+            <span className="text-xs text-red-500">
+              Can make changes
+            </span>
+          )}
+        </div>
+
         <Tabs value={selectedTab} onValueChange={(value) => setSelectedTab(value as "friends" | "groups")} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="friends" className="rounded-full">Friends</TabsTrigger>
