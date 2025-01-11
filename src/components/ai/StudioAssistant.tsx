@@ -60,39 +60,85 @@ export const StudioAssistant = () => {
     enabled: !!selectedStory?.id && !!session?.user?.id,
   });
 
-  const handleCreateCharacter = async (characterData: Partial<Character>) => {
-    if (!session?.user?.id || !selectedStory?.id) {
-      toast({
-        title: "Error",
-        description: "You must be logged in and have a story selected",
-        variant: "destructive",
-      });
-      return;
-    }
+const handleCreateCharacter = async (characterData: Partial<Character>) => {
+  if (!session?.user?.id || !selectedStory?.id) {
+    toast({
+      title: "Error",
+      description: "You must be logged in and have a story selected",
+      variant: "destructive",
+    });
+    return;
+  }
 
-    try {
-      const { error } = await supabase.from("characters").insert({
-        ...characterData,
-        user_id: session.user.id,
-        story_id: selectedStory.id,
-      });
+  // Ensure required fields are present
+  if (!characterData.name) {
+    toast({
+      title: "Error",
+      description: "Character name is required",
+      variant: "destructive",
+    });
+    return;
+  }
 
-      if (error) throw error;
+  try {
+    const { error } = await supabase.from("characters").insert({
+      name: characterData.name,
+      role: characterData.role || null,
+      traits: characterData.traits || [],
+      goals: characterData.goals || null,
+      backstory: characterData.backstory || null,
+      psychology: characterData.psychology || {
+        fears: [],
+        mental_health: null,
+        coping_mechanisms: [],
+        emotional_tendencies: []
+      },
+      psychological_traits: characterData.psychological_traits || {
+        emotional_intelligence: 50,
+        impulsiveness: 50,
+        trust: 50,
+        resilience: 50
+      },
+      values_and_morals: characterData.values_and_morals || {
+        loyalty: 50,
+        honesty: 50,
+        risk_taking: 50,
+        alignment: {
+          lawful_chaotic: 0,
+          selfless_selfish: 0
+        }
+      },
+      cultural_background: characterData.cultural_background || {
+        traditions: [],
+        taboos: [],
+        religious_beliefs: []
+      },
+      life_events: characterData.life_events || {
+        formative: [],
+        turning_points: [],
+        losses: []
+      },
+      ancestry: characterData.ancestry || null,
+      user_id: session.user.id,
+      story_id: selectedStory.id
+    });
 
-      toast({
-        title: "Success",
-        description: "Character created successfully",
-      });
-      queryClient.invalidateQueries({ queryKey: ["characters"] });
-    } catch (error) {
-      console.error("Error creating character:", error);
-      toast({
-        title: "Error",
-        description: "Failed to create character",
-        variant: "destructive",
-      });
-    }
-  };
+    if (error) throw error;
+
+    toast({
+      title: "Success",
+      description: "Character created successfully",
+    });
+    queryClient.invalidateQueries({ queryKey: ["characters"] });
+  } catch (error) {
+    console.error("Error creating character:", error);
+    toast({
+      title: "Error",
+      description: "Failed to create character",
+      variant: "destructive",
+    });
+  }
+};
 
   const handleCreateDocument = async (title: string, content: string) => {
     if (!session?.user?.id || !selectedStory?.id) {
