@@ -4,13 +4,7 @@ import { Share, FileText, Plus } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ShareDocumentDialog } from "./ShareDocumentDialog";
 import { Switch } from "@/components/ui/switch";
-
-interface Document {
-  id: string;
-  title: string;
-  content: string;
-  story_id: string;
-}
+import { Document } from "@/types/story";
 
 interface DocumentsListProps {
   documents: Document[];
@@ -81,7 +75,7 @@ export const DocumentsList = ({ documents, onSelectDocument, selectedDocumentId 
                   }`}>
                     {doc.title}
                   </h3>
-                  {!isGridView && (
+                  {!isGridView && doc.created_at && (
                     <p className="text-sm text-gray-500">
                       {new Date(doc.created_at).toLocaleDateString()}
                     </p>
@@ -98,7 +92,7 @@ export const DocumentsList = ({ documents, onSelectDocument, selectedDocumentId 
                   <Share className="h-4 w-4" />
                 </Button>
               </div>
-              {isGridView && (
+              {isGridView && doc.created_at && (
                 <p className="mt-2 text-sm text-gray-500">
                   {new Date(doc.created_at).toLocaleDateString()}
                 </p>
