@@ -9,16 +9,13 @@ import { CalendarDays, Users } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Post } from "@/components/community/Post";
+import { Profile } from "@/integrations/supabase/types";
 
-interface ExtendedProfile {
-  id: string;
-  username: string | null;
-  avatar_url: string | null;
-  bio: string | null;
+interface ExtendedProfile extends Omit<Profile, 'social_links'> {
   genres: string[];
   skills: string[];
   created_at?: string;
-  social_links?: {
+  social_links: {
     website: string | null;
     twitter: string | null;
     instagram: string | null;
@@ -31,20 +28,20 @@ interface PostWithProfiles {
   user_id: string;
   created_at: string;
   updated_at: string;
-  get_post_profiles: {
+  get_post_profiles: Array<{
     username: string;
     avatar_url: string | null;
-  }[];
+  }>;
   post_likes: Array<{ id: string; user_id: string }>;
   comments: Array<{
     id: string;
     content: string;
     user_id: string;
     created_at: string;
-    get_comment_profiles: {
+    get_comment_profiles: Array<{
       username: string;
       avatar_url: string | null;
-    }[];
+    }>;
   }>;
 }
 
