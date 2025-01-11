@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { PrivateChat } from "@/components/community/chat/PrivateChat";
 import { DailyChallengeDialog } from "@/components/community/DailyChallengeDialog";
+import { UserProfileDialog } from "@/components/community/UserProfileDialog";
 
 const Community = () => {
   const navigate = useNavigate();
@@ -61,6 +62,10 @@ const Community = () => {
                   <Route path="topics" element={<Topics />} />
                   <Route path="saved" element={<SavedPosts />} />
                   <Route path="chat/:friendId" element={<PrivateChat />} />
+                  <Route 
+                    path="profile/:userId" 
+                    element={<UserProfileDialog showInDialog={false} />} 
+                  />
                 </Routes>
               </div>
             </div>
