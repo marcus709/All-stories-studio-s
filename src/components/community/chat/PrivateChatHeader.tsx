@@ -3,13 +3,16 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { UserProfileDialog } from "../UserProfileDialog";
+import { Profile } from "@/integrations/supabase/types/tables.types";
 
 interface PrivateChatHeaderProps {
   friend: {
     id: string;
     avatar_url?: string | null;
-    username?: string | null;
+    username: string | null;
     bio?: string | null;
+    genres?: string[];
+    skills?: string[];
   } | null;
   onBack?: () => void;
 }
@@ -34,14 +37,10 @@ export const PrivateChatHeader = ({ friend, onBack }: PrivateChatHeaderProps) =>
 
   return (
     <div className="flex items-center gap-4 p-4 border-b">
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={handleBack}
-      >
+      <Button variant="ghost" size="icon" onClick={handleBack}>
         <ArrowLeft className="h-5 w-5" />
       </Button>
-      <div 
+      <div
         className="flex items-center gap-3 cursor-pointer hover:opacity-80"
         onClick={handleProfileClick}
       >
@@ -60,10 +59,10 @@ export const PrivateChatHeader = ({ friend, onBack }: PrivateChatHeaderProps) =>
         </div>
         <span className="font-medium">@{friend?.username}</span>
       </div>
-      
+
       {friend && showProfile && (
         <UserProfileDialog
-          user={friend}
+          user={friend as Profile}
           isOpen={showProfile}
           onClose={() => setShowProfile(false)}
         />

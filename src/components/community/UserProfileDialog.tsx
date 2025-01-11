@@ -1,20 +1,30 @@
 import { useState, useEffect } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Profile } from "@/integrations/supabase/types/tables.types";
 import { useNavigate } from "react-router-dom";
 
 interface UserProfileDialogProps {
-  user: Profile;
+  user: Profile & { genres?: string[]; skills?: string[] };
   isOpen: boolean;
   onClose: () => void;
   showInDialog?: boolean;
 }
 
-export const UserProfileDialog = ({ user, isOpen, onClose, showInDialog = true }: UserProfileDialogProps) => {
+export const UserProfileDialog = ({
+  user,
+  isOpen,
+  onClose,
+  showInDialog = true,
+}: UserProfileDialogProps) => {
   const session = useSession();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -133,7 +143,10 @@ export const UserProfileDialog = ({ user, isOpen, onClose, showInDialog = true }
           <h4 className="text-sm font-medium mb-2">Favorite Genres</h4>
           <div className="flex flex-wrap gap-2">
             {user.genres.map((genre, index) => (
-              <span key={index} className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">
+              <span
+                key={index}
+                className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-sm"
+              >
                 {genre}
               </span>
             ))}
@@ -146,7 +159,10 @@ export const UserProfileDialog = ({ user, isOpen, onClose, showInDialog = true }
           <h4 className="text-sm font-medium mb-2">Skills</h4>
           <div className="flex flex-wrap gap-2">
             {user.skills.map((skill, index) => (
-              <span key={index} className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+              <span
+                key={index}
+                className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-sm"
+              >
                 {skill}
               </span>
             ))}
@@ -155,8 +171,8 @@ export const UserProfileDialog = ({ user, isOpen, onClose, showInDialog = true }
       )}
 
       {session?.user?.id !== user.id && (
-        <Button 
-          className="w-full" 
+        <Button
+          className="w-full"
           onClick={handleSendFriendRequest}
           disabled={isSending || !!requestStatus}
         >

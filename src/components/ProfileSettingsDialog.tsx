@@ -81,13 +81,13 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
         return;
       }
 
-      const socialLinks = (data.social_links && typeof data.social_links === 'object')
-        ? data.social_links as SocialLinks
-        : {
-            website: null,
-            twitter: null,
-            instagram: null,
-          };
+      const socialLinks = data.social_links ? 
+        (data.social_links as unknown as SocialLinks) : 
+        {
+          website: null,
+          twitter: null,
+          instagram: null,
+        };
 
       setProfile({
         username: data.username || "",
