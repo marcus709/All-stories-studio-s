@@ -1,14 +1,23 @@
 import { useState, useEffect } from "react";
-import { useSession } from "@supabase/auth-helpers-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
+import { Book, Users, LineChart, Lightbulb, FileText, AlertTriangle, Rewind, ChevronLeft, ChevronRight } from "lucide-react";
+import { StoriesDialog } from "../StoriesDialog";
+import { useStory } from "@/contexts/StoryContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Profile } from "@/integrations/supabase/types";
-import { ProfileForm } from "../profile/ProfileForm";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import type { View } from "@/types/story";
+import { Profile } from "@/integrations/supabase/types/tables.types";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+
+const navigationItems = [
+  { id: "story", icon: Book, label: "Story Editor" },
+  { id: "characters", icon: Users, label: "Characters" },
+  { id: "plot", icon: LineChart, label: "Formatting" },
+  { id: "dream", icon: Rewind, label: "Backwards Planning" },
+  { id: "ideas", icon: Lightbulb, label: "Story Ideas" },
+  { id: "docs", icon: FileText, label: "Story Docs" },
+  { id: "logic", icon: AlertTriangle, label: "Story Logic" },
+] as const;
+
+type View = (typeof navigationItems)[number]["id"];
 
 interface DashboardSidebarProps {
   currentView: View;
@@ -17,158 +26,112 @@ interface DashboardSidebarProps {
   onToggleCollapse: () => void;
 }
 
-export const DashboardSidebar = ({ 
-  currentView, 
-  setCurrentView,
-  isCollapsed,
-  onToggleCollapse 
-}: DashboardSidebarProps) => {
-  const session = useSession();
+export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onToggleCollapse }: DashboardSidebarProps) => {
+  const { selectedStory } = useStory();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (session?.user?.id) {
-      fetchProfile();
-    }
-  }, [session?.user?.id]);
-
-  const fetchProfile = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", session?.user?.id)
-        .single();
-
-      if (error) throw error;
-
-      if (data) {
-        const profileData: Profile = {
-          id: data.id,
-          username: data.username,
-          avatar_url: data.avatar_url,
-          bio: data.bio,
-          genres: data.genres || [],
-          skills: data.skills || [],
-          pinned_work: {
-            title: data.pinned_work?.title || "",
-            content: data.pinned_work?.content || "",
-            link: data.pinned_work?.link || "",
-          },
-          social_links: {
-            website: data.social_links?.website || "",
-            twitter: data.social_links?.twitter || "",
-            instagram: data.social_links?.instagram || "",
-            newsletter: data.social_links?.newsletter || "",
-          },
-        };
-        setProfile(profileData);
+    const fetchProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+        
+        if (data) {
+          setProfile({
+            id: data.id,
+            username: data.username,
+            avatar_url: data.avatar_url,
+            bio: data.bio,
+            website: null
+          });
+        }
       }
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
 
-  const handleProfileUpdate = async (data: any) => {
-    try {
-      const profileData = {
-        ...data,
-        pinned_work: {
-          title: data.pinned_work?.title || "",
-          content: data.pinned_work?.content || "",
-          link: data.pinned_work?.link || "",
-        },
-        social_links: {
-          website: data.social_links?.website || "",
-          twitter: data.social_links?.twitter || "",
-          instagram: data.social_links?.instagram || "",
-          newsletter: data.social_links?.newsletter || "",
-        },
-      };
+    fetchProfile();
+  }, []);
 
-      const { error } = await supabase
-        .from("profiles")
-        .update(profileData)
-        .eq("id", session?.user?.id);
-
-      if (error) throw error;
-
-      await fetchProfile();
-    } catch (error) {
-      console.error("Error updating profile:", error);
-    }
-  };
-
-  if (isLoading) {
-    return <div>Loading...</div>;
+  if (isCollapsed) {
+    return (
+      <div className="fixed left-0 top-16 w-12 h-[calc(100vh-4rem)] border-r bg-white flex flex-col items-center py-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onToggleCollapse}
+          className="mb-4"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+        <nav className="space-y-3">
+          {navigationItems.map(({ id, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => setCurrentView(id)}
+              disabled={!selectedStory}
+              className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors
+                ${currentView === id ? "text-purple-600 bg-purple-50" : "text-gray-700 hover:bg-gray-50"}`}
+            >
+              <Icon className="h-5 w-5" />
+            </button>
+          ))}
+        </nav>
+      </div>
+    );
   }
 
   return (
-    <div className={cn(
-      "relative flex flex-col border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
-      isCollapsed ? "w-16" : "w-80"
-    )}>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute -right-3 top-4 h-6 w-6 rounded-full border bg-background"
-        onClick={onToggleCollapse}
-      >
-        {isCollapsed ? (
-          <ChevronRight className="h-4 w-4" />
-        ) : (
-          <ChevronLeft className="h-4 w-4" />
-        )}
-      </Button>
-      <div className="flex h-14 items-center border-b px-4">
-        {!isCollapsed && <h2 className="text-lg font-semibold">Dashboard</h2>}
-      </div>
-      <ScrollArea className="flex-1">
-        <div className="space-y-4 py-4">
-          <div className="px-4 py-2">
-            <div className="space-y-1">
-              <Button
-                variant={currentView === "stories" ? "secondary" : "ghost"}
-                className="w-full justify-start"
-                onClick={() => setCurrentView("stories")}
-              >
-                {isCollapsed ? "📚" : "Stories"}
-              </Button>
-              <Button
-                variant={currentView === "characters" ? "secondary" : "ghost"}
-                className="w-full justify-start"
-                onClick={() => setCurrentView("characters")}
-              >
-                {isCollapsed ? "👤" : "Characters"}
-              </Button>
-              <Button
-                variant={currentView === "documents" ? "secondary" : "ghost"}
-                className="w-full justify-start"
-                onClick={() => setCurrentView("documents")}
-              >
-                {isCollapsed ? "📄" : "Documents"}
-              </Button>
-            </div>
+    <div className="fixed left-0 top-16 w-72 h-[calc(100vh-4rem)] border-r bg-white">
+      <div className="flex flex-col h-full">
+        <div className="absolute right-2 top-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggleCollapse}
+            className="hover:bg-gray-100"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Profile Section - Fixed */}
+        <div className="flex items-center gap-3 mb-12 px-8 mt-8">
+          <div className="w-11 h-11 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-lg font-medium">
+            {profile?.username?.[0]?.toUpperCase() || "?"}
+          </div>
+          <div className="flex flex-col">
+            <h3 className="font-medium text-base text-gray-900">
+              {profile?.username || "Loading..."}
+            </h3>
           </div>
         </div>
-      </ScrollArea>
-      {!isCollapsed && profile && (
-        <div className="mt-auto border-t p-4">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Settings className="h-4 w-4" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent>
-              <ProfileForm profile={profile} onChange={handleProfileUpdate} />
-            </SheetContent>
-          </Sheet>
+
+        {/* Stories Section - Fixed */}
+        <div className="space-y-4 mb-6 px-8">
+          <StoriesDialog />
         </div>
-      )}
+
+        {/* Navigation - Scrollable */}
+        <ScrollArea className="flex-1 px-4">
+          <nav className="space-y-3 pr-4">
+            {navigationItems.map(({ id, icon: Icon, label }) => (
+              <button
+                key={id}
+                onClick={() => setCurrentView(id)}
+                disabled={!selectedStory}
+                className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-lg transition-colors text-gray-700 text-lg
+                  ${currentView === id ? "bg-purple-50 text-purple-600" : "hover:bg-gray-50"}`}
+              >
+                <Icon className="h-6 w-6" />
+                <span className="font-medium">{label}</span>
+              </button>
+            ))}
+          </nav>
+        </ScrollArea>
+      </div>
     </div>
   );
 };

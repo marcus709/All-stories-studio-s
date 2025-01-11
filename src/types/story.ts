@@ -1,14 +1,22 @@
-export type View = "stories" | "characters" | "plot" | "formatting" | "docs";
+export type StoryStatus = 'draft' | 'published' | 'archived';
 
-export interface DashboardContentProps {
-  view: View;
+export interface Story {
+  id: string;
+  title: string;
+  description: string | null;
+  user_id: string;
+  created_at: string | null;
+  updated_at: string | null;
+  is_shared_space?: boolean;
+  shared_group_id?: string | null;
 }
 
-export interface DashboardSidebarProps {
-  currentView: View;
-  setCurrentView: (view: View) => void;
-  isCollapsed: boolean;
-  onToggleCollapse: () => void;
+export interface CreateStoryInput {
+  title: string;
+  description?: string | null;
+  user_id: string;
+  is_shared_space?: boolean;
+  shared_group_id?: string | null;
 }
 
 export interface Document {
@@ -17,35 +25,28 @@ export interface Document {
   content: string;
   story_id: string;
   user_id: string;
-  created_at: string;
-  updated_at: string;
+  created_at: string | null;
+  updated_at: string | null;
   time_period?: string;
-  time_period_details?: any;
+  time_period_details?: {
+    year: string;
+    season: string;
+    time_of_day: string;
+    weather: string;
+    environment: string;
+  };
 }
 
-export interface Story {
-  id: string;
-  title: string;
-  description: string | null;
-  user_id: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface CreateStoryInput {
-  title: string;
-  description?: string;
-  user_id: string;
-}
+export type StoryIssueType = 'plot_hole' | 'timeline_inconsistency' | 'pov_confusion' | 'character_inconsistency';
 
 export interface StoryIssue {
   id: string;
   analysis_id: string;
-  issue_type: string;
+  issue_type: StoryIssueType;
   description: string;
   location?: string;
   severity?: number;
-  status: string;
-  created_at: string;
-  updated_at: string;
+  status?: string;
+  created_at?: string;
+  updated_at?: string;
 }
