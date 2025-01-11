@@ -31,8 +31,8 @@ export interface Document {
     culture: string;
     environment: string;
   };
-  created_at?: string;
-  updated_at?: string;
+  created_at: string | null;
+  updated_at?: string | null;
 }
 
 export type StoryIssueType = 'plot_hole' | 'timeline_inconsistency' | 'pov_inconsistency' | 'character_inconsistency' | 'setting_inconsistency' | 'logic_flaw';
