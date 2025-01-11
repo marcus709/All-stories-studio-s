@@ -1,13 +1,85 @@
 import { ArrowLeft, MoreHorizontal, Search, RefreshCw, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Profile } from "@/integrations/supabase/types/tables.types";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Post } from "@/integrations/supabase/types/tables.types";
 
 interface UserProfileViewProps {
   user: Profile;
   onBack: () => void;
 }
 
+type ActivityTab = "posts" | "replies" | "highlights";
+
+interface UserActivity {
+  posts_count: number;
+  replies_count: number;
+  highlights_count: number;
+}
+
 export const UserProfileView = ({ user, onBack }: UserProfileViewProps) => {
+  const [activeTab, setActiveTab] = useState<ActivityTab>("posts");
+  const [activity, setActivity] = useState<UserActivity | null>(null);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchActivity = async () => {
+      const { data, error } = await supabase
+        .rpc('get_user_activity', { user_id: user.id });
+      
+      if (!error && data) {
+        setActivity(data[0]);
+      }
+    };
+
+    fetchActivity();
+  }, [user.id]);
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      setLoading(true);
+      let query;
+
+      switch (activeTab) {
+        case "posts":
+          query = supabase
+            .from("posts")
+            .select("*")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false });
+          break;
+        case "replies":
+          query = supabase
+            .from("comments")
+            .select("*")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false });
+          break;
+        case "highlights":
+          query = supabase
+            .from("saved_posts")
+            .select("posts(*)")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false });
+          break;
+      }
+
+      const { data, error } = await query;
+      if (!error && data) {
+        if (activeTab === "highlights") {
+          setPosts(data.map((item: any) => item.posts));
+        } else {
+          setPosts(data);
+        }
+      }
+      setLoading(false);
+    };
+
+    fetchContent();
+  }, [activeTab, user.id]);
+
   return (
     <div className="flex flex-col h-full bg-white">
       {/* Header */}
@@ -67,32 +139,73 @@ export const UserProfileView = ({ user, onBack }: UserProfileViewProps) => {
         <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
           <div className="flex items-center gap-1">
             <Users className="h-4 w-4" />
-            <span className="font-semibold text-black">0</span> followers
+            <span className="font-semibold text-black">{activity?.posts_count || 0}</span> posts
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="font-semibold text-black">{activity?.replies_count || 0}</span> replies
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="font-semibold text-black">{activity?.highlights_count || 0}</span> highlights
           </div>
         </div>
       </div>
 
       {/* Tabs */}
       <div className="flex border-b mt-4">
-        <button className="flex-1 text-sm font-semibold text-purple-600 border-b-2 border-purple-600 py-4">
+        <button 
+          className={`flex-1 text-sm font-semibold py-4 ${
+            activeTab === "posts" 
+              ? "text-purple-600 border-b-2 border-purple-600" 
+              : "text-gray-500 hover:bg-gray-50"
+          }`}
+          onClick={() => setActiveTab("posts")}
+        >
           Posts
         </button>
-        <button className="flex-1 text-sm font-semibold text-gray-500 hover:bg-gray-50 py-4">
+        <button 
+          className={`flex-1 text-sm font-semibold py-4 ${
+            activeTab === "replies" 
+              ? "text-purple-600 border-b-2 border-purple-600" 
+              : "text-gray-500 hover:bg-gray-50"
+          }`}
+          onClick={() => setActiveTab("replies")}
+        >
           Replies
         </button>
-        <button className="flex-1 text-sm font-semibold text-gray-500 hover:bg-gray-50 py-4">
+        <button 
+          className={`flex-1 text-sm font-semibold py-4 ${
+            activeTab === "highlights" 
+              ? "text-purple-600 border-b-2 border-purple-600" 
+              : "text-gray-500 hover:bg-gray-50"
+          }`}
+          onClick={() => setActiveTab("highlights")}
+        >
           Highlights
-        </button>
-        <button className="flex-1 text-sm font-semibold text-gray-500 hover:bg-gray-50 py-4">
-          Media
         </button>
       </div>
 
       {/* Content Area */}
       <div className="flex-1 overflow-auto">
-        <div className="p-4 text-center text-gray-500">
-          No posts yet
-        </div>
+        {loading ? (
+          <div className="p-4 text-center text-gray-500">
+            Loading...
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="p-4 text-center text-gray-500">
+            No {activeTab} yet
+          </div>
+        ) : (
+          <div className="divide-y">
+            {posts.map((post) => (
+              <div key={post.id} className="p-4">
+                <p className="text-sm text-gray-900">{post.content}</p>
+                <span className="text-xs text-gray-500 mt-2 block">
+                  {new Date(post.created_at!).toLocaleDateString()}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

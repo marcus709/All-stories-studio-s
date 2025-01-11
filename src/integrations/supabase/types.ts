@@ -1792,7 +1792,15 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      user_activity_counts: {
+        Row: {
+          highlights_count: number | null
+          posts_count: number | null
+          replies_count: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_comment_profiles: {
@@ -1838,6 +1846,16 @@ export type Database = {
           skills: string[] | null
           social_links: Json | null
           username: string | null
+        }[]
+      }
+      get_user_activity: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          posts_count: number
+          replies_count: number
+          highlights_count: number
         }[]
       }
     }
