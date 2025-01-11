@@ -49,12 +49,12 @@ export const StoryDocsView = () => {
 
       return data.map(doc => ({
         ...doc,
-        time_period_details: doc.time_period_details ? {
-          year: doc.time_period_details.year || "",
-          season: doc.time_period_details.season || "",
-          time_of_day: doc.time_period_details.time_of_day || "",
-          weather: doc.time_period_details.weather || "",
-          environment: doc.time_period_details.environment || ""
+        time_period_details: typeof doc.time_period_details === 'object' && doc.time_period_details ? {
+          year: (doc.time_period_details as any)?.year || "",
+          season: (doc.time_period_details as any)?.season || "",
+          time_of_day: (doc.time_period_details as any)?.time_of_day || "",
+          weather: (doc.time_period_details as any)?.weather || "",
+          environment: (doc.time_period_details as any)?.environment || ""
         } : {
           year: "",
           season: "",
