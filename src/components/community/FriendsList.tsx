@@ -7,6 +7,7 @@ import { FriendItem } from "./FriendItem";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { Profile } from "@/integrations/supabase/types/tables.types";
 
 export const FriendsList = () => {
   const session = useSession();
@@ -33,13 +34,21 @@ export const FriendsList = () => {
               id,
               username,
               avatar_url,
-              bio
+              bio,
+              genres,
+              skills,
+              pinned_work,
+              social_links
             ),
             user:profiles!friendships_user_id_fkey_profiles (
               id,
               username,
               avatar_url,
-              bio
+              bio,
+              genres,
+              skills,
+              pinned_work,
+              social_links
             )
           `)
           .eq('status', 'accepted')
@@ -73,7 +82,16 @@ export const FriendsList = () => {
             return {
               id: friendship.id,
               status: friendship.status,
-              friend: friendProfile
+              friend: {
+                id: friendProfile.id,
+                username: friendProfile.username,
+                avatar_url: friendProfile.avatar_url,
+                bio: friendProfile.bio,
+                genres: friendProfile.genres || null,
+                skills: friendProfile.skills || null,
+                pinned_work: friendProfile.pinned_work || null,
+                social_links: friendProfile.social_links || null
+              }
             };
           })
           .filter(Boolean); // Remove any null entries

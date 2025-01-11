@@ -38,7 +38,18 @@ export const Header = () => {
         return;
       }
       
-      setProfile(data);
+      const profileData: Profile = {
+        id: data.id,
+        username: data.username,
+        avatar_url: data.avatar_url,
+        bio: data.bio,
+        genres: data.genres || null,
+        skills: data.skills || null,
+        pinned_work: data.pinned_work || null,
+        social_links: data.social_links || null
+      };
+      
+      setProfile(profileData);
     } catch (error) {
       console.error("Error in fetchProfile:", error);
     }

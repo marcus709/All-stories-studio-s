@@ -75,7 +75,10 @@ export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) =>
       username: user.username,
       avatar_url: user.avatar_url,
       bio: user.bio,
-      website: user.website || null,
+      genres: user.genres || null,
+      skills: user.skills || null,
+      pinned_work: user.pinned_work || null,
+      social_links: user.social_links || null
     };
     setSelectedUser(completeUser);
   };

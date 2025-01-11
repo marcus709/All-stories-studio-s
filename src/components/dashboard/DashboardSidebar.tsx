@@ -1,136 +1,119 @@
-import { useState, useEffect } from "react";
-import { Book, Users, LineChart, Lightbulb, FileText, AlertTriangle, Rewind, ChevronLeft, ChevronRight } from "lucide-react";
-import { StoriesDialog } from "../StoriesDialog";
-import { useStory } from "@/contexts/StoryContext";
+import { useEffect, useState } from "react";
+import { useSession } from "@supabase/auth-helpers-react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Profile } from "@/integrations/supabase/types/tables.types";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { ProfileSettingsDialog } from "@/components/ProfileSettingsDialog";
+import { Settings } from "lucide-react";
 
-const navigationItems = [
-  { id: "story", icon: Book, label: "Story Editor" },
-  { id: "characters", icon: Users, label: "Characters" },
-  { id: "plot", icon: LineChart, label: "Formatting" },
-  { id: "dream", icon: Rewind, label: "Backwards Planning" },
-  { id: "ideas", icon: Lightbulb, label: "Story Ideas" },
-  { id: "docs", icon: FileText, label: "Story Docs" },
-  { id: "logic", icon: AlertTriangle, label: "Story Logic" },
-] as const;
-
-type View = (typeof navigationItems)[number]["id"];
-
-interface DashboardSidebarProps {
-  currentView: View;
-  setCurrentView: (view: View) => void;
-  isCollapsed: boolean;
-  onToggleCollapse: () => void;
-}
-
-export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onToggleCollapse }: DashboardSidebarProps) => {
-  const { selectedStory } = useStory();
+export const DashboardSidebar = () => {
+  const session = useSession();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .single();
-        
-        if (data) {
-          setProfile({
-            id: data.id,
-            username: data.username,
-            avatar_url: data.avatar_url,
-            bio: data.bio,
-            website: null
-          });
-        }
-      }
-    };
+    if (session?.user?.id) {
+      fetchProfile();
+    }
+  }, [session?.user?.id]);
 
-    fetchProfile();
-  }, []);
+  const fetchProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select()
+        .eq("id", session?.user?.id)
+        .single();
 
-  if (isCollapsed) {
-    return (
-      <div className="fixed left-0 top-16 w-12 h-[calc(100vh-4rem)] border-r bg-white flex flex-col items-center py-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onToggleCollapse}
-          className="mb-4"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-        <nav className="space-y-3">
-          {navigationItems.map(({ id, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setCurrentView(id)}
-              disabled={!selectedStory}
-              className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors
-                ${currentView === id ? "text-purple-600 bg-purple-50" : "text-gray-700 hover:bg-gray-50"}`}
-            >
-              <Icon className="h-5 w-5" />
-            </button>
-          ))}
-        </nav>
-      </div>
-    );
-  }
+      if (error) throw error;
+
+      const profileData: Profile = {
+        id: data.id,
+        username: data.username,
+        avatar_url: data.avatar_url,
+        bio: data.bio,
+        genres: data.genres || null,
+        skills: data.skills || null,
+        pinned_work: data.pinned_work || null,
+        social_links: data.social_links || null
+      };
+
+      setProfile(profileData);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load profile",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleProfileUpdate = (profile: Profile) => {
+    setProfile({
+      id: profile.id,
+      username: profile.username,
+      avatar_url: profile.avatar_url,
+      bio: profile.bio,
+      genres: profile.genres || null,
+      skills: profile.skills || null,
+      pinned_work: profile.pinned_work || null,
+      social_links: profile.social_links || null
+    });
+  };
 
   return (
-    <div className="fixed left-0 top-16 w-72 h-[calc(100vh-4rem)] border-r bg-white">
+    <div className="w-64 bg-white border-r h-full p-4">
       <div className="flex flex-col h-full">
-        <div className="absolute right-2 top-2">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold">Dashboard</h2>
           <Button
             variant="ghost"
             size="icon"
-            onClick={onToggleCollapse}
-            className="hover:bg-gray-100"
+            onClick={() => setShowSettings(true)}
           >
-            <ChevronLeft className="h-4 w-4" />
+            <Settings className="h-5 w-5" />
           </Button>
         </div>
 
-        {/* Profile Section - Fixed */}
-        <div className="flex items-center gap-3 mb-12 px-8 mt-8">
-          <div className="w-11 h-11 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-lg font-medium">
-            {profile?.username?.[0]?.toUpperCase() || "?"}
-          </div>
-          <div className="flex flex-col">
-            <h3 className="font-medium text-base text-gray-900">
-              {profile?.username || "Loading..."}
-            </h3>
-          </div>
-        </div>
+        <nav className="space-y-2">
+          <Button
+            variant="ghost"
+            className="w-full justify-start"
+            onClick={() => navigate("/dashboard")}
+          >
+            Overview
+          </Button>
+          <Button
+            variant="ghost"
+            className="w-full justify-start"
+            onClick={() => navigate("/dashboard/stories")}
+          >
+            My Stories
+          </Button>
+          <Button
+            variant="ghost"
+            className="w-full justify-start"
+            onClick={() => navigate("/dashboard/characters")}
+          >
+            Characters
+          </Button>
+          <Button
+            variant="ghost"
+            className="w-full justify-start"
+            onClick={() => navigate("/dashboard/ideas")}
+          >
+            Story Ideas
+          </Button>
+        </nav>
 
-        {/* Stories Section - Fixed */}
-        <div className="space-y-4 mb-6 px-8">
-          <StoriesDialog />
-        </div>
-
-        {/* Navigation - Scrollable */}
-        <ScrollArea className="flex-1 px-4">
-          <nav className="space-y-3 pr-4">
-            {navigationItems.map(({ id, icon: Icon, label }) => (
-              <button
-                key={id}
-                onClick={() => setCurrentView(id)}
-                disabled={!selectedStory}
-                className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-lg transition-colors text-gray-700 text-lg
-                  ${currentView === id ? "bg-purple-50 text-purple-600" : "hover:bg-gray-50"}`}
-              >
-                <Icon className="h-6 w-6" />
-                <span className="font-medium">{label}</span>
-              </button>
-            ))}
-          </nav>
-        </ScrollArea>
+        {showSettings && (
+          <ProfileSettingsDialog onClose={() => setShowSettings(false)} />
+        )}
       </div>
     </div>
   );
