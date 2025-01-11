@@ -65,13 +65,19 @@ export default function UserProfilePage() {
 
       if (error) throw error;
       
+      const socialLinks = data.social_links as { 
+        website: string | null; 
+        twitter: string | null; 
+        instagram: string | null; 
+      } | null;
+
       // Transform the data to match ExtendedProfile type
       return {
         ...data,
         social_links: {
-          website: data.social_links?.website || null,
-          twitter: data.social_links?.twitter || null,
-          instagram: data.social_links?.instagram || null
+          website: socialLinks?.website || null,
+          twitter: socialLinks?.twitter || null,
+          instagram: socialLinks?.instagram || null
         }
       } as ExtendedProfile;
     },
@@ -108,7 +114,7 @@ export default function UserProfilePage() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as PostWithProfiles[];
+      return data as unknown as PostWithProfiles[];
     },
     enabled: !!userId,
   });
