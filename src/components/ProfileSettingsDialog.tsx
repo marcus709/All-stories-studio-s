@@ -14,6 +14,19 @@ interface ProfileSettingsDialogProps {
   onClose?: () => void;
 }
 
+interface PinnedWork {
+  title: string | null;
+  content: string | null;
+  link: string | null;
+}
+
+interface SocialLinks {
+  website: string | null;
+  twitter: string | null;
+  instagram: string | null;
+  newsletter: string | null;
+}
+
 export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
   const session = useSession();
   const { toast } = useToast();
@@ -25,16 +38,16 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
     genres: [] as string[],
     skills: [] as string[],
     pinned_work: {
-      title: null as string | null,
-      content: null as string | null,
-      link: null as string | null,
-    },
+      title: null,
+      content: null,
+      link: null,
+    } as PinnedWork,
     social_links: {
-      website: null as string | null,
-      twitter: null as string | null,
-      instagram: null as string | null,
-      newsletter: null as string | null,
-    },
+      website: null,
+      twitter: null,
+      instagram: null,
+      newsletter: null,
+    } as SocialLinks,
   });
 
   React.useEffect(() => {
@@ -92,12 +105,12 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
         avatar_url: data.avatar_url || "",
         genres: data.genres || [],
         skills: data.skills || [],
-        pinned_work: data.pinned_work || {
+        pinned_work: (data.pinned_work as PinnedWork) || {
           title: null,
           content: null,
           link: null,
         },
-        social_links: data.social_links || {
+        social_links: (data.social_links as SocialLinks) || {
           website: null,
           twitter: null,
           instagram: null,
