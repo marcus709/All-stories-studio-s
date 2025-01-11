@@ -113,7 +113,7 @@ export const UserProfileView = ({ user, onBack }: UserProfileViewProps) => {
       {/* Profile Header */}
       <div className="relative">
         <div className="h-32 bg-purple-100"></div>
-        <div className="absolute left-4 -bottom-16 transform translate-y-1/3">
+        <div className="absolute left-4 bottom-[-64px]">
           <div className="h-32 w-32 rounded-full border-4 border-white bg-purple-100 flex items-center justify-center">
             {user.avatar_url ? (
               <img
