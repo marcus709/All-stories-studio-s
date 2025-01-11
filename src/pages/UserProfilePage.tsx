@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "@supabase/auth-helpers-react";
@@ -30,20 +31,20 @@ interface PostWithProfiles {
   user_id: string;
   created_at: string;
   updated_at: string;
-  profiles: {
+  get_post_profiles: {
     username: string;
     avatar_url: string | null;
-  };
+  }[];
   post_likes: Array<{ id: string; user_id: string }>;
   comments: Array<{
     id: string;
     content: string;
     user_id: string;
     created_at: string;
-    profiles: {
+    get_comment_profiles: {
       username: string;
       avatar_url: string | null;
-    };
+    }[];
   }>;
 }
 
@@ -75,7 +76,7 @@ export default function UserProfilePage() {
         .from("posts")
         .select(`
           *,
-          profiles!posts_user_id_fkey (
+          get_post_profiles:profiles!posts_user_id_fkey (
             username,
             avatar_url
           ),
@@ -88,7 +89,7 @@ export default function UserProfilePage() {
             content,
             user_id,
             created_at,
-            profiles!comments_user_id_fkey (
+            get_comment_profiles:profiles!comments_user_id_fkey (
               username,
               avatar_url
             )
@@ -219,7 +220,7 @@ export default function UserProfilePage() {
             </div>
             <div className="flex items-center gap-1">
               <CalendarDays className="h-4 w-4" />
-              <span>Joined {formatDistanceToNow(new Date(profile.created_at), { addSuffix: true })}</span>
+              <span>Joined {profile.created_at ? formatDistanceToNow(new Date(profile.created_at), { addSuffix: true }) : 'recently'}</span>
             </div>
           </div>
         </div>
@@ -238,7 +239,7 @@ export default function UserProfilePage() {
             <p className="text-center text-gray-500">No posts yet</p>
           ) : (
             posts?.map((post) => (
-              <Post key={post.id} post={post} />
+              <Post key={post.id} post={post as any} />
             ))
           )}
         </TabsContent>
@@ -281,3 +282,4 @@ export default function UserProfilePage() {
       </Tabs>
     </div>
   );
+}
