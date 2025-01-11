@@ -9,6 +9,7 @@ import { Character } from "@/integrations/supabase/types/tables.types";
 import { PrivateChatHeader } from "./PrivateChatHeader";
 import { Message } from "./types";
 import { useMessageSending } from "./hooks/useMessageSending";
+import { UserProfileView } from "./UserProfileView";
 
 export const PrivateChat = () => {
   const { friendId } = useParams();
@@ -20,6 +21,7 @@ export const PrivateChat = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [friend, setFriend] = useState<any>(null);
   const [isFriend, setIsFriend] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   const {
     sharedCharacter,
@@ -179,9 +181,22 @@ export const PrivateChat = () => {
     return null;
   }
 
+  if (showProfile && friend) {
+    return (
+      <UserProfileView 
+        user={friend} 
+        onBack={() => setShowProfile(false)}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow-sm">
-      <PrivateChatHeader friend={friend} onBack={() => navigate("/community")} />
+      <PrivateChatHeader 
+        friend={friend} 
+        onBack={() => navigate("/community")}
+        onProfileClick={() => setShowProfile(true)}
+      />
       <div className="flex-1 overflow-hidden">
         <MessageList messages={messages} isLoading={isLoading} />
       </div>

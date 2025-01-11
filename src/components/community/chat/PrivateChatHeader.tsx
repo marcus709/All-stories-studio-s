@@ -1,6 +1,5 @@
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 
 interface PrivateChatHeaderProps {
   friend: {
@@ -8,29 +7,23 @@ interface PrivateChatHeaderProps {
     username?: string | null;
   } | null;
   onBack?: () => void;
+  onProfileClick?: () => void;
 }
 
-export const PrivateChatHeader = ({ friend, onBack }: PrivateChatHeaderProps) => {
-  const navigate = useNavigate();
-
-  const handleBack = () => {
-    if (onBack) {
-      onBack();
-    } else {
-      navigate("/community");
-    }
-  };
-
+export const PrivateChatHeader = ({ friend, onBack, onProfileClick }: PrivateChatHeaderProps) => {
   return (
     <div className="flex items-center gap-4 p-4 border-b">
       <Button
         variant="ghost"
         size="icon"
-        onClick={handleBack}
+        onClick={onBack}
       >
         <ArrowLeft className="h-5 w-5" />
       </Button>
-      <div className="flex items-center gap-3">
+      <div 
+        className="flex items-center gap-3 cursor-pointer hover:opacity-80"
+        onClick={onProfileClick}
+      >
         <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
           {friend?.avatar_url ? (
             <img
