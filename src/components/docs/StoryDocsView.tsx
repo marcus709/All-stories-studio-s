@@ -1,13 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Header } from "@/components/Header";
-import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
-import { DashboardContent } from "@/components/dashboard/DashboardContent";
-import { StoryProvider } from "@/contexts/StoryContext";
-import { useSession } from "@supabase/auth-helpers-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Plus, FileText, LayoutGrid, LayoutList } from "lucide-react";
+import { Plus, FileText, LayoutGrid, LayoutList, ArrowLeft } from "lucide-react";
 import { CreateDocumentDialog } from "./CreateDocumentDialog";
 import { DocumentEditor } from "./DocumentEditor";
 import { DocumentSidebar } from "./DocumentSidebar";
@@ -15,14 +12,13 @@ import { DocumentsList } from "./DocumentsList";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useStory } from "@/contexts/StoryContext";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Document } from "@/types/story";
 
 export const StoryDocsView = () => {
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isGridView, setIsGridView] = useState(true);
+  const [isFullDocumentView, setIsFullDocumentView] = useState(false);
   const { selectedStory } = useStory();
   const { toast } = useToast();
 
@@ -73,7 +69,14 @@ export const StoryDocsView = () => {
     setSelectedDocId(docId);
     if (isGridView) {
       setIsGridView(false);
+      setIsFullDocumentView(true);
     }
+  };
+
+  const handleBackToGrid = () => {
+    setIsFullDocumentView(false);
+    setIsGridView(true);
+    setSelectedDocId(null);
   };
 
   const handleDocumentSave = () => {
@@ -84,6 +87,29 @@ export const StoryDocsView = () => {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-4rem)] text-gray-500">
         Please select a story to view documents
+      </div>
+    );
+  }
+
+  if (isFullDocumentView && selectedDocument) {
+    return (
+      <div className="h-[calc(100vh-4rem)] flex flex-col">
+        <div className="flex items-center gap-4 p-4 border-b">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleBackToGrid}
+            className="hover:bg-gray-100"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <h2 className="text-lg font-semibold">{selectedDocument.title}</h2>
+        </div>
+        <DocumentEditor
+          document={selectedDocument}
+          storyId={selectedStory.id}
+          onSave={handleDocumentSave}
+        />
       </div>
     );
   }
