@@ -8,7 +8,7 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import InvitePage from "./pages/InvitePage";
 import UserProfilePage from "./pages/UserProfilePage";
 
-export const router = createBrowserRouter([
+const router = createBrowserRouter([
   {
     path: "/",
     element: <Index />,
@@ -42,3 +42,5 @@ export const router = createBrowserRouter([
     element: <InvitePage />,
   },
 ]);
+
+export default router;
