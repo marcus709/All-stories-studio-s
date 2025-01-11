@@ -116,7 +116,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
         bio: profile.bio,
         genres: profile.genres,
         skills: profile.skills,
-        social_links: profile.social_links as unknown as Json,
+        social_links: profile.social_links,
       };
 
       const { error } = await supabase
