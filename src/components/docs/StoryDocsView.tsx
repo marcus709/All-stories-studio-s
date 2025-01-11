@@ -11,6 +11,7 @@ import { Plus, FileText, LayoutGrid, LayoutList } from "lucide-react";
 import { CreateDocumentDialog } from "./CreateDocumentDialog";
 import { DocumentEditor } from "./DocumentEditor";
 import { DocumentSidebar } from "./DocumentSidebar";
+import { DocumentsList } from "./DocumentsList";  // Added this import
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useStory } from "@/contexts/StoryContext";
