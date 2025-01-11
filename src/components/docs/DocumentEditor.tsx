@@ -54,8 +54,8 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
   };
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between p-4 border-b">
+    <div className="h-full flex flex-col bg-gray-50">
+      <div className="flex items-center justify-between p-4 bg-white border-b">
         <h2 className="text-lg font-semibold">{document.title}</h2>
         <div className="flex gap-2">
           <Button
@@ -78,13 +78,15 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
         </div>
       </div>
 
-      <ScrollArea className="flex-1 p-4">
-        <textarea
-          value={content}
-          onChange={handleContentChange}
-          className="w-full h-full min-h-[500px] p-4 rounded-md border resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
-          placeholder="Start writing your document..."
-        />
+      <ScrollArea className="flex-1 p-8">
+        <div className="max-w-[850px] mx-auto bg-white min-h-[1100px] shadow-sm rounded-sm">
+          <textarea
+            value={content}
+            onChange={handleContentChange}
+            className="w-full h-full min-h-[1100px] p-12 rounded-sm border-0 resize-none focus:outline-none focus:ring-0 text-base leading-relaxed"
+            placeholder="Start writing your document..."
+          />
+        </div>
       </ScrollArea>
 
       <ShareDocumentDialog
