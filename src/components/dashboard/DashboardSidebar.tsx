@@ -66,6 +66,19 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
+        <nav className="space-y-3">
+          {navigationItems.map(({ id, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => setCurrentView(id)}
+              disabled={!selectedStory}
+              className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors
+                ${currentView === id ? "text-purple-600 bg-purple-50" : "text-gray-700 hover:bg-gray-50"}`}
+            >
+              <Icon className="h-5 w-5" />
+            </button>
+          ))}
+        </nav>
       </div>
     );
   }
@@ -73,18 +86,16 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
   return (
     <div className="fixed left-0 top-16 w-72 h-[calc(100vh-4rem)] border-r bg-white">
       <div className="flex flex-col h-full">
-        {currentView === "plot" && (
-          <div className="absolute right-2 top-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onToggleCollapse}
-              className="hover:bg-gray-100"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
+        <div className="absolute right-2 top-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggleCollapse}
+            className="hover:bg-gray-100"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+        </div>
 
         {/* Profile Section - Fixed */}
         <div className="flex items-center gap-3 mb-12 px-8 mt-8">
