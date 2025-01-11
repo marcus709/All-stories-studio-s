@@ -92,8 +92,6 @@ export const UserProfileView = ({ user, onBack }: UserProfileViewProps) => {
     fetchContent();
   }, [activeTab, user.id]);
 
-  // ... keep existing code (JSX for the header and profile sections)
-
   return (
     <div className="flex flex-col h-full bg-white">
       {/* Header */}
