@@ -6,6 +6,7 @@ import { UserProfileDialog } from "../UserProfileDialog";
 
 interface PrivateChatHeaderProps {
   friend: {
+    id: string;
     username: string | null;
     avatar_url: string | null;
   } | null;
