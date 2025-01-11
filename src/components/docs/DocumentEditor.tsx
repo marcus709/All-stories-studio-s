@@ -5,6 +5,7 @@ import { Share } from "lucide-react";
 import { ShareDocumentDialog } from "@/components/community/chat/ShareDocumentDialog";
 import { useDocuments } from "@/hooks/useDocuments";
 import { useToast } from "@/hooks/use-toast";
+import { WYSIWYGEditor } from "@/components/book/WYSIWYGEditor";
 
 interface DocumentEditorProps {
   document: {
@@ -23,8 +24,8 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
   const { updateDocument } = useDocuments(storyId);
   const { toast } = useToast();
 
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setContent(e.target.value);
+  const handleContentChange = (newContent: string) => {
+    setContent(newContent);
   };
 
   const handleSave = async () => {
@@ -79,12 +80,11 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
       </div>
 
       <ScrollArea className="flex-1 p-8">
-        <div className="max-w-[850px] mx-auto bg-white min-h-[1100px] shadow-sm rounded-sm">
-          <textarea
-            value={content}
+        <div className="max-w-[850px] mx-auto">
+          <WYSIWYGEditor
+            content={content}
             onChange={handleContentChange}
-            className="w-full h-full min-h-[1100px] p-12 rounded-sm border-0 resize-none focus:outline-none focus:ring-0 text-base leading-relaxed"
-            placeholder="Start writing your document..."
+            className="min-h-[1100px] bg-white shadow-sm rounded-sm"
           />
         </div>
       </ScrollArea>

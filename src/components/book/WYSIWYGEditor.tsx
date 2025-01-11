@@ -1,6 +1,7 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
+import Underline from '@tiptap/extension-underline';
 import { EditorToolbar } from '../editor/EditorToolbar';
 
 interface WYSIWYGEditorProps {
@@ -14,6 +15,7 @@ export function WYSIWYGEditor({ content, onChange, className = '', style }: WYSI
   const editor = useEditor({
     extensions: [
       StarterKit,
+      Underline,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
