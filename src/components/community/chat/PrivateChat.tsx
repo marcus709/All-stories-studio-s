@@ -184,7 +184,7 @@ export const PrivateChat = () => {
   if (showProfile && friend) {
     return (
       <UserProfileView 
-        user={friend} 
+        userId={friend.id} 
         onBack={() => setShowProfile(false)}
       />
     );

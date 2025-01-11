@@ -1,7 +1,14 @@
-import React, { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
-import { Profile } from "@/types/character";
+
+interface Profile {
+  id: string;
+  username: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  website?: string | null;
+}
 
 export const UserProfileView = ({ userId }: { userId: string }) => {
   const [loading, setLoading] = useState<"planned" | "exact" | "estimated">("planned");
@@ -44,10 +51,16 @@ export const UserProfileView = ({ userId }: { userId: string }) => {
   }
 
   return (
-    <div>
-      <h2>{profile.username}</h2>
-      <img src={profile.avatar_url || ""} alt={`${profile.username}'s avatar`} />
-      <p>{profile.bio}</p>
+    <div className="p-4">
+      <h2 className="text-xl font-semibold">{profile.username}</h2>
+      {profile.avatar_url && (
+        <img 
+          src={profile.avatar_url} 
+          alt={`${profile.username}'s avatar`}
+          className="w-20 h-20 rounded-full my-4"
+        />
+      )}
+      {profile.bio && <p className="text-gray-600 mt-2">{profile.bio}</p>}
     </div>
   );
 };
