@@ -9,6 +9,7 @@ import { ProfileForm } from "./profile/ProfileForm";
 import { CreditCard } from "lucide-react";
 import { FriendsManagement } from "./profile/FriendsManagement";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { Json } from "@/integrations/supabase/types/database.types";
 
 interface ProfileSettingsDialogProps {
   onClose?: () => void;
@@ -145,8 +146,8 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
         bio: profile.bio,
         genres: profile.genres,
         skills: profile.skills,
-        pinned_work: profile.pinned_work,
-        social_links: profile.social_links,
+        pinned_work: profile.pinned_work as Json,
+        social_links: profile.social_links as Json,
       };
 
       const { error } = await supabase

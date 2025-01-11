@@ -22,7 +22,7 @@ export const UserProfileView = ({ user, onBack }: UserProfileViewProps) => {
         </Button>
         <div className="flex-1">
           <h2 className="font-bold text-xl">{user.username}</h2>
-          <p className="text-sm text-gray-500">{user.bio ? `${user.posts_count || 0} posts` : ''}</p>
+          <p className="text-sm text-gray-500">{user.bio || ''}</p>
         </div>
       </div>
 
