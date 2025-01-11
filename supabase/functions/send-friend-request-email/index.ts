@@ -24,10 +24,10 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
     const { recipientId, senderUsername }: EmailRequest = await req.json();
 
-    // Get recipient's email
+    // Get recipient's email from auth.users table
     const { data: userData, error: userError } = await supabase
-      .from('auth.users')
-      .select('email')
+      .from('profiles')
+      .select('id, email')
       .eq('id', recipientId)
       .single();
 

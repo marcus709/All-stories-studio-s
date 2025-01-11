@@ -99,23 +99,27 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
         return;
       }
 
+      const pinnedWork = data.pinned_work as PinnedWork || {
+        title: null,
+        content: null,
+        link: null,
+      };
+
+      const socialLinks = data.social_links as SocialLinks || {
+        website: null,
+        twitter: null,
+        instagram: null,
+        newsletter: null,
+      };
+
       setProfile({
         username: data.username || "",
         bio: data.bio || "",
         avatar_url: data.avatar_url || "",
         genres: data.genres || [],
         skills: data.skills || [],
-        pinned_work: (data.pinned_work as PinnedWork) || {
-          title: null,
-          content: null,
-          link: null,
-        },
-        social_links: (data.social_links as SocialLinks) || {
-          website: null,
-          twitter: null,
-          instagram: null,
-          newsletter: null,
-        },
+        pinned_work: pinnedWork,
+        social_links: socialLinks,
       });
     } catch (error) {
       console.error("Error loading profile:", error);
