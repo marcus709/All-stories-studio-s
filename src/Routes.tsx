@@ -1,63 +1,44 @@
-import { Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import Community from "./pages/Community";
-import InvitePage from "./pages/InvitePage";
-import { Header } from "./components/Header";
-import { Dashboard } from "./pages/Dashboard";
-import { ProfileSettings } from "./pages/ProfileSettings";
+import { createBrowserRouter } from "react-router-dom";
+import Index from "@/pages/Index";
+import { Dashboard } from "@/pages/Dashboard";
+import { Community } from "@/pages/Community";
+import { Settings } from "@/pages/Settings";
+import { ProfileSettings } from "@/pages/ProfileSettings";
+import { PaymentSuccess } from "@/pages/PaymentSuccess";
+import { InvitePage } from "@/pages/InvitePage";
+import UserProfilePage from "@/pages/UserProfilePage";
 
-function AppLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <>
-      <Header />
-      {children}
-    </>
-  );
-}
-
-export default function AppRoutes() {
-  return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <AppLayout>
-            <Index />
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/dashboard"
-        element={
-          <AppLayout>
-            <Dashboard />
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/community/*"
-        element={
-          <AppLayout>
-            <Community />
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/invite/:inviteId"
-        element={
-          <AppLayout>
-            <InvitePage />
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/profile/settings"
-        element={
-          <AppLayout>
-            <ProfileSettings />
-          </AppLayout>
-        }
-      />
-    </Routes>
-  );
-}
+export const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Index />,
+  },
+  {
+    path: "/dashboard",
+    element: <Dashboard />,
+  },
+  {
+    path: "/community",
+    element: <Community />,
+  },
+  {
+    path: "/community/profile/:userId",
+    element: <UserProfilePage />,
+  },
+  {
+    path: "/settings",
+    element: <Settings />,
+  },
+  {
+    path: "/profile-settings",
+    element: <ProfileSettings />,
+  },
+  {
+    path: "/payment/success",
+    element: <PaymentSuccess />,
+  },
+  {
+    path: "/invite/:inviteId",
+    element: <InvitePage />,
+  },
+]);
