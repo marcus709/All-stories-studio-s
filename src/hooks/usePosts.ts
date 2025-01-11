@@ -2,15 +2,15 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@supabase/auth-helpers-react";
 
-export const usePosts = () => {
+export const usePosts = (userId?: string) => {
   const session = useSession();
   
   return useQuery({
-    queryKey: ["posts"],
+    queryKey: ["posts", userId],
     queryFn: async () => {
       console.log("Fetching posts... User authenticated:", !!session?.user);
       
-      const { data, error } = await supabase
+      let query = supabase
         .from("posts")
         .select(`
           *,
@@ -19,10 +19,16 @@ export const usePosts = () => {
           comments (
             *,
             get_comment_profiles(*)
-          ),
-          post_tags (*)
+          )
         `)
         .order("created_at", { ascending: false });
+
+      // If userId is provided, filter posts for that user
+      if (userId) {
+        query = query.eq("user_id", userId);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error("Error fetching posts:", error);
