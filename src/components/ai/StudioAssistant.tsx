@@ -5,9 +5,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAI } from "@/hooks/useAI";
 import { useToast } from "@/hooks/use-toast";
 import { useSession } from "@supabase/auth-helpers-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Character } from "@/types/character";
+import { useStory } from "@/contexts/StoryContext";
 
 type MessageRole = "assistant" | "user";
 type Message = {
@@ -23,22 +24,110 @@ export const StudioAssistant = () => {
   const { toast } = useToast();
   const session = useSession();
   const [isDragging, setIsDragging] = useState(false);
-  const [height, setHeight] = useState(500); // Increased default height
+  const [height, setHeight] = useState(500);
+  const { selectedStory } = useStory();
+  const queryClient = useQueryClient();
 
   // Fetch user's characters for context
   const { data: characters } = useQuery({
-    queryKey: ["characters", session?.user?.id],
+    queryKey: ["characters", selectedStory?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("characters")
         .select("*")
+        .eq("story_id", selectedStory?.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
       return data as Character[];
     },
-    enabled: !!session?.user?.id,
+    enabled: !!selectedStory?.id && !!session?.user?.id,
   });
+
+  // Fetch user's documents for context
+  const { data: documents } = useQuery({
+    queryKey: ["documents", selectedStory?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("documents")
+        .select("*")
+        .eq("story_id", selectedStory?.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedStory?.id && !!session?.user?.id,
+  });
+
+  const handleCreateCharacter = async (characterData: Partial<Character>) => {
+    if (!session?.user?.id || !selectedStory?.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in and have a story selected",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from("characters").insert({
+        ...characterData,
+        user_id: session.user.id,
+        story_id: selectedStory.id,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Character created successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["characters"] });
+    } catch (error) {
+      console.error("Error creating character:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create character",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCreateDocument = async (title: string, content: string) => {
+    if (!session?.user?.id || !selectedStory?.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in and have a story selected",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from("documents").insert({
+        title,
+        content,
+        user_id: session.user.id,
+        story_id: selectedStory.id,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Document created successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+    } catch (error) {
+      console.error("Error creating document:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create document",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,20 +140,43 @@ export const StudioAssistant = () => {
     try {
       const context = {
         characters: JSON.stringify(characters),
+        documents: JSON.stringify(documents),
+        selectedStory: JSON.stringify(selectedStory),
         aiConfig: {
           temperature: 0.7,
           max_tokens: 150,
           model_type: "gpt-4o-mini" as const,
-          system_prompt: `You are a friendly and helpful writing assistant. You have access to the user's characters and their traits. 
-          Keep your responses concise and engaging. Feel free to ask follow-up questions to better understand the user's needs.
-          When discussing characters, reference their specific traits and characteristics to provide personalized advice.`
+          system_prompt: `You are a helpful writing assistant that can help manage characters and documents.
+          You can create new characters and documents, and provide suggestions based on the user's story context.
+          When discussing characters or documents, reference their specific details to provide personalized advice.
+          You can also help with story development and writing suggestions.`
         }
       };
 
       const response = await generateContent(message, 'suggestions', context);
       
       if (response) {
-        const assistantMessage: Message = { role: "assistant", content: response };
+        // Check if the response contains commands to create characters or documents
+        if (response.includes("CREATE_CHARACTER:")) {
+          const characterData = JSON.parse(
+            response.split("CREATE_CHARACTER:")[1].split("END_CHARACTER")[0]
+          );
+          await handleCreateCharacter(characterData);
+        }
+
+        if (response.includes("CREATE_DOCUMENT:")) {
+          const documentData = JSON.parse(
+            response.split("CREATE_DOCUMENT:")[1].split("END_DOCUMENT")[0]
+          );
+          await handleCreateDocument(documentData.title, documentData.content);
+        }
+
+        const assistantMessage: Message = { 
+          role: "assistant", 
+          content: response.replace(/CREATE_CHARACTER:.*END_CHARACTER/g, '')
+                          .replace(/CREATE_DOCUMENT:.*END_DOCUMENT/g, '')
+                          .trim()
+        };
         setConversation([...newConversation, assistantMessage]);
       }
     } catch (error) {
