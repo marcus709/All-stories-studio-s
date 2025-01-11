@@ -17,13 +17,6 @@ function DashboardLayout() {
   const { toast } = useToast();
   const session = useSession();
 
-  // Reset sidebar collapse when changing views
-  useEffect(() => {
-    if (currentView !== 'plot') {
-      setIsSidebarCollapsed(false);
-    }
-  }, [currentView]);
-
   useEffect(() => {
     if (!session) {
       toast({
