@@ -1,28 +1,7 @@
-import { createClient } from '@supabase/supabase-js';
-import type { Database } from '@/integrations/supabase/types';
+import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
-}
-
-export const supabase = createClient<Database>(
-  supabaseUrl,
-  supabaseAnonKey,
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-      flowType: 'pkce',
-      storage: typeof window !== 'undefined' ? window.localStorage : undefined
-    },
-    global: {
-      headers: {
-        'x-client-info': 'lovable-app',
-      },
-    },
-  }
-);
+// Initialize the Supabase client
+export const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL || '',  // URL will be loaded from environment
+  import.meta.env.VITE_SUPABASE_ANON_KEY || ''  // Anon key will be loaded from environment
+)
