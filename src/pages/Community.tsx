@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Routes, Route } from "react-router-dom";
 import { CommunitySidebar } from "@/components/community/CommunitySidebar";
 import { CommunityFeed } from "@/components/community/CommunityFeed";
 import { MyGroups } from "@/components/community/MyGroups";
@@ -10,8 +10,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { PrivateChat } from "@/components/community/chat/PrivateChat";
 import { DailyChallengeDialog } from "@/components/community/DailyChallengeDialog";
-import { UserProfileDialog } from "@/components/community/UserProfileDialog";
-import { Routes, Route } from "react-router-dom";
 
 const Community = () => {
   const navigate = useNavigate();
@@ -63,7 +61,6 @@ const Community = () => {
                   <Route path="topics" element={<Topics />} />
                   <Route path="saved" element={<SavedPosts />} />
                   <Route path="chat/:friendId" element={<PrivateChat />} />
-                  <Route path="profile/:userId" element={<UserProfileDialog showInDialog={false} />} />
                 </Routes>
               </div>
             </div>

@@ -1,61 +1,63 @@
-import { createBrowserRouter } from "react-router-dom";
-import Index from "@/pages/Index";
-import Dashboard from "@/pages/Dashboard";
-import Community from "@/pages/Community";
-import Settings from "@/pages/Settings";
-import { ProfileSettings } from "@/pages/ProfileSettings";
-import { PaymentSuccess } from "@/pages/PaymentSuccess";
-import InvitePage from "@/pages/InvitePage";
-import UserProfilePage from "@/pages/UserProfilePage";
-import ErrorBoundary from "@/components/ErrorBoundary";
-import { PrivateChat } from "@/components/community/chat/PrivateChat";
+import { Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
+import Community from "./pages/Community";
+import InvitePage from "./pages/InvitePage";
+import { Header } from "./components/Header";
+import { Dashboard } from "./pages/Dashboard";
+import { ProfileSettings } from "./pages/ProfileSettings";
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Index />,
-    errorElement: <ErrorBoundary />,
-  },
-  {
-    path: "/dashboard",
-    element: <Dashboard />,
-    errorElement: <ErrorBoundary />,
-  },
-  {
-    path: "/community",
-    element: <Community />,
-    errorElement: <ErrorBoundary />,
-  },
-  {
-    path: "/community/chat/:friendId",
-    element: <PrivateChat />,
-    errorElement: <ErrorBoundary />,
-  },
-  {
-    path: "/community/profile/:userId",
-    element: <UserProfilePage />,
-    errorElement: <ErrorBoundary />,
-  },
-  {
-    path: "/settings",
-    element: <Settings />,
-    errorElement: <ErrorBoundary />,
-  },
-  {
-    path: "/profile-settings",
-    element: <ProfileSettings />,
-    errorElement: <ErrorBoundary />,
-  },
-  {
-    path: "/payment/success",
-    element: <PaymentSuccess />,
-    errorElement: <ErrorBoundary />,
-  },
-  {
-    path: "/invite/:inviteId",
-    element: <InvitePage />,
-    errorElement: <ErrorBoundary />,
-  },
-]);
+function AppLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <Header />
+      {children}
+    </>
+  );
+}
 
-export default router;
+export default function AppRoutes() {
+  return (
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <AppLayout>
+            <Index />
+          </AppLayout>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <AppLayout>
+            <Dashboard />
+          </AppLayout>
+        }
+      />
+      <Route
+        path="/community/*"
+        element={
+          <AppLayout>
+            <Community />
+          </AppLayout>
+        }
+      />
+      <Route
+        path="/invite/:inviteId"
+        element={
+          <AppLayout>
+            <InvitePage />
+          </AppLayout>
+        }
+      />
+      <Route
+        path="/profile/settings"
+        element={
+          <AppLayout>
+            <ProfileSettings />
+          </AppLayout>
+        }
+      />
+    </Routes>
+  );
+}

@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
-import { Award, HelpCircle, Globe, Twitter, Instagram } from "lucide-react";
+import { Award, HelpCircle, Globe, Twitter, Instagram, Mail } from "lucide-react";
 import { AchievementsDialog } from "./AchievementsDialog";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Badge } from "../ui/badge";
+import { ScrollArea } from "../ui/scroll-area";
 
 interface ProfileFormProps {
   profile: {
@@ -14,10 +16,16 @@ interface ProfileFormProps {
     bio: string;
     genres?: string[];
     skills?: string[];
+    pinned_work?: {
+      title: string | null;
+      content: string | null;
+      link: string | null;
+    };
     social_links?: {
       website: string | null;
       twitter: string | null;
       instagram: string | null;
+      newsletter: string | null;
     };
   };
   onChange: (field: string, value: any) => void;
@@ -27,6 +35,8 @@ export function ProfileForm({ profile, onChange }: ProfileFormProps) {
   const session = useSession();
   const [showAchievements, setShowAchievements] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+  const [newGenre, setNewGenre] = useState("");
+  const [newSkill, setNewSkill] = useState("");
 
   const { data: selectedAchievements, refetch: refetchSelected } = useQuery({
     queryKey: ["selectedAchievements"],
@@ -88,6 +98,40 @@ export function ProfileForm({ profile, onChange }: ProfileFormProps) {
     setShowAchievements(true);
   };
 
+  const addGenre = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newGenre && profile.genres) {
+      onChange("genres", [...profile.genres, newGenre]);
+      setNewGenre("");
+    }
+  };
+
+  const removeGenre = (genreToRemove: string) => {
+    if (profile.genres) {
+      onChange(
+        "genres",
+        profile.genres.filter((genre) => genre !== genreToRemove)
+      );
+    }
+  };
+
+  const addSkill = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newSkill && profile.skills) {
+      onChange("skills", [...profile.skills, newSkill]);
+      setNewSkill("");
+    }
+  };
+
+  const removeSkill = (skillToRemove: string) => {
+    if (profile.skills) {
+      onChange(
+        "skills",
+        profile.skills.filter((skill) => skill !== skillToRemove)
+      );
+    }
+  };
+
   return (
     <>
       <div className="space-y-4">
@@ -113,20 +157,95 @@ export function ProfileForm({ profile, onChange }: ProfileFormProps) {
 
         <div className="space-y-2">
           <label className="text-sm font-medium">Writing Focus / Genres</label>
-          <Input
-            value={profile.genres?.join(", ") || ""}
-            onChange={(e) => onChange("genres", e.target.value.split(",").map(s => s.trim()))}
-            placeholder="Enter genres (comma-separated, e.g.: Fantasy, Sci-Fi)"
-            className="bg-white"
-          />
+          <form onSubmit={addGenre} className="flex gap-2">
+            <Input
+              value={newGenre}
+              onChange={(e) => setNewGenre(e.target.value)}
+              placeholder="Add a genre (e.g., Fantasy, Sci-Fi)"
+              className="bg-white"
+            />
+            <Button type="submit" variant="secondary">
+              Add
+            </Button>
+          </form>
+          <ScrollArea className="h-20">
+            <div className="flex flex-wrap gap-2 p-2">
+              {profile.genres?.map((genre) => (
+                <Badge
+                  key={genre}
+                  variant="secondary"
+                  className="cursor-pointer hover:bg-destructive"
+                  onClick={() => removeGenre(genre)}
+                >
+                  {genre} ×
+                </Badge>
+              ))}
+            </div>
+          </ScrollArea>
         </div>
 
         <div className="space-y-2">
           <label className="text-sm font-medium">Skills</label>
+          <form onSubmit={addSkill} className="flex gap-2">
+            <Input
+              value={newSkill}
+              onChange={(e) => setNewSkill(e.target.value)}
+              placeholder="Add a skill (e.g., Editing, World-building)"
+              className="bg-white"
+            />
+            <Button type="submit" variant="secondary">
+              Add
+            </Button>
+          </form>
+          <ScrollArea className="h-20">
+            <div className="flex flex-wrap gap-2 p-2">
+              {profile.skills?.map((skill) => (
+                <Badge
+                  key={skill}
+                  variant="secondary"
+                  className="cursor-pointer hover:bg-destructive"
+                  onClick={() => removeSkill(skill)}
+                >
+                  {skill} ×
+                </Badge>
+              ))}
+            </div>
+          </ScrollArea>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Pinned Work</label>
           <Input
-            value={profile.skills?.join(", ") || ""}
-            onChange={(e) => onChange("skills", e.target.value.split(",").map(s => s.trim()))}
-            placeholder="Enter skills (comma-separated, e.g.: Editing, World-building)"
+            value={profile.pinned_work?.title || ""}
+            onChange={(e) =>
+              onChange("pinned_work", {
+                ...profile.pinned_work,
+                title: e.target.value,
+              })
+            }
+            placeholder="Title of your work"
+            className="bg-white mb-2"
+          />
+          <Textarea
+            value={profile.pinned_work?.content || ""}
+            onChange={(e) =>
+              onChange("pinned_work", {
+                ...profile.pinned_work,
+                content: e.target.value,
+              })
+            }
+            placeholder="Share a short excerpt (optional)"
+            className="min-h-[100px] bg-white mb-2"
+          />
+          <Input
+            value={profile.pinned_work?.link || ""}
+            onChange={(e) =>
+              onChange("pinned_work", {
+                ...profile.pinned_work,
+                link: e.target.value,
+              })
+            }
+            placeholder="Link to your work (optional)"
             className="bg-white"
           />
         </div>
@@ -173,6 +292,20 @@ export function ProfileForm({ profile, onChange }: ProfileFormProps) {
                   })
                 }
                 placeholder="Instagram profile"
+                className="bg-white"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Mail className="w-4 h-4" />
+              <Input
+                value={profile.social_links?.newsletter || ""}
+                onChange={(e) =>
+                  onChange("social_links", {
+                    ...profile.social_links,
+                    newsletter: e.target.value,
+                  })
+                }
+                placeholder="Newsletter subscription link"
                 className="bg-white"
               />
             </div>

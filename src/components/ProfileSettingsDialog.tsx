@@ -9,16 +9,22 @@ import { ProfileForm } from "./profile/ProfileForm";
 import { CreditCard } from "lucide-react";
 import { FriendsManagement } from "./profile/FriendsManagement";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { Json } from "@/integrations/supabase/types";
 
 interface ProfileSettingsDialogProps {
   onClose?: () => void;
+}
+
+interface PinnedWork {
+  title: string | null;
+  content: string | null;
+  link: string | null;
 }
 
 interface SocialLinks {
   website: string | null;
   twitter: string | null;
   instagram: string | null;
+  newsletter: string | null;
 }
 
 export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
@@ -31,10 +37,16 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
     avatar_url: "",
     genres: [] as string[],
     skills: [] as string[],
+    pinned_work: {
+      title: null,
+      content: null,
+      link: null,
+    } as PinnedWork,
     social_links: {
       website: null,
       twitter: null,
       instagram: null,
+      newsletter: null,
     } as SocialLinks,
   });
 
@@ -48,7 +60,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("username, bio, avatar_url, genres, skills, social_links")
+        .select("username, bio, avatar_url, genres, skills, pinned_work, social_links")
         .eq("id", session?.user?.id)
         .maybeSingle();
 
@@ -72,22 +84,37 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
           avatar_url: "",
           genres: [],
           skills: [],
+          pinned_work: {
+            title: null,
+            content: null,
+            link: null,
+          },
           social_links: {
             website: null,
             twitter: null,
             instagram: null,
+            newsletter: null,
           },
         });
         return;
       }
 
-      const socialLinks = data.social_links ? 
-        (data.social_links as unknown as SocialLinks) : 
-        {
-          website: null,
-          twitter: null,
-          instagram: null,
-        };
+      const pinnedWork = (typeof data.pinned_work === 'object' && data.pinned_work !== null) 
+        ? data.pinned_work as PinnedWork 
+        : {
+            title: null,
+            content: null,
+            link: null,
+          };
+
+      const socialLinks = (typeof data.social_links === 'object' && data.social_links !== null)
+        ? data.social_links as SocialLinks
+        : {
+            website: null,
+            twitter: null,
+            instagram: null,
+            newsletter: null,
+          };
 
       setProfile({
         username: data.username || "",
@@ -95,6 +122,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
         avatar_url: data.avatar_url || "",
         genres: data.genres || [],
         skills: data.skills || [],
+        pinned_work: pinnedWork,
         social_links: socialLinks,
       });
     } catch (error) {
@@ -117,7 +145,8 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
         bio: profile.bio,
         genres: profile.genres,
         skills: profile.skills,
-        social_links: profile.social_links as unknown as Json,
+        pinned_work: profile.pinned_work,
+        social_links: profile.social_links,
       };
 
       const { error } = await supabase
