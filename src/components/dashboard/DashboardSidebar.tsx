@@ -1,8 +1,5 @@
-import { useState } from "react";
-import { 
-  Book, Users, LineChart, Lightbulb, FileText, 
-  AlertTriangle, Rewind, ChevronLeft, ChevronRight 
-} from "lucide-react";
+import { Book, Users, LineChart, Lightbulb, FileText, 
+  AlertTriangle, Rewind, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
