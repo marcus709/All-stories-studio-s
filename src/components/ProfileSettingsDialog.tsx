@@ -99,18 +99,22 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
         return;
       }
 
-      const pinnedWork = data.pinned_work as PinnedWork || {
-        title: null,
-        content: null,
-        link: null,
-      };
+      const pinnedWork = (typeof data.pinned_work === 'object' && data.pinned_work !== null) 
+        ? data.pinned_work as PinnedWork 
+        : {
+            title: null,
+            content: null,
+            link: null,
+          };
 
-      const socialLinks = data.social_links as SocialLinks || {
-        website: null,
-        twitter: null,
-        instagram: null,
-        newsletter: null,
-      };
+      const socialLinks = (typeof data.social_links === 'object' && data.social_links !== null)
+        ? data.social_links as SocialLinks
+        : {
+            website: null,
+            twitter: null,
+            instagram: null,
+            newsletter: null,
+          };
 
       setProfile({
         username: data.username || "",
@@ -136,17 +140,19 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
     setLoading(true);
 
     try {
+      const updateData = {
+        username: profile.username,
+        bio: profile.bio,
+        genres: profile.genres,
+        skills: profile.skills,
+        pinned_work: profile.pinned_work,
+        social_links: profile.social_links,
+      };
+
       const { error } = await supabase
         .from("profiles")
-        .upsert({
-          id: session?.user?.id,
-          username: profile.username,
-          bio: profile.bio,
-          genres: profile.genres,
-          skills: profile.skills,
-          pinned_work: profile.pinned_work,
-          social_links: profile.social_links,
-        });
+        .update(updateData)
+        .eq("id", session?.user?.id);
 
       if (error) throw error;
 
