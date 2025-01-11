@@ -13,7 +13,7 @@ import { Profile } from "@/integrations/supabase/types/tables.types";
 import { useNavigate, useParams } from "react-router-dom";
 
 interface UserProfileDialogProps {
-  user?: Partial<Profile> & { genres?: string[]; skills?: string[] };
+  user?: Profile & { genres?: string[]; skills?: string[] };
   isOpen?: boolean;
   onClose?: () => void;
   showInDialog?: boolean;
@@ -34,8 +34,8 @@ export const UserProfileDialog = ({
   const [user, setUser] = useState<Profile & { genres?: string[]; skills?: string[] }>();
 
   useEffect(() => {
-    if (propUser?.id) {
-      fetchUser(propUser.id);
+    if (propUser) {
+      setUser(propUser);
     } else if (userId) {
       fetchUser(userId);
     }

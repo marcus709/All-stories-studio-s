@@ -1,57 +1,72 @@
-import { useState } from "react";
-import { ChevronLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { UserProfileDialog } from "../UserProfileDialog";
+import { Profile } from "@/integrations/supabase/types/tables.types";
 
 interface PrivateChatHeaderProps {
   friend: {
     id: string;
+    avatar_url?: string | null;
     username: string | null;
-    avatar_url: string | null;
+    bio?: string | null;
+    genres?: string[];
+    skills?: string[];
   } | null;
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 export const PrivateChatHeader = ({ friend, onBack }: PrivateChatHeaderProps) => {
+  const navigate = useNavigate();
   const [showProfile, setShowProfile] = useState(false);
 
-  if (!friend) return null;
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      navigate("/community");
+    }
+  };
+
+  const handleProfileClick = () => {
+    if (friend) {
+      navigate(`/community/profile/${friend.id}`);
+    }
+  };
 
   return (
-    <>
-      <div className="flex items-center gap-2 p-4 border-b bg-white/50 backdrop-blur-sm">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="shrink-0"
-          onClick={onBack}
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </Button>
-        
-        <button 
-          onClick={() => setShowProfile(true)}
-          className="flex items-center gap-3 hover:bg-gray-50 px-3 py-1.5 rounded-lg transition-colors"
-        >
-          <Avatar className="h-9 w-9">
-            {friend.avatar_url ? (
-              <AvatarImage src={friend.avatar_url} alt={friend.username || ""} />
-            ) : (
-              <AvatarFallback>
-                {friend.username?.[0]?.toUpperCase() || "?"}
-              </AvatarFallback>
-            )}
-          </Avatar>
-          <span className="font-medium">@{friend.username}</span>
-        </button>
+    <div className="flex items-center gap-4 p-4 border-b">
+      <Button variant="ghost" size="icon" onClick={handleBack}>
+        <ArrowLeft className="h-5 w-5" />
+      </Button>
+      <div
+        className="flex items-center gap-3 cursor-pointer hover:opacity-80"
+        onClick={handleProfileClick}
+      >
+        <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
+          {friend?.avatar_url ? (
+            <img
+              src={friend.avatar_url}
+              alt={friend.username || ""}
+              className="h-full w-full rounded-full object-cover"
+            />
+          ) : (
+            <span className="text-purple-600 text-sm font-medium">
+              {friend?.username?.[0]?.toUpperCase() || "U"}
+            </span>
+          )}
+        </div>
+        <span className="font-medium">@{friend?.username}</span>
       </div>
 
-      <UserProfileDialog
-        user={friend}
-        isOpen={showProfile}
-        onClose={() => setShowProfile(false)}
-      />
-    </>
+      {friend && showProfile && (
+        <UserProfileDialog
+          user={friend as Profile}
+          isOpen={showProfile}
+          onClose={() => setShowProfile(false)}
+        />
+      )}
+    </div>
   );
 };
