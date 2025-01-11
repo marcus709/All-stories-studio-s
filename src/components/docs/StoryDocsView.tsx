@@ -11,12 +11,13 @@ import { Plus, FileText, LayoutGrid, LayoutList } from "lucide-react";
 import { CreateDocumentDialog } from "./CreateDocumentDialog";
 import { DocumentEditor } from "./DocumentEditor";
 import { DocumentSidebar } from "./DocumentSidebar";
-import { DocumentsList } from "./DocumentsList";  // Added this import
+import { DocumentsList } from "./DocumentsList";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useStory } from "@/contexts/StoryContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Document } from "@/types/story";
 
 export const StoryDocsView = () => {
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
@@ -46,7 +47,22 @@ export const StoryDocsView = () => {
         return [];
       }
 
-      return data;
+      return data.map(doc => ({
+        ...doc,
+        time_period_details: doc.time_period_details ? {
+          year: doc.time_period_details.year || "",
+          season: doc.time_period_details.season || "",
+          time_of_day: doc.time_period_details.time_of_day || "",
+          weather: doc.time_period_details.weather || "",
+          environment: doc.time_period_details.environment || ""
+        } : {
+          year: "",
+          season: "",
+          time_of_day: "",
+          weather: "",
+          environment: ""
+        }
+      })) as Document[];
     },
     enabled: !!selectedStory?.id,
   });
