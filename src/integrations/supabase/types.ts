@@ -1255,19 +1255,31 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          genres: string[] | null
           id: string
+          pinned_work: Json | null
+          skills: string[] | null
+          social_links: Json | null
           username: string | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          genres?: string[] | null
           id: string
+          pinned_work?: Json | null
+          skills?: string[] | null
+          social_links?: Json | null
           username?: string | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          genres?: string[] | null
           id?: string
+          pinned_work?: Json | null
+          skills?: string[] | null
+          social_links?: Json | null
           username?: string | null
         }
         Relationships: []
@@ -1790,7 +1802,11 @@ export type Database = {
         Returns: {
           avatar_url: string | null
           bio: string | null
+          genres: string[] | null
           id: string
+          pinned_work: Json | null
+          skills: string[] | null
+          social_links: Json | null
           username: string | null
         }[]
       }
@@ -1801,7 +1817,11 @@ export type Database = {
         Returns: {
           avatar_url: string | null
           bio: string | null
+          genres: string[] | null
           id: string
+          pinned_work: Json | null
+          skills: string[] | null
+          social_links: Json | null
           username: string | null
         }[]
       }
@@ -1812,7 +1832,11 @@ export type Database = {
         Returns: {
           avatar_url: string | null
           bio: string | null
+          genres: string[] | null
           id: string
+          pinned_work: Json | null
+          skills: string[] | null
+          social_links: Json | null
           username: string | null
         }[]
       }

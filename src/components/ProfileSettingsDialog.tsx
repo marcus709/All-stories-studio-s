@@ -22,6 +22,19 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
     username: "",
     bio: "",
     avatar_url: "",
+    genres: [] as string[],
+    skills: [] as string[],
+    pinned_work: {
+      title: null as string | null,
+      content: null as string | null,
+      link: null as string | null,
+    },
+    social_links: {
+      website: null as string | null,
+      twitter: null as string | null,
+      instagram: null as string | null,
+      newsletter: null as string | null,
+    },
   });
 
   React.useEffect(() => {
@@ -34,7 +47,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("username, bio, avatar_url")
+        .select("username, bio, avatar_url, genres, skills, pinned_work, social_links")
         .eq("id", session?.user?.id)
         .maybeSingle();
 
@@ -42,7 +55,6 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
         throw error;
       }
 
-      // If no profile exists, we'll create one
       if (!data) {
         const { error: insertError } = await supabase
           .from("profiles")
@@ -57,6 +69,19 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
           username: session?.user?.email?.split("@")[0] || "",
           bio: "",
           avatar_url: "",
+          genres: [],
+          skills: [],
+          pinned_work: {
+            title: null,
+            content: null,
+            link: null,
+          },
+          social_links: {
+            website: null,
+            twitter: null,
+            instagram: null,
+            newsletter: null,
+          },
         });
         return;
       }
@@ -65,6 +90,19 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
         username: data.username || "",
         bio: data.bio || "",
         avatar_url: data.avatar_url || "",
+        genres: data.genres || [],
+        skills: data.skills || [],
+        pinned_work: data.pinned_work || {
+          title: null,
+          content: null,
+          link: null,
+        },
+        social_links: data.social_links || {
+          website: null,
+          twitter: null,
+          instagram: null,
+          newsletter: null,
+        },
       });
     } catch (error) {
       console.error("Error loading profile:", error);
@@ -87,6 +125,10 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
           id: session?.user?.id,
           username: profile.username,
           bio: profile.bio,
+          genres: profile.genres,
+          skills: profile.skills,
+          pinned_work: profile.pinned_work,
+          social_links: profile.social_links,
         });
 
       if (error) throw error;
@@ -107,7 +149,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
     }
   }
 
-  const handleProfileChange = (field: string, value: string) => {
+  const handleProfileChange = (field: string, value: any) => {
     setProfile((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -134,7 +176,9 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
     <Dialog open={true} onOpenChange={() => onClose?.()}>
       <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-lg font-semibold">Profile Settings</DialogTitle>
+          <DialogTitle className="text-lg font-semibold">
+            Profile Settings
+          </DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="profile" className="w-full">
@@ -175,8 +219,8 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
                 >
                   Cancel
                 </Button>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={loading}
                   className="px-3 py-1 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600"
                 >
