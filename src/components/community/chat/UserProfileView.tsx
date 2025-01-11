@@ -22,7 +22,7 @@ export const UserProfileView = ({ user, onBack }: UserProfileViewProps) => {
   const [activeTab, setActiveTab] = useState<ActivityTab>("followers");
   const [activity, setActivity] = useState<UserActivity | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState("planned");
+  const [loading, setLoading] = useState<"planned" | "exact" | "estimated">("planned");
 
   useEffect(() => {
     const fetchActivity = async () => {
@@ -49,7 +49,7 @@ export const UserProfileView = ({ user, onBack }: UserProfileViewProps) => {
 
   useEffect(() => {
     const fetchContent = async () => {
-      setLoading(true);
+      setLoading("planned");
       let query;
 
       switch (activeTab) {
@@ -86,11 +86,13 @@ export const UserProfileView = ({ user, onBack }: UserProfileViewProps) => {
           setPosts(data);
         }
       }
-      setLoading(false);
+      setLoading("exact");
     };
 
     fetchContent();
   }, [activeTab, user.id]);
+
+  // ... keep existing code (JSX for the header and profile sections)
 
   return (
     <div className="flex flex-col h-full bg-white">
