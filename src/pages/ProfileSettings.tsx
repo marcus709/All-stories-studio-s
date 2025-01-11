@@ -188,5 +188,3 @@ export function ProfileSettings() {
     </div>
   );
 }
-
-export default ProfileSettings;

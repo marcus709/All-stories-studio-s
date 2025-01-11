@@ -4,7 +4,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useSubscription } from "@/contexts/SubscriptionContext";
 import { capitalize } from "lodash";
 
-const PaymentSuccess = () => {
+export const PaymentSuccess = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { plan } = useSubscription();
@@ -39,5 +39,3 @@ const PaymentSuccess = () => {
     </div>
   );
 };
-
-export default PaymentSuccess;
