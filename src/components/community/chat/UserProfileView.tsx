@@ -10,7 +10,7 @@ interface Profile {
   website?: string | null;
 }
 
-export const UserProfileView = ({ userId }: { userId: string }) => {
+export const UserProfileView = ({ userId, onBack }: { userId: string; onBack?: () => void }) => {
   const [loading, setLoading] = useState<"planned" | "exact" | "estimated">("planned");
   const [profile, setProfile] = useState<Profile | null>(null);
   const { toast } = useToast();
@@ -52,6 +52,14 @@ export const UserProfileView = ({ userId }: { userId: string }) => {
 
   return (
     <div className="p-4">
+      {onBack && (
+        <button 
+          onClick={onBack}
+          className="mb-4 text-sm text-gray-600 hover:text-gray-900"
+        >
+          ← Back
+        </button>
+      )}
       <h2 className="text-xl font-semibold">{profile.username}</h2>
       {profile.avatar_url && (
         <img 
