@@ -89,7 +89,19 @@ export type Profile = {
   username: string | null;
   avatar_url: string | null;
   bio: string | null;
-  website?: string | null;
+  genres: string[] | null;
+  skills: string[] | null;
+  pinned_work: {
+    title: string | null;
+    content: string | null;
+    link: string | null;
+  } | null;
+  social_links: {
+    website: string | null;
+    twitter: string | null;
+    instagram: string | null;
+    newsletter: string | null;
+  } | null;
 };
 export type SavedPost = Tables["saved_posts"]["Row"];
 export type Story = Tables["stories"]["Row"];

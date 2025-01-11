@@ -9,6 +9,7 @@ import { ProfileForm } from "./profile/ProfileForm";
 import { CreditCard } from "lucide-react";
 import { FriendsManagement } from "./profile/FriendsManagement";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { Json } from "@/integrations/supabase/types/database.types";
 
 interface ProfileSettingsDialogProps {
   onClose?: () => void;
@@ -100,7 +101,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
       }
 
       const pinnedWork = (typeof data.pinned_work === 'object' && data.pinned_work !== null) 
-        ? data.pinned_work as PinnedWork 
+        ? data.pinned_work as unknown as PinnedWork 
         : {
             title: null,
             content: null,
@@ -108,7 +109,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
           };
 
       const socialLinks = (typeof data.social_links === 'object' && data.social_links !== null)
-        ? data.social_links as SocialLinks
+        ? data.social_links as unknown as SocialLinks
         : {
             website: null,
             twitter: null,
