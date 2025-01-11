@@ -3,13 +3,27 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Profile } from "@/integrations/supabase/types/tables.types";
-import { Post } from "@/components/community/Post";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CalendarDays, Users } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { Post } from "@/components/community/Post";
+
+interface ExtendedProfile {
+  id: string;
+  username: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  genres: string[];
+  skills: string[];
+  created_at: string;
+  social_links?: {
+    website: string | null;
+    twitter: string | null;
+    instagram: string | null;
+  };
+}
 
 export default function UserProfilePage() {
   const { userId } = useParams();
@@ -27,7 +41,7 @@ export default function UserProfilePage() {
         .single();
 
       if (error) throw error;
-      return data as Profile;
+      return data as ExtendedProfile;
     },
     enabled: !!userId,
   });
@@ -39,11 +53,17 @@ export default function UserProfilePage() {
         .from("posts")
         .select(`
           *,
-          get_post_profiles(*),
+          profiles!posts_user_id_fkey (
+            username,
+            avatar_url
+          ),
           post_likes (*),
           comments (
             *,
-            get_comment_profiles(*)
+            profiles!comments_user_id_fkey (
+              username,
+              avatar_url
+            )
           )
         `)
         .eq("user_id", userId)
@@ -125,10 +145,8 @@ export default function UserProfilePage() {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-sm">
-        {/* Cover Image */}
         <div className="h-48 bg-gradient-to-r from-purple-500 to-blue-500 rounded-t-lg" />
         
-        {/* Profile Info */}
         <div className="px-6 pb-6">
           <div className="flex justify-between items-end -mt-12">
             <div className="flex items-end">
@@ -173,7 +191,7 @@ export default function UserProfilePage() {
             </div>
             <div className="flex items-center gap-1">
               <CalendarDays className="h-4 w-4" />
-              <span>Joined {formatDistanceToNow(new Date(profile.created_at || Date.now()), { addSuffix: true })}</span>
+              <span>Joined {formatDistanceToNow(new Date(profile.created_at), { addSuffix: true })}</span>
             </div>
           </div>
         </div>
