@@ -1,26 +1,26 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useStory } from "@/contexts/StoryContext";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Header } from "@/components/Header";
+import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
+import { DashboardContent } from "@/components/dashboard/DashboardContent";
+import { StoryProvider } from "@/contexts/StoryContext";
+import { useSession } from "@supabase/auth-helpers-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Plus, FileText, LayoutGrid, LayoutList } from "lucide-react";
 import { CreateDocumentDialog } from "./CreateDocumentDialog";
 import { DocumentEditor } from "./DocumentEditor";
 import { DocumentSidebar } from "./DocumentSidebar";
-import { Document } from "@/types/story";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import {
-  ResizablePanel,
-  ResizablePanelGroup,
-  ResizableHandle,
-} from "@/components/ui/resizable";
+import { useStory } from "@/contexts/StoryContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export const StoryDocsView = () => {
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isGridView, setIsGridView] = useState(false);
+  const [isGridView, setIsGridView] = useState(true);
   const { selectedStory } = useStory();
   const { toast } = useToast();
 
@@ -45,7 +45,7 @@ export const StoryDocsView = () => {
         return [];
       }
 
-      return data as Document[];
+      return data;
     },
     enabled: !!selectedStory?.id,
   });
@@ -54,6 +54,9 @@ export const StoryDocsView = () => {
 
   const handleDocumentSelect = (docId: string) => {
     setSelectedDocId(docId);
+    if (isGridView) {
+      setIsGridView(false);
+    }
   };
 
   const handleDocumentSave = () => {
@@ -99,34 +102,42 @@ export const StoryDocsView = () => {
         </div>
       </div>
 
-      <ResizablePanelGroup direction="horizontal" className="h-[calc(100vh-12rem)]">
-        <ResizablePanel defaultSize={20} minSize={15} maxSize={40}>
-          <DocumentSidebar 
-            onContentDrop={() => {}} 
-            selectedDocId={selectedDocId}
+      {isGridView ? (
+        <div className="h-[calc(100vh-8rem)]">
+          <DocumentsList
+            documents={documents}
             onSelectDocument={handleDocumentSelect}
-            isGridView={isGridView}
+            selectedDocumentId={selectedDocId}
+            isGridView={true}
           />
-        </ResizablePanel>
-        
-        <ResizableHandle withHandle />
-        
-        <ResizablePanel defaultSize={80}>
-          {selectedDocument ? (
-            <DocumentEditor 
-              key={selectedDocument.id}
-              document={selectedDocument}
-              storyId={selectedStory.id}
-              onSave={handleDocumentSave}
+        </div>
+      ) : (
+        <div className="flex h-[calc(100vh-8rem)]">
+          <div className="w-72 flex-shrink-0">
+            <DocumentSidebar
+              onContentDrop={() => {}}
+              selectedDocId={selectedDocId}
+              onSelectDocument={handleDocumentSelect}
+              isGridView={false}
             />
-          ) : (
-            <div className="flex flex-col items-center justify-center flex-1 h-full bg-gray-50 text-gray-500">
-              <FileText className="w-12 h-12 mb-4" />
-              <p>Select a document to start editing</p>
-            </div>
-          )}
-        </ResizablePanel>
-      </ResizablePanelGroup>
+          </div>
+          <div className="flex-1">
+            {selectedDocument ? (
+              <DocumentEditor
+                key={selectedDocument.id}
+                document={selectedDocument}
+                storyId={selectedStory.id}
+                onSave={handleDocumentSave}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full bg-gray-50 text-gray-500">
+                <FileText className="w-12 h-12 mb-4" />
+                <p>Select a document to start editing</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <CreateDocumentDialog
         isOpen={isCreateDialogOpen}
