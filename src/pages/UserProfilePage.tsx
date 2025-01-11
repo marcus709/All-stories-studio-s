@@ -9,9 +9,12 @@ import { CalendarDays, Users } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Post } from "@/components/community/Post";
-import { Profile } from "@/integrations/supabase/types";
 
-interface ExtendedProfile extends Omit<Profile, 'social_links'> {
+interface ExtendedProfile {
+  id: string;
+  username: string | null;
+  avatar_url: string | null;
+  bio: string | null;
   genres: string[];
   skills: string[];
   created_at?: string;
@@ -61,7 +64,16 @@ export default function UserProfilePage() {
         .single();
 
       if (error) throw error;
-      return data as ExtendedProfile;
+      
+      // Transform the data to match ExtendedProfile type
+      return {
+        ...data,
+        social_links: {
+          website: data.social_links?.website || null,
+          twitter: data.social_links?.twitter || null,
+          instagram: data.social_links?.instagram || null
+        }
+      } as ExtendedProfile;
     },
     enabled: !!userId,
   });
