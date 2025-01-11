@@ -13,27 +13,8 @@ export const AddFriendsDialog = ({ isOpen, onClose }: AddFriendsDialogProps) => 
   const { friends, isLoading } = useFriendsList();
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
 
-  const handleUserSelect = async (user: any) => {
-    const profileData: Profile = {
-      id: user.id,
-      username: user.username,
-      avatar_url: user.avatar_url,
-      bio: user.bio,
-      genres: user.genres || [],
-      skills: user.skills || [],
-      pinned_work: {
-        title: user.pinned_work?.title || "",
-        content: user.pinned_work?.content || "",
-        link: user.pinned_work?.link || "",
-      },
-      social_links: {
-        website: user.social_links?.website || "",
-        twitter: user.social_links?.twitter || "",
-        instagram: user.social_links?.instagram || "",
-        newsletter: user.social_links?.newsletter || "",
-      },
-    };
-    setSelectedUser(profileData);
+  const handleUserSelect = async (user: Profile) => {
+    setSelectedUser(user);
   };
 
   return (
@@ -49,7 +30,7 @@ export const AddFriendsDialog = ({ isOpen, onClose }: AddFriendsDialogProps) => 
             friends.map((friend) => (
               <div key={friend.id} className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <img src={friend.avatar_url || ""} alt={friend.username} className="h-10 w-10 rounded-full" />
+                  <img src={friend.avatar_url || ""} alt={friend.username || ""} className="h-10 w-10 rounded-full" />
                   <span className="ml-2">{friend.username}</span>
                 </div>
                 <Button onClick={() => handleUserSelect(friend)}>Add</Button>
