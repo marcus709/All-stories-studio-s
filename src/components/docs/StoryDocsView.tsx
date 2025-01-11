@@ -4,11 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useStory } from "@/contexts/StoryContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Plus, FileText } from "lucide-react";
+import { Plus, FileText, LayoutGrid, LayoutList } from "lucide-react";
 import { CreateDocumentDialog } from "./CreateDocumentDialog";
 import { DocumentEditor } from "./DocumentEditor";
 import { DocumentSidebar } from "./DocumentSidebar";
 import { Document } from "@/types/story";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   ResizablePanel,
   ResizablePanelGroup,
@@ -18,6 +20,7 @@ import {
 export const StoryDocsView = () => {
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isGridView, setIsGridView] = useState(false);
   const { selectedStory } = useStory();
   const { toast } = useToast();
 
@@ -72,10 +75,24 @@ export const StoryDocsView = () => {
           <h1 className="text-2xl font-bold">Story Documents</h1>
           <p className="text-gray-500">Write and organize your story content</p>
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
-          <Plus className="w-4 h-4" />
-          New Document
-        </Button>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            {isGridView ? <LayoutGrid className="h-4 w-4 text-gray-500" /> : <LayoutList className="h-4 w-4 text-gray-500" />}
+            <Switch
+              id="grid-view"
+              checked={isGridView}
+              onCheckedChange={setIsGridView}
+              className="data-[state=checked]:bg-purple-500"
+            />
+            <Label htmlFor="grid-view" className="text-sm text-gray-600">
+              Grid View
+            </Label>
+          </div>
+          <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
+            <Plus className="w-4 h-4" />
+            New Document
+          </Button>
+        </div>
       </div>
 
       <ResizablePanelGroup direction="horizontal" className="h-[calc(100vh-12rem)]">
@@ -84,6 +101,7 @@ export const StoryDocsView = () => {
             onContentDrop={() => {}} 
             selectedDocId={selectedDocId}
             onSelectDocument={handleDocumentSelect}
+            isGridView={isGridView}
           />
         </ResizablePanel>
         
