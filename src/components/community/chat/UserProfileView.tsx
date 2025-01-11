@@ -10,28 +10,38 @@ interface UserProfileViewProps {
   onBack: () => void;
 }
 
-type ActivityTab = "posts" | "replies" | "highlights";
+type ActivityTab = "followers" | "replies" | "highlights";
 
 interface UserActivity {
-  posts_count: number;
+  followers_count: number;
   replies_count: number;
   highlights_count: number;
 }
 
 export const UserProfileView = ({ user, onBack }: UserProfileViewProps) => {
-  const [activeTab, setActiveTab] = useState<ActivityTab>("posts");
+  const [activeTab, setActiveTab] = useState<ActivityTab>("followers");
   const [activity, setActivity] = useState<UserActivity | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchActivity = async () => {
-      const { data, error } = await supabase
+      // First get the followers count
+      const { count: followersCount } = await supabase
+        .from('friendships')
+        .select('*', { count: true })
+        .eq('friend_id', user.id)
+        .eq('status', 'accepted');
+
+      // Then get other activity counts
+      const { data: activityData } = await supabase
         .rpc('get_user_activity', { user_id: user.id });
-      
-      if (!error && data) {
-        setActivity(data[0]);
-      }
+
+      setActivity({
+        followers_count: followersCount || 0,
+        replies_count: activityData?.[0]?.replies_count || 0,
+        highlights_count: activityData?.[0]?.highlights_count || 0
+      });
     };
 
     fetchActivity();
@@ -43,12 +53,12 @@ export const UserProfileView = ({ user, onBack }: UserProfileViewProps) => {
       let query;
 
       switch (activeTab) {
-        case "posts":
+        case "followers":
           query = supabase
-            .from("posts")
-            .select("*")
-            .eq("user_id", user.id)
-            .order("created_at", { ascending: false });
+            .from("friendships")
+            .select("profiles!friendships_friend_id_fkey_profiles(*)")
+            .eq("friend_id", user.id)
+            .eq("status", "accepted");
           break;
         case "replies":
           query = supabase
@@ -70,6 +80,8 @@ export const UserProfileView = ({ user, onBack }: UserProfileViewProps) => {
       if (!error && data) {
         if (activeTab === "highlights") {
           setPosts(data.map((item: any) => item.posts));
+        } else if (activeTab === "followers") {
+          setPosts(data.map((item: any) => item.profiles));
         } else {
           setPosts(data);
         }
@@ -101,7 +113,7 @@ export const UserProfileView = ({ user, onBack }: UserProfileViewProps) => {
       {/* Profile Header */}
       <div className="relative">
         <div className="h-32 bg-purple-100"></div>
-        <div className="absolute left-4 -bottom-16">
+        <div className="absolute left-4 -bottom-16 transform translate-y-1/3">
           <div className="h-32 w-32 rounded-full border-4 border-white bg-purple-100 flex items-center justify-center">
             {user.avatar_url ? (
               <img
@@ -139,7 +151,7 @@ export const UserProfileView = ({ user, onBack }: UserProfileViewProps) => {
         <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
           <div className="flex items-center gap-1">
             <Users className="h-4 w-4" />
-            <span className="font-semibold text-black">{activity?.posts_count || 0}</span> posts
+            <span className="font-semibold text-black">{activity?.followers_count || 0}</span> followers
           </div>
           <div className="flex items-center gap-1">
             <span className="font-semibold text-black">{activity?.replies_count || 0}</span> replies
@@ -154,13 +166,13 @@ export const UserProfileView = ({ user, onBack }: UserProfileViewProps) => {
       <div className="flex border-b mt-4">
         <button 
           className={`flex-1 text-sm font-semibold py-4 ${
-            activeTab === "posts" 
+            activeTab === "followers" 
               ? "text-purple-600 border-b-2 border-purple-600" 
               : "text-gray-500 hover:bg-gray-50"
           }`}
-          onClick={() => setActiveTab("posts")}
+          onClick={() => setActiveTab("followers")}
         >
-          Posts
+          Followers
         </button>
         <button 
           className={`flex-1 text-sm font-semibold py-4 ${
