@@ -1,19 +1,31 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Profile } from "@/integrations/supabase/types/tables.types";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { ProfileSettingsDialog } from "@/components/ProfileSettingsDialog";
-import { Settings } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Profile } from "@/integrations/supabase/types";
+import { ProfileForm } from "../profile/ProfileForm";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import type { View } from "@/types/story";
 
-export const DashboardSidebar = () => {
+interface DashboardSidebarProps {
+  currentView: View;
+  setCurrentView: (view: View) => void;
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
+}
+
+export const DashboardSidebar = ({ 
+  currentView, 
+  setCurrentView,
+  isCollapsed,
+  onToggleCollapse 
+}: DashboardSidebarProps) => {
   const session = useSession();
-  const navigate = useNavigate();
-  const { toast } = useToast();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [showSettings, setShowSettings] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -25,96 +37,138 @@ export const DashboardSidebar = () => {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select()
+        .select("*")
         .eq("id", session?.user?.id)
         .single();
 
       if (error) throw error;
 
-      const profileData: Profile = {
-        id: data.id,
-        username: data.username,
-        avatar_url: data.avatar_url,
-        bio: data.bio,
-        genres: data.genres || null,
-        skills: data.skills || null,
-        pinned_work: data.pinned_work || null,
-        social_links: data.social_links || null
-      };
-
-      setProfile(profileData);
+      if (data) {
+        const profileData: Profile = {
+          id: data.id,
+          username: data.username,
+          avatar_url: data.avatar_url,
+          bio: data.bio,
+          genres: data.genres || [],
+          skills: data.skills || [],
+          pinned_work: {
+            title: data.pinned_work?.title || "",
+            content: data.pinned_work?.content || "",
+            link: data.pinned_work?.link || "",
+          },
+          social_links: {
+            website: data.social_links?.website || "",
+            twitter: data.social_links?.twitter || "",
+            instagram: data.social_links?.instagram || "",
+            newsletter: data.social_links?.newsletter || "",
+          },
+        };
+        setProfile(profileData);
+      }
     } catch (error) {
       console.error("Error fetching profile:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load profile",
-        variant: "destructive",
-      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleProfileUpdate = (profile: Profile) => {
-    setProfile({
-      id: profile.id,
-      username: profile.username,
-      avatar_url: profile.avatar_url,
-      bio: profile.bio,
-      genres: profile.genres || null,
-      skills: profile.skills || null,
-      pinned_work: profile.pinned_work || null,
-      social_links: profile.social_links || null
-    });
+  const handleProfileUpdate = async (data: any) => {
+    try {
+      const profileData = {
+        ...data,
+        pinned_work: {
+          title: data.pinned_work?.title || "",
+          content: data.pinned_work?.content || "",
+          link: data.pinned_work?.link || "",
+        },
+        social_links: {
+          website: data.social_links?.website || "",
+          twitter: data.social_links?.twitter || "",
+          instagram: data.social_links?.instagram || "",
+          newsletter: data.social_links?.newsletter || "",
+        },
+      };
+
+      const { error } = await supabase
+        .from("profiles")
+        .update(profileData)
+        .eq("id", session?.user?.id);
+
+      if (error) throw error;
+
+      await fetchProfile();
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
   };
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <div className="w-64 bg-white border-r h-full p-4">
-      <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold">Dashboard</h2>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowSettings(true)}
-          >
-            <Settings className="h-5 w-5" />
-          </Button>
-        </div>
-
-        <nav className="space-y-2">
-          <Button
-            variant="ghost"
-            className="w-full justify-start"
-            onClick={() => navigate("/dashboard")}
-          >
-            Overview
-          </Button>
-          <Button
-            variant="ghost"
-            className="w-full justify-start"
-            onClick={() => navigate("/dashboard/stories")}
-          >
-            My Stories
-          </Button>
-          <Button
-            variant="ghost"
-            className="w-full justify-start"
-            onClick={() => navigate("/dashboard/characters")}
-          >
-            Characters
-          </Button>
-          <Button
-            variant="ghost"
-            className="w-full justify-start"
-            onClick={() => navigate("/dashboard/ideas")}
-          >
-            Story Ideas
-          </Button>
-        </nav>
-
-        {showSettings && (
-          <ProfileSettingsDialog onClose={() => setShowSettings(false)} />
+    <div className={cn(
+      "relative flex flex-col border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+      isCollapsed ? "w-16" : "w-80"
+    )}>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute -right-3 top-4 h-6 w-6 rounded-full border bg-background"
+        onClick={onToggleCollapse}
+      >
+        {isCollapsed ? (
+          <ChevronRight className="h-4 w-4" />
+        ) : (
+          <ChevronLeft className="h-4 w-4" />
         )}
+      </Button>
+      <div className="flex h-14 items-center border-b px-4">
+        {!isCollapsed && <h2 className="text-lg font-semibold">Dashboard</h2>}
       </div>
+      <ScrollArea className="flex-1">
+        <div className="space-y-4 py-4">
+          <div className="px-4 py-2">
+            <div className="space-y-1">
+              <Button
+                variant={currentView === "stories" ? "secondary" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => setCurrentView("stories")}
+              >
+                {isCollapsed ? "📚" : "Stories"}
+              </Button>
+              <Button
+                variant={currentView === "characters" ? "secondary" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => setCurrentView("characters")}
+              >
+                {isCollapsed ? "👤" : "Characters"}
+              </Button>
+              <Button
+                variant={currentView === "documents" ? "secondary" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => setCurrentView("documents")}
+              >
+                {isCollapsed ? "📄" : "Documents"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </ScrollArea>
+      {!isCollapsed && profile && (
+        <div className="mt-auto border-t p-4">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Settings className="h-4 w-4" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <ProfileForm profile={profile} onChange={handleProfileUpdate} />
+            </SheetContent>
+          </Sheet>
+        </div>
+      )}
     </div>
   );
 };

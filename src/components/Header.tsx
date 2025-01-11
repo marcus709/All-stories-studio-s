@@ -1,144 +1,64 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { BookOpen } from "lucide-react";
-import { AuthModals } from "./auth/AuthModals";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "./ui/use-toast";
 import { useSession } from "@supabase/auth-helpers-react";
 import { Navigation } from "./header/Navigation";
 import { UserMenu } from "./header/UserMenu";
-import { Profile } from "@/integrations/supabase/types/tables.types";
+import { supabase } from "@/integrations/supabase/client";
+import { Profile } from "@/integrations/supabase/types";
 
 export const Header = () => {
-  const [showAuth, setShowAuth] = useState(false);
-  const [authView, setAuthView] = useState<"signin" | "signup">("signin");
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const { toast } = useToast();
-  const navigate = useNavigate();
   const session = useSession();
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
-    if (session?.user) {
-      fetchProfile(session.user.id);
-    } else {
-      setProfile(null);
+    if (session?.user?.id) {
+      fetchProfile();
     }
-  }, [session]);
+  }, [session?.user?.id]);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async () => {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select()
-        .eq("id", userId)
-        .maybeSingle();
+        .select("*")
+        .eq("id", session?.user?.id)
+        .single();
 
-      if (error) {
-        console.error("Error fetching profile:", error);
-        return;
+      if (error) throw error;
+
+      if (data) {
+        // Ensure the data matches the Profile type structure
+        const profileData: Profile = {
+          id: data.id,
+          username: data.username,
+          avatar_url: data.avatar_url,
+          bio: data.bio,
+          genres: data.genres || [],
+          skills: data.skills || [],
+          pinned_work: {
+            title: data.pinned_work?.title || "",
+            content: data.pinned_work?.content || "",
+            link: data.pinned_work?.link || "",
+          },
+          social_links: {
+            website: data.social_links?.website || "",
+            twitter: data.social_links?.twitter || "",
+            instagram: data.social_links?.instagram || "",
+            newsletter: data.social_links?.newsletter || "",
+          },
+        };
+        setProfile(profileData);
       }
-      
-      const profileData: Profile = {
-        id: data.id,
-        username: data.username,
-        avatar_url: data.avatar_url,
-        bio: data.bio,
-        genres: data.genres || null,
-        skills: data.skills || null,
-        pinned_work: data.pinned_work || null,
-        social_links: data.social_links || null
-      };
-      
-      setProfile(profileData);
     } catch (error) {
-      console.error("Error in fetchProfile:", error);
+      console.error("Error fetching profile:", error);
     }
-  };
-
-  const handleSignOut = async () => {
-    try {
-      // First, clear local data
-      localStorage.clear();
-      
-      // Attempt to sign out from Supabase
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error("Error during sign out:", error);
-        toast({
-          title: "Warning",
-          description: "Sign out completed with some warnings. Please refresh the page.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Success",
-          description: "You have been signed out successfully.",
-        });
-      }
-
-      // Force a page refresh to clear any remaining state
-      window.location.href = '/';
-    } catch (error) {
-      console.error("Unexpected error during sign out:", error);
-      window.location.href = '/';
-    }
-  };
-
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const handleCommunityClick = () => {
-    if (!session) {
-      setAuthView("signin");
-      setShowAuth(true);
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to access the community.",
-      });
-      return;
-    }
-    navigate("/community");
-  };
-
-  const handleShowAuth = (view: "signin" | "signup") => {
-    setAuthView(view);
-    setShowAuth(true);
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center space-x-2">
-            <BookOpen className="h-6 w-6 text-purple-600" />
-            <span className="text-xl font-bold">All Stories Studio</span>
-          </Link>
-
-          <div className="flex items-center space-x-6">
-            <Navigation 
-              onScrollToSection={scrollToSection}
-              onCommunityClick={handleCommunityClick}
-            />
-            <UserMenu
-              session={session}
-              profile={profile}
-              onSignOut={handleSignOut}
-              onShowAuth={handleShowAuth}
-            />
-          </div>
-        </div>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-14 items-center">
+        <Navigation />
+        {session && <UserMenu profile={profile} />}
       </div>
-
-      <AuthModals
-        isOpen={showAuth}
-        onClose={() => setShowAuth(false)}
-        defaultView={authView}
-      />
     </header>
   );
 };
