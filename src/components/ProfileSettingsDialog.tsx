@@ -81,7 +81,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
         return;
       }
 
-      const socialLinks = (typeof data.social_links === 'object' && data.social_links !== null)
+      const socialLinks = (data.social_links && typeof data.social_links === 'object')
         ? data.social_links as SocialLinks
         : {
             website: null,
@@ -117,7 +117,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
         bio: profile.bio,
         genres: profile.genres,
         skills: profile.skills,
-        social_links: profile.social_links as Json,
+        social_links: profile.social_links as unknown as Json,
       };
 
       const { error } = await supabase
