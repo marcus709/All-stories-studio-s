@@ -127,7 +127,7 @@ export const StoryView = () => {
         {!selectedStory && (
           <div className="absolute inset-0 bg-transparent z-10" />
         )}
-        <div className="flex gap-6 mb-8">
+        <div className="flex gap-6 mb-8 relative z-30">
           <Select
             value={selectedConfig}
             onValueChange={handleSelectChange}
