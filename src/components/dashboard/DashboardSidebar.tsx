@@ -31,8 +31,8 @@ export const DashboardSidebar = ({
   return (
     <div 
       className={cn(
-        "fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white border-r transition-all duration-300",
-        isCollapsed ? "w-12" : "w-72"
+        "fixed left-0 top-16 h-[calc(100vh-4rem)] bg-background border-r transition-all duration-300",
+        isCollapsed ? "w-16" : "w-72"
       )}
     >
       <div className="flex justify-end p-2 border-b">
