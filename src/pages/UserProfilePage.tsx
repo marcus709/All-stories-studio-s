@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "@supabase/auth-helpers-react";
@@ -17,12 +16,35 @@ interface ExtendedProfile {
   bio: string | null;
   genres: string[];
   skills: string[];
-  created_at: string;
+  created_at?: string;
   social_links?: {
     website: string | null;
     twitter: string | null;
     instagram: string | null;
   };
+}
+
+interface PostWithProfiles {
+  id: string;
+  content: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+  profiles: {
+    username: string;
+    avatar_url: string | null;
+  };
+  post_likes: Array<{ id: string; user_id: string }>;
+  comments: Array<{
+    id: string;
+    content: string;
+    user_id: string;
+    created_at: string;
+    profiles: {
+      username: string;
+      avatar_url: string | null;
+    };
+  }>;
 }
 
 export default function UserProfilePage() {
@@ -57,9 +79,15 @@ export default function UserProfilePage() {
             username,
             avatar_url
           ),
-          post_likes (*),
+          post_likes (
+            id,
+            user_id
+          ),
           comments (
-            *,
+            id,
+            content,
+            user_id,
+            created_at,
             profiles!comments_user_id_fkey (
               username,
               avatar_url
@@ -70,7 +98,7 @@ export default function UserProfilePage() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as PostWithProfiles[];
     },
     enabled: !!userId,
   });
@@ -253,4 +281,3 @@ export default function UserProfilePage() {
       </Tabs>
     </div>
   );
-}

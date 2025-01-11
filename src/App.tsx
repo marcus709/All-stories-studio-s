@@ -1,10 +1,10 @@
-import { BrowserRouter } from "react-router-dom";
+import { RouterProvider } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SessionContextProvider } from "@supabase/auth-helpers-react";
 import { StoryProvider } from "./contexts/StoryContext";
 import { SubscriptionProvider } from "./contexts/SubscriptionContext";
 import { Toaster } from "@/components/ui/toaster";
-import AppRoutes from "./Routes";
+import router from "./Routes";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
@@ -94,21 +94,19 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <SessionContextProvider
-          supabaseClient={supabase}
-          initialSession={session}
-        >
-          <SubscriptionProvider>
-            <StoryProvider>
-              <AppRoutes />
-              <Toaster />
-            </StoryProvider>
-          </SubscriptionProvider>
-        </SessionContextProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <SessionContextProvider
+        supabaseClient={supabase}
+        initialSession={session}
+      >
+        <SubscriptionProvider>
+          <StoryProvider>
+            <RouterProvider router={router} />
+            <Toaster />
+          </StoryProvider>
+        </SubscriptionProvider>
+      </SessionContextProvider>
+    </QueryClientProvider>
   );
 }
 
