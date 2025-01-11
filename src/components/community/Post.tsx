@@ -7,7 +7,6 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { Link } from "react-router-dom";
 
 interface PostLike {
   id: string;
@@ -140,16 +139,14 @@ export const Post = ({ post }: PostProps) => {
     addComment.mutate(newComment);
   };
 
+  // Get the username from the get_post_profiles function result
   const postUsername = post.get_post_profiles?.[0]?.username || "Anonymous";
   const postAvatarUrl = post.get_post_profiles?.[0]?.avatar_url;
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex items-center justify-between mb-4">
-        <Link 
-          to={`/community/profile/${post.user_id}`}
-          className="flex items-center gap-3 hover:opacity-80"
-        >
+        <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
             {postAvatarUrl ? (
               <img
@@ -169,7 +166,7 @@ export const Post = ({ post }: PostProps) => {
               {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
             </p>
           </div>
-        </Link>
+        </div>
         {isOwnPost && (
           <Button
             variant="ghost"
