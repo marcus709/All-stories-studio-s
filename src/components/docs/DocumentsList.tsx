@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Share, FileText, Plus } from "lucide-react";
+import { Share, FileText, Plus, LayoutGrid, LayoutList } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ShareDocumentDialog } from "./ShareDocumentDialog";
 import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Document } from "@/types/story";
 
 interface DocumentsListProps {
@@ -30,16 +31,19 @@ export const DocumentsList = ({ documents, onSelectDocument, selectedDocumentId 
   return (
     <div className="relative h-full">
       <div className="sticky top-0 z-10 flex items-center justify-between p-4 bg-white border-b">
-        <div className="flex items-center gap-2">
-          <Switch
-            id="grid-view"
-            checked={isGridView}
-            onCheckedChange={setIsGridView}
-            className="data-[state=checked]:bg-purple-500"
-          />
-          <label htmlFor="grid-view" className="text-sm text-gray-600">
-            Grid View
-          </label>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            {isGridView ? <LayoutGrid className="h-4 w-4 text-gray-500" /> : <LayoutList className="h-4 w-4 text-gray-500" />}
+            <Switch
+              id="grid-view"
+              checked={isGridView}
+              onCheckedChange={setIsGridView}
+              className="data-[state=checked]:bg-purple-500"
+            />
+            <Label htmlFor="grid-view" className="text-sm text-gray-600">
+              Grid View
+            </Label>
+          </div>
         </div>
       </div>
 
