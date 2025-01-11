@@ -10,17 +10,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Profile } from "@/integrations/supabase/types/tables.types";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface UserProfileDialogProps {
-  user: Profile & { genres?: string[]; skills?: string[] };
-  isOpen: boolean;
-  onClose: () => void;
+  user?: Profile & { genres?: string[]; skills?: string[] };
+  isOpen?: boolean;
+  onClose?: () => void;
   showInDialog?: boolean;
 }
 
 export const UserProfileDialog = ({
-  user,
+  user: propUser,
   isOpen,
   onClose,
   showInDialog = true,
@@ -28,11 +28,41 @@ export const UserProfileDialog = ({
   const session = useSession();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { userId } = useParams();
   const [isSending, setIsSending] = useState(false);
   const [existingRequest, setExistingRequest] = useState<any>(null);
+  const [user, setUser] = useState<Profile & { genres?: string[]; skills?: string[] }>();
+
+  useEffect(() => {
+    if (propUser) {
+      setUser(propUser);
+    } else if (userId) {
+      fetchUser(userId);
+    }
+  }, [userId, propUser]);
+
+  const fetchUser = async (id: string) => {
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+      setUser(profile);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not load user profile",
+      });
+    }
+  };
 
   const checkExistingRequest = async () => {
-    if (!session?.user?.id) return;
+    if (!session?.user?.id || !user?.id) return;
     
     try {
       const { data, error } = await supabase
@@ -53,11 +83,13 @@ export const UserProfileDialog = ({
   };
 
   useEffect(() => {
-    checkExistingRequest();
-  }, [session?.user?.id, user.id]);
+    if (user?.id) {
+      checkExistingRequest();
+    }
+  }, [session?.user?.id, user?.id]);
 
   const handleSendFriendRequest = async () => {
-    if (!session?.user?.id) return;
+    if (!session?.user?.id || !user?.id) return;
     
     setIsSending(true);
     try {
@@ -71,24 +103,12 @@ export const UserProfileDialog = ({
 
       if (error) throw error;
 
-      // Send email notification
-      const { error: emailError } = await supabase.functions.invoke('send-friend-request-email', {
-        body: {
-          recipientId: user.id,
-          senderUsername: session.user.email?.split('@')[0] || 'someone',
-        },
-      });
-
-      if (emailError) {
-        console.error("Error sending email notification:", emailError);
-      }
-
       toast({
         title: "Friend request sent",
         description: `A friend request has been sent to ${user.username}`,
       });
       setExistingRequest({ status: 'pending' });
-      onClose();
+      if (onClose) onClose();
     } catch (error) {
       console.error("Error sending friend request:", error);
       toast({
@@ -115,6 +135,10 @@ export const UserProfileDialog = ({
   };
 
   const requestStatus = getRequestStatus();
+
+  if (!user) {
+    return <div className="p-4">Loading...</div>;
+  }
 
   const profileContent = (
     <div className="space-y-6">
@@ -184,8 +208,16 @@ export const UserProfileDialog = ({
 
   if (!showInDialog) {
     return (
-      <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-sm">
-        {profileContent}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-semibold text-gray-900">User Profile</h1>
+          <Button variant="outline" onClick={() => navigate(-1)}>
+            Back
+          </Button>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          {profileContent}
+        </div>
       </div>
     );
   }

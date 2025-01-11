@@ -62,10 +62,7 @@ const Community = () => {
                   <Route path="topics" element={<Topics />} />
                   <Route path="saved" element={<SavedPosts />} />
                   <Route path="chat/:friendId" element={<PrivateChat />} />
-                  <Route 
-                    path="profile/:userId" 
-                    element={<UserProfileDialog showInDialog={false} />} 
-                  />
+                  <Route path="profile/:userId" element={<UserProfileDialog showInDialog={false} />} />
                 </Routes>
               </div>
             </div>
