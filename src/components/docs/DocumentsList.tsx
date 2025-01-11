@@ -34,34 +34,37 @@ export const DocumentsList = ({
   return (
     <div className="relative h-full">
       <ScrollArea className="h-[calc(100vh-16rem)] px-4">
-        <div className={`${isGridView ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-2'}`}>
+        <div className={`${
+          isGridView 
+            ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' 
+            : 'flex flex-col space-y-2'
+        }`}>
           {documents.map((doc) => (
             <div
               key={doc.id}
               onClick={() => onSelectDocument(doc.id)}
-              className={`${
-                isGridView 
-                  ? `p-6 border rounded-lg transition-colors cursor-pointer group
-                     ${selectedDocumentId === doc.id 
-                       ? 'border-purple-500 bg-purple-50' 
-                       : 'hover:border-purple-500'}`
-                  : `p-4 border rounded-lg transition-colors cursor-pointer group
-                     ${selectedDocumentId === doc.id 
-                       ? 'border-purple-500 bg-purple-50' 
-                       : 'hover:border-purple-500'}`
-              }`}
+              className={`
+                ${isGridView 
+                  ? 'p-6 border rounded-lg transition-colors cursor-pointer hover:border-purple-500' 
+                  : 'p-4 border rounded-lg transition-colors cursor-pointer hover:border-purple-500'
+                }
+                ${selectedDocumentId === doc.id 
+                  ? 'border-purple-500 bg-purple-50' 
+                  : 'border-gray-200'
+                }
+              `}
             >
               <div className="flex items-start gap-3">
                 <FileText className={`h-5 w-5 ${
                   selectedDocumentId === doc.id 
                     ? 'text-purple-500' 
-                    : 'text-gray-400 group-hover:text-purple-500'
+                    : 'text-gray-400'
                 }`} />
                 <div className="flex-1 min-w-0">
                   <h3 className={`font-medium truncate ${
                     selectedDocumentId === doc.id 
                       ? 'text-purple-700' 
-                      : 'text-gray-900 group-hover:text-purple-500'
+                      : 'text-gray-900'
                   }`}>
                     {doc.title}
                   </h3>

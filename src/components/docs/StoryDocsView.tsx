@@ -77,7 +77,11 @@ export const StoryDocsView = () => {
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            {isGridView ? <LayoutGrid className="h-4 w-4 text-gray-500" /> : <LayoutList className="h-4 w-4 text-gray-500" />}
+            {isGridView ? (
+              <LayoutGrid className="h-4 w-4 text-gray-500" />
+            ) : (
+              <LayoutList className="h-4 w-4 text-gray-500" />
+            )}
             <Switch
               id="grid-view"
               checked={isGridView}
@@ -134,4 +138,4 @@ export const StoryDocsView = () => {
       />
     </div>
   );
-}
+};
