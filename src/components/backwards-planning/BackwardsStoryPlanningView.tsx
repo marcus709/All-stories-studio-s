@@ -23,9 +23,9 @@ export const BackwardsStoryPlanningView = () => {
         .from("backwards_story_endings")
         .select("*")
         .eq("story_id", selectedStory.id)
-        .single();
+        .maybeSingle();
 
-      if (error) {
+      if (error && error.code !== 'PGRST116') {
         toast({
           title: "Error",
           description: "Failed to load story ending",
