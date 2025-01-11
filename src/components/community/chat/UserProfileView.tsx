@@ -22,7 +22,7 @@ export const UserProfileView = ({ user, onBack }: UserProfileViewProps) => {
   const [activeTab, setActiveTab] = useState<ActivityTab>("followers");
   const [activity, setActivity] = useState<UserActivity | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState("planned");
 
   useEffect(() => {
     const fetchActivity = async () => {
@@ -198,7 +198,7 @@ export const UserProfileView = ({ user, onBack }: UserProfileViewProps) => {
 
       {/* Content Area */}
       <div className="flex-1 overflow-auto">
-        {loading ? (
+        {loading === "planned" ? (
           <div className="p-4 text-center text-gray-500">
             Loading...
           </div>
