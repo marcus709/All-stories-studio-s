@@ -8,6 +8,7 @@ import { PaymentSuccess } from "@/pages/PaymentSuccess";
 import InvitePage from "@/pages/InvitePage";
 import UserProfilePage from "@/pages/UserProfilePage";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { PrivateChat } from "@/components/community/chat/PrivateChat";
 
 const router = createBrowserRouter([
   {
@@ -21,8 +22,18 @@ const router = createBrowserRouter([
     errorElement: <ErrorBoundary />,
   },
   {
-    path: "/community/*",
+    path: "/community",
     element: <Community />,
+    errorElement: <ErrorBoundary />,
+  },
+  {
+    path: "/community/chat/:friendId",
+    element: <PrivateChat />,
+    errorElement: <ErrorBoundary />,
+  },
+  {
+    path: "/community/profile/:userId",
+    element: <UserProfilePage />,
     errorElement: <ErrorBoundary />,
   },
   {
