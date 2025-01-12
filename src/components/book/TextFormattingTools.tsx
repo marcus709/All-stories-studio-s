@@ -4,7 +4,18 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ChevronDown, ChevronUp, AlertCircle, X, Smartphone, Tablet, Book, Monitor } from "lucide-react";
+import { 
+  ChevronDown, 
+  ChevronUp, 
+  AlertCircle, 
+  X, 
+  Smartphone, 
+  Tablet, 
+  Book, 
+  Monitor,
+  PanelRightClose,
+  PanelRightOpen
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BOOK_SIZES, DIGITAL_FORMATS, FORMAT_SIZES, BookSize } from "@/lib/formatting-constants";
 import { getPreviewStyles } from "@/lib/preview-constants";
@@ -52,6 +63,7 @@ export const TextFormattingTools = ({
   const [isFormatSettingsOpen, setIsFormatSettingsOpen] = useState(true);
   const [editableContent, setEditableContent] = useState(sectionContent || '');
   const [showPlatformAlert, setShowPlatformAlert] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -110,35 +122,27 @@ export const TextFormattingTools = ({
     };
   };
 
-  const getDevicePreviewClass = () => {
-    switch (deviceView) {
-      case 'kindle':
-        return 'bg-gray-100 rounded-lg shadow-lg p-4';
-      case 'ipad':
-        return 'bg-gray-200 rounded-xl shadow-xl p-6';
-      case 'phone':
-        return 'bg-black rounded-[2.5rem] shadow-2xl p-4 max-w-[375px] mx-auto';
-      default:
-        return 'bg-white shadow-md';
-    }
-  };
-
-  const getDeviceContainerClass = () => {
-    switch (deviceView) {
-      case 'kindle':
-        return 'bg-gray-50 min-h-[600px]';
-      case 'ipad':
-        return 'bg-white min-h-[800px] rounded-lg';
-      case 'phone':
-        return 'bg-white min-h-[600px] rounded-t-[2rem]';
-      default:
-        return 'bg-white';
-    }
-  };
-
   return (
     <div className="flex-1 flex">
-      <div className="w-[50%] mx-auto my-4 overflow-hidden">
+      <div className={cn(
+        "w-[50%] mx-auto my-4 overflow-hidden transition-all duration-300",
+        isSidebarOpen ? "mr-[350px]" : "mr-4"
+      )}>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex-1" />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="ml-2"
+          >
+            {isSidebarOpen ? (
+              <PanelRightClose className="h-4 w-4 text-gray-500" />
+            ) : (
+              <PanelRightOpen className="h-4 w-4 text-gray-500" />
+            )}
+          </Button>
+        </div>
         <ScrollArea className="h-[calc(100vh-8rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 hover:scrollbar-thumb-gray-300 scrollbar-track-transparent">
           {showPlatformAlert && (
             <Alert className="mb-4 relative">
@@ -175,186 +179,164 @@ export const TextFormattingTools = ({
         </ScrollArea>
       </div>
 
-      <div className="w-[350px] border-l flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
-        <Collapsible
-          open={isFormatSettingsOpen}
-          onOpenChange={setIsFormatSettingsOpen}
-          className="border-b"
-        >
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium">Format Settings</h3>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  {isFormatSettingsOpen ? (
-                    <ChevronUp className="h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4" />
-                  )}
-                </Button>
-              </CollapsibleTrigger>
-            </div>
-            <CollapsibleContent className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-              <div>
-                <label className="text-sm text-gray-600 mb-1 block">Publishing Platform</label>
-                <Select 
-                  value={selectedPlatform}
-                  onValueChange={(value: 'kdp' | 'ingramSpark') => handlePlatformChange(value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose platform" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="kdp">Amazon KDP</SelectItem>
-                    <SelectItem value="ingramSpark">IngramSpark</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-600 mb-1 block">Preview Device</label>
-                <Select value={deviceView} onValueChange={(value: 'print' | 'kindle' | 'ipad' | 'phone') => {
-                  setDeviceView(value);
-                  if (value !== 'print') {
-                    setSelectedFormat('digital');
-                  } else {
-                    setSelectedFormat('print');
-                  }
-                }}>
-                  <SelectTrigger>
-                    <SelectValue>
-                      <div className="flex items-center gap-2">
-                        {getDeviceIcon(deviceView)}
-                        <span>
-                          {deviceView === 'print' ? 'Print Preview' :
-                           deviceView === 'kindle' ? 'Kindle E-reader' :
-                           deviceView === 'ipad' ? 'iPad/Tablet' :
-                           'Phone'}
-                        </span>
-                      </div>
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="print">
-                      <div className="flex items-center gap-2">
-                        <Book className="h-4 w-4" />
-                        <span>Print Preview</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="kindle">
-                      <div className="flex items-center gap-2">
-                        <Book className="h-4 w-4" />
-                        <span>Kindle E-reader</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="ipad">
-                      <div className="flex items-center gap-2">
-                        <Tablet className="h-4 w-4" />
-                        <span>iPad/Tablet</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="phone">
-                      <div className="flex items-center gap-2">
-                        <Smartphone className="h-4 w-4" />
-                        <span>Phone</span>
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-600 mb-1 block">Format Type</label>
-                <Select 
-                  value={selectedFormat}
-                  onValueChange={(value: 'print' | 'digital') => handleFormatChange(value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose format" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="print">Print Book</SelectItem>
-                    {selectedPlatform === 'kdp' && (
-                      <SelectItem value="digital">Digital (Kindle)</SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {selectedFormat === 'print' && (
+      <div className={cn(
+        "fixed right-0 top-0 h-full bg-white border-l w-[350px] transition-all duration-300 z-50",
+        isSidebarOpen ? "translate-x-0" : "translate-x-full"
+      )}>
+        <div className="p-4 border-b">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium">Document Settings</h3>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+        <ScrollArea className="h-[calc(100vh-4rem)] p-4">
+          <div className="space-y-6">
+            {/* Format settings content */}
+            <Collapsible
+              open={isFormatSettingsOpen}
+              onOpenChange={setIsFormatSettingsOpen}
+            >
+              <div className="space-y-4">
                 <div>
-                  <label className="text-sm text-gray-600 mb-1 block">Trim Size</label>
+                  <label className="text-sm text-gray-600 mb-1 block">Publishing Platform</label>
                   <Select 
-                    value={selectedSize} 
-                    onValueChange={setSelectedSize}
+                    value={selectedPlatform}
+                    onValueChange={(value: 'kdp' | 'ingramSpark') => handlePlatformChange(value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Choose size" />
+                      <SelectValue placeholder="Choose platform" />
                     </SelectTrigger>
                     <SelectContent>
-                      {selectedPlatform === 'kdp' ? (
-                        <>
-                          <SelectItem value="5x8">5" x 8" (Novel)</SelectItem>
-                          <SelectItem value="6x9">6" x 9" (Standard)</SelectItem>
-                          <SelectItem value="8.5x11">8.5" x 11" (Textbook)</SelectItem>
-                        </>
-                      ) : (
-                        <>
-                          <SelectItem value="5x8">5" x 8" (Novel)</SelectItem>
-                          <SelectItem value="6x9">6" x 9" (Standard)</SelectItem>
-                          <SelectItem value="8.5x8.5">8.5" x 8.5" (Square)</SelectItem>
-                        </>
+                      <SelectItem value="kdp">Amazon KDP</SelectItem>
+                      <SelectItem value="ingramSpark">IngramSpark</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="text-sm text-gray-600 mb-1 block">Preview Device</label>
+                  <Select value={deviceView} onValueChange={(value: 'print' | 'kindle' | 'ipad' | 'phone') => {
+                    setDeviceView(value);
+                    if (value !== 'print') {
+                      setSelectedFormat('digital');
+                    } else {
+                      setSelectedFormat('print');
+                    }
+                  }}>
+                    <SelectTrigger>
+                      <SelectValue>
+                        <div className="flex items-center gap-2">
+                          {getDeviceIcon(deviceView)}
+                          <span>
+                            {deviceView === 'print' ? 'Print Preview' :
+                             deviceView === 'kindle' ? 'Kindle E-reader' :
+                             deviceView === 'ipad' ? 'iPad/Tablet' :
+                             'Phone'}
+                          </span>
+                        </div>
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="print">
+                        <div className="flex items-center gap-2">
+                          <Book className="h-4 w-4" />
+                          <span>Print Preview</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="kindle">
+                        <div className="flex items-center gap-2">
+                          <Book className="h-4 w-4" />
+                          <span>Kindle E-reader</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="ipad">
+                        <div className="flex items-center gap-2">
+                          <Tablet className="h-4 w-4" />
+                          <span>iPad/Tablet</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="phone">
+                        <div className="flex items-center gap-2">
+                          <Smartphone className="h-4 w-4" />
+                          <span>Phone</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="text-sm text-gray-600 mb-1 block">Format Type</label>
+                  <Select 
+                    value={selectedFormat}
+                    onValueChange={(value: 'print' | 'digital') => handleFormatChange(value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose format" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="print">Print Book</SelectItem>
+                      {selectedPlatform === 'kdp' && (
+                        <SelectItem value="digital">Digital (Kindle)</SelectItem>
                       )}
                     </SelectContent>
                   </Select>
                 </div>
-              )}
 
-              <Button 
-                className="w-full"
-                onClick={() => {
-                  setIsFormatSettingsOpen(false);
-                  onDeviceSettingsChange({
-                    platform: selectedPlatform,
-                    format: selectedFormat,
-                    size: selectedSize,
-                    deviceView,
-                    fontSize
-                  });
-                }}
-              >
-                Save Format Settings
-              </Button>
-            </CollapsibleContent>
-          </div>
-        </Collapsible>
+                {selectedFormat === 'print' && (
+                  <div>
+                    <label className="text-sm text-gray-600 mb-1 block">Trim Size</label>
+                    <Select 
+                      value={selectedSize} 
+                      onValueChange={setSelectedSize}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {selectedPlatform === 'kdp' ? (
+                          <>
+                            <SelectItem value="5x8">5" x 8" (Novel)</SelectItem>
+                            <SelectItem value="6x9">6" x 9" (Standard)</SelectItem>
+                            <SelectItem value="8.5x11">8.5" x 11" (Textbook)</SelectItem>
+                          </>
+                        ) : (
+                          <>
+                            <SelectItem value="5x8">5" x 8" (Novel)</SelectItem>
+                            <SelectItem value="6x9">6" x 9" (Standard)</SelectItem>
+                            <SelectItem value="8.5x8.5">8.5" x 8.5" (Square)</SelectItem>
+                          </>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
-        <div className="flex-1 overflow-auto p-4">
-          <div className={cn(
-            "relative transition-all duration-300",
-            getDevicePreviewClass()
-          )}>
-            <div className={cn(
-              "preview-container whitespace-pre-wrap break-words overflow-x-hidden",
-              getDeviceContainerClass()
-            )}>
-              <div 
-                className="prose prose-sm max-w-none"
-                style={{
-                  ...deviceStyles,
-                  wordWrap: 'break-word',
-                  overflowWrap: 'break-word',
-                  overflowX: 'hidden',
-                  maxWidth: '100%'
-                }}
-                dangerouslySetInnerHTML={{ __html: editableContent }} 
-              />
-            </div>
-            {deviceView === 'phone' && (
-              <div className="absolute top-[6px] left-1/2 -translate-x-1/2 w-[80px] h-[6px] bg-black rounded-full" />
-            )}
+                <Button 
+                  className="w-full"
+                  onClick={() => {
+                    setIsFormatSettingsOpen(false);
+                    onDeviceSettingsChange({
+                      platform: selectedPlatform,
+                      format: selectedFormat,
+                      size: selectedSize,
+                      deviceView,
+                      fontSize
+                    });
+                  }}
+                >
+                  Save Format Settings
+                </Button>
+              </div>
+            </Collapsible>
           </div>
-        </div>
+        </ScrollArea>
       </div>
     </div>
   );
