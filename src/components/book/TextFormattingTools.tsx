@@ -150,40 +150,38 @@ export const TextFormattingTools = ({
           </Button>
         </div>
 
-        <ScrollArea className="h-[calc(100vh-8rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 hover:scrollbar-thumb-gray-300 scrollbar-track-transparent">
-          {showPlatformAlert && (
-            <Alert className="mb-4 relative">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                {selectedPlatform === 'kdp' 
-                  ? "Amazon KDP requires specific trim sizes and bleed settings. Preview shows safe areas and bleed zones."
-                  : "IngramSpark offers more flexibility but requires higher quality PDF submissions with proper bleed settings."}
-              </AlertDescription>
-              <button 
-                onClick={() => setShowPlatformAlert(false)}
-                className="absolute top-2 right-2 p-1 hover:bg-gray-100 rounded-full"
-              >
-                <X className="h-4 w-4 text-gray-500" />
-              </button>
-            </Alert>
-          )}
+        {showPlatformAlert && (
+          <Alert className="mb-4 relative">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {selectedPlatform === 'kdp' 
+                ? "Amazon KDP requires specific trim sizes and bleed settings. Preview shows safe areas and bleed zones."
+                : "IngramSpark offers more flexibility but requires higher quality PDF submissions with proper bleed settings."}
+            </AlertDescription>
+            <button 
+              onClick={() => setShowPlatformAlert(false)}
+              className="absolute top-2 right-2 p-1 hover:bg-gray-100 rounded-full"
+            >
+              <X className="h-4 w-4 text-gray-500" />
+            </button>
+          </Alert>
+        )}
 
-          <div className={cn(
-            "relative mx-auto transition-all duration-300",
-            "rounded-lg overflow-hidden"
-          )}>
-            <div style={getDocumentStyle()} className="relative">
-              <WYSIWYGEditor
-                content={editableContent}
-                onChange={(content) => {
-                  setEditableContent(content);
-                  onContentChange(content);
-                }}
-                style={getDocumentStyle()}
-              />
-            </div>
+        <div className={cn(
+          "relative mx-auto transition-all duration-300",
+          "rounded-lg overflow-hidden"
+        )}>
+          <div style={getDocumentStyle()} className="relative">
+            <WYSIWYGEditor
+              content={editableContent}
+              onChange={(content) => {
+                setEditableContent(content);
+                onContentChange(content);
+              }}
+              style={getDocumentStyle()}
+            />
           </div>
-        </ScrollArea>
+        </div>
       </div>
 
       <div className={cn(
