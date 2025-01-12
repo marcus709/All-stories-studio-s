@@ -6,6 +6,7 @@ import { ShareDocumentDialog } from "@/components/community/chat/ShareDocumentDi
 import { useDocuments } from "@/hooks/useDocuments";
 import { useToast } from "@/hooks/use-toast";
 import { WYSIWYGEditor } from "@/components/book/WYSIWYGEditor";
+import { DocumentInsights } from "./DocumentInsights";
 
 interface DocumentEditorProps {
   document: {
@@ -55,6 +56,18 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
     }
   };
 
+  const handleReplaceWord = (oldWord: string, newWord: string, index: number) => {
+    // Implementation for word replacement
+    const newContent = content.replace(new RegExp(oldWord, 'g'), newWord);
+    setContent(newContent);
+  };
+
+  const handleJumpToLocation = (index: number) => {
+    // Implementation for jumping to word location
+    // This would need to be implemented with the editor's API
+    console.log("Jumping to location:", index);
+  };
+
   return (
     <div className="h-full flex flex-col bg-gray-50">
       <div className="flex items-center justify-between p-4 bg-white border-b">
@@ -102,16 +115,11 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
 
         {showInsights && (
           <div className="w-[400px] flex flex-col bg-white border-l">
-            <div className="p-4 border-b">
-              <h3 className="text-lg font-semibold">Document Insights</h3>
-            </div>
-            <ScrollArea className="flex-1 p-4">
-              <div className="space-y-4">
-                <p className="text-sm text-gray-600">
-                  Document analysis and insights will appear here...
-                </p>
-              </div>
-            </ScrollArea>
+            <DocumentInsights 
+              content={content}
+              onReplaceWord={handleReplaceWord}
+              onJumpToLocation={handleJumpToLocation}
+            />
           </div>
         )}
       </div>
