@@ -6,7 +6,7 @@ import {
   Cloud,
   ArrowLeft
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -17,6 +17,10 @@ interface DocumentInsightsProps {
   onJumpToLocation?: (index: number) => void;
 }
 
+interface WordFrequency {
+  [key: string]: number;
+}
+
 export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: DocumentInsightsProps) {
   const [expandedSections, setExpandedSections] = useState({
     synonyms: true,
@@ -24,14 +28,39 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
     goals: true
   });
   const [showWordCloud, setShowWordCloud] = useState(false);
+  const [wordFrequency, setWordFrequency] = useState<WordFrequency>({});
 
-  // Mock data for demonstration - in a real app, this would come from an API or analysis
-  const wordFrequency = {
-    "just": 16,
-    "very": 12,
-    "really": 8,
-    "actually": 6
-  };
+  useEffect(() => {
+    if (!content) return;
+
+    // Remove HTML tags and extract text content
+    const textContent = content.replace(/<[^>]+>/g, '');
+
+    // Split into words and count frequencies
+    const words = textContent.toLowerCase()
+      .split(/\s+/)
+      .filter(word => 
+        // Filter out common words and short words
+        word.length > 3 && 
+        !['the', 'and', 'that', 'this', 'with', 'from', 'they', 'have', 'were'].includes(word)
+      );
+
+    const frequency: WordFrequency = {};
+    words.forEach(word => {
+      frequency[word] = (frequency[word] || 0) + 1;
+    });
+
+    // Sort by frequency and take top words
+    const sortedWords = Object.entries(frequency)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 20)
+      .reduce((obj, [word, count]) => ({
+        ...obj,
+        [word]: count
+      }), {});
+
+    setWordFrequency(sortedWords);
+  }, [content]);
 
   const mockSynonyms = {
     "just": ["simply", "merely", "only", "precisely"],
@@ -121,28 +150,28 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
               open={expandedSections.goals}
               className="space-y-2"
             >
-            <CollapsibleTrigger
-              onClick={() => toggleSection('goals')}
-              className="flex items-center justify-between w-full"
-            >
-              <h4 className="text-sm font-medium">Word Goals & Frequency</h4>
-              {expandedSections.goals ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-4">
-              {Object.entries(wordFrequency).map(([word, count]) => (
-                <div key={word} className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span>Reduce "{word}"</span>
-                    <span className="text-gray-500">{count} occurrences</span>
+              <CollapsibleTrigger
+                onClick={() => toggleSection('goals')}
+                className="flex items-center justify-between w-full"
+              >
+                <h4 className="text-sm font-medium">Word Goals & Frequency</h4>
+                {expandedSections.goals ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-4">
+                {Object.entries(wordFrequency).map(([word, count]) => (
+                  <div key={word} className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span>"{word}"</span>
+                      <span className="text-gray-500">{count} occurrences</span>
+                    </div>
+                    <Progress value={((16 - count) / 16) * 100} className="h-2" />
                   </div>
-                  <Progress value={((16 - count) / 16) * 100} className="h-2" />
-                </div>
-              ))}
-            </CollapsibleContent>
+                ))}
+              </CollapsibleContent>
             </Collapsible>
 
             {/* Contextual Usage */}
@@ -150,38 +179,38 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
               open={expandedSections.usage}
               className="space-y-2"
             >
-            <CollapsibleTrigger
-              onClick={() => toggleSection('usage')}
-              className="flex items-center justify-between w-full"
-            >
-              <h4 className="text-sm font-medium">Contextual Usage</h4>
-              {expandedSections.usage ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-3">
-              {Object.keys(wordFrequency).map((word, idx) => (
-                <div key={word} className="bg-gray-50 p-3 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium text-sm">"{word}"</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                      onClick={() => onJumpToLocation?.(idx)}
-                    >
-                      <ArrowRight className="h-3 w-3 mr-1" />
-                      Jump to
-                    </Button>
+              <CollapsibleTrigger
+                onClick={() => toggleSection('usage')}
+                className="flex items-center justify-between w-full"
+              >
+                <h4 className="text-sm font-medium">Contextual Usage</h4>
+                {expandedSections.usage ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-3">
+                {Object.entries(wordFrequency).slice(0, 5).map(([word, count], idx) => (
+                  <div key={word} className="bg-gray-50 p-3 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-sm">"{word}"</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        onClick={() => onJumpToLocation?.(idx)}
+                      >
+                        <ArrowRight className="h-3 w-3 mr-1" />
+                        Jump to
+                      </Button>
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      ...the context where this word appears would be shown here...
+                    </p>
                   </div>
-                  <p className="text-sm text-gray-600">
-                    ...the context where this word appears would be shown here...
-                  </p>
-                </div>
-              ))}
-            </CollapsibleContent>
+                ))}
+              </CollapsibleContent>
             </Collapsible>
           </div>
         )}
