@@ -339,3 +339,4 @@ export const TextFormattingTools = ({
       </div>
     </div>
   );
+};
