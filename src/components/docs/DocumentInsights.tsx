@@ -46,12 +46,12 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full overflow-hidden">
       <div className="p-4 border-b">
         <h3 className="text-lg font-semibold">Document Insights</h3>
       </div>
       
-      <ScrollArea className="flex-1">
+      <div className="flex-1 overflow-y-auto scrollbar-none">
         <div className="p-4 space-y-6">
           {/* Synonym Suggestions */}
           <Collapsible 
@@ -162,7 +162,7 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
             </CollapsibleContent>
           </Collapsible>
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 }
