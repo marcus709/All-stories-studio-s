@@ -7,6 +7,7 @@ import { useDocuments } from "@/hooks/useDocuments";
 import { useToast } from "@/hooks/use-toast";
 import { WYSIWYGEditor } from "@/components/book/WYSIWYGEditor";
 import { InsightsSidebar } from "./InsightsSidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 interface DocumentEditorProps {
   document: {
@@ -90,20 +91,22 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
         </div>
       </div>
 
-      <div className="flex flex-1">
-        {showInsights && (
-          <InsightsSidebar document={{ ...document, content }} />
-        )}
-        <ScrollArea className="flex-1 p-8">
-          <div className="max-w-[850px] mx-auto">
-            <WYSIWYGEditor
-              content={content}
-              onChange={handleContentChange}
-              className="min-h-[1100px] bg-white shadow-sm rounded-sm"
-            />
-          </div>
-        </ScrollArea>
-      </div>
+      <SidebarProvider>
+        <div className="flex flex-1 w-full">
+          {showInsights && (
+            <InsightsSidebar document={{ ...document, content }} />
+          )}
+          <ScrollArea className="flex-1 p-8">
+            <div className="max-w-[850px] mx-auto">
+              <WYSIWYGEditor
+                content={content}
+                onChange={handleContentChange}
+                className="min-h-[1100px] bg-white shadow-sm rounded-sm"
+              />
+            </div>
+          </ScrollArea>
+        </div>
+      </SidebarProvider>
 
       <ShareDocumentDialog
         document={document}
