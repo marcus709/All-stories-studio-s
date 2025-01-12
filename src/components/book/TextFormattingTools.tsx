@@ -197,7 +197,6 @@ export const TextFormattingTools = ({
         </div>
         <ScrollArea className="h-[calc(100vh-4rem)] p-4">
           <div className="space-y-6">
-            {/* Format settings content */}
             <Collapsible
               open={isFormatSettingsOpen}
               onOpenChange={setIsFormatSettingsOpen}
