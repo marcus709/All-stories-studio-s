@@ -2,7 +2,9 @@ import {
   ArrowRight,
   Replace,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Cloud,
+  ArrowLeft
 } from "lucide-react";
 import { useState } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -21,6 +23,7 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
     usage: true,
     goals: true
   });
+  const [showWordCloud, setShowWordCloud] = useState(false);
 
   // Mock data for demonstration - in a real app, this would come from an API or analysis
   const wordFrequency = {
@@ -44,10 +47,46 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
     }));
   };
 
+  if (showWordCloud) {
+    return (
+      <div className="fixed inset-0 bg-white z-50 flex flex-col">
+        <div className="p-4 border-b bg-white flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowWordCloud(false)}
+            className="hover:bg-gray-100"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <h3 className="text-lg font-semibold">Document Word Cloud</h3>
+        </div>
+        <div className="flex-1 p-8 flex items-center justify-center">
+          <img 
+            src="/lovable-uploads/f50826f3-d6b0-4fdc-8359-6cd97cffafc9.png" 
+            alt="Word Cloud"
+            className="max-w-full max-h-full object-contain"
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="p-4 border-b bg-white">
-        <h3 className="text-lg font-semibold">Document Insights</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Document Insights</h3>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowWordCloud(true)}
+            className="gap-2"
+          >
+            <Cloud className="h-4 w-4" />
+            Word Cloud
+          </Button>
+        </div>
       </div>
       
       <div className="flex-1 overflow-y-auto scrollbar-none">
