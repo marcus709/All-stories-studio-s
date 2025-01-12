@@ -112,7 +112,15 @@ export const UserProfileView = ({ user, onBack }: UserProfileViewProps) => {
 
       {/* Profile Header */}
       <div className="relative">
-        <div className="h-32 bg-purple-100"></div>
+        <div className="h-32 bg-purple-100">
+          {user.background_url && (
+            <img
+              src={user.background_url}
+              alt="Profile background"
+              className="h-full w-full object-cover"
+            />
+          )}
+        </div>
         <div className="absolute left-4 bottom-[-16px]">
           <div className="h-32 w-32 rounded-full border-4 border-white bg-purple-100 flex items-center justify-center">
             {user.avatar_url ? (
