@@ -4,12 +4,14 @@ import {
   ChevronDown,
   ChevronUp,
   Cloud,
-  ArrowLeft
+  Plus,
+  X
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 
 interface DocumentInsightsProps {
   content: string;
@@ -21,14 +23,23 @@ interface WordFrequency {
   [key: string]: number;
 }
 
+interface TrackedWord {
+  word: string;
+  goal: number;
+}
+
 export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: DocumentInsightsProps) {
   const [expandedSections, setExpandedSections] = useState({
     synonyms: true,
     usage: true,
-    goals: true
+    goals: true,
+    tracking: true
   });
   const [showWordCloud, setShowWordCloud] = useState(false);
   const [wordFrequency, setWordFrequency] = useState<WordFrequency>({});
+  const [newTrackedWord, setNewTrackedWord] = useState('');
+  const [newWordGoal, setNewWordGoal] = useState('');
+  const [trackedWords, setTrackedWords] = useState<TrackedWord[]>([]);
 
   useEffect(() => {
     if (!content) return;
@@ -40,7 +51,6 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
     const words = textContent.toLowerCase()
       .split(/\s+/)
       .filter(word => 
-        // Filter out common words and short words
         word.length > 3 && 
         !['the', 'and', 'that', 'this', 'with', 'from', 'they', 'have', 'were'].includes(word)
       );
@@ -50,30 +60,41 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
       frequency[word] = (frequency[word] || 0) + 1;
     });
 
-    // Sort by frequency and take top words
-    const sortedWords = Object.entries(frequency)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 20)
-      .reduce((obj, [word, count]) => ({
-        ...obj,
-        [word]: count
-      }), {});
-
-    setWordFrequency(sortedWords);
+    setWordFrequency(frequency);
   }, [content]);
-
-  const mockSynonyms = {
-    "just": ["simply", "merely", "only", "precisely"],
-    "very": ["extremely", "highly", "particularly", "notably"],
-    "really": ["genuinely", "truly", "absolutely", "certainly"],
-    "actually": ["in fact", "indeed", "as a matter of fact", "in reality"]
-  };
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({
       ...prev,
       [section]: !prev[section]
     }));
+  };
+
+  const addTrackedWord = () => {
+    if (!newTrackedWord || !newWordGoal) return;
+    
+    setTrackedWords(prev => [...prev, {
+      word: newTrackedWord.toLowerCase(),
+      goal: parseInt(newWordGoal)
+    }]);
+    
+    setNewTrackedWord('');
+    setNewWordGoal('');
+  };
+
+  const removeTrackedWord = (wordToRemove: string) => {
+    setTrackedWords(prev => prev.filter(({ word }) => word !== wordToRemove));
+  };
+
+  const getWordCount = (word: string): number => {
+    return wordFrequency[word.toLowerCase()] || 0;
+  };
+
+  const mockSynonyms = {
+    "just": ["simply", "merely", "only", "precisely"],
+    "very": ["extremely", "highly", "particularly", "notably"],
+    "really": ["genuinely", "truly", "absolutely", "certainly"],
+    "actually": ["in fact", "indeed", "as a matter of fact", "in reality"]
   };
 
   return (
@@ -104,7 +125,75 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
           </div>
         ) : (
           <div className="p-4 space-y-6">
-            {/* Synonym Suggestions */}
+            {/* Word Tracking Section */}
+            <Collapsible 
+              open={expandedSections.tracking}
+              className="space-y-2"
+            >
+              <CollapsibleTrigger
+                onClick={() => toggleSection('tracking')}
+                className="flex items-center justify-between w-full"
+              >
+                <h4 className="text-sm font-medium">Word Tracking</h4>
+                {expandedSections.tracking ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Word to track"
+                    value={newTrackedWord}
+                    onChange={(e) => setNewTrackedWord(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Goal"
+                    value={newWordGoal}
+                    onChange={(e) => setNewWordGoal(e.target.value)}
+                    className="w-24"
+                  />
+                  <Button
+                    size="sm"
+                    onClick={addTrackedWord}
+                    disabled={!newTrackedWord || !newWordGoal}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="space-y-3">
+                  {trackedWords.map(({ word, goal }) => {
+                    const count = getWordCount(word);
+                    const progress = Math.min((count / goal) * 100, 100);
+                    
+                    return (
+                      <div key={word} className="bg-gray-50 p-3 rounded-lg space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-sm">"{word}"</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeTrackedWord(word)}
+                            className="h-6 w-6 p-0"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between text-sm text-gray-600">
+                          <span>{count} / {goal} occurrences</span>
+                          <span>{Math.round(progress)}%</span>
+                        </div>
+                        <Progress value={progress} className="h-2" />
+                      </div>
+                    );
+                  })}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+
             <Collapsible 
               open={expandedSections.synonyms}
               className="space-y-2"
