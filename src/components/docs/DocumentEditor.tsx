@@ -6,6 +6,7 @@ import { ShareDocumentDialog } from "@/components/community/chat/ShareDocumentDi
 import { useDocuments } from "@/hooks/useDocuments";
 import { useToast } from "@/hooks/use-toast";
 import { WYSIWYGEditor } from "@/components/book/WYSIWYGEditor";
+import { InsightsSidebar } from "./InsightsSidebar";
 
 interface DocumentEditorProps {
   document: {
@@ -21,6 +22,7 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
   const [content, setContent] = useState(document.content);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showInsights, setShowInsights] = useState(false);
   const { updateDocument } = useDocuments(storyId);
   const { toast } = useToast();
 
@@ -63,6 +65,7 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
             variant="outline"
             size="sm"
             className="gap-2"
+            onClick={() => setShowInsights(!showInsights)}
           >
             <Eye className="h-4 w-4" />
             Insights
@@ -87,15 +90,20 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
         </div>
       </div>
 
-      <ScrollArea className="flex-1 p-8">
-        <div className="max-w-[850px] mx-auto">
-          <WYSIWYGEditor
-            content={content}
-            onChange={handleContentChange}
-            className="min-h-[1100px] bg-white shadow-sm rounded-sm"
-          />
-        </div>
-      </ScrollArea>
+      <div className="flex flex-1">
+        {showInsights && (
+          <InsightsSidebar document={{ ...document, content }} />
+        )}
+        <ScrollArea className="flex-1 p-8">
+          <div className="max-w-[850px] mx-auto">
+            <WYSIWYGEditor
+              content={content}
+              onChange={handleContentChange}
+              className="min-h-[1100px] bg-white shadow-sm rounded-sm"
+            />
+          </div>
+        </ScrollArea>
+      </div>
 
       <ShareDocumentDialog
         document={document}
