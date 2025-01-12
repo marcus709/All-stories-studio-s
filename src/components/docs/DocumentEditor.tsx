@@ -91,22 +91,23 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
         </div>
       </div>
 
-      <SidebarProvider>
-        <div className="flex flex-1 w-full">
-          <ScrollArea className="flex-1 p-8">
-            <div className="max-w-[850px] mx-auto">
-              <WYSIWYGEditor
-                content={content}
-                onChange={handleContentChange}
-                className="min-h-[1100px] bg-white shadow-sm rounded-sm"
-              />
-            </div>
-          </ScrollArea>
-          {showInsights && (
+      <div className="flex flex-1 w-full relative">
+        <ScrollArea className="flex-1 p-8">
+          <div className="max-w-[850px] mx-auto">
+            <WYSIWYGEditor
+              content={content}
+              onChange={handleContentChange}
+              className="min-h-[1100px] bg-white shadow-sm rounded-sm"
+            />
+          </div>
+        </ScrollArea>
+        
+        {showInsights && (
+          <div className="w-80 border-l bg-white">
             <InsightsSidebar document={{ ...document, content }} />
-          )}
-        </div>
-      </SidebarProvider>
+          </div>
+        )}
+      </div>
 
       <ShareDocumentDialog
         document={document}
