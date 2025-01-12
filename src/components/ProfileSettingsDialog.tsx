@@ -201,22 +201,22 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
 
   return (
     <Dialog open={true} onOpenChange={() => onClose?.()}>
-      <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[800px] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-lg font-semibold">
+          <DialogTitle className="text-2xl font-bold mb-6">
             Profile Settings
           </DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="friends">Friends</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-8">
+            <TabsTrigger value="profile" className="text-lg py-3">Profile</TabsTrigger>
+            <TabsTrigger value="friends" className="text-lg py-3">Friends</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="flex justify-center">
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="mb-12">
                 <AvatarUpload
                   avatarUrl={profile.avatar_url}
                   backgroundUrl={profile.background_url}
@@ -229,34 +229,36 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
                 />
               </div>
 
-              <ProfileForm profile={profile} onChange={handleProfileChange} />
+              <div className="space-y-6">
+                <ProfileForm profile={profile} onChange={handleProfileChange} />
 
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={handleManageSubscription}
-              >
-                <CreditCard className="mr-2 h-4 w-4" />
-                Manage Subscription
-              </Button>
-
-              <div className="flex justify-end gap-2">
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => onClose?.()}
-                  className="px-3 py-1"
+                  className="w-full"
+                  onClick={handleManageSubscription}
                 >
-                  Cancel
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Manage Subscription
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="px-3 py-1 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600"
-                >
-                  Save Changes
-                </Button>
+
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => onClose?.()}
+                    className="px-6 py-2"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="px-6 py-2 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600"
+                  >
+                    Save Changes
+                  </Button>
+                </div>
               </div>
             </form>
           </TabsContent>

@@ -74,10 +74,10 @@ export function AvatarUpload({
   }
 
   return (
-    <div className="space-y-2">
+    <div>
       <div className="relative w-full">
         {/* Background Image Container */}
-        <div className="relative h-48 w-full rounded-lg bg-gray-100 overflow-hidden">
+        <div className="relative h-64 w-full bg-gray-50 overflow-hidden rounded-xl">
           {backgroundUrl ? (
             <img
               src={backgroundUrl}
@@ -85,7 +85,7 @@ export function AvatarUpload({
               className="h-full w-full object-cover"
             />
           ) : (
-            <div className="h-full w-full bg-purple-100" />
+            <div className="h-full w-full bg-gray-100" />
           )}
           <label
             htmlFor="background-upload"
@@ -103,10 +103,10 @@ export function AvatarUpload({
           />
         </div>
 
-        {/* Profile Picture Container - Positioned on top of background */}
-        <div className="absolute left-8 bottom-0 transform translate-y-1/2">
-          <div className="relative h-24 w-24 rounded-full bg-white p-1">
-            <div className="relative h-full w-full rounded-full bg-purple-100 overflow-hidden">
+        {/* Profile Picture Container */}
+        <div className="absolute left-8 -bottom-16">
+          <div className="relative h-32 w-32 rounded-full bg-white p-1 shadow-lg">
+            <div className="relative h-full w-full rounded-full bg-gray-100 overflow-hidden">
               {avatarUrl ? (
                 <img
                   src={avatarUrl}
@@ -114,7 +114,7 @@ export function AvatarUpload({
                   className="h-full w-full rounded-full object-cover"
                 />
               ) : (
-                <div className="h-full w-full flex items-center justify-center text-4xl text-purple-500 font-semibold">
+                <div className="h-full w-full flex items-center justify-center text-4xl text-gray-400 font-semibold">
                   {session?.user?.email?.[0].toUpperCase() || "?"}
                 </div>
               )}
