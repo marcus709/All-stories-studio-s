@@ -118,7 +118,7 @@ export const StudioAssistant = () => {
   return (
     <div 
       style={{ height: `${height}px` }}
-      className="fixed bottom-6 right-6 w-96 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-gray-800/50 flex flex-col overflow-hidden transition-all duration-300 animate-in slide-in-from-bottom-6"
+      className="fixed bottom-6 right-6 w-96 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-gray-800/50 flex flex-col overflow-hidden transition-all duration-300 animate-in slide-in-from-bottom-6 z-50"
     >
       <div 
         onMouseDown={handleMouseDown}
