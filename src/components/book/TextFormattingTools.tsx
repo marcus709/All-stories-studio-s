@@ -129,7 +129,15 @@ export const TextFormattingTools = ({
         "w-[50%] mx-auto my-4 overflow-hidden transition-all duration-300",
         isSidebarOpen ? "mr-[350px]" : "mr-4"
       )}>
-        <div className="flex items-center justify-end mb-4 bg-gray-50 p-2 rounded-lg">
+        <div className="flex items-center justify-end mb-4 bg-gray-50 p-2 rounded-lg gap-2">
+          <Button
+            variant="outline"
+            size="default"
+            className="flex items-center gap-2 hover:bg-gray-100"
+          >
+            <Eye className="h-4 w-4" />
+            <span>Insights</span>
+          </Button>
           <Button
             variant="outline"
             size="default"
