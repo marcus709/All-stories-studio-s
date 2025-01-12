@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Share } from "lucide-react";
+import { Share, Eye } from "lucide-react";
 import { ShareDocumentDialog } from "@/components/community/chat/ShareDocumentDialog";
 import { useDocuments } from "@/hooks/useDocuments";
 import { useToast } from "@/hooks/use-toast";
@@ -59,6 +59,14 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
       <div className="flex items-center justify-between p-4 bg-white border-b">
         <h2 className="text-lg font-semibold">{document.title}</h2>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+          >
+            <Eye className="h-4 w-4" />
+            Insights
+          </Button>
           <Button
             variant="outline"
             size="sm"
