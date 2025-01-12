@@ -128,21 +128,27 @@ export const TextFormattingTools = ({
         "w-[50%] mx-auto my-4 overflow-hidden transition-all duration-300",
         isSidebarOpen ? "mr-[350px]" : "mr-4"
       )}>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex-1" />
+        <div className="flex items-center justify-end mb-4 bg-gray-50 p-2 rounded-lg">
           <Button
-            variant="ghost"
-            size="icon"
+            variant="outline"
+            size="default"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="ml-2"
+            className="flex items-center gap-2 hover:bg-gray-100"
           >
             {isSidebarOpen ? (
-              <PanelRightClose className="h-4 w-4 text-gray-500" />
+              <>
+                <PanelRightClose className="h-5 w-5" />
+                <span>Hide Settings</span>
+              </>
             ) : (
-              <PanelRightOpen className="h-4 w-4 text-gray-500" />
+              <>
+                <PanelRightOpen className="h-5 w-5" />
+                <span>Show Settings</span>
+              </>
             )}
           </Button>
         </div>
+
         <ScrollArea className="h-[calc(100vh-8rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 hover:scrollbar-thumb-gray-300 scrollbar-track-transparent">
           {showPlatformAlert && (
             <Alert className="mb-4 relative">
