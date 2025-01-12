@@ -112,7 +112,7 @@ export const UserProfileView = ({ user, onBack }: UserProfileViewProps) => {
 
       {/* Profile Header */}
       <div className="relative">
-        <div className="h-32 bg-purple-100">
+        <div className="h-48 w-full bg-purple-100">
           {user.background_url && (
             <img
               src={user.background_url}
@@ -121,13 +121,13 @@ export const UserProfileView = ({ user, onBack }: UserProfileViewProps) => {
             />
           )}
         </div>
-        <div className="absolute left-4 bottom-[-16px]">
-          <div className="h-32 w-32 rounded-full border-4 border-white bg-purple-100 flex items-center justify-center">
+        <div className="absolute left-4 -bottom-16">
+          <div className="h-32 w-32 rounded-full border-4 border-white bg-purple-100 flex items-center justify-center overflow-hidden">
             {user.avatar_url ? (
               <img
                 src={user.avatar_url}
                 alt={user.username || ""}
-                className="h-full w-full rounded-full object-cover"
+                className="h-full w-full object-cover"
               />
             ) : (
               <span className="text-purple-600 text-4xl font-medium">
