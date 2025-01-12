@@ -6,7 +6,6 @@ import { ShareDocumentDialog } from "@/components/community/chat/ShareDocumentDi
 import { useDocuments } from "@/hooks/useDocuments";
 import { useToast } from "@/hooks/use-toast";
 import { WYSIWYGEditor } from "@/components/book/WYSIWYGEditor";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 interface DocumentEditorProps {
   document: {
@@ -91,7 +90,7 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
       </div>
 
       <div className="flex-1 flex">
-        <ScrollArea className="flex-1 p-8">
+        <ScrollArea className={`flex-1 p-8 ${showInsights ? 'border-r' : ''}`}>
           <div className="max-w-[850px] mx-auto">
             <WYSIWYGEditor
               content={content}
@@ -101,22 +100,20 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
           </div>
         </ScrollArea>
 
-        <Sheet open={showInsights} onOpenChange={setShowInsights}>
-          <SheetContent side="right" className="w-[400px] p-0">
-            <div className="h-full flex flex-col bg-white">
-              <div className="p-4 border-b">
-                <h3 className="text-lg font-semibold">Document Insights</h3>
-              </div>
-              <ScrollArea className="flex-1 p-4">
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-600">
-                    Document analysis and insights will appear here...
-                  </p>
-                </div>
-              </ScrollArea>
+        {showInsights && (
+          <div className="w-[400px] flex flex-col bg-white border-l">
+            <div className="p-4 border-b">
+              <h3 className="text-lg font-semibold">Document Insights</h3>
             </div>
-          </SheetContent>
-        </Sheet>
+            <ScrollArea className="flex-1 p-4">
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600">
+                  Document analysis and insights will appear here...
+                </p>
+              </div>
+            </ScrollArea>
+          </div>
+        )}
       </div>
 
       <ShareDocumentDialog
