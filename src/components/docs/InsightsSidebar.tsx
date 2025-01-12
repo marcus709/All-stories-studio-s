@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ChevronDown, ChevronRight, Replace, ArrowRight } from "lucide-react";
+import { ChevronDown, ChevronRight, Replace, ArrowRight, BookOpen, Target, Cloud } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface InsightsSidebarProps {
@@ -31,7 +31,7 @@ interface WordFrequency {
 
 export const InsightsSidebar = ({ document }: InsightsSidebarProps) => {
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
-  const [expandedSections, setExpandedSections] = useState<string[]>(['synonyms', 'context', 'goals']);
+  const [expandedSections, setExpandedSections] = useState<string[]>(['synonyms', 'context', 'goals', 'cloud']);
 
   // Mock data - In a real implementation, these would be calculated from the document
   const wordFrequencies: WordFrequency[] = [
@@ -85,6 +85,7 @@ export const InsightsSidebar = ({ document }: InsightsSidebarProps) => {
                 ) : (
                   <ChevronRight className="h-4 w-4" />
                 )}
+                <BookOpen className="h-4 w-4" />
                 Synonym Suggestions
               </CollapsibleTrigger>
               <CollapsibleContent className="space-y-2">
@@ -95,7 +96,7 @@ export const InsightsSidebar = ({ document }: InsightsSidebarProps) => {
                     </p>
                     <div className="space-y-1">
                       {mockSynonyms[selectedWord as keyof typeof mockSynonyms].map((synonym) => (
-                        <div key={synonym} className="flex items-center justify-between">
+                        <div key={synonym} className="flex items-center justify-between bg-muted/50 p-2 rounded-md">
                           <span className="text-sm">{synonym}</span>
                           <Button size="sm" variant="ghost" className="h-6 px-2">
                             <Replace className="h-3 w-3 mr-1" />
@@ -123,6 +124,7 @@ export const InsightsSidebar = ({ document }: InsightsSidebarProps) => {
                 ) : (
                   <ChevronRight className="h-4 w-4" />
                 )}
+                <Target className="h-4 w-4" />
                 Word Goals
               </CollapsibleTrigger>
               <CollapsibleContent className="space-y-4">
@@ -130,7 +132,7 @@ export const InsightsSidebar = ({ document }: InsightsSidebarProps) => {
                   <div key={word.word} className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Reduce "{word.word}"</span>
-                      <span>{word.count}/{word.goal} occurrences</span>
+                      <span className="text-muted-foreground">{word.count}/{word.goal} occurrences</span>
                     </div>
                     <Progress
                       value={((word.goal || 0) / word.count) * 100}
@@ -142,28 +144,46 @@ export const InsightsSidebar = ({ document }: InsightsSidebarProps) => {
             </Collapsible>
 
             {/* Word Cloud */}
-            <div className="p-4 bg-muted/50 rounded-lg">
-              <h3 className="text-sm font-medium mb-2">Frequent Words</h3>
-              <div className="flex flex-wrap gap-2">
-                {wordFrequencies.map((word) => (
-                  <button
-                    key={word.word}
-                    onClick={() => setSelectedWord(word.word)}
-                    className={cn(
-                      "px-2 py-1 rounded-full text-sm transition-colors",
-                      selectedWord === word.word
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted hover:bg-muted/80"
-                    )}
-                    style={{
-                      fontSize: `${Math.max(0.8, word.count / 10)}rem`
-                    }}
-                  >
-                    {word.word}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <Collapsible
+              open={expandedSections.includes('cloud')}
+              className="space-y-2"
+            >
+              <CollapsibleTrigger
+                onClick={() => toggleSection('cloud')}
+                className="flex items-center gap-2 w-full text-left font-medium"
+              >
+                {expandedSections.includes('cloud') ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+                <Cloud className="h-4 w-4" />
+                Word Cloud
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <div className="flex flex-wrap gap-2">
+                    {wordFrequencies.map((word) => (
+                      <button
+                        key={word.word}
+                        onClick={() => setSelectedWord(word.word)}
+                        className={cn(
+                          "px-2 py-1 rounded-full text-sm transition-colors",
+                          selectedWord === word.word
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted hover:bg-muted/80"
+                        )}
+                        style={{
+                          fontSize: `${Math.max(0.8, word.count / 10)}rem`
+                        }}
+                      >
+                        {word.word}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
 
             {/* Contextual Usage */}
             <Collapsible
@@ -184,12 +204,15 @@ export const InsightsSidebar = ({ document }: InsightsSidebarProps) => {
               <CollapsibleContent className="space-y-2">
                 {selectedWord && getWordContexts(selectedWord).map((item, index) => (
                   <div key={index} className="space-y-1">
-                    <div className="text-sm p-2 bg-muted rounded-lg">
-                      {item.context.replace(
-                        new RegExp(`(${selectedWord})`, 'gi'),
-                        '<strong>$1</strong>'
-                      )}
-                    </div>
+                    <div 
+                      className="text-sm p-2 bg-muted rounded-lg"
+                      dangerouslySetInnerHTML={{
+                        __html: item.context.replace(
+                          new RegExp(`(${selectedWord})`, 'gi'),
+                          '<strong class="text-primary">$1</strong>'
+                        )
+                      }}
+                    />
                     <Button
                       size="sm"
                       variant="ghost"
