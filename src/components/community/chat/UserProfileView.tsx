@@ -6,17 +6,11 @@ import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface UserProfileViewProps {
-  userId?: string;
-  user?: {
-    username: string;
-    avatar_url: string;
-    bio: string;
-    id: string;
-  };
+  userId: string;
   onClose?: () => void;
 }
 
-export function UserProfileView({ userId, user, onClose }: UserProfileViewProps) {
+export function UserProfileView({ userId, onClose }: UserProfileViewProps) {
   const session = useSession();
   const { toast } = useToast();
   const [profile, setProfile] = React.useState<{
@@ -27,12 +21,10 @@ export function UserProfileView({ userId, user, onClose }: UserProfileViewProps)
   const [loadingState, setLoadingState] = React.useState<"planned" | "exact" | "estimated">("planned");
 
   React.useEffect(() => {
-    if (user) {
-      setProfile(user);
-    } else if (userId) {
+    if (userId) {
       getProfile();
     }
-  }, [userId, user]);
+  }, [userId]);
 
   async function getProfile() {
     try {
