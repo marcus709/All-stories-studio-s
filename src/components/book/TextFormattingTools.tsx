@@ -31,22 +31,6 @@ interface TextFormattingToolsProps {
   onDeviceSettingsChange: (settings: any) => void;
 }
 
-// Helper function to get the appropriate icon for each device type
-const getDeviceIcon = (deviceType: string) => {
-  switch (deviceType) {
-    case 'print':
-      return <Book className="h-4 w-4" />;
-    case 'kindle':
-      return <Monitor className="h-4 w-4" />;
-    case 'ipad':
-      return <Tablet className="h-4 w-4" />;
-    case 'phone':
-      return <Smartphone className="h-4 w-4" />;
-    default:
-      return <Book className="h-4 w-4" />;
-  }
-};
-
 export const TextFormattingTools = ({ 
   isAIMode, 
   currentSection,
