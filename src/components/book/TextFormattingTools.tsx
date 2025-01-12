@@ -95,6 +95,33 @@ export const TextFormattingTools = ({
 
   const deviceStyles = getPreviewStyles(selectedPlatform, selectedFormat, selectedSize, deviceView);
 
+  const getDocumentStyle = (): React.CSSProperties => {
+    const selectedSizeObj = BOOK_SIZES.find(size => size.name === selectedSize);
+    return {
+      padding: '1rem',
+      fontSize: fontSize,
+      lineHeight: '1.6',
+      fontFamily: '"Times New Roman", serif',
+      color: '#1a1a1a',
+      textAlign: 'left' as const,
+      width: selectedSizeObj ? `${selectedSizeObj.width * 96}px` : '100%',
+      height: selectedSizeObj ? `${selectedSizeObj.height * 96}px` : 'auto',
+      minHeight: '90vh',
+      maxWidth: '100%',
+      backgroundColor: '#ffffff',
+      margin: '0 auto',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+      borderRadius: '4px',
+      border: '1px solid rgba(0, 0, 0, 0.1)',
+      transition: 'all 0.2s ease-in-out',
+      position: 'relative' as const,
+      overflow: 'hidden',
+      wordWrap: 'break-word',
+      overflowWrap: 'break-word',
+      overflowX: 'hidden',
+    };
+  };
+
   return (
     <div className="flex-1 flex">
       <div className={cn(
@@ -312,6 +339,3 @@ export const TextFormattingTools = ({
       </div>
     </div>
   );
-};
-
-export default TextFormattingTools;
