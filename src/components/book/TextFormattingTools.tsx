@@ -323,21 +323,30 @@ export const TextFormattingTools = ({
                   </div>
                 )}
 
-                <Button 
-                  className="w-full"
-                  onClick={() => {
-                    setIsFormatSettingsOpen(false);
-                    onDeviceSettingsChange({
-                      platform: selectedPlatform,
-                      format: selectedFormat,
-                      size: selectedSize,
-                      deviceView,
-                      fontSize
-                    });
-                  }}
-                >
-                  Save Format Settings
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    className="flex-1"
+                    onClick={() => {
+                      setIsFormatSettingsOpen(false);
+                      onDeviceSettingsChange({
+                        platform: selectedPlatform,
+                        format: selectedFormat,
+                        size: selectedSize,
+                        deviceView,
+                        fontSize
+                      });
+                    }}
+                  >
+                    Save Format Settings
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <Eye className="h-4 w-4" />
+                    Insights
+                  </Button>
+                </div>
               </div>
             </Collapsible>
           </div>
