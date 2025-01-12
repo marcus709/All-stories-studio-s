@@ -19,11 +19,16 @@ export function KeywordsConfig({
 }: KeywordsConfigProps) {
   const [includeInput, setIncludeInput] = useState("");
   const [avoidInput, setAvoidInput] = useState("");
+  const [goalInput, setGoalInput] = useState<string>("");
 
   const handleAddInclude = () => {
     if (includeInput.trim()) {
-      onIncludeKeywordsChange([...includeKeywords, includeInput.trim()]);
+      const keyword = includeInput.trim();
+      const goal = goalInput.trim() ? parseInt(goalInput.trim()) : undefined;
+      
+      onIncludeKeywordsChange([...includeKeywords, keyword]);
       setIncludeInput("");
+      setGoalInput("");
     }
   };
 
@@ -44,6 +49,15 @@ export function KeywordsConfig({
             onChange={(e) => setIncludeInput(e.target.value)}
             placeholder="Add keyword"
             onKeyPress={(e) => e.key === "Enter" && handleAddInclude()}
+            className="flex-1"
+          />
+          <Input
+            type="number"
+            value={goalInput}
+            onChange={(e) => setGoalInput(e.target.value)}
+            placeholder="Goal (optional)"
+            onKeyPress={(e) => e.key === "Enter" && handleAddInclude()}
+            className="w-32"
           />
           <Button type="button" onClick={handleAddInclude}>Add</Button>
         </div>
