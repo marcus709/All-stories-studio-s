@@ -47,31 +47,6 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
     }));
   };
 
-  if (showWordCloud) {
-    return (
-      <div className="fixed inset-0 bg-white z-50 flex flex-col">
-        <div className="p-4 border-b bg-white flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowWordCloud(false)}
-            className="hover:bg-gray-100"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <h3 className="text-lg font-semibold">Document Word Cloud</h3>
-        </div>
-        <div className="flex-1 p-8 flex items-center justify-center">
-          <img 
-            src="/lovable-uploads/f50826f3-d6b0-4fdc-8359-6cd97cffafc9.png" 
-            alt="Word Cloud"
-            className="max-w-full max-h-full object-contain"
-          />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="p-4 border-b bg-white">
@@ -80,7 +55,7 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setShowWordCloud(true)}
+            onClick={() => setShowWordCloud(!showWordCloud)}
             className="gap-2"
           >
             <Cloud className="h-4 w-4" />
@@ -90,53 +65,62 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
       </div>
       
       <div className="flex-1 overflow-y-auto scrollbar-none">
-        <div className="p-4 space-y-6">
-          {/* Synonym Suggestions */}
-          <Collapsible 
-            open={expandedSections.synonyms}
-            className="space-y-2"
-          >
-            <CollapsibleTrigger
-              onClick={() => toggleSection('synonyms')}
-              className="flex items-center justify-between w-full"
+        {showWordCloud ? (
+          <div className="p-4 flex items-center justify-center min-h-[400px]">
+            <img 
+              src="/lovable-uploads/f50826f3-d6b0-4fdc-8359-6cd97cffafc9.png" 
+              alt="Word Cloud"
+              className="max-w-full max-h-full object-contain"
+            />
+          </div>
+        ) : (
+          <div className="p-4 space-y-6">
+            {/* Synonym Suggestions */}
+            <Collapsible 
+              open={expandedSections.synonyms}
+              className="space-y-2"
             >
-              <h4 className="text-sm font-medium">Synonym Suggestions</h4>
-              {expandedSections.synonyms ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-3">
-              {Object.entries(mockSynonyms).map(([word, synonyms]) => (
-                <div key={word} className="bg-gray-50 p-3 rounded-lg">
-                  <div className="font-medium text-sm mb-2">"{word}"</div>
-                  <div className="space-y-2">
-                    {synonyms.map((synonym, index) => (
-                      <div key={index} className="flex items-center justify-between text-sm">
-                        <span>{synonym}</span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                          onClick={() => onReplaceWord?.(word, synonym, 0)}
-                        >
-                          <Replace className="h-3 w-3 mr-1" />
-                          Replace
-                        </Button>
-                      </div>
-                    ))}
+              <CollapsibleTrigger
+                onClick={() => toggleSection('synonyms')}
+                className="flex items-center justify-between w-full"
+              >
+                <h4 className="text-sm font-medium">Synonym Suggestions</h4>
+                {expandedSections.synonyms ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-3">
+                {Object.entries(mockSynonyms).map(([word, synonyms]) => (
+                  <div key={word} className="bg-gray-50 p-3 rounded-lg">
+                    <div className="font-medium text-sm mb-2">"{word}"</div>
+                    <div className="space-y-2">
+                      {synonyms.map((synonym, index) => (
+                        <div key={index} className="flex items-center justify-between text-sm">
+                          <span>{synonym}</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            onClick={() => onReplaceWord?.(word, synonym, 0)}
+                          >
+                            <Replace className="h-3 w-3 mr-1" />
+                            Replace
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </CollapsibleContent>
-          </Collapsible>
+                ))}
+              </CollapsibleContent>
+            </Collapsible>
 
-          {/* Word Goals & Frequency */}
-          <Collapsible 
-            open={expandedSections.goals}
-            className="space-y-2"
-          >
+            {/* Word Goals & Frequency */}
+            <Collapsible 
+              open={expandedSections.goals}
+              className="space-y-2"
+            >
             <CollapsibleTrigger
               onClick={() => toggleSection('goals')}
               className="flex items-center justify-between w-full"
@@ -159,13 +143,13 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
                 </div>
               ))}
             </CollapsibleContent>
-          </Collapsible>
+            </Collapsible>
 
-          {/* Contextual Usage */}
-          <Collapsible 
-            open={expandedSections.usage}
-            className="space-y-2"
-          >
+            {/* Contextual Usage */}
+            <Collapsible 
+              open={expandedSections.usage}
+              className="space-y-2"
+            >
             <CollapsibleTrigger
               onClick={() => toggleSection('usage')}
               className="flex items-center justify-between w-full"
@@ -198,8 +182,9 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
                 </div>
               ))}
             </CollapsibleContent>
-          </Collapsible>
-        </div>
+            </Collapsible>
+          </div>
+        )}
       </div>
     </div>
   );
