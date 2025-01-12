@@ -31,7 +31,7 @@ interface WordFrequency {
 
 export const InsightsSidebar = ({ document }: InsightsSidebarProps) => {
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
-  const [expandedSections, setExpandedSections] = useState<string[]>(['synonyms', 'context', 'goals', 'cloud']);
+  const [expandedSections, setExpandedSections] = useState<string[]>(['synonyms', 'goals', 'cloud', 'context']);
 
   // Mock data - In a real implementation, these would be calculated from the document
   const wordFrequencies: WordFrequency[] = [
