@@ -90,6 +90,7 @@ export type Profile = {
   avatar_url: string | null;
   bio: string | null;
   website?: string | null;
+  background_url?: string | null;
 };
 export type SavedPost = Tables["saved_posts"]["Row"];
 export type Story = Tables["stories"]["Row"];
