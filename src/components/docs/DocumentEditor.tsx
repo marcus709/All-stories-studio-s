@@ -102,11 +102,8 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
               />
             </div>
           </ScrollArea>
-          
           {showInsights && (
-            <div className="w-80 border-l bg-white h-full overflow-hidden">
-              <InsightsSidebar document={{ ...document, content }} />
-            </div>
+            <InsightsSidebar document={{ ...document, content }} />
           )}
         </div>
       </SidebarProvider>
