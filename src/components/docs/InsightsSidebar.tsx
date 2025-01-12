@@ -64,11 +64,11 @@ export const InsightsSidebar = ({ document }: InsightsSidebarProps) => {
   };
 
   return (
-    <Sidebar className="w-80 border-l">
+    <Sidebar className="w-full border-none">
       <SidebarHeader className="border-b p-4">
         <h2 className="text-lg font-semibold">Document Insights</h2>
       </SidebarHeader>
-      <ScrollArea className="flex-1">
+      <ScrollArea className="h-[calc(100vh-10rem)]">
         <SidebarContent>
           <div className="space-y-4 p-4">
             {/* Synonym Suggestions */}

@@ -92,7 +92,7 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
       </div>
 
       <SidebarProvider>
-        <div className="flex flex-1 w-full relative">
+        <div className="flex flex-1 w-full">
           <ScrollArea className="flex-1 p-8">
             <div className="max-w-[850px] mx-auto">
               <WYSIWYGEditor
@@ -104,7 +104,7 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
           </ScrollArea>
           
           {showInsights && (
-            <div className="w-80 border-l bg-white">
+            <div className="w-80 border-l bg-white h-full overflow-hidden">
               <InsightsSidebar document={{ ...document, content }} />
             </div>
           )}
