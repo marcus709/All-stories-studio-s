@@ -1,6 +1,3 @@
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
 import { 
   ArrowRight,
   Replace,
@@ -9,6 +6,8 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 
 interface DocumentInsightsProps {
   content: string;
@@ -47,7 +46,7 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="p-4 border-b">
+      <div className="p-4 border-b bg-white">
         <h3 className="text-lg font-semibold">Document Insights</h3>
       </div>
       
