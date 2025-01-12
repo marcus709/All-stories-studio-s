@@ -132,7 +132,7 @@ export const TextFormattingTools = ({
         <div className="flex items-center justify-end mb-4 bg-gray-50 p-2 rounded-lg gap-2">
           <Button
             variant="outline"
-            size="default"
+            size="sm"
             className="flex items-center gap-2 hover:bg-gray-100"
           >
             <Eye className="h-4 w-4" />
@@ -140,7 +140,7 @@ export const TextFormattingTools = ({
           </Button>
           <Button
             variant="outline"
-            size="default"
+            size="sm"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="flex items-center gap-2 hover:bg-gray-100"
           >
