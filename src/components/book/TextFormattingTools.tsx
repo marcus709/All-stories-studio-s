@@ -14,7 +14,8 @@ import {
   Book, 
   Monitor,
   PanelRightClose,
-  PanelRightOpen
+  PanelRightOpen,
+  Eye
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BOOK_SIZES, DIGITAL_FORMATS, FORMAT_SIZES, BookSize } from "@/lib/formatting-constants";
