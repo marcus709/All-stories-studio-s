@@ -75,16 +75,17 @@ export function AvatarUpload({
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium">Profile Picture</label>
-      <div className="relative w-full max-w-md mx-auto">
+      <div className="relative w-full">
         {/* Background Image Container */}
         <div className="relative h-48 w-full rounded-lg bg-gray-100 overflow-hidden">
-          {backgroundUrl && (
+          {backgroundUrl ? (
             <img
               src={backgroundUrl}
               alt="Profile Background"
               className="h-full w-full object-cover"
             />
+          ) : (
+            <div className="h-full w-full bg-purple-100" />
           )}
           <label
             htmlFor="background-upload"
@@ -103,29 +104,35 @@ export function AvatarUpload({
         </div>
 
         {/* Profile Picture Container - Positioned on top of background */}
-        <div className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-1/2">
-          <div className="relative h-24 w-24 rounded-full bg-gray-100">
-            {avatarUrl && (
-              <img
-                src={avatarUrl}
-                alt="Profile"
-                className="h-full w-full rounded-full object-cover"
+        <div className="absolute left-8 bottom-0 transform translate-y-1/2">
+          <div className="relative h-24 w-24 rounded-full bg-white p-1">
+            <div className="relative h-full w-full rounded-full bg-purple-100 overflow-hidden">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="Profile"
+                  className="h-full w-full rounded-full object-cover"
+                />
+              ) : (
+                <div className="h-full w-full flex items-center justify-center text-4xl text-purple-500 font-semibold">
+                  {session?.user?.email?.[0].toUpperCase() || "?"}
+                </div>
+              )}
+              <label
+                htmlFor="avatar-upload"
+                className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100"
+              >
+                <Upload className="h-6 w-6 text-white" />
+                <span className="mt-1 text-xs text-white">Change Photo</span>
+              </label>
+              <input
+                id="avatar-upload"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarUpload}
               />
-            )}
-            <label
-              htmlFor="avatar-upload"
-              className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100"
-            >
-              <Upload className="h-6 w-6 text-white" />
-              <span className="mt-1 text-xs text-white">Change Photo</span>
-            </label>
-            <input
-              id="avatar-upload"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleAvatarUpload}
-            />
+            </div>
           </div>
         </div>
       </div>
