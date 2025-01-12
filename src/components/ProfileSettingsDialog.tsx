@@ -36,6 +36,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
     username: "",
     bio: "",
     avatar_url: "",
+    background_url: "",
     genres: [] as string[],
     skills: [] as string[],
     pinned_work: {
@@ -61,7 +62,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("username, bio, avatar_url, genres, skills, pinned_work, social_links")
+        .select("username, bio, avatar_url, background_url, genres, skills, pinned_work, social_links")
         .eq("id", session?.user?.id)
         .maybeSingle();
 
@@ -83,6 +84,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
           username: session?.user?.email?.split("@")[0] || "",
           bio: "",
           avatar_url: "",
+          background_url: "",
           genres: [],
           skills: [],
           pinned_work: {
@@ -121,6 +123,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
         username: data.username || "",
         bio: data.bio || "",
         avatar_url: data.avatar_url || "",
+        background_url: data.background_url || "",
         genres: data.genres || [],
         skills: data.skills || [],
         pinned_work: pinnedWork,
@@ -216,8 +219,12 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
               <div className="flex justify-center">
                 <AvatarUpload
                   avatarUrl={profile.avatar_url}
+                  backgroundUrl={profile.background_url}
                   onAvatarChange={(url) =>
                     setProfile((prev) => ({ ...prev, avatar_url: url }))
+                  }
+                  onBackgroundChange={(url) =>
+                    setProfile((prev) => ({ ...prev, background_url: url }))
                   }
                 />
               </div>

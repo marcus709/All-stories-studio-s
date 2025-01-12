@@ -6,19 +6,22 @@ import { Upload } from "lucide-react";
 
 interface AvatarUploadProps {
   avatarUrl: string;
+  backgroundUrl?: string;
   onAvatarChange: (url: string) => void;
+  onBackgroundChange?: (url: string) => void;
 }
 
-export function AvatarUpload({ avatarUrl, onAvatarChange }: AvatarUploadProps) {
+export function AvatarUpload({ 
+  avatarUrl, 
+  backgroundUrl, 
+  onAvatarChange,
+  onBackgroundChange 
+}: AvatarUploadProps) {
   const session = useSession();
   const { toast } = useToast();
 
-  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileUpload(file: File, isBackground: boolean = false) {
     try {
-      if (!e.target.files || e.target.files.length === 0) {
-        return;
-      }
-      const file = e.target.files[0];
       const fileExt = file.name.split(".").pop();
       const filePath = `${session?.user?.id}-${Math.random()}.${fileExt}`;
 
@@ -34,51 +37,96 @@ export function AvatarUpload({ avatarUrl, onAvatarChange }: AvatarUploadProps) {
 
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ avatar_url: urlData.publicUrl })
+        .update({ 
+          [isBackground ? 'background_url' : 'avatar_url']: urlData.publicUrl 
+        })
         .eq("id", session?.user?.id);
 
       if (updateError) throw updateError;
 
-      onAvatarChange(urlData.publicUrl);
+      if (isBackground && onBackgroundChange) {
+        onBackgroundChange(urlData.publicUrl);
+      } else {
+        onAvatarChange(urlData.publicUrl);
+      }
+
       toast({
         title: "Success",
-        description: "Your profile picture has been updated.",
+        description: `Your ${isBackground ? 'background' : 'profile'} picture has been updated.`,
       });
     } catch (error) {
       toast({
         title: "Error",
-        description: "There was an error uploading your avatar. Please try again.",
+        description: `There was an error uploading your ${isBackground ? 'background' : 'profile'} picture. Please try again.`,
         variant: "destructive",
       });
     }
   }
 
+  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!e.target.files || e.target.files.length === 0) return;
+    await handleFileUpload(e.target.files[0], false);
+  }
+
+  async function handleBackgroundUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!e.target.files || e.target.files.length === 0) return;
+    await handleFileUpload(e.target.files[0], true);
+  }
+
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium">Profile Picture</label>
-      <div className="flex items-center gap-4">
-        <div className="relative h-24 w-24 rounded-full bg-gray-100">
-          {avatarUrl && (
+      <div className="relative w-full max-w-md mx-auto">
+        {/* Background Image Container */}
+        <div className="relative h-48 w-full rounded-lg bg-gray-100 overflow-hidden">
+          {backgroundUrl && (
             <img
-              src={avatarUrl}
-              alt="Profile"
-              className="h-full w-full rounded-full object-cover"
+              src={backgroundUrl}
+              alt="Profile Background"
+              className="h-full w-full object-cover"
             />
           )}
           <label
-            htmlFor="avatar-upload"
-            className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100"
+            htmlFor="background-upload"
+            className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center bg-black/40 opacity-0 transition-opacity hover:opacity-100"
           >
             <Upload className="h-6 w-6 text-white" />
-            <span className="mt-1 text-sm text-white">Change Photo</span>
+            <span className="mt-1 text-sm text-white">Change Background</span>
           </label>
           <input
-            id="avatar-upload"
+            id="background-upload"
             type="file"
             accept="image/*"
             className="hidden"
-            onChange={handleAvatarUpload}
+            onChange={handleBackgroundUpload}
           />
+        </div>
+
+        {/* Profile Picture Container - Positioned on top of background */}
+        <div className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-1/2">
+          <div className="relative h-24 w-24 rounded-full bg-gray-100">
+            {avatarUrl && (
+              <img
+                src={avatarUrl}
+                alt="Profile"
+                className="h-full w-full rounded-full object-cover"
+              />
+            )}
+            <label
+              htmlFor="avatar-upload"
+              className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100"
+            >
+              <Upload className="h-6 w-6 text-white" />
+              <span className="mt-1 text-xs text-white">Change Photo</span>
+            </label>
+            <input
+              id="avatar-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarUpload}
+            />
+          </div>
         </div>
       </div>
     </div>
