@@ -24,7 +24,7 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [storyToDelete, setStoryToDelete] = useState<Story | null>(null);
   const { data: stories = [], isLoading, refetch } = useStories();
-  const { selectedStory } = useStory();
+  const { selectedStory, setSelectedStory } = useStory();
   const createStory = useCreateStory();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -86,8 +86,13 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
 
       toast({
         title: "Story deleted",
-        description: "The story and all its content has been permanently deleted.",
+        description: "The story and all its content has been permanently deleted for all members.",
       });
+
+      // If the deleted story was selected, clear the selection
+      if (selectedStory?.id === storyToDelete.id) {
+        setSelectedStory(null);
+      }
 
       queryClient.invalidateQueries({ queryKey: ["stories"] });
       setShowDeleteAlert(false);
@@ -114,13 +119,24 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
 
       if (error) throw error;
 
+      // If the left story was selected, clear the selection
+      if (selectedStory?.id === story.id) {
+        setSelectedStory(null);
+      }
+
       toast({
         title: "Left story",
         description: "You have successfully left the shared story.",
       });
 
-      // Refetch stories to update the list
-      refetch();
+      // Immediately remove the story from the local cache
+      queryClient.setQueryData(["stories"], (oldData: Story[] | undefined) => {
+        if (!oldData) return [];
+        return oldData.filter(s => s.id !== story.id);
+      });
+
+      // Then refetch to ensure everything is in sync
+      queryClient.invalidateQueries({ queryKey: ["stories"] });
     } catch (error) {
       console.error("Error leaving story:", error);
       toast({
