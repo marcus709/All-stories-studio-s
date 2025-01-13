@@ -160,10 +160,12 @@ export const StoryView = () => {
               <BookOpen className="h-5 w-5" />
               {wordCount} words
             </div>
-            <div className="flex items-center gap-2">
-              <LineChart className="h-5 w-5" />
-              Readability: {readabilityScore}
-            </div>
+            {!isChatMode && (
+              <div className="flex items-center gap-2">
+                <LineChart className="h-5 w-5" />
+                Readability: {readabilityScore}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -172,32 +174,33 @@ export const StoryView = () => {
         {!selectedStory && (
           <div className="absolute inset-0 bg-transparent z-10" />
         )}
-        <div className="flex gap-6 mb-8 relative z-30">
-          <Select
-            value={selectedConfig}
-            onValueChange={handleSelectChange}
-            disabled={!selectedStory}
-          >
-            <SelectTrigger className="w-[280px]">
-              <SelectValue placeholder="Select AI Configuration" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Your Configurations</SelectLabel>
-                {aiConfigurations?.map((config) => (
-                  <SelectItem key={config.id} value={config.id}>
-                    {config.name}
+        
+        {!isChatMode && (
+          <div className="flex gap-6 mb-8 relative z-30">
+            <Select
+              value={selectedConfig}
+              onValueChange={handleSelectChange}
+              disabled={!selectedStory}
+            >
+              <SelectTrigger className="w-[280px]">
+                <SelectValue placeholder="Select AI Configuration" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Your Configurations</SelectLabel>
+                  {aiConfigurations?.map((config) => (
+                    <SelectItem key={config.id} value={config.id}>
+                      {config.name}
+                    </SelectItem>
+                  ))}
+                  <SelectSeparator />
+                  <SelectItem value="new">
+                    <span className="text-blue-600">+ Configure New AI</span>
                   </SelectItem>
-                ))}
-                <SelectSeparator />
-                <SelectItem value="new">
-                  <span className="text-blue-600">+ Configure New AI</span>
-                </SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
 
-          {!isChatMode && (
             <Button
               className={`ml-auto px-8 py-2.5 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg flex items-center gap-2 transition-colors ${!selectedStory || isLoading || !selectedConfig ? "cursor-not-allowed opacity-50" : ""}`}
               onClick={handleGetSuggestions}
@@ -206,12 +209,12 @@ export const StoryView = () => {
               <Wand className="h-5 w-5" />
               {isLoading ? "Getting suggestions..." : "Get AI Suggestions"}
             </Button>
-          )}
-        </div>
+          </div>
+        )}
 
         {isChatMode ? (
-          <div className="flex flex-col h-[600px]">
-            <div className="flex-1 overflow-y-auto mb-4 space-y-4">
+          <div className="flex flex-col h-[calc(100vh-300px)] max-h-[700px]">
+            <div className="flex-1 overflow-y-auto mb-4 space-y-4 pr-4 scrollbar-thin scrollbar-thumb-gray-200 hover:scrollbar-thumb-gray-300 scrollbar-track-transparent">
               {messages.map((message, index) => (
                 <div
                   key={index}
@@ -222,10 +225,10 @@ export const StoryView = () => {
                 >
                   <div
                     className={cn(
-                      "max-w-[80%] rounded-2xl px-4 py-2 backdrop-blur-sm",
+                      "max-w-[80%] rounded-2xl px-6 py-3 backdrop-blur-sm shadow-sm",
                       message.role === "user"
                         ? "bg-purple-500/90 text-white ml-auto"
-                        : "bg-gray-100/90 text-gray-900"
+                        : "bg-gray-100/90 text-gray-900 border border-gray-200/50"
                     )}
                   >
                     {message.content}
@@ -233,11 +236,11 @@ export const StoryView = () => {
                 </div>
               ))}
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 sticky bottom-0 bg-white/80 backdrop-blur-sm p-2 rounded-lg border border-gray-100">
               <input
                 type="text"
-                placeholder="Ask anything about your story..."
-                className="flex-1 rounded-full px-4 py-2 bg-gray-100/80 backdrop-blur-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                placeholder="Share your ideas or ask for writing suggestions..."
+                className="flex-1 rounded-full px-6 py-3 bg-gray-50/80 backdrop-blur-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
                 onKeyPress={(e) => {
                   if (e.key === 'Enter') {
                     handleChatSubmit(e.currentTarget.value);
@@ -253,7 +256,7 @@ export const StoryView = () => {
                     input.value = '';
                   }
                 }}
-                className="rounded-full bg-purple-500 hover:bg-purple-600 text-white"
+                className="rounded-full bg-purple-500 hover:bg-purple-600 text-white px-6"
               >
                 <Wand className="h-5 w-5" />
               </Button>
