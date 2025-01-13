@@ -843,6 +843,95 @@ export type Database = {
           },
         ]
       }
+      group_goal_progress: {
+        Row: {
+          created_at: string | null
+          date: string
+          goal_id: string
+          group_id: string
+          id: string
+          user_id: string
+          value: number
+        }
+        Insert: {
+          created_at?: string | null
+          date?: string
+          goal_id: string
+          group_id: string
+          id?: string
+          user_id: string
+          value: number
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          goal_id?: string
+          group_id?: string
+          id?: string
+          user_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_goal_progress_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "group_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_goal_progress_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_goals: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          frequency: Database["public"]["Enums"]["goal_frequency"]
+          goal_type: Database["public"]["Enums"]["goal_type"]
+          group_id: string
+          id: string
+          start_date: string
+          target_value: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          frequency: Database["public"]["Enums"]["goal_frequency"]
+          goal_type: Database["public"]["Enums"]["goal_type"]
+          group_id: string
+          id?: string
+          start_date?: string
+          target_value: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          frequency?: Database["public"]["Enums"]["goal_frequency"]
+          goal_type?: Database["public"]["Enums"]["goal_type"]
+          group_id?: string
+          id?: string
+          start_date?: string
+          target_value?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_goals_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_join_requests: {
         Row: {
           created_at: string | null

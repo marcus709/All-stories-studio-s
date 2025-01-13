@@ -12,6 +12,7 @@ import { InviteMembersInput } from "./InviteMembersInput";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { InviteLinkGenerator } from "./InviteLinkGenerator";
+import { GroupGoalsTab } from "./GroupGoalsTab";
 
 interface GroupSettingsDialogProps {
   group: {
@@ -160,12 +161,13 @@ export const GroupSettingsDialog = ({
         </DialogHeader>
         
         <Tabs defaultValue="details">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="members">Members</TabsTrigger>
+            <TabsTrigger value="goals">Goals</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="details" className="space-y-4">
+          <TabsContent value="details">
             <div className="flex justify-center">
               <div className="relative">
                 <Avatar className="h-24 w-24">
@@ -215,13 +217,6 @@ export const GroupSettingsDialog = ({
                 disabled={!isCreator}
               />
             </div>
-
-            {isCreator && (
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium text-gray-500">Invite via Link</h4>
-                <InviteLinkGenerator type="group" groupId={group.id} />
-              </div>
-            )}
 
             {isCreator && (
               <div className="flex justify-end gap-3">
@@ -296,6 +291,10 @@ export const GroupSettingsDialog = ({
                 </div>
               </ScrollArea>
             </div>
+          </TabsContent>
+
+          <TabsContent value="goals">
+            <GroupGoalsTab groupId={group.id} isCreator={isCreator} />
           </TabsContent>
         </Tabs>
       </DialogContent>
