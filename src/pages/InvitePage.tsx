@@ -91,8 +91,12 @@ export default function InvitePage() {
 
   if (isProcessing) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p>Processing invite...</p>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
+          <h2 className="text-2xl font-semibold text-foreground mb-2">Processing Invite</h2>
+          <p className="text-muted-foreground">Please wait while we process your invitation...</p>
+        </div>
       </div>
     );
   }
