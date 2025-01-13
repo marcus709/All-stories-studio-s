@@ -16,6 +16,11 @@ import { useSession } from "@supabase/auth-helpers-react";
 import { RichTextEditor } from "@/components/editor/RichTextEditor";
 import { cn } from "@/lib/utils";
 
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export const StoryView = () => {
   const [wordCount, setWordCount] = useState(1);
   const [readabilityScore, setReadabilityScore] = useState(0);
@@ -26,7 +31,8 @@ export const StoryView = () => {
   const [configToEdit, setConfigToEdit] = useState<any>(null);
   const [showPaywallAlert, setShowPaywallAlert] = useState(false);
   const [isChatMode, setIsChatMode] = useState(false);
-  const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant', content: string }>>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [currentMessage, setCurrentMessage] = useState('');
   const { selectedStory } = useStory();
   const { generateContent, isLoading } = useAI();
   const { toast } = useToast();
@@ -114,27 +120,42 @@ export const StoryView = () => {
     }
   };
 
-  const handleChatSubmit = async (content: string) => {
-    if (!content.trim()) return;
+  const handleChatSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    const newMessages = [...messages, { role: 'user' as const, content }];
+    if (!currentMessage.trim()) return;
+
+    // Add user message
+    const newMessages = [...messages, { role: 'user', content: currentMessage }];
     setMessages(newMessages);
-    
-    // Trigger AI response
-    const selectedAIConfig = selectedConfig ? await supabase
-      .from("ai_configurations")
-      .select("*")
-      .eq("id", selectedConfig)
-      .single() : null;
+    setCurrentMessage('');
 
-    const context = {
-      storyDescription: selectedStory?.description || "",
-      aiConfig: selectedAIConfig?.data,
-    };
+    try {
+      // Get AI response
+      const aiResponse = await generateContent(
+        currentMessage,
+        'suggestions',
+        {
+          storyDescription: selectedStory?.description || "",
+          aiConfig: {
+            model_type: 'gpt-4o-mini',
+            system_prompt: "You are a creative writing assistant helping with brainstorming and story development. Be concise, encouraging, and specific in your suggestions.",
+            temperature: 0.7,
+            max_tokens: 1000
+          }
+        }
+      );
 
-    const response = await generateContent(content, "suggestions", context);
-    if (response) {
-      setMessages([...newMessages, { role: 'assistant', content: response }]);
+      if (aiResponse) {
+        setMessages([...newMessages, { role: 'assistant', content: aiResponse }]);
+      }
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      toast({
+        title: "Error",
+        description: "Failed to get AI response. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -175,43 +196,6 @@ export const StoryView = () => {
           <div className="absolute inset-0 bg-transparent z-10" />
         )}
         
-        {!isChatMode && (
-          <div className="flex gap-6 mb-8 relative z-30">
-            <Select
-              value={selectedConfig}
-              onValueChange={handleSelectChange}
-              disabled={!selectedStory}
-            >
-              <SelectTrigger className="w-[280px]">
-                <SelectValue placeholder="Select AI Configuration" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Your Configurations</SelectLabel>
-                  {aiConfigurations?.map((config) => (
-                    <SelectItem key={config.id} value={config.id}>
-                      {config.name}
-                    </SelectItem>
-                  ))}
-                  <SelectSeparator />
-                  <SelectItem value="new">
-                    <span className="text-blue-600">+ Configure New AI</span>
-                  </SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-
-            <Button
-              className={`ml-auto px-8 py-2.5 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg flex items-center gap-2 transition-colors ${!selectedStory || isLoading || !selectedConfig ? "cursor-not-allowed opacity-50" : ""}`}
-              onClick={handleGetSuggestions}
-              disabled={!selectedStory || isLoading || !selectedConfig}
-            >
-              <Wand className="h-5 w-5" />
-              {isLoading ? "Getting suggestions..." : "Get AI Suggestions"}
-            </Button>
-          </div>
-        )}
-
         {isChatMode ? (
           <div className="flex flex-col h-[calc(100vh-300px)] max-h-[700px]">
             <div className="flex-1 overflow-y-auto mb-4 space-y-4 pr-4 scrollbar-thin scrollbar-thumb-gray-200 hover:scrollbar-thumb-gray-300 scrollbar-track-transparent">
@@ -236,31 +220,27 @@ export const StoryView = () => {
                 </div>
               ))}
             </div>
-            <div className="flex gap-2 sticky bottom-0 bg-white/80 backdrop-blur-sm p-2 rounded-lg border border-gray-100">
-              <input
-                type="text"
-                placeholder="Share your ideas or ask for writing suggestions..."
-                className="flex-1 rounded-full px-6 py-3 bg-gray-50/80 backdrop-blur-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    handleChatSubmit(e.currentTarget.value);
-                    e.currentTarget.value = '';
-                  }
-                }}
-              />
-              <Button
-                onClick={() => {
-                  const input = document.querySelector('input');
-                  if (input) {
-                    handleChatSubmit(input.value);
-                    input.value = '';
-                  }
-                }}
-                className="rounded-full bg-purple-500 hover:bg-purple-600 text-white px-6"
-              >
-                <Wand className="h-5 w-5" />
-              </Button>
-            </div>
+            <form 
+              onSubmit={handleChatSubmit}
+              className="sticky bottom-0 bg-white/80 backdrop-blur-sm p-2 rounded-lg border border-gray-100"
+            >
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={currentMessage}
+                  onChange={(e) => setCurrentMessage(e.target.value)}
+                  placeholder="Share your ideas or ask for writing suggestions..."
+                  className="flex-1 rounded-full px-6 py-3 bg-gray-50/80 backdrop-blur-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                />
+                <Button
+                  type="submit"
+                  disabled={!currentMessage.trim() || isLoading}
+                  className="rounded-full bg-purple-500 hover:bg-purple-600 text-white px-6"
+                >
+                  <Wand className="h-5 w-5" />
+                </Button>
+              </div>
+            </form>
           </div>
         ) : (
           <>
