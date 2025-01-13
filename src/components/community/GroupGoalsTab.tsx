@@ -35,7 +35,7 @@ export const GroupGoalsTab = ({ groupId, isCreator }: GroupGoalsTabProps) => {
             value,
             date,
             user_id,
-            user:profiles!group_goal_progress_user_id_fkey (
+            profiles (
               username,
               avatar_url
             )
@@ -111,8 +111,8 @@ export const GroupGoalsTab = ({ groupId, isCreator }: GroupGoalsTabProps) => {
     goal.group_goal_progress?.forEach((progress: any) => {
       if (!userProgress.has(progress.user_id)) {
         userProgress.set(progress.user_id, {
-          username: progress.user?.username || "Unknown User",
-          avatar_url: progress.user?.avatar_url,
+          username: progress.profiles?.username || "Unknown User",
+          avatar_url: progress.profiles?.avatar_url,
           progress: 0,
         });
       }
