@@ -40,11 +40,12 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
     queryFn: async () => {
       if (!selectedStory?.shared_group_id) return false;
       
+      const { data: { user } } = await supabase.auth.getUser();
       const { data: memberData, error } = await supabase
         .from("group_members")
         .select("role")
         .eq("group_id", selectedStory.shared_group_id)
-        .eq("user_id", (await supabase.auth.getUser()).data.user?.id)
+        .eq("user_id", user?.id)
         .maybeSingle();
 
       if (error) {
@@ -61,10 +62,11 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
   const { data: userEditingRights = {} } = useQuery({
     queryKey: ["userEditingRights"],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
       const { data: memberData, error } = await supabase
         .from("group_members")
         .select("group_id, editing_rights")
-        .eq("user_id", (await supabase.auth.getUser()).data.user?.id);
+        .eq("user_id", user?.id);
 
       if (error) {
         console.error("Error fetching editing rights:", error);
@@ -83,10 +85,11 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
   const { data: userGroupMemberships = [] } = useQuery({
     queryKey: ["userGroupMemberships"],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
       const { data: memberships, error } = await supabase
         .from("group_members")
         .select("group_id")
-        .eq("user_id", (await supabase.auth.getUser()).data.user?.id);
+        .eq("user_id", user?.id);
 
       if (error) {
         console.error("Error fetching group memberships:", error);
@@ -99,9 +102,10 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
   });
 
   // Filter stories to only show those the user should see
-  const visibleStories = stories.filter(story => {
+  const visibleStories = stories.filter(async story => {
+    const { data: { user } } = await supabase.auth.getUser();
     // Show user's own stories
-    if (!story.is_shared_space || story.user_id === (supabase.auth.getUser()).data.user?.id) {
+    if (!story.is_shared_space || story.user_id === user?.id) {
       return true;
     }
     // For shared stories, only show if user is still a member of the group
@@ -138,11 +142,12 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
     try {
       if (!story.shared_group_id) return;
 
+      const { data: { user } } = await supabase.auth.getUser();
       const { error } = await supabase
         .from("group_members")
         .delete()
         .eq("group_id", story.shared_group_id)
-        .eq("user_id", (await supabase.auth.getUser()).data.user?.id);
+        .eq("user_id", user?.id);
 
       if (error) throw error;
 
