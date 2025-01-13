@@ -23,8 +23,12 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useFriendsList } from "@/hooks/useFriendsList";
 import { Checkbox } from "@/components/ui/checkbox";
 
-export function StoriesDialog() {
-  const [isOpen, setIsOpen] = React.useState(false);
+interface StoriesDialogProps {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+}
+
+export function StoriesDialog({ isOpen, setIsOpen }: StoriesDialogProps) {
   const [showNewStory, setShowNewStory] = React.useState(false);
   const [showNewSharedStory, setShowNewSharedStory] = useState(false);
   const [newStory, setNewStory] = useState<{ title: string; description: string }>({

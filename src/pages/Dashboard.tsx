@@ -8,7 +8,7 @@ import { useSession } from "@supabase/auth-helpers-react";
 import { useToast } from "@/hooks/use-toast";
 import { StudioAssistant } from "@/components/ai/StudioAssistant";
 
-type View = "story" | "characters" | "plot" | "dream" | "ideas" | "docs" | "logic";
+type View = "story" | "characters" | "plot" | "dream" | "docs" | "logic";
 
 function DashboardLayout() {
   const [currentView, setCurrentView] = useState<View>("story");

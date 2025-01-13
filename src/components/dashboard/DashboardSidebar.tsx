@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { StoriesDialog } from "@/components/StoriesDialog";
@@ -17,9 +16,11 @@ import {
   Plus,
 } from "lucide-react";
 
+type View = "story" | "characters" | "plot" | "dream" | "docs" | "logic";
+
 interface DashboardSidebarProps {
-  currentView: string;
-  setCurrentView: (view: string) => void;
+  currentView: View;
+  setCurrentView: (view: View) => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
 }
@@ -31,20 +32,14 @@ export const DashboardSidebar = ({
   onToggleCollapse,
 }: DashboardSidebarProps) => {
   const [showStoriesDialog, setShowStoriesDialog] = useState(false);
-  const { selectedStory, clearSelectedStory } = useStory();
-  const navigate = useNavigate();
+  const { selectedStory } = useStory();
 
-  const handleViewChange = (view: string) => {
+  const handleViewChange = (view: View) => {
     if (!selectedStory) {
       setShowStoriesDialog(true);
       return;
     }
     setCurrentView(view);
-  };
-
-  const handleStorySelect = () => {
-    setShowStoriesDialog(false);
-    // The view will update automatically through the story context
   };
 
   return (
@@ -167,11 +162,10 @@ export const DashboardSidebar = ({
         </div>
       </ScrollArea>
 
-      <StoriesDialog
-        open={showStoriesDialog}
-        onOpenChange={setShowStoriesDialog}
-        onStorySelect={handleStorySelect}
+      <StoriesDialog 
+        isOpen={showStoriesDialog}
+        setIsOpen={setShowStoriesDialog}
       />
     </div>
   );
-}
+};
