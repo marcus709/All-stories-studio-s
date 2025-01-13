@@ -59,19 +59,24 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
 
   // Add query for user's editing rights in shared stories
   const { data: userEditingRights = {} } = useQuery({
-    queryKey: ["userEditingRights", selectedStory?.shared_group_id],
+    queryKey: ["userEditingRights"],
     queryFn: async () => {
-      const { data: memberData } = await supabase
+      const { data: memberData, error } = await supabase
         .from("group_members")
         .select("group_id, editing_rights")
         .eq("user_id", (await supabase.auth.getUser()).data.user?.id);
+
+      if (error) {
+        console.error("Error fetching editing rights:", error);
+        return {};
+      }
 
       return memberData?.reduce((acc: Record<string, boolean>, curr) => {
         acc[curr.group_id] = curr.editing_rights;
         return acc;
       }, {}) || {};
     },
-    enabled: !!selectedStory?.shared_group_id,
+    enabled: true,
   });
 
   const handleCreateStory = async () => {
