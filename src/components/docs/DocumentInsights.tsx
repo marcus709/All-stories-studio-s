@@ -5,13 +5,18 @@ import {
   ChevronUp,
   Cloud,
   Plus,
-  X
+  X,
+  History,
+  ArrowLeft
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
+import { TimeAnalysisDialog } from "./TimeAnalysisDialog";
+import { HistoricalAnalysis } from "./HistoricalAnalysis";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DocumentInsightsProps {
   content: string;
@@ -39,15 +44,18 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
   const [newTrackedWord, setNewTrackedWord] = useState('');
   const [newWordGoal, setNewWordGoal] = useState('');
   const [trackedWords, setTrackedWords] = useState<TrackedWord[]>([]);
+  const [showHistoricalContext, setShowHistoricalContext] = useState(false);
+  const [isTimeAnalysisOpen, setIsTimeAnalysisOpen] = useState(false);
+  const [timePeriod, setTimePeriod] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResults, setAnalysisResults] = useState<any>(null);
 
   useEffect(() => {
     if (!content || !trackedWords.length) return;
 
-    // Remove HTML tags and extract text content
     const textContent = content.replace(/<[^>]+>/g, '');
     const words = textContent.toLowerCase().split(/\s+/);
     
-    // Count frequency for tracked words
     const frequency: WordFrequency = {};
     trackedWords.forEach(({ word }) => {
       frequency[word.toLowerCase()] = words.filter(w => w === word.toLowerCase()).length;
@@ -83,6 +91,32 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
     return wordFrequency[word.toLowerCase()] || 0;
   };
 
+  const handleAnalyze = async () => {
+    setIsAnalyzing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('get-time-period-context', {
+        body: { 
+          timePeriod,
+          documentContent: content
+        }
+      });
+
+      if (error) throw error;
+      setAnalysisResults(data.contextInfo);
+    } catch (error) {
+      console.error('Error analyzing time period:', error);
+      setAnalysisResults({
+        language: "Analysis failed",
+        culture: "Analysis failed",
+        environment: "Analysis failed",
+        warnings: ["Failed to analyze time period"]
+      });
+    } finally {
+      setIsAnalyzing(false);
+      setIsTimeAnalysisOpen(false);
+    }
+  };
+
   const mockSynonyms = {
     "just": ["simply", "merely", "only", "precisely"],
     "very": ["extremely", "highly", "particularly", "notably"],
@@ -90,20 +124,79 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
     "actually": ["in fact", "indeed", "as a matter of fact", "in reality"]
   };
 
+  if (showHistoricalContext) {
+    return (
+      <div className="flex flex-col h-full overflow-hidden">
+        <div className="p-4 border-b bg-white">
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowHistoricalContext(false)}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Insights
+            </Button>
+          </div>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="space-y-4">
+            <Button 
+              onClick={() => setIsTimeAnalysisOpen(true)}
+              className="w-full gap-2"
+            >
+              <History className="h-4 w-4" />
+              Analyze Historical Context
+            </Button>
+
+            {analysisResults && (
+              <HistoricalAnalysis
+                isLoading={isAnalyzing}
+                results={analysisResults}
+              />
+            )}
+          </div>
+        </div>
+
+        <TimeAnalysisDialog
+          isOpen={isTimeAnalysisOpen}
+          onOpenChange={setIsTimeAnalysisOpen}
+          timePeriod={timePeriod}
+          setTimePeriod={setTimePeriod}
+          onAnalyze={handleAnalyze}
+          isLoading={isAnalyzing}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="p-4 border-b bg-white">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">Document Insights</h3>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowWordCloud(!showWordCloud)}
-            className="gap-2"
-          >
-            <Cloud className="h-4 w-4" />
-            Word Cloud
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowHistoricalContext(true)}
+              className="gap-2"
+            >
+              <History className="h-4 w-4" />
+              Historical Context
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowWordCloud(!showWordCloud)}
+              className="gap-2"
+            >
+              <Cloud className="h-4 w-4" />
+              Word Cloud
+            </Button>
+          </div>
         </div>
       </div>
       
