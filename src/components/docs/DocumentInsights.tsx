@@ -33,6 +33,12 @@ interface TrackedWord {
   goal: number;
 }
 
+interface AnalysisConfig {
+  focusAreas: string[];
+  customInstructions: string;
+  analysisDepth: string;
+}
+
 export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: DocumentInsightsProps) {
   const [expandedSections, setExpandedSections] = useState({
     synonyms: true,
@@ -49,6 +55,11 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
   const [timePeriod, setTimePeriod] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResults, setAnalysisResults] = useState<any>(null);
+  const [analysisConfig, setAnalysisConfig] = useState<AnalysisConfig>({
+    focusAreas: ["Language", "Culture"],
+    customInstructions: "",
+    analysisDepth: "detailed"
+  });
 
   useEffect(() => {
     if (!content || !trackedWords.length) return;
@@ -97,7 +108,8 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
       const { data, error } = await supabase.functions.invoke('get-time-period-context', {
         body: { 
           timePeriod,
-          documentContent: content
+          documentContent: content,
+          analysisConfig
         }
       });
 
@@ -167,6 +179,8 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
           setTimePeriod={setTimePeriod}
           onAnalyze={handleAnalyze}
           isLoading={isAnalyzing}
+          analysisConfig={analysisConfig}
+          onConfigChange={setAnalysisConfig}
         />
       </div>
     );

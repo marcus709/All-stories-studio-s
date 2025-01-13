@@ -14,12 +14,11 @@ serve(async (req) => {
   }
 
   try {
-    const { timePeriod, documentContent } = await req.json();
-
+    const { timePeriod, documentContent, analysisConfig } = await req.json();
+    
     console.log('Analyzing time period:', timePeriod);
-    console.log('Document content:', documentContent);
+    console.log('Analysis config:', analysisConfig);
 
-    // Validate inputs
     if (!timePeriod?.trim()) {
       throw new Error('Time period is required');
     }
@@ -27,6 +26,21 @@ serve(async (req) => {
     if (!documentContent?.trim()) {
       throw new Error('Document content is required for analysis');
     }
+
+    // Build the system prompt based on configuration
+    const focusAreasPrompt = analysisConfig.focusAreas
+      .map(area => `- Detailed analysis of ${area.toLowerCase()} during this period`)
+      .join('\n');
+
+    const depthInstructions = {
+      basic: "Provide a basic overview focusing on the most important aspects.",
+      detailed: "Conduct a thorough analysis with specific examples and explanations.",
+      comprehensive: "Perform an in-depth analysis covering all aspects with historical references and detailed context."
+    }[analysisConfig.analysisDepth];
+
+    const customInstructions = analysisConfig.customInstructions
+      ? `\nAdditional focus areas:\n${analysisConfig.customInstructions}`
+      : '';
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -40,7 +54,11 @@ serve(async (req) => {
           {
             role: 'system',
             content: `You are a historical context expert. Analyze the provided text content and verify its historical accuracy for the specified time period.
-            You must be critical and point out any anachronisms or historical inaccuracies.
+            ${depthInstructions}
+            Focus on these specific areas:
+            ${focusAreasPrompt}
+            ${customInstructions}
+            
             You must ONLY return a valid JSON object with exactly this structure:
             {
               "language": "your analysis of language usage and authenticity for the time period, highlighting any anachronistic terms",
