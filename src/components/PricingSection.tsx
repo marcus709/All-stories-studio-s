@@ -6,7 +6,22 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { Input } from "./ui/input";
 
-const plans = [
+type Feature = string | {
+  text: string;
+  available: boolean;
+};
+
+type Plan = {
+  name: string;
+  price: string;
+  features: Feature[];
+  buttonText: string;
+  buttonVariant: "outline" | "default";
+  priceId: string | null;
+  popular?: boolean;
+};
+
+const plans: Plan[] = [
   {
     name: "5-Day Free Trial",
     price: "0",
@@ -18,7 +33,7 @@ const plans = [
       "Full community access"
     ],
     buttonText: "Start Free Trial",
-    buttonVariant: "outline" as const,
+    buttonVariant: "outline",
     priceId: null
   },
   {
@@ -35,7 +50,7 @@ const plans = [
     ],
     popular: true,
     buttonText: "Choose Creator",
-    buttonVariant: "default" as const,
+    buttonVariant: "default",
     priceId: "price_1QcuXCEYIZGXbokupYo0Y6j2"
   },
   {
@@ -52,7 +67,7 @@ const plans = [
       "Story logic checker"
     ],
     buttonText: "Choose Professional",
-    buttonVariant: "outline" as const,
+    buttonVariant: "outline",
     priceId: "price_1QcuYKEYIZGXbokuvrWFAB9u"
   }
 ];
@@ -206,8 +221,8 @@ export const PricingSection = () => {
               </CardHeader>
               <CardContent className="p-6">
                 <ul className="space-y-4">
-                  {plan.features.map((feature) => {
-                    const isObject = typeof feature === 'object';
+                  {plan.features.map((feature, index) => {
+                    const isObject = typeof feature === 'object' && feature !== null;
                     return (
                       <li 
                         key={isObject ? feature.text : feature} 
