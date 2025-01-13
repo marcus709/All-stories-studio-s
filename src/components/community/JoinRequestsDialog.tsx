@@ -46,7 +46,8 @@ export const JoinRequestsDialog = ({ open, onOpenChange }: JoinRequestsDialogPro
           groups:group_id (
             id,
             name,
-            created_by
+            created_by,
+            group_type
           ),
           profiles:user_id (
             username,
@@ -152,16 +153,19 @@ export const JoinRequestsDialog = ({ open, onOpenChange }: JoinRequestsDialogPro
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id={`editing-rights-${request.id}`}
-                    checked={request.editing_rights_on_accept}
-                    onCheckedChange={(checked) => handleEditingRightsChange(request.id, checked)}
-                  />
-                  <Label htmlFor={`editing-rights-${request.id}`}>
-                    Grant editing rights
-                  </Label>
-                </div>
+                {/* Only show editing rights switch for writing groups */}
+                {request.groups?.group_type === 'writing' && (
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id={`editing-rights-${request.id}`}
+                      checked={request.editing_rights_on_accept}
+                      onCheckedChange={(checked) => handleEditingRightsChange(request.id, checked)}
+                    />
+                    <Label htmlFor={`editing-rights-${request.id}`}>
+                      Grant editing rights
+                    </Label>
+                  </div>
+                )}
 
                 <div className="flex justify-end space-x-2">
                   <Button
