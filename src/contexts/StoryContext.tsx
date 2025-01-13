@@ -10,7 +10,6 @@ interface StoryContextType {
   setSelectedStory: (story: Story | null) => void;
   stories: Story[];
   isLoading: boolean;
-  clearSelectedStory: () => void;
 }
 
 const StoryContext = createContext<StoryContextType | null>(null);
@@ -47,18 +46,8 @@ export function StoryProvider({ children }: { children: ReactNode }) {
     enabled: !!session?.user,
   });
 
-  const clearSelectedStory = () => {
-    setSelectedStory(null);
-  };
-
   return (
-    <StoryContext.Provider value={{ 
-      selectedStory, 
-      setSelectedStory, 
-      stories, 
-      isLoading,
-      clearSelectedStory 
-    }}>
+    <StoryContext.Provider value={{ selectedStory, setSelectedStory, stories, isLoading }}>
       {children}
     </StoryContext.Provider>
   );
