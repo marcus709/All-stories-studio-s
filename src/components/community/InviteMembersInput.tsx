@@ -112,12 +112,12 @@ export const InviteMembersInput = ({ groupId, onInvite }: InviteMembersInputProp
 
   return (
     <div className="space-y-2">
-      <div className="flex gap-2">
+      <div className="relative">
         <Input
           placeholder="Search users by username..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="flex-1"
+          className="w-full"
         />
       </div>
 
