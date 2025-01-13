@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Profile } from "@/integrations/supabase/types/tables.types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { StoryButtons } from "../stories/StoryButtons";
+import { Story } from "@/types/story";
 
 const navigationItems = [
   { id: "story", icon: Book, label: "Story Editor" },
@@ -117,6 +119,16 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
 
         {/* Stories Section - Fixed */}
         <div className="space-y-4 mb-6 px-8">
+          <StoryButtons
+            selectedStory={selectedStory}
+            isLoading={false}
+            onOpenStories={() => setShowStoriesDialog(true)}
+            onNewStory={() => {
+              setShowStoriesDialog(true);
+              setSelectedStory(null);
+            }}
+            createMutationPending={false}
+          />
           <StoriesDialog
             open={showStoriesDialog}
             onOpenChange={setShowStoriesDialog}
@@ -144,4 +156,4 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
       </div>
     </div>
   );
-};
+}
