@@ -32,29 +32,29 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
   const [expandedSections, setExpandedSections] = useState({
     synonyms: true,
     usage: true,
-    goals: true,
-    tracking: true
+    wordTracking: true
   });
   const [showWordCloud, setShowWordCloud] = useState(false);
   const [wordFrequency, setWordFrequency] = useState<WordFrequency>({});
   const [newTrackedWord, setNewTrackedWord] = useState('');
   const [newWordGoal, setNewWordGoal] = useState('');
   const [trackedWords, setTrackedWords] = useState<TrackedWord[]>([]);
-  const [wordToCheck, setWordToCheck] = useState('');
 
   useEffect(() => {
-    if (!content || !wordToCheck) return;
+    if (!content || !trackedWords.length) return;
 
     // Remove HTML tags and extract text content
     const textContent = content.replace(/<[^>]+>/g, '');
-
-    // Count frequency of the specific word
     const words = textContent.toLowerCase().split(/\s+/);
+    
+    // Count frequency for tracked words
     const frequency: WordFrequency = {};
-    frequency[wordToCheck.toLowerCase()] = words.filter(word => word === wordToCheck.toLowerCase()).length;
+    trackedWords.forEach(({ word }) => {
+      frequency[word.toLowerCase()] = words.filter(w => w === word.toLowerCase()).length;
+    });
 
     setWordFrequency(frequency);
-  }, [content, wordToCheck]);
+  }, [content, trackedWords]);
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({
@@ -118,53 +118,17 @@ export function DocumentInsights({ content, onReplaceWord, onJumpToLocation }: D
           </div>
         ) : (
           <div className="p-4 space-y-6">
-            {/* Word Frequency Check */}
-            <Collapsible 
-              open={expandedSections.goals}
-              className="space-y-2"
-            >
-              <CollapsibleTrigger
-                onClick={() => toggleSection('goals')}
-                className="flex items-center justify-between w-full"
-              >
-                <h4 className="text-sm font-medium">Word Frequency Check</h4>
-                {expandedSections.goals ? (
-                  <ChevronUp className="h-4 w-4" />
-                ) : (
-                  <ChevronDown className="h-4 w-4" />
-                )}
-              </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-4">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Enter word to check"
-                    value={wordToCheck}
-                    onChange={(e) => setWordToCheck(e.target.value)}
-                    className="flex-1"
-                  />
-                </div>
-                {wordToCheck && (
-                  <div className="bg-gray-50 p-3 rounded-lg space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-sm">"{wordToCheck}"</span>
-                      <span className="text-sm text-gray-600">{getWordCount(wordToCheck)} occurrences</span>
-                    </div>
-                  </div>
-                )}
-              </CollapsibleContent>
-            </Collapsible>
-
             {/* Word Tracking Section */}
             <Collapsible 
-              open={expandedSections.tracking}
+              open={expandedSections.wordTracking}
               className="space-y-2"
             >
               <CollapsibleTrigger
-                onClick={() => toggleSection('tracking')}
+                onClick={() => toggleSection('wordTracking')}
                 className="flex items-center justify-between w-full"
               >
                 <h4 className="text-sm font-medium">Word Tracking</h4>
-                {expandedSections.tracking ? (
+                {expandedSections.wordTracking ? (
                   <ChevronUp className="h-4 w-4" />
                 ) : (
                   <ChevronDown className="h-4 w-4" />
