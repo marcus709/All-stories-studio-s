@@ -40,12 +40,17 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
     queryFn: async () => {
       if (!selectedStory?.shared_group_id) return false;
       
-      const { data: memberData } = await supabase
+      const { data: memberData, error } = await supabase
         .from("group_members")
         .select("role")
         .eq("group_id", selectedStory.shared_group_id)
         .eq("user_id", (await supabase.auth.getUser()).data.user?.id)
-        .single();
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error checking group role:", error);
+        return false;
+      }
 
       return memberData?.role === "admin";
     },
