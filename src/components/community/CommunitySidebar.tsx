@@ -17,7 +17,7 @@ const navItems = [
   { icon: Users, label: "My Groups", href: "/community/groups" },
   { icon: Hash, label: "Topics", href: "/community/topics" },
   { icon: Bookmark, label: "Saved", href: "/community/saved" },
-  { icon: Settings, label: "Settings", href: "/profile/settings" }, // Updated this line
+  { icon: Settings, label: "Settings", href: "/profile/settings" },
 ];
 
 export const CommunitySidebar = () => {
@@ -71,20 +71,29 @@ export const CommunitySidebar = () => {
     enabled: !!session?.user?.id,
   });
 
-  const { data: dailyChallenge } = useQuery({
+  const { data: dailyChallenge, isLoading: isChallengeLoading } = useQuery({
     queryKey: ["daily-challenge"],
     queryFn: async () => {
       try {
+        console.log("Fetching daily challenge...");
+        const today = new Date().toISOString().split("T")[0];
+        console.log("Today's date:", today);
+        
         const { data, error } = await supabase
           .from("daily_challenges")
           .select("*")
-          .eq("active_date", new Date().toISOString().split("T")[0])
+          .eq("active_date", today)
           .maybeSingle();
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error fetching daily challenge:", error);
+          throw error;
+        }
+        
+        console.log("Daily challenge data:", data);
         return data;
       } catch (error) {
-        console.error("Error fetching daily challenge:", error);
+        console.error("Error in daily challenge query:", error);
         return null;
       }
     },
@@ -130,6 +139,13 @@ export const CommunitySidebar = () => {
   const hasPendingRequests = friendRequests && friendRequests.length > 0;
 
   if (!session) return null;
+
+  // Add debug log for dailyChallenge
+  console.log("Daily Challenge State:", {
+    isLoading: isChallengeLoading,
+    dailyChallenge,
+    today: new Date().toISOString().split("T")[0]
+  });
 
   return (
     <div className="space-y-6">
