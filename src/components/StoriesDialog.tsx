@@ -7,6 +7,8 @@ import { useStories } from "@/hooks/useStories";
 import { useStory } from "@/contexts/StoryContext";
 import { Story } from "@/types/story";
 import { useCreateStory } from "@/hooks/useCreateStory";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 interface StoriesDialogProps {
   open: boolean;
@@ -24,6 +26,24 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
   const [newStory, setNewStory] = useState({
     title: "",
     description: "",
+  });
+
+  // Query to check if user is admin in the group
+  const { data: isGroupAdmin } = useQuery({
+    queryKey: ["groupRole", selectedStory?.shared_group_id],
+    queryFn: async () => {
+      if (!selectedStory?.shared_group_id) return false;
+      
+      const { data: memberData } = await supabase
+        .from("group_members")
+        .select("role")
+        .eq("group_id", selectedStory.shared_group_id)
+        .eq("user_id", (await supabase.auth.getUser()).data.user?.id)
+        .single();
+
+      return memberData?.role === "admin";
+    },
+    enabled: !!selectedStory?.shared_group_id,
   });
 
   const handleCreateStory = async () => {
@@ -71,6 +91,7 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
             onSelect={onStorySelect}
             isLoading={isLoading}
             onClose={() => onOpenChange(false)}
+            isGroupAdmin={isGroupAdmin}
           />
         )}
       </DialogContent>

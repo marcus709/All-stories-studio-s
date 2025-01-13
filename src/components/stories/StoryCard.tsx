@@ -1,6 +1,6 @@
 import React from "react";
 import { Card } from "../ui/card";
-import { Trash2 } from "lucide-react";
+import { LogOut, Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 
 interface StoryCardProps {
@@ -9,13 +9,16 @@ interface StoryCardProps {
     title: string;
     description: string | null;
     updated_at: string;
+    is_shared_space?: boolean;
   };
   isSelected: boolean;
   onClick: () => void;
   onDelete: (e: React.MouseEvent) => void;
+  isSharedStory?: boolean;
+  isAdmin?: boolean;
 }
 
-export function StoryCard({ story, isSelected, onClick, onDelete }: StoryCardProps) {
+export function StoryCard({ story, isSelected, onClick, onDelete, isSharedStory, isAdmin }: StoryCardProps) {
   return (
     <Card 
       className={`relative bg-purple-50 p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-purple-100 transition-colors ${
@@ -26,10 +29,16 @@ export function StoryCard({ story, isSelected, onClick, onDelete }: StoryCardPro
       <Button
         variant="ghost"
         size="icon"
-        className="absolute top-2 right-2 text-gray-500 hover:text-red-500 hover:bg-red-50"
+        className={`absolute top-2 right-2 text-gray-500 ${
+          isSharedStory && !isAdmin ? "hover:text-blue-500 hover:bg-blue-50" : "hover:text-red-500 hover:bg-red-50"
+        }`}
         onClick={onDelete}
       >
-        <Trash2 className="h-4 w-4" />
+        {isSharedStory && !isAdmin ? (
+          <LogOut className="h-4 w-4" />
+        ) : (
+          <Trash2 className="h-4 w-4" />
+        )}
       </Button>
       
       <div className="w-12 h-12 mb-4 text-purple-500">
