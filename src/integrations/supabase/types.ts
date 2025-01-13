@@ -1079,6 +1079,7 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           description: string | null
+          group_type: Database["public"]["Enums"]["group_type"]
           id: string
           name: string
           privacy: Database["public"]["Enums"]["group_privacy"]
@@ -1088,6 +1089,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          group_type?: Database["public"]["Enums"]["group_type"]
           id?: string
           name: string
           privacy?: Database["public"]["Enums"]["group_privacy"]
@@ -1097,6 +1099,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          group_type?: Database["public"]["Enums"]["group_type"]
           id?: string
           name?: string
           privacy?: Database["public"]["Enums"]["group_privacy"]
@@ -2036,6 +2039,7 @@ export type Database = {
       goal_frequency: "daily" | "weekly" | "monthly"
       goal_type: "word_count" | "time_based"
       group_privacy: "public" | "private"
+      group_type: "social" | "writing"
       milestone_type:
         | "ending"
         | "major_event"

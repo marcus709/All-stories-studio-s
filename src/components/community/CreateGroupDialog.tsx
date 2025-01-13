@@ -24,6 +24,7 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [privacy, setPrivacy] = useState<"public" | "private">("public");
+  const [groupType, setGroupType] = useState<"social" | "writing">("social");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [createdGroupId, setCreatedGroupId] = useState<string | null>(null);
@@ -33,6 +34,7 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
     mutationFn: async () => {
       if (!session?.user) throw new Error("Not authenticated");
       
+      // Create the group
       const { data: group, error: groupError } = await supabase
         .from("groups")
         .insert({
@@ -41,12 +43,29 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
           created_by: session.user.id,
           privacy,
           image_url: imageUrl,
+          group_type: groupType,
         })
         .select()
         .single();
 
       if (groupError) throw groupError;
 
+      // If it's a writing group, create a shared story
+      if (groupType === "writing") {
+        const { error: storyError } = await supabase
+          .from("stories")
+          .insert({
+            title: `${name} - Shared Story`,
+            description: `Shared story space for the group ${name}`,
+            user_id: session.user.id,
+            is_shared_space: true,
+            shared_group_id: group.id,
+          });
+
+        if (storyError) throw storyError;
+      }
+
+      // Add creator as admin
       const { error: memberError } = await supabase
         .from("group_members")
         .insert({
@@ -62,6 +81,7 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-groups"] });
+      queryClient.invalidateQueries({ queryKey: ["stories"] });
       setStep("invite");
     },
     onError: (error) => {
@@ -121,6 +141,7 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
     setName("");
     setDescription("");
     setPrivacy("public");
+    setGroupType("social");
     setImageUrl(null);
     setCreatedGroupId(null);
   };
@@ -187,6 +208,23 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
                   <SelectItem value="private">Private</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Select value={groupType} onValueChange={(value: "social" | "writing") => setGroupType(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select group type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="social">Social Group</SelectItem>
+                  <SelectItem value="writing">Shared Writing Group</SelectItem>
+                </SelectContent>
+              </Select>
+              {groupType === "writing" && (
+                <p className="text-sm text-gray-500">
+                  A shared story space will be created for all group members to collaborate.
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
