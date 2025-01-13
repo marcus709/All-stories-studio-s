@@ -1,7 +1,8 @@
 import { ProfileSettingsDialog } from "@/components/ProfileSettingsDialog";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
-const Settings = () => {
+export default function Settings() {
   const navigate = useNavigate();
 
   const handleClose = () => {
@@ -9,6 +10,4 @@ const Settings = () => {
   };
 
   return <ProfileSettingsDialog onClose={handleClose} />;
-};
-
-export default Settings;
+}

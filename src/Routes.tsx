@@ -1,40 +1,63 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Index from "@/pages/Index";
-import Dashboard from "@/pages/Dashboard";
-import Community from "@/pages/Community";
-import Settings from "@/pages/Settings";
-import { PaymentSuccess } from "@/pages/PaymentSuccess";
-import InvitePage from "@/pages/InvitePage";
+import { Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
+import Community from "./pages/Community";
+import InvitePage from "./pages/InvitePage";
+import { Header } from "./components/Header";
+import { Dashboard } from "./pages/Dashboard";
+import { ProfileSettings } from "./pages/ProfileSettings";
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Index />,
-  },
-  {
-    path: "/dashboard",
-    element: <Dashboard />,
-  },
-  {
-    path: "/community",
-    element: <Community />,
-  },
-  {
-    path: "/settings",
-    element: <Settings />,
-  },
-  {
-    path: "/payment/success",
-    element: <PaymentSuccess />,
-  },
-  {
-    path: "/invite/:inviteId",
-    element: <InvitePage />,
-  },
-]);
+function AppLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <Header />
+      {children}
+    </>
+  );
+}
 
-const Routes = () => {
-  return <RouterProvider router={router} />;
-};
-
-export default Routes;
+export default function AppRoutes() {
+  return (
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <AppLayout>
+            <Index />
+          </AppLayout>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <AppLayout>
+            <Dashboard />
+          </AppLayout>
+        }
+      />
+      <Route
+        path="/community/*"
+        element={
+          <AppLayout>
+            <Community />
+          </AppLayout>
+        }
+      />
+      <Route
+        path="/invite/:inviteId"
+        element={
+          <AppLayout>
+            <InvitePage />
+          </AppLayout>
+        }
+      />
+      <Route
+        path="/profile/settings"
+        element={
+          <AppLayout>
+            <ProfileSettings />
+          </AppLayout>
+        }
+      />
+    </Routes>
+  );
+}

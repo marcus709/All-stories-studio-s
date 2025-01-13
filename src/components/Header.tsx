@@ -9,9 +9,7 @@ import { Navigation } from "./header/Navigation";
 import { UserMenu } from "./header/UserMenu";
 import { Profile } from "@/integrations/supabase/types/tables.types";
 
-interface HeaderProps {}
-
-export const Header: React.FC<HeaderProps> = () => {
+export const Header = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [authView, setAuthView] = useState<"signin" | "signup">("signin");
   const [profile, setProfile] = useState<Profile | null>(null);
