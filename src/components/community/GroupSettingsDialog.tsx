@@ -11,7 +11,6 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { InviteMembersInput } from "./InviteMembersInput";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { InviteLinkGenerator } from "./InviteLinkGenerator";
 import { GroupGoalsTab } from "./GroupGoalsTab";
 
 interface GroupSettingsDialogProps {
