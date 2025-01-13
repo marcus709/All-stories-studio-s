@@ -79,6 +79,35 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
     enabled: true,
   });
 
+  // Query to get current group memberships
+  const { data: userGroupMemberships = [] } = useQuery({
+    queryKey: ["userGroupMemberships"],
+    queryFn: async () => {
+      const { data: memberships, error } = await supabase
+        .from("group_members")
+        .select("group_id")
+        .eq("user_id", (await supabase.auth.getUser()).data.user?.id);
+
+      if (error) {
+        console.error("Error fetching group memberships:", error);
+        return [];
+      }
+
+      return memberships.map(m => m.group_id);
+    },
+    enabled: true,
+  });
+
+  // Filter stories to only show those the user should see
+  const visibleStories = stories.filter(story => {
+    // Show user's own stories
+    if (!story.is_shared_space || story.user_id === (supabase.auth.getUser()).data.user?.id) {
+      return true;
+    }
+    // For shared stories, only show if user is still a member of the group
+    return story.shared_group_id && userGroupMemberships.includes(story.shared_group_id);
+  });
+
   const handleCreateStory = async () => {
     try {
       const formData = {
@@ -126,7 +155,11 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
         setSelectedStory(null);
       }
 
-      queryClient.invalidateQueries({ queryKey: ["stories"] });
+      // Invalidate both stories and group memberships queries
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["stories"] }),
+        queryClient.invalidateQueries({ queryKey: ["userGroupMemberships"] })
+      ]);
     } catch (error) {
       console.error("Error leaving story:", error);
       toast({
@@ -141,7 +174,6 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
     if (!storyToDelete) return;
 
     try {
-      // Check if user has editing rights for shared stories
       if (storyToDelete.is_shared_space && !isGroupAdmin && !userEditingRights[storyToDelete.shared_group_id!]) {
         toast({
           title: "Permission denied",
@@ -201,7 +233,7 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
             />
           ) : (
             <StoriesGrid
-              stories={stories}
+              stories={visibleStories}
               onSelect={onStorySelect}
               isLoading={isLoading}
               onClose={() => onOpenChange(false)}
