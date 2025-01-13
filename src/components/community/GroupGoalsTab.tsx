@@ -175,14 +175,12 @@ export const GroupGoalsTab = ({ groupId, isCreator }: GroupGoalsTabProps) => {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h4 className="text-sm font-medium text-gray-500">Active Goals</h4>
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <span 
             onClick={() => setShowMemberProgress(!showMemberProgress)}
-            className="text-xs text-gray-400 hover:text-gray-600"
+            className="text-xs text-gray-400 hover:text-gray-600 cursor-pointer"
           >
             {showMemberProgress ? "Show Overall Progress" : "Show Member Progress →"}
-          </Button>
+          </span>
         </div>
         
         <ScrollArea className="h-[300px] rounded-md border">
