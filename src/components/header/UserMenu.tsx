@@ -12,8 +12,17 @@ import { useToast } from "@/hooks/use-toast";
 import { Settings, LogOut } from "lucide-react";
 import { useState } from "react";
 import { ProfileSettingsDialog } from "../ProfileSettingsDialog";
+import { Session } from "@supabase/supabase-js";
+import { Profile } from "@/integrations/supabase/types/tables.types";
 
-export function UserMenu() {
+interface UserMenuProps {
+  session: Session | null;
+  profile: Profile | null;
+  onSignOut: () => Promise<void>;
+  onShowAuth: (view: "signin" | "signup") => void;
+}
+
+export function UserMenu({ session, profile, onSignOut, onShowAuth }: UserMenuProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showSettings, setShowSettings] = useState(false);

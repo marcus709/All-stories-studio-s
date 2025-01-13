@@ -33,6 +33,8 @@ const router = createBrowserRouter([
   },
 ]);
 
-export default function Routes() {
+const Routes = () => {
   return <RouterProvider router={router} />;
-}
+};
+
+export default Routes;
