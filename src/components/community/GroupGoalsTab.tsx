@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { User } from "lucide-react";
 
 interface GroupGoalsTabProps {
   groupId: string;
@@ -30,7 +32,12 @@ export const GroupGoalsTab = ({ groupId, isCreator }: GroupGoalsTabProps) => {
           *,
           group_goal_progress (
             value,
-            date
+            date,
+            user_id,
+            profiles:profiles (
+              username,
+              avatar_url
+            )
           )
         `)
         .eq("group_id", groupId)
@@ -88,10 +95,35 @@ export const GroupGoalsTab = ({ groupId, isCreator }: GroupGoalsTabProps) => {
     createGoalMutation.mutate();
   };
 
-  const calculateProgress = (goal: any) => {
+  const calculateProgress = (goal: any, userId?: string) => {
     if (!goal.group_goal_progress?.length) return 0;
-    const totalProgress = goal.group_goal_progress.reduce((sum: number, progress: any) => sum + progress.value, 0);
+    const relevantProgress = userId
+      ? goal.group_goal_progress.filter((p: any) => p.user_id === userId)
+      : goal.group_goal_progress;
+    const totalProgress = relevantProgress.reduce((sum: number, progress: any) => sum + progress.value, 0);
     return Math.min((totalProgress / goal.target_value) * 100, 100);
+  };
+
+  const groupProgressByUser = (goal: any) => {
+    const userProgress = new Map();
+    
+    goal.group_goal_progress?.forEach((progress: any) => {
+      if (!userProgress.has(progress.user_id)) {
+        userProgress.set(progress.user_id, {
+          username: progress.profiles?.username || "Unknown User",
+          avatar_url: progress.profiles?.avatar_url,
+          progress: 0,
+        });
+      }
+      const current = userProgress.get(progress.user_id);
+      current.progress += progress.value;
+      userProgress.set(progress.user_id, current);
+    });
+
+    return Array.from(userProgress.entries()).map(([userId, data]) => ({
+      userId,
+      ...data,
+    }));
   };
 
   return (
@@ -140,20 +172,47 @@ export const GroupGoalsTab = ({ groupId, isCreator }: GroupGoalsTabProps) => {
       )}
 
       <div className="space-y-4">
-        <h4 className="text-sm font-medium text-gray-500">Active Goals</h4>
-        {goals?.map((goal) => (
-          <div key={goal.id} className="bg-white p-4 rounded-lg shadow-sm space-y-2">
-            <div className="flex justify-between items-center">
-              <h5 className="font-medium">
-                {goal.target_value} {goal.goal_type === "word_count" ? "words" : "minutes"} ({goal.frequency})
-              </h5>
-              <span className="text-sm text-gray-500">
-                {new Date(goal.created_at).toLocaleDateString()}
-              </span>
-            </div>
-            <Progress value={calculateProgress(goal)} className="h-2" />
+        <div className="flex justify-between items-center">
+          <h4 className="text-sm font-medium text-gray-500">Active Goals</h4>
+          <span className="text-xs text-gray-400">Member Progress →</span>
+        </div>
+        
+        <ScrollArea className="h-[300px] rounded-md border">
+          <div className="p-4 space-y-4">
+            {goals?.map((goal) => (
+              <div key={goal.id} className="space-y-4">
+                <div className="bg-white p-4 rounded-lg shadow-sm space-y-2">
+                  <div className="flex justify-between items-center">
+                    <h5 className="font-medium">
+                      {goal.target_value} {goal.goal_type === "word_count" ? "words" : "minutes"} ({goal.frequency})
+                    </h5>
+                    <span className="text-sm text-gray-500">
+                      {new Date(goal.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <Progress value={calculateProgress(goal)} className="h-2" />
+                  
+                  <div className="pt-2 space-y-2">
+                    {groupProgressByUser(goal).map((userProgress) => (
+                      <div key={userProgress.userId} className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-2 w-1/3">
+                          <User className="h-4 w-4 text-gray-400" />
+                          <span className="text-sm truncate">{userProgress.username}</span>
+                        </div>
+                        <div className="flex-1">
+                          <Progress 
+                            value={(userProgress.progress / goal.target_value) * 100} 
+                            className="h-2"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        </ScrollArea>
       </div>
     </div>
   );
