@@ -35,7 +35,7 @@ export const GroupGoalsTab = ({ groupId, isCreator }: GroupGoalsTabProps) => {
             value,
             date,
             user_id,
-            profiles (
+            profiles!group_goal_progress_user_id_fkey_profiles (
               username,
               avatar_url
             )
