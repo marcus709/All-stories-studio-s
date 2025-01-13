@@ -1081,6 +1081,7 @@ export type Database = {
           description: string | null
           group_type: Database["public"]["Enums"]["group_type"]
           id: string
+          image_url: string | null
           name: string
           privacy: Database["public"]["Enums"]["group_privacy"]
           updated_at: string | null
@@ -1091,6 +1092,7 @@ export type Database = {
           description?: string | null
           group_type?: Database["public"]["Enums"]["group_type"]
           id?: string
+          image_url?: string | null
           name: string
           privacy?: Database["public"]["Enums"]["group_privacy"]
           updated_at?: string | null
@@ -1101,6 +1103,7 @@ export type Database = {
           description?: string | null
           group_type?: Database["public"]["Enums"]["group_type"]
           id?: string
+          image_url?: string | null
           name?: string
           privacy?: Database["public"]["Enums"]["group_privacy"]
           updated_at?: string | null

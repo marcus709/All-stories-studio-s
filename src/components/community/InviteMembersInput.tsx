@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { UserPlus } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useQuery } from "@tanstack/react-query";
 
 interface InviteMembersInputProps {
   groupId: string;
@@ -11,54 +14,59 @@ interface InviteMembersInputProps {
 }
 
 export const InviteMembersInput = ({ groupId, onInvite }: InviteMembersInputProps) => {
-  const [email, setEmail] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleInvite = async () => {
-    if (!email.trim()) return;
-    
+  // Query for searching users
+  const { data: searchResults } = useQuery({
+    queryKey: ["search-users", searchQuery],
+    queryFn: async () => {
+      if (!searchQuery.trim()) return [];
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, username, avatar_url")
+        .ilike("username", `%${searchQuery}%`)
+        .limit(5);
+
+      if (error) {
+        console.error("Error searching users:", error);
+        return [];
+      }
+
+      // Filter out users who are already members or invited
+      const { data: existingMembers } = await supabase
+        .from("group_members")
+        .select("user_id")
+        .eq("group_id", groupId);
+
+      const { data: pendingInvites } = await supabase
+        .from("group_join_requests")
+        .select("user_id")
+        .eq("group_id", groupId)
+        .eq("invitation_status", "pending");
+
+      const existingMemberIds = new Set(existingMembers?.map(m => m.user_id) || []);
+      const pendingInviteIds = new Set(pendingInvites?.map(i => i.user_id) || []);
+
+      return data.filter(user => 
+        !existingMemberIds.has(user.id) && 
+        !pendingInviteIds.has(user.id)
+      );
+    },
+    enabled: searchQuery.length > 0,
+  });
+
+  const handleInvite = async (userId: string, username: string) => {
     setIsLoading(true);
     try {
-      // First check if user exists
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("username", email.toLowerCase())
-        .maybeSingle();
-
-      if (!profiles?.id) {
-        toast({
-          title: "User not found",
-          description: "Please check the username and try again",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Check if already a member
-      const { data: existingMember } = await supabase
-        .from("group_members")
-        .select()
-        .eq("group_id", groupId)
-        .eq("user_id", profiles.id)
-        .maybeSingle();
-
-      if (existingMember) {
-        toast({
-          title: "Already a member",
-          description: "This user is already a member of the group",
-          variant: "destructive",
-        });
-        return;
-      }
-
       // Check if already invited
       const { data: existingInvite } = await supabase
         .from("group_join_requests")
         .select()
         .eq("group_id", groupId)
-        .eq("user_id", profiles.id)
+        .eq("user_id", userId)
         .eq("invitation_status", "pending")
         .maybeSingle();
 
@@ -76,7 +84,7 @@ export const InviteMembersInput = ({ groupId, onInvite }: InviteMembersInputProp
         .from("group_join_requests")
         .insert({
           group_id: groupId,
-          user_id: profiles.id,
+          user_id: userId,
           invitation_status: "pending",
           invited_by: (await supabase.auth.getUser()).data.user?.id,
         });
@@ -84,11 +92,11 @@ export const InviteMembersInput = ({ groupId, onInvite }: InviteMembersInputProp
       if (inviteError) throw inviteError;
 
       toast({
-        title: "Invitation sent",
-        description: "The user has been invited to join the group",
+        title: "Success",
+        description: `Invitation sent to ${username}`,
       });
       
-      setEmail("");
+      setSearchQuery("");
       onInvite?.();
     } catch (error) {
       console.error("Error inviting member:", error);
@@ -103,20 +111,52 @@ export const InviteMembersInput = ({ groupId, onInvite }: InviteMembersInputProp
   };
 
   return (
-    <div className="flex gap-2">
-      <Input
-        placeholder="Enter username to invite"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="flex-1"
-      />
-      <Button 
-        onClick={handleInvite} 
-        disabled={isLoading || !email.trim()}
-        size="icon"
-      >
-        <UserPlus className="h-4 w-4" />
-      </Button>
+    <div className="space-y-2">
+      <div className="flex gap-2">
+        <Input
+          placeholder="Search users by username..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="flex-1"
+        />
+      </div>
+
+      {searchQuery && searchResults && searchResults.length > 0 && (
+        <ScrollArea className="h-[200px] rounded-md border">
+          <div className="p-4 space-y-2">
+            {searchResults.map((user) => (
+              <div key={user.id} className="flex items-center justify-between p-2 hover:bg-accent rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-8 w-8">
+                    {user.avatar_url ? (
+                      <AvatarImage src={user.avatar_url} />
+                    ) : (
+                      <AvatarFallback>
+                        {user.username?.[0]?.toUpperCase() || "U"}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <span className="text-sm font-medium">{user.username}</span>
+                </div>
+                <Button 
+                  size="sm"
+                  onClick={() => handleInvite(user.id, user.username || "")}
+                  disabled={isLoading}
+                >
+                  <UserPlus className="h-4 w-4 mr-1" />
+                  Invite
+                </Button>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+      )}
+
+      {searchQuery && searchResults && searchResults.length === 0 && (
+        <div className="text-sm text-muted-foreground text-center py-2">
+          No users found
+        </div>
+      )}
     </div>
   );
 };
