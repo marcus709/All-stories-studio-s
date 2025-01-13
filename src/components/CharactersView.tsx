@@ -13,6 +13,7 @@ import { useFeatureAccess } from "@/utils/subscriptionUtils";
 import { DialogAssistant } from "./characters/DialogAssistant";
 import { CharacterDynamics } from "./characters/CharacterDynamics";
 import { Character } from "@/types/character";
+import { useStory } from "@/contexts/StoryContext";
 
 type ViewMode = 'grid' | 'dialog' | 'dynamics';
 
@@ -25,13 +26,17 @@ export const CharactersView = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { currentLimits, getRequiredPlan } = useFeatureAccess();
+  const { selectedStory } = useStory();
 
   const { data: characters, isLoading } = useQuery({
-    queryKey: ["characters", session?.user?.id],
+    queryKey: ["characters", session?.user?.id, selectedStory?.id],
     queryFn: async () => {
+      if (!selectedStory?.id) return [];
+      
       const { data, error } = await supabase
         .from("characters")
         .select("*")
+        .eq("story_id", selectedStory.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -49,7 +54,7 @@ export const CharactersView = () => {
         expertise: char.expertise as Character['expertise']
       })) as Character[];
     },
-    enabled: !!session?.user?.id,
+    enabled: !!session?.user?.id && !!selectedStory?.id,
   });
 
   const handleCreateClick = () => {
