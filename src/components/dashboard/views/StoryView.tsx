@@ -40,7 +40,6 @@ export const StoryView = () => {
   const queryClient = useQueryClient();
   const { currentLimits, getRequiredPlan } = useFeatureAccess();
 
-  // Fetch AI configurations for the current user
   const { data: aiConfigurations = [] } = useQuery({
     queryKey: ["aiConfigurations", session?.user?.id],
     queryFn: async () => {
@@ -105,7 +104,7 @@ export const StoryView = () => {
     
     if (suggestions) {
       if (isChatMode) {
-        setMessages([...messages, { role: 'assistant', content: suggestions }]);
+        setMessages([...messages, { role: 'assistant' as const, content: suggestions }]);
       } else {
         setAiSuggestions(suggestions);
       }
@@ -125,13 +124,12 @@ export const StoryView = () => {
     
     if (!currentMessage.trim()) return;
 
-    // Add user message
-    const newMessages = [...messages, { role: 'user', content: currentMessage }];
-    setMessages(newMessages);
+    const newMessage: Message = { role: 'user', content: currentMessage };
+    const updatedMessages = [...messages, newMessage];
+    setMessages(updatedMessages);
     setCurrentMessage('');
 
     try {
-      // Get AI response
       const aiResponse = await generateContent(
         currentMessage,
         'suggestions',
@@ -147,7 +145,7 @@ export const StoryView = () => {
       );
 
       if (aiResponse) {
-        setMessages([...newMessages, { role: 'assistant', content: aiResponse }]);
+        setMessages([...updatedMessages, { role: 'assistant', content: aiResponse }]);
       }
     } catch (error) {
       console.error('Error getting AI response:', error);
