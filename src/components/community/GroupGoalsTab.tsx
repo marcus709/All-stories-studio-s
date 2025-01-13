@@ -22,6 +22,7 @@ export const GroupGoalsTab = ({ groupId, isCreator }: GroupGoalsTabProps) => {
   const [goalType, setGoalType] = useState<"word_count" | "time_based">("word_count");
   const [frequency, setFrequency] = useState<"daily" | "weekly" | "monthly">("daily");
   const [targetValue, setTargetValue] = useState("");
+  const [showMemberProgress, setShowMemberProgress] = useState(false);
 
   const { data: goals } = useQuery({
     queryKey: ["group-goals", groupId],
@@ -174,7 +175,14 @@ export const GroupGoalsTab = ({ groupId, isCreator }: GroupGoalsTabProps) => {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h4 className="text-sm font-medium text-gray-500">Active Goals</h4>
-          <span className="text-xs text-gray-400">Member Progress →</span>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setShowMemberProgress(!showMemberProgress)}
+            className="text-xs text-gray-400 hover:text-gray-600"
+          >
+            {showMemberProgress ? "Show Overall Progress" : "Show Member Progress →"}
+          </Button>
         </div>
         
         <ScrollArea className="h-[300px] rounded-md border">
@@ -190,24 +198,27 @@ export const GroupGoalsTab = ({ groupId, isCreator }: GroupGoalsTabProps) => {
                       {new Date(goal.created_at).toLocaleDateString()}
                     </span>
                   </div>
-                  <Progress value={calculateProgress(goal)} className="h-2" />
                   
-                  <div className="pt-2 space-y-2">
-                    {groupProgressByUser(goal).map((userProgress) => (
-                      <div key={userProgress.userId} className="flex items-center space-x-3">
-                        <div className="flex items-center space-x-2 w-1/3">
-                          <User className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm truncate">{userProgress.username}</span>
+                  {!showMemberProgress ? (
+                    <Progress value={calculateProgress(goal)} className="h-2" />
+                  ) : (
+                    <div className="pt-2 space-y-2">
+                      {groupProgressByUser(goal).map((userProgress) => (
+                        <div key={userProgress.userId} className="flex items-center space-x-3">
+                          <div className="flex items-center space-x-2 w-1/3">
+                            <User className="h-4 w-4 text-gray-400" />
+                            <span className="text-sm truncate">{userProgress.username}</span>
+                          </div>
+                          <div className="flex-1">
+                            <Progress 
+                              value={(userProgress.progress / goal.target_value) * 100} 
+                              className="h-2"
+                            />
+                          </div>
                         </div>
-                        <div className="flex-1">
-                          <Progress 
-                            value={(userProgress.progress / goal.target_value) * 100} 
-                            className="h-2"
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
