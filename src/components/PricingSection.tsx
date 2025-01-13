@@ -8,16 +8,16 @@ import { Input } from "./ui/input";
 
 const plans = [
   {
-    name: "Curious",
+    name: "5-Day Free Trial",
     price: "0",
     features: [
-      "2 AI prompts to try",
+      "Unlimited prompts",
       "1 story maximum",
       "5 characters maximum",
       "Basic story enhancement",
-      { text: "Community Access", available: false }
+      "Full community access"
     ],
-    buttonText: "Try for Free",
+    buttonText: "Start Free Trial",
     buttonVariant: "outline" as const,
     priceId: null
   },
@@ -66,7 +66,63 @@ export const PricingSection = () => {
   const [processingPlanId, setProcessingPlanId] = useState<string | null>(null);
 
   const handleSubscription = async (priceId: string | null) => {
-    if (!priceId) return; // Free plan
+    if (!priceId) {
+      if (!session) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to start your free trial.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Start free trial
+      try {
+        const { data: existingTrial, error: trialCheckError } = await supabase
+          .from('user_trials')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+
+        if (trialCheckError) throw trialCheckError;
+
+        if (existingTrial) {
+          toast({
+            title: "Trial Already Used",
+            description: "You've already used your free trial. Please choose a paid plan to continue.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const { error: createTrialError } = await supabase
+          .from('user_trials')
+          .insert([
+            { 
+              user_id: session.user.id,
+              trial_start_date: new Date().toISOString(),
+              trial_end_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+              is_active: true
+            }
+          ]);
+
+        if (createTrialError) throw createTrialError;
+
+        toast({
+          title: "Trial Started",
+          description: "Your 5-day free trial has started. Enjoy full access to our community features!",
+        });
+        return;
+      } catch (error) {
+        console.error('Error starting trial:', error);
+        toast({
+          title: "Error",
+          description: "Failed to start your trial. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
     
     if (!session) {
       toast({
@@ -99,7 +155,6 @@ export const PricingSection = () => {
         throw new Error('No checkout URL received');
       }
 
-      // Redirect to Stripe Checkout
       window.location.href = data.url;
     } catch (error) {
       console.error('Error:', error);
