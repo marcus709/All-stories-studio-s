@@ -223,9 +223,10 @@ export const PricingSection = () => {
                 <ul className="space-y-4">
                   {plan.features.map((feature, index) => {
                     const isObject = typeof feature === 'object' && feature !== null;
+                    const featureText = isObject ? feature.text : feature;
                     return (
                       <li 
-                        key={isObject ? feature.text : feature} 
+                        key={`${plan.name}-feature-${index}`}
                         className="flex items-center space-x-3"
                       >
                         {isObject ? (
@@ -237,7 +238,7 @@ export const PricingSection = () => {
                         ) : (
                           <Check className="h-5 w-5 text-green-500" />
                         )}
-                        <span>{isObject ? feature.text : feature}</span>
+                        <span>{featureText}</span>
                       </li>
                     );
                   })}
