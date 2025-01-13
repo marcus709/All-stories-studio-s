@@ -27,7 +27,8 @@ interface DashboardSidebarProps {
 }
 
 export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onToggleCollapse }: DashboardSidebarProps) => {
-  const { selectedStory } = useStory();
+  const [showStoriesDialog, setShowStoriesDialog] = useState(false);
+  const { selectedStory, setSelectedStory } = useStory();
   const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
@@ -54,6 +55,11 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
 
     fetchProfile();
   }, []);
+
+  const handleStorySelect = (story: Story) => {
+    setSelectedStory(story);
+    setShowStoriesDialog(false);
+  };
 
   if (isCollapsed) {
     return (
@@ -111,7 +117,11 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
 
         {/* Stories Section - Fixed */}
         <div className="space-y-4 mb-6 px-8">
-          <StoriesDialog />
+          <StoriesDialog
+            open={showStoriesDialog}
+            onOpenChange={setShowStoriesDialog}
+            onStorySelect={handleStorySelect}
+          />
         </div>
 
         {/* Navigation - Scrollable */}

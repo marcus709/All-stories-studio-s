@@ -18,7 +18,6 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
   const [showNewStory, setShowNewStory] = useState(false);
   const [showNewSharedStory, setShowNewSharedStory] = useState(false);
   const { data: stories = [], isLoading } = useStories();
-  const { selectedStory } = useStory();
   const createStory = useCreateStory();
 
   const handleCreateStory = async (formData: any) => {
@@ -49,9 +48,9 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
         ) : (
           <StoriesGrid
             stories={stories}
-            selectedStory={selectedStory}
             onSelect={onStorySelect}
             isLoading={isLoading}
+            onClose={() => onOpenChange(false)}
           />
         )}
       </DialogContent>

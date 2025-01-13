@@ -1,27 +1,19 @@
 import { StoryCard } from "./StoryCard";
-import { useStory } from "@/contexts/StoryContext";
+import { Story } from "@/types/story";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-interface Story {
-  id: string;
-  title: string;
-  description: string;
-  created_at: string;
-  updated_at: string;
-  user_id: string;
-}
-
 interface StoriesGridProps {
   stories: Story[];
-  onStorySelect: (story: Story) => void;
+  onSelect: (story: Story) => void;
+  isLoading: boolean;
   onClose: () => void;
 }
 
-export const StoriesGrid = ({ stories, onStorySelect, onClose }: StoriesGridProps) => {
+export const StoriesGrid = ({ stories, onSelect, isLoading, onClose }: StoriesGridProps) => {
   const { selectedStory, setSelectedStory } = useStory();
   const [storyToDelete, setStoryToDelete] = useState<Story | null>(null);
   const { toast } = useToast();
@@ -69,18 +61,17 @@ export const StoriesGrid = ({ stories, onStorySelect, onClose }: StoriesGridProp
   };
 
   const handleStorySelect = (story: Story) => {
-    onStorySelect(story);
+    onSelect(story);
     onClose();
   };
 
   return (
-    <>
+    <div className="p-6 pt-0">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {stories.map((story) => (
           <StoryCard
             key={story.id}
             story={story}
-            isSelected={selectedStory?.id === story.id}
             onClick={() => handleStorySelect(story)}
             onDelete={(e) => handleDelete(story, e)}
           />
@@ -107,6 +98,6 @@ export const StoriesGrid = ({ stories, onStorySelect, onClose }: StoriesGridProp
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </div>
   );
 };
