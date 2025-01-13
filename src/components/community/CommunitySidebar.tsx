@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
-import { MessageSquare, Users, Hash, Bookmark, Settings, UserPlus, PenLine } from "lucide-react";
+import { MessageSquare, Users, Hash, Bookmark, Settings, UserPlus, PenLine, Target } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AddFriendsDialog } from "./AddFriendsDialog";
@@ -10,6 +10,7 @@ import { capitalize } from "lodash";
 import { FriendRequestsList } from "./FriendRequestsList";
 import { FriendsList } from "./FriendsList";
 import { DailyChallengeDialog } from "./DailyChallengeDialog";
+import { GoalsDialog } from "./GoalsDialog";
 import { useToast } from "@/hooks/use-toast";
 
 const navItems = [
@@ -24,6 +25,7 @@ export const CommunitySidebar = () => {
   const session = useSession();
   const { plan } = useSubscription();
   const [showChallengeDialog, setShowChallengeDialog] = useState(false);
+  const [showGoalsDialog, setShowGoalsDialog] = useState(false);
   const [hasFeedback, setHasFeedback] = useState(false);
   const { toast } = useToast();
 
@@ -205,6 +207,14 @@ export const CommunitySidebar = () => {
           </button>
         )}
 
+        <button
+          onClick={() => setShowGoalsDialog(true)}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 text-gray-600 hover:bg-purple-50/50 hover:text-gray-900"
+        >
+          <Target className="h-5 w-5" />
+          <span>Goals</span>
+        </button>
+
         <AddFriendsDialog>
           <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 text-gray-600 hover:bg-purple-50/50 hover:text-gray-900 relative">
             <UserPlus className="h-5 w-5" />
@@ -228,6 +238,10 @@ export const CommunitySidebar = () => {
           onOpenChange={setShowChallengeDialog} 
           latestSubmission={latestSubmission}
         />
+      )}
+
+      {showGoalsDialog && (
+        <GoalsDialog onOpenChange={setShowGoalsDialog} />
       )}
     </div>
   );

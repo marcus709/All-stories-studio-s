@@ -808,6 +808,41 @@ export type Database = {
           },
         ]
       }
+      goal_progress: {
+        Row: {
+          created_at: string | null
+          date: string
+          goal_id: string
+          id: string
+          user_id: string
+          value: number
+        }
+        Insert: {
+          created_at?: string | null
+          date?: string
+          goal_id: string
+          id?: string
+          user_id: string
+          value: number
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          goal_id?: string
+          id?: string
+          user_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_progress_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "user_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_join_requests: {
         Row: {
           created_at: string | null
@@ -1769,6 +1804,39 @@ export type Database = {
           },
         ]
       }
+      user_goals: {
+        Row: {
+          created_at: string | null
+          frequency: Database["public"]["Enums"]["goal_frequency"]
+          goal_type: Database["public"]["Enums"]["goal_type"]
+          id: string
+          start_date: string
+          target_value: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          frequency: Database["public"]["Enums"]["goal_frequency"]
+          goal_type: Database["public"]["Enums"]["goal_type"]
+          id?: string
+          start_date?: string
+          target_value: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          frequency?: Database["public"]["Enums"]["goal_frequency"]
+          goal_type?: Database["public"]["Enums"]["goal_type"]
+          id?: string
+          start_date?: string
+          target_value?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_trials: {
         Row: {
           id: string
@@ -1869,6 +1937,8 @@ export type Database = {
       ai_model_type: "gpt-4o" | "gpt-4o-mini"
       challenge_difficulty: "easy" | "medium" | "hard"
       document_section_type: "chapter" | "scene" | "note"
+      goal_frequency: "daily" | "weekly" | "monthly"
+      goal_type: "word_count" | "time_based"
       group_privacy: "public" | "private"
       milestone_type:
         | "ending"
