@@ -11,7 +11,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
-import { Badge } from "./ui/badge";
 
 interface StoriesDialogProps {
   open: boolean;
@@ -99,6 +98,38 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleLeaveStory = async (story: Story) => {
+    try {
+      if (!story.shared_group_id) return;
+
+      const { error } = await supabase
+        .from("group_members")
+        .delete()
+        .eq("group_id", story.shared_group_id)
+        .eq("user_id", (await supabase.auth.getUser()).data.user?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Left the shared story successfully",
+      });
+
+      if (selectedStory?.id === story.id) {
+        setSelectedStory(null);
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["stories"] });
+    } catch (error) {
+      console.error("Error leaving story:", error);
+      toast({
+        title: "Error",
+        description: "Failed to leave the story",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDeleteConfirm = async () => {
