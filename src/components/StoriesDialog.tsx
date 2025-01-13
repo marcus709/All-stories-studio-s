@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
+import { Badge } from "./ui/badge";
 
 interface StoriesDialogProps {
   open: boolean;
@@ -57,6 +58,23 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
     enabled: !!selectedStory?.shared_group_id,
   });
 
+  // Add query for user's editing rights in shared stories
+  const { data: userEditingRights = {} } = useQuery({
+    queryKey: ["userEditingRights", selectedStory?.shared_group_id],
+    queryFn: async () => {
+      const { data: memberData } = await supabase
+        .from("group_members")
+        .select("group_id, editing_rights")
+        .eq("user_id", (await supabase.auth.getUser()).data.user?.id);
+
+      return memberData?.reduce((acc: Record<string, boolean>, curr) => {
+        acc[curr.group_id] = curr.editing_rights;
+        return acc;
+      }, {}) || {};
+    },
+    enabled: !!selectedStory?.shared_group_id,
+  });
+
   const handleCreateStory = async () => {
     try {
       const formData = {
@@ -68,6 +86,11 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
       onStorySelect(createdStory);
     } catch (error) {
       console.error("Error creating story:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create story",
+        variant: "destructive",
+      });
     }
   };
 
@@ -82,6 +105,16 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
     if (!storyToDelete) return;
 
     try {
+      // Check if user has editing rights for shared stories
+      if (storyToDelete.is_shared_space && !isGroupAdmin && !userEditingRights[storyToDelete.shared_group_id!]) {
+        toast({
+          title: "Permission denied",
+          description: "You don't have editing rights for this shared story.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from("stories")
         .delete()
@@ -91,10 +124,9 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
 
       toast({
         title: "Story deleted",
-        description: "The story and all its content has been permanently deleted for all members.",
+        description: "The story has been permanently deleted.",
       });
 
-      // If the deleted story was selected, clear the selection
       if (selectedStory?.id === storyToDelete.id) {
         setSelectedStory(null);
       }
@@ -107,46 +139,6 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
       toast({
         title: "Error",
         description: "Failed to delete the story.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleLeaveStory = async (story: Story) => {
-    if (!story.shared_group_id) return;
-
-    try {
-      const { error } = await supabase
-        .from("group_members")
-        .delete()
-        .eq("group_id", story.shared_group_id)
-        .eq("user_id", (await supabase.auth.getUser()).data.user?.id);
-
-      if (error) throw error;
-
-      // If the left story was selected, clear the selection
-      if (selectedStory?.id === story.id) {
-        setSelectedStory(null);
-      }
-
-      toast({
-        title: "Left story",
-        description: "You have successfully left the shared story.",
-      });
-
-      // Immediately remove the story from the local cache
-      queryClient.setQueryData(["stories"], (oldData: Story[] | undefined) => {
-        if (!oldData) return [];
-        return oldData.filter(s => s.id !== story.id);
-      });
-
-      // Then refetch to ensure everything is in sync
-      queryClient.invalidateQueries({ queryKey: ["stories"] });
-    } catch (error) {
-      console.error("Error leaving story:", error);
-      toast({
-        title: "Error",
-        description: "Failed to leave the story.",
         variant: "destructive",
       });
     }
@@ -178,6 +170,7 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
               isLoading={isLoading}
               onClose={() => onOpenChange(false)}
               isGroupAdmin={isGroupAdmin}
+              userEditingRights={userEditingRights}
               onLeave={handleLeaveStory}
               onDelete={(story) => {
                 setStoryToDelete(story);
@@ -194,7 +187,7 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the story
-              and all its associated content for all members of the group.
+              and all its associated content.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -11,6 +11,7 @@ interface StoriesGridProps {
   isLoading: boolean;
   onClose: () => void;
   isGroupAdmin?: boolean;
+  userEditingRights: Record<string, boolean>;
   onLeave: (story: Story) => void;
   onDelete: (story: Story) => void;
 }
@@ -19,8 +20,9 @@ export function StoriesGrid({
   stories, 
   onSelect, 
   isLoading, 
-  onClose, 
+  onClose,
   isGroupAdmin,
+  userEditingRights,
   onLeave,
   onDelete
 }: StoriesGridProps) {
@@ -29,17 +31,14 @@ export function StoriesGrid({
   const handleAction = async (e: React.MouseEvent, story: Story) => {
     e.stopPropagation();
 
-    // If it's a shared story and user is not an admin, they can only leave
-    if (story.is_shared_space && !isGroupAdmin) {
-      onLeave(story);
-      return;
+    if (story.is_shared_space) {
+      if (!isGroupAdmin && !userEditingRights[story.shared_group_id!]) {
+        onLeave(story);
+        return;
+      }
     }
-
-    // If user is admin of shared story or it's their own story, they can delete
-    if ((story.is_shared_space && isGroupAdmin) || !story.is_shared_space) {
-      onDelete(story);
-      return;
-    }
+    
+    onDelete(story);
   };
 
   if (isLoading) {
@@ -73,6 +72,7 @@ export function StoriesGrid({
             isSelected={false}
             isSharedStory={story.is_shared_space}
             isAdmin={isGroupAdmin}
+            hasEditingRights={story.is_shared_space ? userEditingRights[story.shared_group_id!] : true}
           />
         ))}
       </div>

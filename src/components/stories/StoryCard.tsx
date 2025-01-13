@@ -1,7 +1,8 @@
 import React from "react";
 import { Card } from "../ui/card";
-import { LogOut, Trash2 } from "lucide-react";
+import { LogOut, Trash2, Edit, Eye } from "lucide-react";
 import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
 
 interface StoryCardProps {
   story: {
@@ -16,6 +17,7 @@ interface StoryCardProps {
   onAction: (e: React.MouseEvent) => void;
   isSharedStory?: boolean;
   isAdmin?: boolean;
+  hasEditingRights: boolean;
 }
 
 export function StoryCard({ 
@@ -23,8 +25,9 @@ export function StoryCard({
   isSelected, 
   onClick, 
   onAction,
-  isSharedStory, 
-  isAdmin 
+  isSharedStory,
+  isAdmin,
+  hasEditingRights
 }: StoryCardProps) {
   return (
     <Card 
@@ -37,16 +40,29 @@ export function StoryCard({
         variant="ghost"
         size="icon"
         className={`absolute top-2 right-2 text-gray-500 ${
-          isSharedStory && !isAdmin ? "hover:text-blue-500 hover:bg-blue-50" : "hover:text-red-500 hover:bg-red-50"
+          isSharedStory && !isAdmin && !hasEditingRights ? "hover:text-blue-500 hover:bg-blue-50" : "hover:text-red-500 hover:bg-red-50"
         }`}
         onClick={onAction}
       >
-        {isSharedStory && !isAdmin ? (
+        {isSharedStory && !isAdmin && !hasEditingRights ? (
           <LogOut className="h-4 w-4" />
         ) : (
           <Trash2 className="h-4 w-4" />
         )}
       </Button>
+      
+      {isSharedStory && (
+        <Badge 
+          variant={hasEditingRights ? "default" : "secondary"}
+          className="absolute top-2 left-2"
+        >
+          {hasEditingRights ? (
+            <><Edit className="h-3 w-3 mr-1" /> Editor</>
+          ) : (
+            <><Eye className="h-3 w-3 mr-1" /> Viewer</>
+          )}
+        </Badge>
+      )}
       
       <div className="w-12 h-12 mb-4 text-purple-500">
         <svg
