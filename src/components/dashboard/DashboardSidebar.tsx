@@ -1,137 +1,177 @@
-import { useState, useEffect } from "react";
-import { Book, Users, LineChart, Lightbulb, FileText, AlertTriangle, Rewind, ChevronLeft, ChevronRight } from "lucide-react";
-import { StoriesDialog } from "../StoriesDialog";
-import { useStory } from "@/contexts/StoryContext";
-import { supabase } from "@/integrations/supabase/client";
-import { Profile } from "@/integrations/supabase/types/tables.types";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-
-const navigationItems = [
-  { id: "story", icon: Book, label: "Story Editor" },
-  { id: "characters", icon: Users, label: "Characters" },
-  { id: "plot", icon: LineChart, label: "Formatting" },
-  { id: "dream", icon: Rewind, label: "Backwards Planning" },
-  { id: "ideas", icon: Lightbulb, label: "Story Ideas" },
-  { id: "docs", icon: FileText, label: "Story Docs" },
-  { id: "logic", icon: AlertTriangle, label: "Story Logic" },
-] as const;
-
-type View = (typeof navigationItems)[number]["id"];
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { StoriesDialog } from "@/components/StoriesDialog";
+import { useStory } from "@/contexts/StoryContext";
+import { cn } from "@/lib/utils";
+import {
+  BookOpen,
+  Users,
+  GitBranch,
+  Cloud,
+  FileText,
+  BrainCircuit,
+  PanelLeftClose,
+  PanelLeft,
+  Plus,
+} from "lucide-react";
 
 interface DashboardSidebarProps {
-  currentView: View;
-  setCurrentView: (view: View) => void;
+  currentView: string;
+  setCurrentView: (view: string) => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
 }
 
-export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onToggleCollapse }: DashboardSidebarProps) => {
-  const { selectedStory } = useStory();
-  const [profile, setProfile] = useState<Profile | null>(null);
+export const DashboardSidebar = ({
+  currentView,
+  setCurrentView,
+  isCollapsed,
+  onToggleCollapse,
+}: DashboardSidebarProps) => {
+  const [showStoriesDialog, setShowStoriesDialog] = useState(false);
+  const { selectedStory, clearSelectedStory } = useStory();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .single();
-        
-        if (data) {
-          setProfile({
-            id: data.id,
-            username: data.username,
-            avatar_url: data.avatar_url,
-            bio: data.bio,
-            website: null
-          });
-        }
-      }
-    };
+  const handleViewChange = (view: string) => {
+    if (!selectedStory) {
+      setShowStoriesDialog(true);
+      return;
+    }
+    setCurrentView(view);
+  };
 
-    fetchProfile();
-  }, []);
+  const handleStorySelect = () => {
+    setShowStoriesDialog(false);
+    // The view will update automatically through the story context
+  };
 
-  if (isCollapsed) {
-    return (
-      <div className="fixed left-0 top-16 w-12 h-[calc(100vh-4rem)] border-r bg-white flex flex-col items-center py-4">
+  return (
+    <div
+      className={cn(
+        "fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white border-r transition-all duration-300 z-10",
+        isCollapsed ? "w-12" : "w-72"
+      )}
+    >
+      <div className="flex items-center justify-between p-4 border-b">
+        <h2 className={cn("font-semibold", isCollapsed && "hidden")}>
+          {selectedStory?.title || "Select a Story"}
+        </h2>
         <Button
           variant="ghost"
           size="icon"
           onClick={onToggleCollapse}
-          className="mb-4"
+          className="h-8 w-8"
         >
-          <ChevronRight className="h-4 w-4" />
+          {isCollapsed ? (
+            <PanelLeft className="h-4 w-4" />
+          ) : (
+            <PanelLeftClose className="h-4 w-4" />
+          )}
         </Button>
-        <nav className="space-y-3">
-          {navigationItems.map(({ id, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setCurrentView(id)}
-              disabled={!selectedStory}
-              className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors
-                ${currentView === id ? "text-purple-600 bg-purple-50" : "text-gray-700 hover:bg-gray-50"}`}
-            >
-              <Icon className="h-5 w-5" />
-            </button>
-          ))}
-        </nav>
       </div>
-    );
-  }
 
-  return (
-    <div className="fixed left-0 top-16 w-72 h-[calc(100vh-4rem)] border-r bg-white">
-      <div className="flex flex-col h-full">
-        <div className="absolute right-2 top-2">
+      <ScrollArea className="h-[calc(100vh-8rem)]">
+        <div className="space-y-2 p-2">
           <Button
             variant="ghost"
-            size="icon"
-            onClick={onToggleCollapse}
-            className="hover:bg-gray-100"
+            className={cn(
+              "w-full justify-start gap-2",
+              !isCollapsed && "px-2",
+              isCollapsed && "justify-center px-0"
+            )}
+            onClick={() => setShowStoriesDialog(true)}
           >
-            <ChevronLeft className="h-4 w-4" />
+            <Plus className="h-4 w-4" />
+            {!isCollapsed && "Switch Story"}
+          </Button>
+
+          <Button
+            variant={currentView === "story" ? "secondary" : "ghost"}
+            className={cn(
+              "w-full justify-start gap-2",
+              !isCollapsed && "px-2",
+              isCollapsed && "justify-center px-0"
+            )}
+            onClick={() => handleViewChange("story")}
+          >
+            <BookOpen className="h-4 w-4" />
+            {!isCollapsed && "Write"}
+          </Button>
+
+          <Button
+            variant={currentView === "characters" ? "secondary" : "ghost"}
+            className={cn(
+              "w-full justify-start gap-2",
+              !isCollapsed && "px-2",
+              isCollapsed && "justify-center px-0"
+            )}
+            onClick={() => handleViewChange("characters")}
+          >
+            <Users className="h-4 w-4" />
+            {!isCollapsed && "Characters"}
+          </Button>
+
+          <Button
+            variant={currentView === "plot" ? "secondary" : "ghost"}
+            className={cn(
+              "w-full justify-start gap-2",
+              !isCollapsed && "px-2",
+              isCollapsed && "justify-center px-0"
+            )}
+            onClick={() => handleViewChange("plot")}
+          >
+            <GitBranch className="h-4 w-4" />
+            {!isCollapsed && "Plot"}
+          </Button>
+
+          <Button
+            variant={currentView === "dream" ? "secondary" : "ghost"}
+            className={cn(
+              "w-full justify-start gap-2",
+              !isCollapsed && "px-2",
+              isCollapsed && "justify-center px-0"
+            )}
+            onClick={() => handleViewChange("dream")}
+          >
+            <Cloud className="h-4 w-4" />
+            {!isCollapsed && "Dream to Story"}
+          </Button>
+
+          <Button
+            variant={currentView === "docs" ? "secondary" : "ghost"}
+            className={cn(
+              "w-full justify-start gap-2",
+              !isCollapsed && "px-2",
+              isCollapsed && "justify-center px-0"
+            )}
+            onClick={() => handleViewChange("docs")}
+          >
+            <FileText className="h-4 w-4" />
+            {!isCollapsed && "Documents"}
+          </Button>
+
+          <Button
+            variant={currentView === "logic" ? "secondary" : "ghost"}
+            className={cn(
+              "w-full justify-start gap-2",
+              !isCollapsed && "px-2",
+              isCollapsed && "justify-center px-0"
+            )}
+            onClick={() => handleViewChange("logic")}
+          >
+            <BrainCircuit className="h-4 w-4" />
+            {!isCollapsed && "Story Logic"}
           </Button>
         </div>
+      </ScrollArea>
 
-        {/* Profile Section - Fixed */}
-        <div className="flex items-center gap-3 mb-12 px-8 mt-8">
-          <div className="w-11 h-11 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-lg font-medium">
-            {profile?.username?.[0]?.toUpperCase() || "?"}
-          </div>
-          <div className="flex flex-col">
-            <h3 className="font-medium text-base text-gray-900">
-              {profile?.username || "Loading..."}
-            </h3>
-          </div>
-        </div>
-
-        {/* Stories Section - Fixed */}
-        <div className="space-y-4 mb-6 px-8">
-          <StoriesDialog />
-        </div>
-
-        {/* Navigation - Scrollable */}
-        <ScrollArea className="flex-1 px-4">
-          <nav className="space-y-3 pr-4">
-            {navigationItems.map(({ id, icon: Icon, label }) => (
-              <button
-                key={id}
-                onClick={() => setCurrentView(id)}
-                disabled={!selectedStory}
-                className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-lg transition-colors text-gray-700 text-lg
-                  ${currentView === id ? "bg-purple-50 text-purple-600" : "hover:bg-gray-50"}`}
-              >
-                <Icon className="h-6 w-6" />
-                <span className="font-medium">{label}</span>
-              </button>
-            ))}
-          </nav>
-        </ScrollArea>
-      </div>
+      <StoriesDialog
+        open={showStoriesDialog}
+        onOpenChange={setShowStoriesDialog}
+        onStorySelect={handleStorySelect}
+      />
     </div>
   );
-};
+}

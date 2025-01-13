@@ -1,140 +1,52 @@
-import { useState, useEffect } from "react";
-import { CharactersView } from "@/components/CharactersView";
-import { FormattingView } from "@/components/FormattingView";
-import { BackwardsStoryPlanningView } from "@/components/backwards-planning/BackwardsStoryPlanningView";
-import { StoryIdeasView } from "@/components/StoryIdeasView";
-import { StoryDocsView } from "@/components/docs/StoryDocsView";
 import { StoryView } from "./views/StoryView";
-import { StoryLogicView } from "@/components/story-logic/StoryLogicView";
-import { useFeatureAccess } from "@/utils/subscriptionUtils";
-import { PaywallAlert } from "../PaywallAlert";
-import { FeatureKey } from "@/utils/subscriptionUtils";
+import { CharactersView } from "../CharactersView";
+import { PlotDevelopmentView } from "../PlotDevelopmentView";
+import { DreamToStory } from "../dream-to-story/DreamToStory";
+import { StoryDocsView } from "../docs/StoryDocsView";
+import { StoryLogicView } from "../story-logic/StoryLogicView";
 import { useStory } from "@/contexts/StoryContext";
-import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-
-type View = "story" | "characters" | "plot" | "dream" | "ideas" | "docs" | "logic";
+import { AlertCircle } from "lucide-react";
 
 interface DashboardContentProps {
-  currentView: View;
+  currentView: string;
 }
 
 export const DashboardContent = ({ currentView }: DashboardContentProps) => {
-  const [showPaywallAlert, setShowPaywallAlert] = useState(false);
-  const [blockedFeature, setBlockedFeature] = useState<{ name: string; plan: string } | null>(null);
-  const { checkFeatureAccess, getRequiredPlan } = useFeatureAccess();
   const { selectedStory } = useStory();
-  const [error, setError] = useState<Error | null>(null);
-  const [currentComponent, setCurrentComponent] = useState<React.ReactNode | null>(null);
 
-  const handleFeatureAccess = (feature: string, requiredFeature: FeatureKey) => {
-    if (!checkFeatureAccess(requiredFeature)) {
-      setBlockedFeature({
-        name: feature,
-        plan: getRequiredPlan(requiredFeature) || 'creator'
-      });
-      setShowPaywallAlert(true);
-      return false;
-    }
-    return true;
-  };
-
-  useEffect(() => {
-    try {
-      let component: React.ReactNode = null;
-      
-      switch (currentView) {
-        case "characters":
-          component = <CharactersView />;
-          break;
-        case "plot":
-          if (handleFeatureAccess("Book Creator", "story_docs")) {
-            component = <FormattingView />;
-          }
-          break;
-        case "dream":
-          if (handleFeatureAccess("Backwards Planning", "story_docs")) {
-            component = <BackwardsStoryPlanningView />;
-          }
-          break;
-        case "ideas":
-          component = <StoryIdeasView />;
-          break;
-        case "docs":
-          if (handleFeatureAccess("Story Documentation", "story_docs")) {
-            component = <StoryDocsView />;
-          }
-          break;
-        case "logic":
-          if (handleFeatureAccess("Story Logic", "story_logic")) {
-            component = <StoryLogicView />;
-          }
-          break;
-        case "story":
-          component = <StoryView />;
-          break;
-        default:
-          component = (
-            <div className="flex items-center justify-center h-full text-gray-500">
-              This feature is coming soon!
-            </div>
-          );
-      }
-      
-      setCurrentComponent(component);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('An unexpected error occurred'));
-    }
-  }, [currentView, handleFeatureAccess]);
-
-  if (error) {
+  if (!selectedStory) {
     return (
-      <div className="p-8">
+      <div className="p-6">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription className="mt-2">
-            {error.message}
-            <div className="mt-4">
-              <Button 
-                variant="outline" 
-                onClick={() => setError(null)}
-              >
-                Try Again
-              </Button>
-            </div>
+          <AlertTitle>No Story Selected</AlertTitle>
+          <AlertDescription>
+            Please select a story from the sidebar to start working.
           </AlertDescription>
         </Alert>
       </div>
     );
   }
 
-  if (!selectedStory && currentView !== "story") {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-4rem)] bg-gray-50">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">No Story Selected</h2>
-          <p className="text-gray-600 mb-4">Please select or create a story to access this feature.</p>
-        </div>
-      </div>
-    );
-  }
+  const renderContent = () => {
+    switch (currentView) {
+      case "story":
+        return <StoryView />;
+      case "characters":
+        return <CharactersView />;
+      case "plot":
+        return <PlotDevelopmentView />;
+      case "dream":
+        return <DreamToStory />;
+      case "docs":
+        return <StoryDocsView />;
+      case "logic":
+        return <StoryLogicView />;
+      default:
+        return <StoryView />;
+    }
+  };
 
-  return (
-    <>
-      {currentComponent}
-      
-      <PaywallAlert
-        isOpen={showPaywallAlert}
-        onClose={() => {
-          setShowPaywallAlert(false);
-          setBlockedFeature(null);
-        }}
-        feature={blockedFeature?.name || ""}
-        requiredPlan={blockedFeature?.plan || "creator"}
-      />
-    </>
-  );
+  return <div className="min-h-[calc(100vh-4rem)]">{renderContent()}</div>;
 };
