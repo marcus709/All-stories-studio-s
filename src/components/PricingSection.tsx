@@ -223,7 +223,7 @@ export const PricingSection = () => {
                 <ul className="space-y-4">
                   {plan.features.map((feature, index) => {
                     const isObject = typeof feature === 'object' && feature !== null;
-                    const featureText = isObject ? feature.text : feature;
+                    const featureText = isObject ? feature.text : feature as string;
                     return (
                       <li 
                         key={`${plan.name}-feature-${index}`}
