@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -29,6 +29,13 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
   const [isUploading, setIsUploading] = useState(false);
   const [createdGroupId, setCreatedGroupId] = useState<string | null>(null);
   const [step, setStep] = useState<"details" | "invite">("details");
+
+  // Effect to enforce private status for writing groups
+  useEffect(() => {
+    if (groupType === "writing") {
+      setPrivacy("private");
+    }
+  }, [groupType]);
 
   const createGroupMutation = useMutation({
     mutationFn: async () => {
@@ -199,18 +206,6 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
             </div>
 
             <div className="space-y-2">
-              <Select value={privacy} onValueChange={(value: "public" | "private") => setPrivacy(value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select privacy setting" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="public">Public</SelectItem>
-                  <SelectItem value="private">Private</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
               <Select value={groupType} onValueChange={(value: "social" | "writing") => setGroupType(value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select group type" />
@@ -223,8 +218,25 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
               {groupType === "writing" && (
                 <p className="text-sm text-gray-500">
                   A shared story space will be created for all group members to collaborate.
+                  Writing groups are always private to protect shared content.
                 </p>
               )}
+            </div>
+
+            <div className="space-y-2">
+              <Select 
+                value={privacy} 
+                onValueChange={(value: "public" | "private") => setPrivacy(value)}
+                disabled={groupType === "writing"}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select privacy setting" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="public">Public</SelectItem>
+                  <SelectItem value="private">Private</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
