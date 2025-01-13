@@ -5,6 +5,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle, XCircle } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 interface JoinRequestsDialogProps {
   open: boolean;
@@ -40,6 +42,7 @@ export const JoinRequestsDialog = ({ open, onOpenChange }: JoinRequestsDialogPro
           user_id,
           status,
           message,
+          editing_rights_on_accept,
           groups:group_id (
             id,
             name,
@@ -62,19 +65,20 @@ export const JoinRequestsDialog = ({ open, onOpenChange }: JoinRequestsDialogPro
     enabled: !!session?.user?.id,
   });
 
-  const handleRequest = async (requestId: string, status: "accepted" | "rejected") => {
+  const handleRequest = async (requestId: string, status: "accepted" | "rejected", editingRights: boolean) => {
     try {
       if (status === "accepted") {
         const request = requests?.find((r) => r.id === requestId);
         if (!request) return;
 
-        // Add user to group members
+        // Add user to group members with editing rights status
         const { error: memberError } = await supabase
           .from("group_members")
           .insert({
             group_id: request.group_id,
             user_id: request.user_id,
             role: "member",
+            editing_rights: editingRights
           });
 
         if (memberError) throw memberError;
@@ -104,6 +108,24 @@ export const JoinRequestsDialog = ({ open, onOpenChange }: JoinRequestsDialogPro
     }
   };
 
+  const handleEditingRightsChange = async (requestId: string, editingRights: boolean) => {
+    try {
+      const { error } = await supabase
+        .from("group_join_requests")
+        .update({ editing_rights_on_accept: editingRights })
+        .eq("id", requestId);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error("Error updating editing rights:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update editing rights",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -117,32 +139,48 @@ export const JoinRequestsDialog = ({ open, onOpenChange }: JoinRequestsDialogPro
             requests.map((request) => (
               <div
                 key={request.id}
-                className="flex items-center justify-between space-x-4 rounded-lg border p-4"
+                className="flex flex-col space-y-4 rounded-lg border p-4"
               >
-                <div>
-                  <p className="font-medium">
-                    {request.profiles?.username} wants to join {request.groups?.name}
-                  </p>
-                  {request.message && (
-                    <p className="text-sm text-gray-500">{request.message}</p>
-                  )}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">
+                      {request.profiles?.username} wants to join {request.groups?.name}
+                    </p>
+                    {request.message && (
+                      <p className="text-sm text-gray-500">{request.message}</p>
+                    )}
+                  </div>
                 </div>
-                <div className="flex space-x-2">
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id={`editing-rights-${request.id}`}
+                    checked={request.editing_rights_on_accept}
+                    onCheckedChange={(checked) => handleEditingRightsChange(request.id, checked)}
+                  />
+                  <Label htmlFor={`editing-rights-${request.id}`}>
+                    Grant editing rights
+                  </Label>
+                </div>
+
+                <div className="flex justify-end space-x-2">
                   <Button
-                    size="icon"
+                    size="sm"
                     variant="ghost"
-                    onClick={() => handleRequest(request.id, "accepted")}
+                    onClick={() => handleRequest(request.id, "accepted", request.editing_rights_on_accept)}
                     className="hover:bg-green-50 hover:text-green-600"
                   >
-                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                    Accept
                   </Button>
                   <Button
-                    size="icon"
+                    size="sm"
                     variant="ghost"
-                    onClick={() => handleRequest(request.id, "rejected")}
+                    onClick={() => handleRequest(request.id, "rejected", false)}
                     className="hover:bg-red-50 hover:text-red-600"
                   >
-                    <XCircle className="h-4 w-4 text-red-500" />
+                    <XCircle className="h-4 w-4 text-red-500 mr-2" />
+                    Reject
                   </Button>
                 </div>
               </div>

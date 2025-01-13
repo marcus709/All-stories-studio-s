@@ -942,6 +942,7 @@ export type Database = {
       group_join_requests: {
         Row: {
           created_at: string | null
+          editing_rights_on_accept: boolean | null
           group_id: string | null
           id: string
           invitation_status: string | null
@@ -953,6 +954,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          editing_rights_on_accept?: boolean | null
           group_id?: string | null
           id?: string
           invitation_status?: string | null
@@ -964,6 +966,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          editing_rights_on_accept?: boolean | null
           group_id?: string | null
           id?: string
           invitation_status?: string | null
@@ -993,6 +996,7 @@ export type Database = {
       group_members: {
         Row: {
           created_at: string | null
+          editing_rights: boolean | null
           group_id: string | null
           id: string
           role: string
@@ -1000,6 +1004,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          editing_rights?: boolean | null
           group_id?: string | null
           id?: string
           role?: string
@@ -1007,6 +1012,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          editing_rights?: boolean | null
           group_id?: string | null
           id?: string
           role?: string
