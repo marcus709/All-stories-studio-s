@@ -13,12 +13,19 @@ interface StoryCardProps {
   };
   isSelected: boolean;
   onClick: () => void;
-  onDelete: (e: React.MouseEvent) => void;
+  onAction: (e: React.MouseEvent) => void;
   isSharedStory?: boolean;
   isAdmin?: boolean;
 }
 
-export function StoryCard({ story, isSelected, onClick, onDelete, isSharedStory, isAdmin }: StoryCardProps) {
+export function StoryCard({ 
+  story, 
+  isSelected, 
+  onClick, 
+  onAction,
+  isSharedStory, 
+  isAdmin 
+}: StoryCardProps) {
   return (
     <Card 
       className={`relative bg-purple-50 p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-purple-100 transition-colors ${
@@ -32,7 +39,7 @@ export function StoryCard({ story, isSelected, onClick, onDelete, isSharedStory,
         className={`absolute top-2 right-2 text-gray-500 ${
           isSharedStory && !isAdmin ? "hover:text-blue-500 hover:bg-blue-50" : "hover:text-red-500 hover:bg-red-50"
         }`}
-        onClick={onDelete}
+        onClick={onAction}
       >
         {isSharedStory && !isAdmin ? (
           <LogOut className="h-4 w-4" />

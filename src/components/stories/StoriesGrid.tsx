@@ -11,65 +11,34 @@ interface StoriesGridProps {
   isLoading: boolean;
   onClose: () => void;
   isGroupAdmin?: boolean;
+  onLeave: (story: Story) => void;
+  onDelete: (story: Story) => void;
 }
 
-export function StoriesGrid({ stories, onSelect, isLoading, onClose, isGroupAdmin }: StoriesGridProps) {
-  const queryClient = useQueryClient();
+export function StoriesGrid({ 
+  stories, 
+  onSelect, 
+  isLoading, 
+  onClose, 
+  isGroupAdmin,
+  onLeave,
+  onDelete
+}: StoriesGridProps) {
   const { toast } = useToast();
 
-  const handleDelete = async (e: React.MouseEvent, story: Story) => {
+  const handleAction = async (e: React.MouseEvent, story: Story) => {
     e.stopPropagation();
 
     // If it's a shared story and user is not an admin, they can only leave
     if (story.is_shared_space && !isGroupAdmin) {
-      try {
-        const { error } = await supabase
-          .from("group_members")
-          .delete()
-          .eq("group_id", story.shared_group_id)
-          .eq("user_id", (await supabase.auth.getUser()).data.user?.id);
-
-        if (error) throw error;
-
-        toast({
-          title: "Left shared story",
-          description: "You have successfully left the shared story space.",
-        });
-
-        queryClient.invalidateQueries({ queryKey: ["stories"] });
-      } catch (error) {
-        console.error("Error leaving shared story:", error);
-        toast({
-          title: "Error",
-          description: "Failed to leave the shared story space.",
-          variant: "destructive",
-        });
-      }
+      onLeave(story);
       return;
     }
 
-    // Regular delete for own stories or admin of shared stories
-    try {
-      const { error } = await supabase
-        .from("stories")
-        .delete()
-        .eq("id", story.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Story deleted",
-        description: "The story has been successfully deleted.",
-      });
-
-      queryClient.invalidateQueries({ queryKey: ["stories"] });
-    } catch (error) {
-      console.error("Error deleting story:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete the story.",
-        variant: "destructive",
-      });
+    // If user is admin of shared story or it's their own story, they can delete
+    if ((story.is_shared_space && isGroupAdmin) || !story.is_shared_space) {
+      onDelete(story);
+      return;
     }
   };
 
@@ -100,7 +69,7 @@ export function StoriesGrid({ stories, onSelect, isLoading, onClose, isGroupAdmi
               onSelect(story);
               onClose();
             }}
-            onDelete={(e) => handleDelete(e, story)}
+            onAction={(e) => handleAction(e, story)}
             isSelected={false}
             isSharedStory={story.is_shared_space}
             isAdmin={isGroupAdmin}

@@ -8,7 +8,9 @@ import { useStory } from "@/contexts/StoryContext";
 import { Story } from "@/types/story";
 import { useCreateStory } from "@/hooks/useCreateStory";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 
 interface StoriesDialogProps {
   open: boolean;
@@ -19,9 +21,13 @@ interface StoriesDialogProps {
 export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDialogProps) {
   const [showNewStory, setShowNewStory] = useState(false);
   const [showNewSharedStory, setShowNewSharedStory] = useState(false);
-  const { data: stories = [], isLoading } = useStories();
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const [storyToDelete, setStoryToDelete] = useState<Story | null>(null);
+  const { data: stories = [], isLoading, refetch } = useStories();
   const { selectedStory } = useStory();
   const createStory = useCreateStory();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const [newStory, setNewStory] = useState({
     title: "",
@@ -67,34 +73,125 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
     }));
   };
 
+  const handleDeleteConfirm = async () => {
+    if (!storyToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from("stories")
+        .delete()
+        .eq("id", storyToDelete.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Story deleted",
+        description: "The story and all its content has been permanently deleted.",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["stories"] });
+      setShowDeleteAlert(false);
+      setStoryToDelete(null);
+    } catch (error) {
+      console.error("Error deleting story:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete the story.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleLeaveStory = async (story: Story) => {
+    if (!story.shared_group_id) return;
+
+    try {
+      const { error } = await supabase
+        .from("group_members")
+        .delete()
+        .eq("group_id", story.shared_group_id)
+        .eq("user_id", (await supabase.auth.getUser()).data.user?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Left story",
+        description: "You have successfully left the shared story.",
+      });
+
+      // Refetch stories to update the list
+      refetch();
+    } catch (error) {
+      console.error("Error leaving story:", error);
+      toast({
+        title: "Error",
+        description: "Failed to leave the story.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl p-0 gap-0">
-        <StoriesDialogHeader 
-          showNewStory={showNewStory}
-          setShowNewStory={setShowNewStory}
-          showNewSharedStory={showNewSharedStory}
-          setShowNewSharedStory={setShowNewSharedStory}
-        />
-        
-        {showNewStory ? (
-          <CreateStoryForm 
-            newStory={newStory}
-            onChange={handleChange}
-            onSubmit={handleCreateStory}
-            onCancel={() => setShowNewStory(false)}
-            isLoading={createStory.isPending}
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-4xl p-0 gap-0">
+          <StoriesDialogHeader 
+            showNewStory={showNewStory}
+            setShowNewStory={setShowNewStory}
+            showNewSharedStory={showNewSharedStory}
+            setShowNewSharedStory={setShowNewSharedStory}
           />
-        ) : (
-          <StoriesGrid
-            stories={stories}
-            onSelect={onStorySelect}
-            isLoading={isLoading}
-            onClose={() => onOpenChange(false)}
-            isGroupAdmin={isGroupAdmin}
-          />
-        )}
-      </DialogContent>
-    </Dialog>
+          
+          {showNewStory ? (
+            <CreateStoryForm 
+              newStory={newStory}
+              onChange={handleChange}
+              onSubmit={handleCreateStory}
+              onCancel={() => setShowNewStory(false)}
+              isLoading={createStory.isPending}
+            />
+          ) : (
+            <StoriesGrid
+              stories={stories}
+              onSelect={onStorySelect}
+              isLoading={isLoading}
+              onClose={() => onOpenChange(false)}
+              isGroupAdmin={isGroupAdmin}
+              onLeave={handleLeaveStory}
+              onDelete={(story) => {
+                setStoryToDelete(story);
+                setShowDeleteAlert(true);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the story
+              and all its associated content for all members of the group.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setShowDeleteAlert(false);
+              setStoryToDelete(null);
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Delete Story
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
