@@ -4,7 +4,7 @@ import { SessionContextProvider } from "@supabase/auth-helpers-react";
 import { StoryProvider } from "./contexts/StoryContext";
 import { SubscriptionProvider } from "./contexts/SubscriptionContext";
 import { Toaster } from "@/components/ui/toaster";
-import AppRoutes from "./Routes";
+import Routes from "./Routes";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
@@ -102,7 +102,7 @@ function App() {
         >
           <SubscriptionProvider>
             <StoryProvider>
-              <AppRoutes />
+              <Routes />
               <Toaster />
             </StoryProvider>
           </SubscriptionProvider>

@@ -4,7 +4,7 @@ import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-export default function InvitePage() {
+const InvitePage = () => {
   const { inviteId } = useParams();
   const session = useSession();
   const navigate = useNavigate();
@@ -98,4 +98,6 @@ export default function InvitePage() {
   }
 
   return null;
-}
+};
+
+export default InvitePage;

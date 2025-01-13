@@ -1,10 +1,10 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { Index } from "@/pages/Index";
-import { Dashboard } from "@/pages/Dashboard";
-import { Community } from "@/pages/Community";
-import { Settings } from "@/pages/Settings";
+import Index from "@/pages/Index";
+import Dashboard from "@/pages/Dashboard";
+import Community from "@/pages/Community";
+import Settings from "@/pages/Settings";
 import { PaymentSuccess } from "@/pages/PaymentSuccess";
-import { InvitePage } from "@/pages/InvitePage";
+import InvitePage from "@/pages/InvitePage";
 
 const router = createBrowserRouter([
   {
@@ -33,6 +33,6 @@ const router = createBrowserRouter([
   },
 ]);
 
-export function Routes() {
+export default function Routes() {
   return <RouterProvider router={router} />;
 }
