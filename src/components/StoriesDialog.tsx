@@ -21,14 +21,30 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
   const { selectedStory } = useStory();
   const createStory = useCreateStory();
 
-  const handleCreateStory = async (formData: any) => {
+  const [newStory, setNewStory] = useState({
+    title: "",
+    description: "",
+  });
+
+  const handleCreateStory = async () => {
     try {
-      const newStory = await createStory.mutateAsync(formData);
+      const formData = {
+        ...newStory,
+        user_id: (await supabase.auth.getUser()).data.user?.id,
+      };
+      const createdStory = await createStory.mutateAsync(formData);
       setShowNewStory(false);
-      onStorySelect(newStory);
+      onStorySelect(createdStory);
     } catch (error) {
       console.error("Error creating story:", error);
     }
+  };
+
+  const handleChange = (field: "title" | "description", value: string) => {
+    setNewStory(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   return (
@@ -43,8 +59,11 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
         
         {showNewStory ? (
           <CreateStoryForm 
+            newStory={newStory}
+            onChange={handleChange}
             onSubmit={handleCreateStory}
             onCancel={() => setShowNewStory(false)}
+            isLoading={createStory.isPending}
           />
         ) : (
           <StoriesGrid

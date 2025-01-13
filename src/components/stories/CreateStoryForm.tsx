@@ -4,14 +4,17 @@ import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 
 interface CreateStoryFormProps {
-  newStory: { title: string; description: string };
-  onClose: () => void;
+  newStory: {
+    title: string;
+    description: string;
+  };
   onChange: (field: "title" | "description", value: string) => void;
   onSubmit: () => void;
+  onCancel: () => void;
   isLoading?: boolean;
 }
 
-export function CreateStoryForm({ newStory, onClose, onChange, onSubmit, isLoading }: CreateStoryFormProps) {
+export function CreateStoryForm({ newStory, onChange, onSubmit, onCancel, isLoading }: CreateStoryFormProps) {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -40,7 +43,7 @@ export function CreateStoryForm({ newStory, onClose, onChange, onSubmit, isLoadi
       </div>
 
       <div className="flex justify-end gap-3">
-        <Button variant="outline" onClick={onClose} disabled={isLoading}>
+        <Button variant="outline" onClick={onCancel} disabled={isLoading}>
           Cancel
         </Button>
         <Button
