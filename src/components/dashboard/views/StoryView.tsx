@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { BookOpen, LineChart, Wand, Settings } from "lucide-react";
+import { BookOpen, LineChart, Wand, Settings, MessageSquare } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel, SelectSeparator } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { useStory } from "@/contexts/StoryContext";
 import { useAI } from "@/hooks/useAI";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +14,7 @@ import { useFeatureAccess } from "@/utils/subscriptionUtils";
 import { PaywallAlert } from "@/components/PaywallAlert";
 import { useSession } from "@supabase/auth-helpers-react";
 import { RichTextEditor } from "@/components/editor/RichTextEditor";
+import { cn } from "@/lib/utils";
 
 export const StoryView = () => {
   const [wordCount, setWordCount] = useState(1);
@@ -23,6 +25,8 @@ export const StoryView = () => {
   const [selectedConfig, setSelectedConfig] = useState<string>("");
   const [configToEdit, setConfigToEdit] = useState<any>(null);
   const [showPaywallAlert, setShowPaywallAlert] = useState(false);
+  const [isChatMode, setIsChatMode] = useState(false);
+  const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant', content: string }>>([]);
   const { selectedStory } = useStory();
   const { generateContent, isLoading } = useAI();
   const { toast } = useToast();
@@ -65,7 +69,7 @@ export const StoryView = () => {
   };
 
   const handleGetSuggestions = async () => {
-    if (!storyContent) {
+    if (!storyContent && !isChatMode) {
       toast({
         title: "No content",
         description: "Please write some content first to get AI suggestions.",
@@ -90,9 +94,15 @@ export const StoryView = () => {
       aiConfig: selectedAIConfig?.data,
     };
 
-    const suggestions = await generateContent(storyContent, "suggestions", context);
+    const contentToAnalyze = isChatMode ? messages[messages.length - 1]?.content : storyContent;
+    const suggestions = await generateContent(contentToAnalyze, "suggestions", context);
+    
     if (suggestions) {
-      setAiSuggestions(suggestions);
+      if (isChatMode) {
+        setMessages([...messages, { role: 'assistant', content: suggestions }]);
+      } else {
+        setAiSuggestions(suggestions);
+      }
     }
   };
 
@@ -104,6 +114,30 @@ export const StoryView = () => {
     }
   };
 
+  const handleChatSubmit = async (content: string) => {
+    if (!content.trim()) return;
+    
+    const newMessages = [...messages, { role: 'user' as const, content }];
+    setMessages(newMessages);
+    
+    // Trigger AI response
+    const selectedAIConfig = selectedConfig ? await supabase
+      .from("ai_configurations")
+      .select("*")
+      .eq("id", selectedConfig)
+      .single() : null;
+
+    const context = {
+      storyDescription: selectedStory?.description || "",
+      aiConfig: selectedAIConfig?.data,
+    };
+
+    const response = await generateContent(content, "suggestions", context);
+    if (response) {
+      setMessages([...newMessages, { role: 'assistant', content: response }]);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-8 py-8">
       <div className="flex items-center justify-between mb-6">
@@ -112,13 +146,24 @@ export const StoryView = () => {
           <p className="text-gray-500 text-lg">Let your creativity flow</p>
         </div>
         <div className="flex items-center gap-8 text-base text-gray-600">
-          <div className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5" />
-            {wordCount} words
-          </div>
-          <div className="flex items-center gap-2">
-            <LineChart className="h-5 w-5" />
-            Readability: {readabilityScore}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={isChatMode}
+                onCheckedChange={setIsChatMode}
+                className="data-[state=checked]:bg-purple-500"
+              />
+              <MessageSquare className="h-5 w-5" />
+              Chat Mode
+            </div>
+            <div className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5" />
+              {wordCount} words
+            </div>
+            <div className="flex items-center gap-2">
+              <LineChart className="h-5 w-5" />
+              Readability: {readabilityScore}
+            </div>
           </div>
         </div>
       </div>
@@ -152,38 +197,94 @@ export const StoryView = () => {
             </SelectContent>
           </Select>
 
-          <Button
-            className={`ml-auto px-8 py-2.5 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg flex items-center gap-2 transition-colors ${!selectedStory || isLoading || !selectedConfig ? "cursor-not-allowed opacity-50" : ""}`}
-            onClick={handleGetSuggestions}
-            disabled={!selectedStory || isLoading || !selectedConfig}
-          >
-            <Wand className="h-5 w-5" />
-            {isLoading ? "Getting suggestions..." : "Get AI Suggestions"}
-          </Button>
+          {!isChatMode && (
+            <Button
+              className={`ml-auto px-8 py-2.5 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg flex items-center gap-2 transition-colors ${!selectedStory || isLoading || !selectedConfig ? "cursor-not-allowed opacity-50" : ""}`}
+              onClick={handleGetSuggestions}
+              disabled={!selectedStory || isLoading || !selectedConfig}
+            >
+              <Wand className="h-5 w-5" />
+              {isLoading ? "Getting suggestions..." : "Get AI Suggestions"}
+            </Button>
+          )}
         </div>
 
-        <RichTextEditor
-          content={storyContent}
-          onChange={handleContentChange}
-          className="min-h-[400px]"
-        />
+        {isChatMode ? (
+          <div className="flex flex-col h-[600px]">
+            <div className="flex-1 overflow-y-auto mb-4 space-y-4">
+              {messages.map((message, index) => (
+                <div
+                  key={index}
+                  className={cn(
+                    "flex w-full",
+                    message.role === "user" ? "justify-end" : "justify-start"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "max-w-[80%] rounded-2xl px-4 py-2 backdrop-blur-sm",
+                      message.role === "user"
+                        ? "bg-purple-500/90 text-white ml-auto"
+                        : "bg-gray-100/90 text-gray-900"
+                    )}
+                  >
+                    {message.content}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Ask anything about your story..."
+                className="flex-1 rounded-full px-4 py-2 bg-gray-100/80 backdrop-blur-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleChatSubmit(e.currentTarget.value);
+                    e.currentTarget.value = '';
+                  }
+                }}
+              />
+              <Button
+                onClick={() => {
+                  const input = document.querySelector('input');
+                  if (input) {
+                    handleChatSubmit(input.value);
+                    input.value = '';
+                  }
+                }}
+                className="rounded-full bg-purple-500 hover:bg-purple-600 text-white"
+              >
+                <Wand className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <RichTextEditor
+              content={storyContent}
+              onChange={handleContentChange}
+              className="min-h-[400px]"
+            />
 
-        {(isLoading || aiSuggestions) && (
-          <div className="bg-purple-50 rounded-lg p-6 relative mt-6">
-            <h3 className="text-xl font-semibold text-purple-900 mb-4">AI Suggestions</h3>
-            {isLoading ? (
-              <div className="flex items-center gap-2 text-purple-600">
-                <Wand className="h-5 w-5 animate-spin" />
-                <span>Getting AI suggestions...</span>
-              </div>
-            ) : (
-              <div className="prose prose-purple max-w-none">
-                {aiSuggestions.split("\n").map((paragraph, index) => (
-                  <p key={index} className="text-purple-800">{paragraph}</p>
-                ))}
+            {(isLoading || aiSuggestions) && (
+              <div className="bg-purple-50 rounded-lg p-6 relative mt-6">
+                <h3 className="text-xl font-semibold text-purple-900 mb-4">AI Suggestions</h3>
+                {isLoading ? (
+                  <div className="flex items-center gap-2 text-purple-600">
+                    <Wand className="h-5 w-5 animate-spin" />
+                    <span>Getting AI suggestions...</span>
+                  </div>
+                ) : (
+                  <div className="prose prose-purple max-w-none">
+                    {aiSuggestions.split("\n").map((paragraph, index) => (
+                      <p key={index} className="text-purple-800">{paragraph}</p>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
 
