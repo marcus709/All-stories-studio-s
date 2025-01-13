@@ -3,7 +3,7 @@ import Index from "./pages/Index";
 import Community from "./pages/Community";
 import InvitePage from "./pages/InvitePage";
 import { Header } from "./components/Header";
-import { Dashboard } from "./pages/Dashboard";
+import Dashboard from "./pages/Dashboard";
 import { ProfileSettings } from "./pages/ProfileSettings";
 
 function AppLayout({ children }: { children: React.ReactNode }) {

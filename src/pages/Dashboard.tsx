@@ -48,12 +48,10 @@ function DashboardLayout() {
   );
 }
 
-export const Dashboard = () => {
+export default function Dashboard() {
   return (
     <StoryProvider>
       <DashboardLayout />
     </StoryProvider>
   );
-};
-
-export default Dashboard;
+}
