@@ -7,8 +7,6 @@ import { useDocuments } from "@/hooks/useDocuments";
 import { useToast } from "@/hooks/use-toast";
 import { WYSIWYGEditor } from "@/components/book/WYSIWYGEditor";
 import { DocumentInsights } from "./DocumentInsights";
-import { DocumentNavigationSidebar } from "./DocumentNavigationSidebar";
-import { cn } from "@/lib/utils";
 
 interface DocumentEditorProps {
   document: {
@@ -25,7 +23,6 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
-  const [isNavSidebarCollapsed, setIsNavSidebarCollapsed] = useState(false);
   const { updateDocument } = useDocuments(storyId);
   const { toast } = useToast();
 
@@ -60,21 +57,16 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
   };
 
   const handleReplaceWord = (oldWord: string, newWord: string, index: number) => {
+    // Implementation for word replacement
     const newContent = content.replace(new RegExp(oldWord, 'g'), newWord);
     setContent(newContent);
   };
 
   const handleJumpToLocation = (index: number) => {
+    // Implementation for jumping to word location
+    // This would need to be implemented with the editor's API
     console.log("Jumping to location:", index);
   };
-
-  if (!document) {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-4rem)] text-gray-500">
-        Please select a document to view
-      </div>
-    );
-  }
 
   return (
     <div className="h-full flex flex-col bg-gray-50">
@@ -111,17 +103,7 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
       </div>
 
       <div className="flex-1 flex">
-        <DocumentNavigationSidebar
-          content={content}
-          isCollapsed={isNavSidebarCollapsed}
-          onToggleCollapse={() => setIsNavSidebarCollapsed(!isNavSidebarCollapsed)}
-        />
-        
-        <ScrollArea className={cn(
-          "flex-1 p-8",
-          showInsights ? 'border-r' : '',
-          isNavSidebarCollapsed ? 'ml-20' : 'ml-72'
-        )}>
+        <ScrollArea className={`flex-1 p-8 ${showInsights ? 'border-r' : ''}`}>
           <div className="max-w-[850px] mx-auto">
             <WYSIWYGEditor
               content={content}
