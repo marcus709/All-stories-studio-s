@@ -113,13 +113,20 @@ export const PlotDevelopmentView = () => {
 
   const handleSaveTimeline = async (title: string) => {
     try {
+      const user = await supabase.auth.getUser();
+      const userId = user.data.user?.id;
+
+      if (!userId || !selectedStory?.id) {
+        throw new Error("User or story not found");
+      }
+
       // Create document first
       const { data: document, error: docError } = await supabase
         .from("documents")
         .insert({
           title,
-          story_id: selectedStory?.id,
-          user_id: (await supabase.auth.getUser()).data.user?.id,
+          story_id: selectedStory.id,
+          user_id: userId,
           content: "",
         })
         .select()
@@ -130,8 +137,8 @@ export const PlotDevelopmentView = () => {
 
       // Create plot events
       const plotEvents = selectedTemplate?.plotPoints.map((point, index) => ({
-        story_id: selectedStory?.id,
-        user_id: (await supabase.auth.getUser()).data.user?.id,
+        story_id: selectedStory.id,
+        user_id: userId,
         stage: point,
         title: point,
         description: "",

@@ -51,7 +51,7 @@ export const WritingDialog = ({
           .from("document_sections")
           .insert({
             document_id: documentId,
-            type: "plot_point",
+            type: "scene",
             title,
             content,
             order_index: 0,
