@@ -314,6 +314,95 @@ export const PlotDevelopmentView = () => {
     }
   }, [existingTimeline]);
 
+  const createTimelineDocument = async () => {
+    if (!session?.user?.id || !selectedStory?.id || !selectedTemplate) {
+      toast({
+        title: "Error",
+        description: "Missing required information to create timeline",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsProcessing(true);
+    try {
+      // Create the document
+      const { data: document, error: documentError } = await supabase
+        .from('documents')
+        .insert({
+          title: timelineTitle,
+          story_id: selectedStory.id,
+          user_id: session.user.id,
+          content: JSON.stringify({
+            templateName: selectedTemplate.name,
+            plotPoints: selectedTemplate.plotPoints,
+            subEvents: selectedTemplate.subEvents || [],
+          }),
+        })
+        .select()
+        .single();
+
+      if (documentError) throw documentError;
+
+      // Create the timeline section
+      const { data: section, error: sectionError } = await supabase
+        .from('document_sections')
+        .insert({
+          document_id: document.id,
+          type: 'timeline',
+          title: 'Plot Timeline',
+          content: JSON.stringify({
+            template: selectedTemplate.name,
+            plotPoints: selectedTemplate.plotPoints,
+            subEvents: selectedTemplate.subEvents || [],
+            description: `Timeline based on ${selectedTemplate.name}`,
+          }),
+          order_index: 0,
+        })
+        .select()
+        .single();
+
+      if (sectionError) throw sectionError;
+
+      // Create plot events
+      const plotEvents = selectedTemplate.plotPoints.map((point, index) => ({
+        story_id: selectedStory.id,
+        document_section_id: section.id,
+        stage: selectedTemplate.subEvents?.[index] || point,
+        title: point,
+        description: "Development Stage",
+        order_index: index,
+        user_id: session.user.id
+      }));
+
+      const { error: eventsError } = await supabase
+        .from('plot_events')
+        .insert(plotEvents);
+
+      if (eventsError) throw eventsError;
+
+      await queryClient.invalidateQueries({ queryKey: ['timeline'] });
+      await queryClient.invalidateQueries({ queryKey: ['documents'] });
+
+      toast({
+        title: "Timeline Created",
+        description: `Timeline "${timelineTitle}" has been created and saved.`,
+      });
+
+      return document;
+    } catch (error) {
+      console.error('Error creating timeline document:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create timeline. Please try again.",
+        variant: "destructive",
+      });
+      return null;
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const addNewAct = async () => {
     if (!selectedStory?.id || !existingTimeline?.timelineSection?.id || !session?.user?.id) {
       toast({
@@ -366,7 +455,7 @@ export const PlotDevelopmentView = () => {
 
       setPlotData([...plotData, newAct]);
       
-      queryClient.invalidateQueries({ queryKey: ['timeline'] });
+      await queryClient.invalidateQueries({ queryKey: ['timeline'] });
 
       toast({
         title: "Success",
@@ -382,84 +471,6 @@ export const PlotDevelopmentView = () => {
     }
   };
 
-  const createTimelineDocument = async (template: PlotTemplate) => {
-    if (!session?.user?.id || !selectedStory?.id) return;
-    
-    setIsProcessing(true);
-    try {
-      const { data: document, error: documentError } = await supabase
-        .from('documents')
-        .insert({
-          title: timelineTitle,
-          story_id: selectedStory.id,
-          user_id: session.user.id,
-          content: JSON.stringify({
-            templateName: template.name,
-            plotPoints: template.plotPoints,
-            subEvents: template.subEvents || [],
-          }),
-        })
-        .select()
-        .single();
-
-      if (documentError) throw documentError;
-
-      const { data: section, error: sectionError } = await supabase
-        .from('document_sections')
-        .insert({
-          document_id: document.id,
-          type: 'timeline',
-          title: 'Plot Timeline',
-          content: JSON.stringify({
-            template: template.name,
-            plotPoints: template.plotPoints,
-            subEvents: template.subEvents || [],
-            description: `Timeline based on ${template.name}`,
-          }),
-          order_index: 0,
-        })
-        .select()
-        .single();
-
-      if (sectionError) throw sectionError;
-
-      const plotEvents = template.plotPoints.map((point, index) => ({
-        story_id: selectedStory.id,
-        document_section_id: section.id,
-        stage: template.subEvents?.[index] || point,
-        title: point,
-        description: "Development Stage",
-        order_index: index,
-        user_id: session.user.id
-      }));
-
-      const { error: eventsError } = await supabase
-        .from('plot_events')
-        .insert(plotEvents);
-
-      if (eventsError) throw eventsError;
-
-      queryClient.invalidateQueries({ queryKey: ['timeline'] });
-      queryClient.invalidateQueries({ queryKey: ['documents'] });
-
-      toast({
-        title: "Timeline Created",
-        description: `Timeline "${timelineTitle}" has been created and saved to your documents.`,
-      });
-
-      return document;
-    } catch (error) {
-      console.error('Error creating timeline document:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create timeline document. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
   const applyTemplate = (template: PlotTemplate) => {
     setSelectedTemplate(template);
     setTimelineTitle(`${template.name} Timeline`);
@@ -468,16 +479,19 @@ export const PlotDevelopmentView = () => {
 
   const handleTimelineCreate = async () => {
     if (!selectedTemplate || !timelineTitle.trim()) return;
-    await createTimelineDocument(selectedTemplate);
-    setIsNamingDialogOpen(false);
+    
+    const document = await createTimelineDocument();
+    if (document) {
+      setIsNamingDialogOpen(false);
 
-    setTimeout(() => {
-      if (timelineRef.current) {
-        const yOffset = -100;
-        const y = timelineRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
-        window.scrollTo({ top: y, behavior: 'smooth' });
-      }
-    }, 100);
+      setTimeout(() => {
+        if (timelineRef.current) {
+          const yOffset = -100;
+          const y = timelineRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }, 100);
+    }
   };
 
   return (
