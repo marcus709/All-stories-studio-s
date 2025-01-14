@@ -25,7 +25,7 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
-  const [isNavigationCollapsed, setIsNavigationCollapsed] = useState(true);
+  const [isNavigationCollapsed, setIsNavigationCollapsed] = useState(false);
   const { updateDocument } = useDocuments(storyId);
   const { toast } = useToast();
 

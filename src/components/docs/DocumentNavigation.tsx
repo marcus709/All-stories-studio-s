@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface DocumentNavigationProps {
@@ -17,6 +17,8 @@ export const DocumentNavigation = ({
   const [viewportPosition, setViewportPosition] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(0);
   const navigationRef = useRef<HTMLDivElement>(null);
+  const minimapRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,10 +33,53 @@ export const DocumentNavigation = ({
       setViewportHeight(height);
     };
 
+    const handleMinimapClick = (e: MouseEvent) => {
+      if (!minimapRef.current || !navigationRef.current) return;
+      
+      const { top, height } = minimapRef.current.getBoundingClientRect();
+      const clickPosition = (e.clientY - top) / height;
+      const documentHeight = document.documentElement.scrollHeight;
+      const windowHeight = window.innerHeight;
+      
+      window.scrollTo({
+        top: clickPosition * (documentHeight - windowHeight),
+        behavior: 'smooth'
+      });
+    };
+
+    const handleMouseDown = () => {
+      isDragging.current = true;
+    };
+
+    const handleMouseUp = () => {
+      isDragging.current = false;
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging.current || !minimapRef.current) return;
+      handleMinimapClick(e);
+    };
+
+    const minimap = minimapRef.current;
+    if (minimap) {
+      minimap.addEventListener('mousedown', handleMouseDown);
+      minimap.addEventListener('click', handleMinimapClick);
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
     window.addEventListener('scroll', handleScroll);
     handleScroll();
 
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (minimap) {
+        minimap.removeEventListener('mousedown', handleMouseDown);
+        minimap.removeEventListener('click', handleMinimapClick);
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      }
+    };
   }, []);
 
   if (isCollapsed) return null;
@@ -43,7 +88,7 @@ export const DocumentNavigation = ({
   const maxLineLength = Math.max(...lines.map(line => line.length));
 
   return (
-    <div className="fixed left-12 top-16 w-16 h-[calc(100vh-4rem)] bg-white border-r flex flex-col z-10">
+    <div className="fixed left-12 top-16 w-16 h-[calc(100vh-4rem)] bg-white border-r flex flex-col z-10 shadow-sm">
       <Button
         variant="ghost"
         size="icon"
@@ -55,24 +100,31 @@ export const DocumentNavigation = ({
       
       <div 
         ref={navigationRef}
-        className="flex-1 mt-12 px-2 relative overflow-hidden"
+        className="flex-1 mt-12 px-2 relative overflow-hidden cursor-pointer"
       >
-        <div className="absolute inset-0 mt-12">
+        <div 
+          ref={minimapRef}
+          className="absolute inset-0 mt-12"
+        >
           {lines.map((line, index) => {
             const width = (line.length / maxLineLength) * 100;
             return (
               <div
                 key={index}
-                className="h-[2px] mb-[1px] bg-gray-200"
+                className={cn(
+                  "h-[2px] mb-[1px] transition-all duration-75",
+                  line.length > 0 ? "bg-gray-200" : "bg-transparent"
+                )}
                 style={{ width: `${Math.max(width, 10)}%` }}
               />
             );
           })}
           <div
-            className="absolute right-0 bg-gray-400/20 w-1"
+            className="absolute right-0 bg-gray-400/20 w-1 transition-all duration-75"
             style={{
               top: `${viewportPosition}%`,
               height: `${viewportHeight}%`,
+              opacity: isDragging.current ? '0.4' : '0.2'
             }}
           />
         </div>
