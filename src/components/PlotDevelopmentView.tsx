@@ -314,7 +314,7 @@ export const PlotDevelopmentView = () => {
     }
   }, [existingTimeline]);
 
-  const createTimelineDocument = async (template: PlotTemplate, title: string) => {
+  const createTimelineDocument = async (template: PlotTemplate, title: string, shouldScroll: boolean = true) => {
     if (!session?.user?.id || !selectedStory?.id || !template) {
       toast({
         title: "Error",
@@ -480,7 +480,7 @@ export const PlotDevelopmentView = () => {
   const handleTimelineCreate = async () => {
     if (!selectedTemplate || !timelineTitle.trim()) return;
     
-    const document = await createTimelineDocument(selectedTemplate, timelineTitle);
+    const document = await createTimelineDocument(selectedTemplate, timelineTitle, true);
     if (document) {
       setIsNamingDialogOpen(false);
 
