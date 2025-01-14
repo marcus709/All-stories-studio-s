@@ -314,8 +314,8 @@ export const PlotDevelopmentView = () => {
     }
   }, [existingTimeline]);
 
-  const createTimelineDocument = async () => {
-    if (!session?.user?.id || !selectedStory?.id || !selectedTemplate) {
+  const createTimelineDocument = async (template: PlotTemplate, title: string) => {
+    if (!session?.user?.id || !selectedStory?.id || !template) {
       toast({
         title: "Error",
         description: "Missing required information to create timeline",
@@ -330,13 +330,13 @@ export const PlotDevelopmentView = () => {
       const { data: document, error: documentError } = await supabase
         .from('documents')
         .insert({
-          title: timelineTitle,
+          title: title,
           story_id: selectedStory.id,
           user_id: session.user.id,
           content: JSON.stringify({
-            templateName: selectedTemplate.name,
-            plotPoints: selectedTemplate.plotPoints,
-            subEvents: selectedTemplate.subEvents || [],
+            templateName: template.name,
+            plotPoints: template.plotPoints,
+            subEvents: template.subEvents || [],
           }),
         })
         .select()
@@ -352,10 +352,10 @@ export const PlotDevelopmentView = () => {
           type: 'timeline',
           title: 'Plot Timeline',
           content: JSON.stringify({
-            template: selectedTemplate.name,
-            plotPoints: selectedTemplate.plotPoints,
-            subEvents: selectedTemplate.subEvents || [],
-            description: `Timeline based on ${selectedTemplate.name}`,
+            template: template.name,
+            plotPoints: template.plotPoints,
+            subEvents: template.subEvents || [],
+            description: `Timeline based on ${template.name}`,
           }),
           order_index: 0,
         })
@@ -365,10 +365,10 @@ export const PlotDevelopmentView = () => {
       if (sectionError) throw sectionError;
 
       // Create plot events
-      const plotEvents = selectedTemplate.plotPoints.map((point, index) => ({
+      const plotEvents = template.plotPoints.map((point, index) => ({
         story_id: selectedStory.id,
         document_section_id: section.id,
-        stage: selectedTemplate.subEvents?.[index] || point,
+        stage: template.subEvents?.[index] || point,
         title: point,
         description: "Development Stage",
         order_index: index,
@@ -386,7 +386,7 @@ export const PlotDevelopmentView = () => {
 
       toast({
         title: "Timeline Created",
-        description: `Timeline "${timelineTitle}" has been created and saved.`,
+        description: `Timeline "${title}" has been created and saved.`,
       });
 
       return document;
@@ -480,7 +480,7 @@ export const PlotDevelopmentView = () => {
   const handleTimelineCreate = async () => {
     if (!selectedTemplate || !timelineTitle.trim()) return;
     
-    const document = await createTimelineDocument();
+    const document = await createTimelineDocument(selectedTemplate, timelineTitle);
     if (document) {
       setIsNamingDialogOpen(false);
 
