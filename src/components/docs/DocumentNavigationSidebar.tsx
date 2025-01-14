@@ -15,28 +15,31 @@ export const DocumentNavigationSidebar = ({
   onToggleCollapse
 }: DocumentNavigationSidebarProps) => {
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const indicatorRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const viewportIndicatorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (!sidebarRef.current || !indicatorRef.current) return;
+      if (!sidebarRef.current || !viewportIndicatorRef.current || !contentRef.current) return;
 
-      const windowHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
+      const windowHeight = window.innerHeight;
       const scrollTop = window.scrollY;
       
-      // Calculate the visible portion of the document
+      // Calculate the visible portion ratio
       const visibleRatio = windowHeight / documentHeight;
-      const scrollRatio = scrollTop / (documentHeight - windowHeight);
       
-      // Update the indicator position and height
+      // Calculate the scroll progress
+      const scrollProgress = scrollTop / (documentHeight - windowHeight);
+      
+      // Update the viewport indicator
       const sidebarHeight = sidebarRef.current.clientHeight;
       const indicatorHeight = Math.max(30, sidebarHeight * visibleRatio);
       const maxScroll = sidebarHeight - indicatorHeight;
-      const indicatorTop = maxScroll * scrollRatio;
+      const indicatorTop = maxScroll * scrollProgress;
 
-      indicatorRef.current.style.height = `${indicatorHeight}px`;
-      indicatorRef.current.style.top = `${indicatorTop}px`;
+      viewportIndicatorRef.current.style.height = `${indicatorHeight}px`;
+      viewportIndicatorRef.current.style.top = `${indicatorTop}px`;
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -60,8 +63,11 @@ export const DocumentNavigationSidebar = ({
     );
   }
 
+  // Split content into lines and create minimap
+  const lines = content.split('\n');
+
   return (
-    <div className="fixed left-0 top-16 w-6 h-[calc(100vh-4rem)] bg-gray-100/50 flex flex-col">
+    <div className="fixed left-0 top-16 w-12 h-[calc(100vh-4rem)] bg-gray-100/50 flex flex-col">
       <Button
         variant="ghost"
         size="icon"
@@ -70,15 +76,35 @@ export const DocumentNavigationSidebar = ({
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
+      
       <div
         ref={sidebarRef}
-        className="relative flex-1 mx-1"
+        className="relative flex-1 mx-1 overflow-hidden"
       >
+        {/* Minimap content */}
+        <div 
+          ref={contentRef}
+          className="absolute inset-0 opacity-50 pointer-events-none"
+          style={{ fontSize: '1px', lineHeight: '2px' }}
+        >
+          {lines.map((line, i) => (
+            <div 
+              key={i}
+              className="whitespace-pre h-[2px] bg-gray-400/20"
+              style={{ 
+                width: `${Math.min(100, line.length)}%`,
+                opacity: line.trim() ? 0.5 : 0.1
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Viewport indicator */}
         <div
-          ref={indicatorRef}
+          ref={viewportIndicatorRef}
           className={cn(
             "absolute left-0 w-full",
-            "bg-gray-300/50 rounded-sm transition-all duration-150"
+            "bg-gray-400/50 rounded-sm transition-all duration-150"
           )}
         />
       </div>
