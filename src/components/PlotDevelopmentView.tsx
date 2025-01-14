@@ -69,8 +69,10 @@ const plotData = [
 
 export const PlotDevelopmentView = () => {
   return (
-    <div className="h-[calc(100vh-4rem)] bg-background overflow-y-auto">
-      <Timeline data={plotData} />
+    <div className="min-h-screen w-full">
+      <div className="absolute top-0 left-0 w-full">
+        <Timeline data={plotData} />
+      </div>
     </div>
   );
 };
