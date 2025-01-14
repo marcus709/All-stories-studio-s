@@ -288,13 +288,13 @@ export const PlotDevelopmentView = () => {
   const { selectedStory } = useStory();
   const queryClient = useQueryClient();
 
-  // Add query to fetch existing timeline
+  // Update the query to use maybeSingle and handle the case when no document is found
   const { data: existingTimeline } = useQuery({
     queryKey: ['timeline', selectedStory?.id],
     queryFn: async () => {
-      if (!selectedStory?.id) return null;
+      if (!selectedStory?.id || !timelineTitle) return null;
 
-      const { data: document } = await supabase
+      const { data, error } = await supabase
         .from('documents')
         .select(`
           id,
@@ -305,24 +305,37 @@ export const PlotDevelopmentView = () => {
         `)
         .eq('story_id', selectedStory.id)
         .eq('title', timelineTitle)
-        .single();
+        .maybeSingle();
 
-      if (!document) return null;
+      if (error) {
+        console.error('Error fetching timeline:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch timeline data",
+          variant: "destructive",
+        });
+        return null;
+      }
 
-      const { data: events } = await supabase
+      if (!data) return null;
+
+      const { data: events, error: eventsError } = await supabase
         .from('plot_events')
         .select('*')
         .eq('story_id', selectedStory.id)
         .order('order_index');
 
-      if (!events) return null;
+      if (eventsError) {
+        console.error('Error fetching plot events:', eventsError);
+        return null;
+      }
 
       return {
-        document,
-        events
+        document: data,
+        events: events || []
       };
     },
-    enabled: !!selectedStory?.id
+    enabled: !!selectedStory?.id && !!timelineTitle
   });
 
   // Load timeline data when it exists
