@@ -288,9 +288,9 @@ export const PlotDevelopmentView = () => {
   const { selectedStory } = useStory();
   const queryClient = useQueryClient();
 
-  // Update the query to use maybeSingle and handle the case when no document is found
+  // Update the query to properly handle the title parameter and errors
   const { data: existingTimeline } = useQuery({
-    queryKey: ['timeline', selectedStory?.id],
+    queryKey: ['timeline', selectedStory?.id, timelineTitle],
     queryFn: async () => {
       if (!selectedStory?.id || !timelineTitle) return null;
 
@@ -304,7 +304,7 @@ export const PlotDevelopmentView = () => {
           )
         `)
         .eq('story_id', selectedStory.id)
-        .eq('title', timelineTitle)
+        .eq('title', timelineTitle.trim())
         .maybeSingle();
 
       if (error) {
