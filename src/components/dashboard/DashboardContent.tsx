@@ -13,7 +13,8 @@ import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
-type View = "story" | "characters" | "plot" | "ideas" | "docs" | "logic";
+// Export the View type
+export type View = "story" | "characters" | "plot" | "ideas" | "docs" | "logic";
 
 interface DashboardContentProps {
   currentView: View;

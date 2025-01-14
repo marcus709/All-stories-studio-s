@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
-import { DashboardContent } from "@/components/dashboard/DashboardContent";
-import type { View } from "@/components/dashboard/DashboardContent";
+import { DashboardContent, View } from "@/components/dashboard/DashboardContent";
 
 export const Dashboard = () => {
   const [currentView, setCurrentView] = useState<View>("story");
@@ -22,3 +21,6 @@ export const Dashboard = () => {
     </div>
   );
 };
+
+// Add default export to fix the Routes.tsx import
+export default Dashboard;
