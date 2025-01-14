@@ -422,7 +422,7 @@ export const PlotDevelopmentView = () => {
           title: `Act ${newActNumber}`,
           description: "New Act Development",
           order_index: plotData.length,
-          user_id: session.user.id
+          user_id: session.user.id  // Add user_id for RLS
         })
         .select()
         .single();
@@ -488,6 +488,7 @@ export const PlotDevelopmentView = () => {
 
       if (sectionError) throw sectionError;
 
+      // Create plot events with proper user_id
       const plotEvents = template.plotPoints.map((point, index) => ({
         story_id: selectedStory.id,
         document_section_id: section.id,
@@ -495,7 +496,7 @@ export const PlotDevelopmentView = () => {
         title: point,
         description: "Development Stage",
         order_index: index,
-        user_id: session.user.id
+        user_id: session.user.id  // Add user_id for RLS
       }));
 
       const { error: eventsError } = await supabase
