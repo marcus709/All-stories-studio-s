@@ -22,7 +22,7 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
       const rect = ref.current.getBoundingClientRect();
       setHeight(rect.height);
     }
-  }, [ref]);
+  }, [ref, data]); // Add data as dependency to recalculate height when new acts are added
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
