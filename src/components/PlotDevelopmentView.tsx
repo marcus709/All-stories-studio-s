@@ -215,7 +215,7 @@ const plotTemplates: PlotTemplate[] = [
   }
 ];
 
-const PlotDevelopmentView = () => {
+export const PlotDevelopmentView = () => {
   const [plotData, setPlotData] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
@@ -478,5 +478,3 @@ const PlotDevelopmentView = () => {
     </div>
   );
 };
-
-export default PlotDevelopmentView;
