@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Book, Users, LineChart, Lightbulb, FileText, AlertTriangle, Rewind, ChevronLeft, ChevronRight } from "lucide-react";
+import { Book, Users, LineChart, Lightbulb, FileText, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
 import { StoriesDialog } from "../StoriesDialog";
 import { useStory } from "@/contexts/StoryContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,8 +12,7 @@ import { Story } from "@/types/story";
 const navigationItems = [
   { id: "story", icon: Book, label: "Story Editor" },
   { id: "characters", icon: Users, label: "Characters" },
-  { id: "plot", icon: LineChart, label: "Formatting" },
-  { id: "dream", icon: Rewind, label: "Backwards Planning" },
+  { id: "plot", icon: LineChart, label: "Plot Development" },
   { id: "ideas", icon: Lightbulb, label: "Story Ideas" },
   { id: "docs", icon: FileText, label: "Story Docs" },
   { id: "logic", icon: AlertTriangle, label: "Story Logic" },
@@ -105,7 +104,6 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
           </Button>
         </div>
 
-        {/* Profile Section - Fixed */}
         <div className="flex items-center gap-3 mb-12 px-8 mt-8">
           <div className="w-11 h-11 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-lg font-medium">
             {profile?.username?.[0]?.toUpperCase() || "?"}
@@ -117,7 +115,6 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
           </div>
         </div>
 
-        {/* Stories Section - Fixed */}
         <div className="space-y-4 mb-6 px-8">
           <StoryButtons
             selectedStory={selectedStory}
@@ -136,7 +133,6 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
           />
         </div>
 
-        {/* Navigation - Scrollable */}
         <ScrollArea className="flex-1 px-4">
           <nav className="space-y-3 pr-4">
             {navigationItems.map(({ id, icon: Icon, label }) => (

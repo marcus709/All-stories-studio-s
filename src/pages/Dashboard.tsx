@@ -1,57 +1,24 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Header } from "@/components/Header";
+import { useState } from "react";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
-import { StoryProvider } from "@/contexts/StoryContext";
-import { useSession } from "@supabase/auth-helpers-react";
-import { useToast } from "@/hooks/use-toast";
-import { StudioAssistant } from "@/components/ai/StudioAssistant";
+import type { View } from "@/components/dashboard/DashboardContent";
 
-type View = "story" | "characters" | "plot" | "dream" | "ideas" | "docs" | "logic";
-
-function DashboardLayout() {
+export const Dashboard = () => {
   const [currentView, setCurrentView] = useState<View>("story");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const session = useSession();
-
-  useEffect(() => {
-    if (!session) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to access the dashboard.",
-      });
-      navigate("/");
-    }
-  }, [session, navigate, toast]);
-
-  if (!session) {
-    return null;
-  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <DashboardSidebar 
-        currentView={currentView} 
+    <div className="flex min-h-screen bg-gray-50">
+      <DashboardSidebar
+        currentView={currentView}
         setCurrentView={setCurrentView}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
-      <div className={`pt-16 transition-all duration-300 ${isSidebarCollapsed ? 'ml-12' : 'ml-72'}`}>
+      
+      <main className={`flex-1 ${isSidebarCollapsed ? 'ml-12' : 'ml-72'}`}>
         <DashboardContent currentView={currentView} />
-      </div>
-      <StudioAssistant />
+      </main>
     </div>
   );
-}
-
-export default function Dashboard() {
-  return (
-    <StoryProvider>
-      <DashboardLayout />
-    </StoryProvider>
-  );
-}
+};
