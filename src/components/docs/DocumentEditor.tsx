@@ -68,6 +68,14 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
     console.log("Jumping to location:", index);
   };
 
+  if (!document) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-4rem)] text-gray-500">
+        Please select a document to view
+      </div>
+    );
+  }
+
   return (
     <div className="h-full flex flex-col bg-gray-50">
       <div className="flex items-center justify-between p-4 bg-white border-b">
@@ -112,7 +120,7 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
         <ScrollArea className={cn(
           "flex-1 p-8",
           showInsights ? 'border-r' : '',
-          isNavSidebarCollapsed ? 'ml-8' : 'ml-12'
+          isNavSidebarCollapsed ? 'ml-20' : 'ml-72'
         )}>
           <div className="max-w-[850px] mx-auto">
             <WYSIWYGEditor
