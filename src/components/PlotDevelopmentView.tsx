@@ -357,7 +357,7 @@ export const PlotDevelopmentView = () => {
           title: `Act ${newActNumber}`,
           description: "New Act Development",
           order_index: plotData.length,
-          user_id: session.user.id  // Add user_id for RLS
+          user_id: session.user.id
         })
         .select()
         .single();
@@ -382,7 +382,7 @@ export const PlotDevelopmentView = () => {
     }
   };
 
-  const createTimelineDocument = async (template: PlotTemplate, title: string) => {
+  const createTimelineDocument = async (template: PlotTemplate) => {
     if (!selectedStory?.id || !session?.user?.id) return;
     
     setIsProcessing(true);
@@ -390,7 +390,7 @@ export const PlotDevelopmentView = () => {
       const { data: document, error: documentError } = await supabase
         .from('documents')
         .insert({
-          title: title,
+          title: timelineTitle,
           story_id: selectedStory.id,
           user_id: session.user.id,
           content: JSON.stringify({
@@ -423,7 +423,6 @@ export const PlotDevelopmentView = () => {
 
       if (sectionError) throw sectionError;
 
-      // Create plot events with proper user_id
       const plotEvents = template.plotPoints.map((point, index) => ({
         story_id: selectedStory.id,
         document_section_id: section.id,
@@ -431,7 +430,7 @@ export const PlotDevelopmentView = () => {
         title: point,
         description: "Development Stage",
         order_index: index,
-        user_id: session.user.id  // Add user_id for RLS
+        user_id: session.user.id
       }));
 
       const { error: eventsError } = await supabase
@@ -445,7 +444,7 @@ export const PlotDevelopmentView = () => {
 
       toast({
         title: "Timeline Created",
-        description: `Timeline "${title}" has been created and saved to your documents.`,
+        description: `Timeline "${timelineTitle}" has been created and saved to your documents.`,
       });
 
       return document;
@@ -470,7 +469,7 @@ export const PlotDevelopmentView = () => {
   const handleTimelineCreate = async () => {
     if (!selectedTemplate || !timelineTitle.trim()) return;
 
-    const document = await createTimelineDocument(selectedTemplate, timelineTitle);
+    const document = await createTimelineDocument(selectedTemplate);
     if (document) {
       const newPlotData = selectedTemplate.plotPoints.map((point, index) => ({
         title: point,
