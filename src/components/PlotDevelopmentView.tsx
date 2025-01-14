@@ -4,6 +4,7 @@ import { Timeline } from "@/components/ui/timeline";
 import { Button } from "@/components/ui/button";
 import { Plus, LayoutTemplate, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useSession } from "@supabase/auth-helpers-react";
 import {
   Sheet,
   SheetContent,
@@ -287,6 +288,7 @@ export const PlotDevelopmentView = () => {
   const { toast } = useToast();
   const { selectedStory } = useStory();
   const queryClient = useQueryClient();
+  const session = useSession();
 
   const { data: existingTimeline } = useQuery({
     queryKey: ['timeline', selectedStory?.id, timelineTitle],
@@ -378,10 +380,10 @@ export const PlotDevelopmentView = () => {
   }, [existingTimeline]);
 
   const addNewAct = async () => {
-    if (!selectedStory?.id || !existingTimeline?.timelineSection?.id) {
+    if (!selectedStory?.id || !existingTimeline?.timelineSection?.id || !session?.user?.id) {
       toast({
         title: "Error",
-        description: "Please create a timeline first",
+        description: "Please create a timeline first and ensure you're logged in",
         variant: "destructive",
       });
       return;
@@ -419,7 +421,8 @@ export const PlotDevelopmentView = () => {
           stage: `Define key events, Advance the plot, Further character growth`,
           title: `Act ${newActNumber}`,
           description: "New Act Development",
-          order_index: plotData.length
+          order_index: plotData.length,
+          user_id: session.user.id
         })
         .select()
         .single();
@@ -428,7 +431,6 @@ export const PlotDevelopmentView = () => {
 
       setPlotData([...plotData, newAct]);
       
-      // Refresh the timeline data
       queryClient.invalidateQueries({ queryKey: ['timeline'] });
 
       toast({
@@ -446,20 +448,16 @@ export const PlotDevelopmentView = () => {
   };
 
   const createTimelineDocument = async (template: PlotTemplate, title: string) => {
-    if (!selectedStory?.id) return;
+    if (!selectedStory?.id || !session?.user?.id) return;
     
     setIsProcessing(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user?.id) throw new Error("User not authenticated");
-
-      // Create a new document with complete template information
       const { data: document, error: documentError } = await supabase
         .from('documents')
         .insert({
           title: title,
           story_id: selectedStory.id,
-          user_id: user.id,
+          user_id: session.user.id,
           content: JSON.stringify({
             templateName: template.name,
             plotPoints: template.plotPoints,
@@ -471,7 +469,6 @@ export const PlotDevelopmentView = () => {
 
       if (documentError) throw documentError;
 
-      // Create a document section for the timeline
       const { data: section, error: sectionError } = await supabase
         .from('document_sections')
         .insert({
@@ -491,7 +488,6 @@ export const PlotDevelopmentView = () => {
 
       if (sectionError) throw sectionError;
 
-      // Create plot events with document section reference
       const plotEvents = template.plotPoints.map((point, index) => ({
         story_id: selectedStory.id,
         document_section_id: section.id,
@@ -499,6 +495,7 @@ export const PlotDevelopmentView = () => {
         title: point,
         description: "Development Stage",
         order_index: index,
+        user_id: session.user.id
       }));
 
       const { error: eventsError } = await supabase
@@ -507,7 +504,6 @@ export const PlotDevelopmentView = () => {
 
       if (eventsError) throw eventsError;
 
-      // Invalidate queries to refresh the data
       queryClient.invalidateQueries({ queryKey: ['timeline'] });
       queryClient.invalidateQueries({ queryKey: ['documents'] });
 
@@ -565,7 +561,6 @@ export const PlotDevelopmentView = () => {
       setPlotData(newPlotData);
       setIsNamingDialogOpen(false);
 
-      // Scroll to timeline after a short delay
       setTimeout(() => {
         if (timelineRef.current) {
           const yOffset = -100;
