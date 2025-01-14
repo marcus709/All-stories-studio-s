@@ -25,7 +25,7 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
-  const [isNavigationCollapsed, setIsNavigationCollapsed] = useState(false);
+  const [isNavigationCollapsed, setIsNavigationCollapsed] = useState(true);
   const { updateDocument } = useDocuments(storyId);
   const { toast } = useToast();
 
@@ -96,14 +96,14 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
       <div className="flex-1 flex">
         <DocumentNavigation 
           content={content}
-          isCollapsed={!isNavigationCollapsed}
+          isCollapsed={isNavigationCollapsed}
           onToggleCollapse={() => setIsNavigationCollapsed(!isNavigationCollapsed)}
         />
         
         <ScrollArea className={cn(
           "flex-1 p-8",
           showInsights ? 'border-r' : '',
-          !isNavigationCollapsed ? 'ml-16' : ''
+          !isNavigationCollapsed ? 'ml-28' : ''
         )}>
           <div className="max-w-[850px] mx-auto">
             <WYSIWYGEditor

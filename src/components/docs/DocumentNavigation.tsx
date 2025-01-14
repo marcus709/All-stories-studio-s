@@ -37,13 +37,13 @@ export const DocumentNavigation = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  if (!isCollapsed) return null;
+  if (isCollapsed) return null;
 
   const lines = content.split('\n').map(line => line.trim());
   const maxLineLength = Math.max(...lines.map(line => line.length));
 
   return (
-    <div className="fixed left-12 top-16 w-16 h-[calc(100vh-4rem)] bg-white border-r flex flex-col">
+    <div className="fixed left-12 top-16 w-16 h-[calc(100vh-4rem)] bg-white border-r flex flex-col z-10">
       <Button
         variant="ghost"
         size="icon"
