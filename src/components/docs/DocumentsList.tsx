@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Share, FileText, Plus, MoreVertical } from "lucide-react";
+import { Share, FileText, Plus, MoreVertical, Trash2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ShareDocumentDialog } from "./ShareDocumentDialog";
 import { Document } from "@/types/story";
@@ -10,6 +10,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface DocumentsListProps {
   documents: Document[];
@@ -25,6 +37,8 @@ export const DocumentsList = ({
   isGridView 
 }: DocumentsListProps) => {
   const [shareDocument, setShareDocument] = useState<Document | null>(null);
+  const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
+  const { toast } = useToast();
 
   if (!documents?.length) {
     return (
@@ -43,6 +57,36 @@ export const DocumentsList = ({
       month: 'short',
       day: 'numeric'
     });
+  };
+
+  const handleDeleteDocument = async () => {
+    if (!documentToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from('documents')
+        .delete()
+        .eq('id', documentToDelete.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Document deleted",
+        description: "The document has been permanently deleted.",
+      });
+
+      // Force a page refresh to update the documents list
+      window.location.reload();
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete the document. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setDocumentToDelete(null);
+    }
   };
 
   return (
@@ -101,6 +145,16 @@ export const DocumentsList = ({
                           <Share className="h-4 w-4 mr-2" />
                           Share
                         </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDocumentToDelete(doc);
+                          }}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -124,16 +178,29 @@ export const DocumentsList = ({
                       {formatDate(doc.created_at)}
                     </p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShareDocument(doc);
-                    }}
-                  >
-                    <Share className="h-4 w-4" />
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShareDocument(doc);
+                      }}
+                    >
+                      <Share className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDocumentToDelete(doc);
+                      }}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
@@ -155,6 +222,29 @@ export const DocumentsList = ({
         open={!!shareDocument}
         onOpenChange={(open) => !open && setShareDocument(null)}
       />
+
+      <AlertDialog open={!!documentToDelete} onOpenChange={(open) => !open && setDocumentToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the document
+              "{documentToDelete?.title}" and all its associated content.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDocumentToDelete(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteDocument}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Delete Document
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
