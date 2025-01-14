@@ -460,15 +460,14 @@ export const PlotDevelopmentView = () => {
     }
   };
 
-  const applyTemplate = async (template: PlotTemplate) => {
+  const applyTemplate = (template: PlotTemplate) => {
     setSelectedTemplate(template);
     setTimelineTitle(`${template.name} Timeline`);
     setIsNamingDialogOpen(true);
   };
 
   const handleTimelineCreate = async () => {
-    if (!selectedTemplate || !timelineTitle.trim() || !selectedStory?.id) return;
-
+    if (!selectedTemplate || !timelineTitle.trim()) return;
     await createTimelineDocument(selectedTemplate, timelineTitle);
     setIsNamingDialogOpen(false);
 
