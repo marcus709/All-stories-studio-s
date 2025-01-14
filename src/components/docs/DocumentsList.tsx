@@ -63,7 +63,15 @@ export const DocumentsList = ({
     if (!documentToDelete) return;
 
     try {
-      // First delete all document sections
+      // First delete all plot events referencing the document sections
+      const { error: plotEventsError } = await supabase
+        .from('plot_events')
+        .delete()
+        .eq('document_section_id', documentToDelete.id);
+
+      if (plotEventsError) throw plotEventsError;
+
+      // Then delete all document sections
       const { error: sectionsError } = await supabase
         .from('document_sections')
         .delete()
@@ -71,7 +79,7 @@ export const DocumentsList = ({
 
       if (sectionsError) throw sectionsError;
 
-      // Then delete the document itself
+      // Finally delete the document itself
       const { error } = await supabase
         .from('documents')
         .delete()
