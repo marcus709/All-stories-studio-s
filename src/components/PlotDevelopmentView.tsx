@@ -279,13 +279,13 @@ export const PlotDevelopmentView = () => {
   const [plotData, setPlotData] = useState(initialPlotData);
   const [selectedTemplate, setSelectedTemplate] = useState<PlotTemplate | null>(null);
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
-  const [templateName, setTemplateName] = useState("");
+  const [timelineName, setTimelineName] = useState("");
   const { toast } = useToast();
   const { selectedStory } = useStory();
   const queryClient = useQueryClient();
 
-  const { data: savedTemplates } = useQuery({
-    queryKey: ["plot-templates", selectedStory?.id],
+  const { data: savedTimelines } = useQuery({
+    queryKey: ["plot-timelines", selectedStory?.id],
     queryFn: async () => {
       if (!selectedStory?.id) return [];
       
@@ -298,7 +298,7 @@ export const PlotDevelopmentView = () => {
       if (error) {
         toast({
           title: "Error",
-          description: "Failed to fetch saved templates",
+          description: "Failed to fetch saved timelines",
           variant: "destructive",
         });
         return [];
@@ -337,11 +337,11 @@ export const PlotDevelopmentView = () => {
     ]);
   };
 
-  const handleSaveTemplate = async () => {
-    if (!selectedStory?.id || !selectedTemplate || !templateName.trim()) {
+  const handleSaveTimeline = async () => {
+    if (!selectedStory?.id || !selectedTemplate || !timelineName.trim()) {
       toast({
         title: "Error",
-        description: "Please provide a name for your template",
+        description: "Please provide a name for your timeline",
         variant: "destructive",
       });
       return;
@@ -352,14 +352,14 @@ export const PlotDevelopmentView = () => {
       .insert({
         user_id: (await supabase.auth.getUser()).data.user?.id,
         story_id: selectedStory.id,
-        name: templateName.trim(),
+        name: timelineName.trim(),
         template_name: selectedTemplate.name,
       });
 
     if (error) {
       toast({
         title: "Error",
-        description: "Failed to save template",
+        description: "Failed to save timeline",
         variant: "destructive",
       });
       return;
@@ -367,12 +367,12 @@ export const PlotDevelopmentView = () => {
 
     toast({
       title: "Success",
-      description: "Template saved successfully",
+      description: "Timeline saved successfully",
     });
 
-    queryClient.invalidateQueries({ queryKey: ["plot-templates"] });
+    queryClient.invalidateQueries({ queryKey: ["plot-timelines"] });
     setIsTemplateDialogOpen(false);
-    setTemplateName("");
+    setTimelineName("");
     applyTemplate(selectedTemplate);
   };
 
@@ -381,10 +381,27 @@ export const PlotDevelopmentView = () => {
     setIsTemplateDialogOpen(true);
   };
 
-  const loadSavedTemplate = async (templateName: string) => {
+  const loadSavedTimeline = async (templateName: string) => {
     const template = plotTemplates.find(t => t.name === templateName);
     if (template) {
-      applyTemplate(template);
+      const newPlotData = template.plotPoints.map((point, index) => ({
+        title: `Act ${index + 1}`,
+        content: (
+          <div>
+            <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
+              {point}
+            </p>
+            <div className="mb-8">
+              {template.subEvents && template.subEvents.map((subEvent, subIndex) => (
+                <div key={subIndex} className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+                  ✅ {subEvent}
+                </div>
+              ))}
+            </div>
+          </div>
+        ),
+      }));
+      setPlotData(newPlotData);
     }
   };
 
@@ -441,15 +458,15 @@ export const PlotDevelopmentView = () => {
                   </SheetDescription>
                 </SheetHeader>
                 <ScrollArea className="h-[calc(100vh-200px)] mt-4">
-                  {savedTemplates && savedTemplates.length > 0 && (
+                  {savedTimelines && savedTimelines.length > 0 && (
                     <div className="mb-6">
-                      <h3 className="text-lg font-semibold text-purple-600 mb-4">Saved Templates</h3>
+                      <h3 className="text-lg font-semibold text-purple-600 mb-4">Saved Timelines</h3>
                       <div className="space-y-4">
-                        {savedTemplates.map((saved) => (
+                        {savedTimelines.map((saved) => (
                           <Card
                             key={saved.id}
                             className="p-4 cursor-pointer hover:shadow-md transition-all duration-200"
-                            onClick={() => loadSavedTemplate(saved.template_name)}
+                            onClick={() => loadSavedTimeline(saved.template_name)}
                           >
                             <h3 className="text-lg font-semibold text-purple-600 mb-2">{saved.name}</h3>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
@@ -493,17 +510,17 @@ export const PlotDevelopmentView = () => {
       <Dialog open={isTemplateDialogOpen} onOpenChange={setIsTemplateDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Save Template</DialogTitle>
+            <DialogTitle>Name Your Timeline</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <label htmlFor="templateName" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Template Name
+            <label htmlFor="timelineName" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Timeline Name
             </label>
             <Input
-              id="templateName"
-              value={templateName}
-              onChange={(e) => setTemplateName(e.target.value)}
-              placeholder="Enter a name for your template"
+              id="timelineName"
+              value={timelineName}
+              onChange={(e) => setTimelineName(e.target.value)}
+              placeholder="Enter a name for your timeline"
               className="mt-1"
             />
           </div>
@@ -511,8 +528,8 @@ export const PlotDevelopmentView = () => {
             <Button variant="outline" onClick={() => setIsTemplateDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSaveTemplate}>
-              Save Template
+            <Button onClick={handleSaveTimeline}>
+              Create Timeline
             </Button>
           </DialogFooter>
         </DialogContent>
