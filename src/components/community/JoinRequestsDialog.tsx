@@ -117,6 +117,11 @@ export const JoinRequestsDialog = ({ open, onOpenChange }: JoinRequestsDialogPro
         .eq("id", requestId);
 
       if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Editing rights ${editingRights ? 'granted' : 'revoked'}`,
+      });
     } catch (error) {
       console.error("Error updating editing rights:", error);
       toast({
