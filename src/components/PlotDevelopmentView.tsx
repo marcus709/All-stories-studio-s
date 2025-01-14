@@ -321,13 +321,16 @@ export const PlotDevelopmentView = () => {
     
     setIsProcessing(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.id) throw new Error("User not authenticated");
+
       // Create a new document
       const { data: document, error: documentError } = await supabase
         .from('documents')
         .insert({
           title: title,
           story_id: selectedStory.id,
-          user_id: (await supabase.auth.getUser()).data.user?.id,
+          user_id: user.id,
           content: '',
         })
         .select()
@@ -353,7 +356,7 @@ export const PlotDevelopmentView = () => {
       // Create plot events
       const plotEvents = template.plotPoints.map((point, index) => ({
         story_id: selectedStory.id,
-        user_id: (await supabase.auth.getUser()).data.user?.id,
+        user_id: user.id,
         stage: point,
         title: point,
         description: template.subEvents?.[index] || "Development Stage",
