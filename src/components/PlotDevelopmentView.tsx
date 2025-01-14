@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Timeline } from "@/components/ui/timeline";
 import { Button } from "@/components/ui/button";
@@ -78,6 +78,53 @@ export const PlotDevelopmentView = () => {
   const { selectedStory } = useStory();
   const { toast } = useToast();
 
+  // Fetch existing plot events when story is selected
+  useEffect(() => {
+    const fetchPlotEvents = async () => {
+      if (selectedStory?.id) {
+        const { data: events, error } = await supabase
+          .from("plot_events")
+          .select("*")
+          .eq("story_id", selectedStory.id)
+          .order("order_index", { ascending: true });
+
+        if (error) {
+          console.error("Error fetching plot events:", error);
+          return;
+        }
+
+        if (events && events.length > 0) {
+          const formattedEvents = events.map(event => ({
+            title: event.stage,
+            content: (
+              <div>
+                <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
+                  {event.title}
+                </p>
+                <div className="mb-8">
+                  <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+                    {event.description || "Add details to this plot point"}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-4"
+                    onClick={() => handleWriteClick(event)}
+                  >
+                    Write
+                  </Button>
+                </div>
+              </div>
+            ),
+          }));
+          setPlotData(formattedEvents);
+        }
+      }
+    };
+
+    fetchPlotEvents();
+  }, [selectedStory?.id]);
+
   const addNewAct = () => {
     const newActNumber = plotData.length + 1;
     setPlotData([
@@ -151,6 +198,32 @@ export const PlotDevelopmentView = () => {
           .insert(plotEvents);
 
         if (plotError) throw plotError;
+
+        // Update the timeline display with the new events
+        const formattedEvents = plotEvents.map(event => ({
+          title: event.stage,
+          content: (
+            <div>
+              <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
+                {event.title}
+              </p>
+              <div className="mb-8">
+                <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+                  Add details to this plot point
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-4"
+                  onClick={() => handleWriteClick(event)}
+                >
+                  Write
+                </Button>
+              </div>
+            </div>
+          ),
+        }));
+        setPlotData(formattedEvents);
       }
 
       toast({
@@ -193,7 +266,6 @@ export const PlotDevelopmentView = () => {
         </div>
       </div>
 
-      {/* Dashboard Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <Card className="p-6 bg-white dark:bg-gray-900 shadow-lg hover:shadow-xl transition-shadow duration-200">
