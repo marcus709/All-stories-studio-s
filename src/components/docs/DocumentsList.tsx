@@ -74,6 +74,21 @@ export const DocumentsList = ({
       // Delete plot events referencing any of these sections
       if (sections && sections.length > 0) {
         const sectionIds = sections.map(s => s.id);
+        
+        // Delete plot emotions first (they reference plot events)
+        const { error: plotEmotionsError } = await supabase
+          .from('plot_emotions')
+          .delete()
+          .in('plot_event_id', (
+            await supabase
+              .from('plot_events')
+              .select('id')
+              .in('document_section_id', sectionIds)
+          ).data?.map(pe => pe.id) || []);
+
+        if (plotEmotionsError) throw plotEmotionsError;
+
+        // Then delete plot events
         const { error: plotEventsError } = await supabase
           .from('plot_events')
           .delete()
@@ -82,7 +97,23 @@ export const DocumentsList = ({
         if (plotEventsError) throw plotEventsError;
       }
 
-      // Then delete the document sections
+      // Delete document references
+      const { error: referencesError } = await supabase
+        .from('document_references')
+        .delete()
+        .eq('document_id', documentToDelete.id);
+
+      if (referencesError) throw referencesError;
+
+      // Delete document shares
+      const { error: sharesError } = await supabase
+        .from('document_shares')
+        .delete()
+        .eq('document_id', documentToDelete.id);
+
+      if (sharesError) throw sharesError;
+
+      // Delete document sections
       const { error: sectionsError } = await supabase
         .from('document_sections')
         .delete()
@@ -116,6 +147,8 @@ export const DocumentsList = ({
       setDocumentToDelete(null);
     }
   };
+
+  // ... keep existing code (rest of the component JSX)
 
   return (
     <div className="relative h-full">
