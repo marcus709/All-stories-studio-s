@@ -43,12 +43,12 @@ export const DocumentNavigation = ({
   const maxLineLength = Math.max(...lines.map(line => line.length));
 
   return (
-    <div className="fixed left-12 top-16 w-16 h-[calc(100vh-4rem)] bg-gray-950 border-r flex flex-col">
+    <div className="fixed left-12 top-16 w-16 h-[calc(100vh-4rem)] bg-white border-r flex flex-col">
       <Button
         variant="ghost"
         size="icon"
         onClick={onToggleCollapse}
-        className="absolute right-2 top-2 text-gray-400 hover:text-gray-300"
+        className="absolute right-2 top-2 text-gray-400 hover:text-gray-600"
       >
         <ChevronRight className="h-4 w-4" />
       </Button>
@@ -63,7 +63,7 @@ export const DocumentNavigation = ({
             return (
               <div
                 key={index}
-                className="h-[2px] mb-[1px] bg-gray-700"
+                className="h-[2px] mb-[1px] bg-gray-200"
                 style={{ width: `${Math.max(width, 10)}%` }}
               />
             );
