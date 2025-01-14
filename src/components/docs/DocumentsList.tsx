@@ -63,6 +63,15 @@ export const DocumentsList = ({
     if (!documentToDelete) return;
 
     try {
+      // First delete all document sections
+      const { error: sectionsError } = await supabase
+        .from('document_sections')
+        .delete()
+        .eq('document_id', documentToDelete.id);
+
+      if (sectionsError) throw sectionsError;
+
+      // Then delete the document itself
       const { error } = await supabase
         .from('documents')
         .delete()
