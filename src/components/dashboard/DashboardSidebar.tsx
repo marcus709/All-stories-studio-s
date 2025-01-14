@@ -13,7 +13,7 @@ const navigationItems = [
   { id: "story", icon: Book, label: "Story Editor" },
   { id: "characters", icon: Users, label: "Characters" },
   { id: "plot", icon: LineChart, label: "Formatting" },
-  { id: "dream", icon: Rewind, label: "Backwards Planning" },
+  { id: "dream", icon: Rewind, label: "Plot Development" },
   { id: "ideas", icon: Lightbulb, label: "Story Ideas" },
   { id: "docs", icon: FileText, label: "Story Docs" },
   { id: "logic", icon: AlertTriangle, label: "Story Logic" },

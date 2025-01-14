@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { CharactersView } from "@/components/CharactersView";
 import { FormattingView } from "@/components/FormattingView";
-import { BackwardsStoryPlanningView } from "@/components/backwards-planning/BackwardsStoryPlanningView";
+import { PlotDevelopmentView } from "@/components/PlotDevelopmentView";
 import { StoryIdeasView } from "@/components/StoryIdeasView";
 import { StoryDocsView } from "@/components/docs/StoryDocsView";
 import { StoryView } from "./views/StoryView";
@@ -54,8 +54,8 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
           }
           break;
         case "dream":
-          if (handleFeatureAccess("Backwards Planning", "story_docs")) {
-            component = <BackwardsStoryPlanningView />;
+          if (handleFeatureAccess("Plot Development", "story_docs")) {
+            component = <PlotDevelopmentView />;
           }
           break;
         case "ideas":
