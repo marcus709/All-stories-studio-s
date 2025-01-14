@@ -108,10 +108,9 @@ export const PlotDevelopmentView = () => {
         <div className="flex justify-center mt-8 mb-16">
           <Button
             onClick={addNewAct}
-            variant="outline"
-            className="gap-2 text-neutral-700 dark:text-neutral-300"
+            className="bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white font-medium px-6 py-2 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center gap-2"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-5 w-5" />
             Add New Act
           </Button>
         </div>
