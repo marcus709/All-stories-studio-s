@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Timeline } from "@/components/ui/timeline";
 import { Button } from "@/components/ui/button";
 import { Plus, LayoutTemplate, BookOpen } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import {
   Sheet,
   SheetContent,
