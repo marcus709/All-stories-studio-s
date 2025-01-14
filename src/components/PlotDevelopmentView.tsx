@@ -213,7 +213,10 @@ const plotTemplates: PlotTemplate[] = [
 ];
 
 export const PlotDevelopmentView = () => {
-  const [plotData, setPlotData] = useState(initialPlotData);
+  const [plotData, setPlotData] = useState<{
+    title: string;
+    content: React.ReactNode;
+  }[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<PlotTemplate | null>(null);
   const [isNamingDialogOpen, setIsNamingDialogOpen] = useState(false);
   const [timelineTitle, setTimelineTitle] = useState("");
