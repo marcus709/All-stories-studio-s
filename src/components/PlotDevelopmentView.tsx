@@ -212,72 +212,6 @@ const plotTemplates: PlotTemplate[] = [
   }
 ];
 
-const initialPlotData = [
-  {
-    title: "Act 1",
-    content: (
-      <div>
-        <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
-          Setup and Introduction
-        </p>
-        <div className="mb-8">
-          <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-            ✅ Introduce main characters
-          </div>
-          <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-            ✅ Establish the setting
-          </div>
-          <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-            ✅ Present the initial conflict
-          </div>
-        </div>
-      </div>
-    ),
-  },
-  {
-    title: "Act 2",
-    content: (
-      <div>
-        <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
-          Rising Action and Complications
-        </p>
-        <div className="mb-8">
-          <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-            ✅ Develop subplots
-          </div>
-          <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-            ✅ Increase tension
-          </div>
-          <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-            ✅ Character development
-          </div>
-        </div>
-      </div>
-    ),
-  },
-  {
-    title: "Act 3",
-    content: (
-      <div>
-        <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
-          Resolution and Conclusion
-        </p>
-        <div className="mb-8">
-          <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-            ✅ Climactic scene
-          </div>
-          <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-            ✅ Resolve conflicts
-          </div>
-          <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-            ✅ Character arcs completion
-          </div>
-        </div>
-      </div>
-    ),
-  },
-];
-
 export const PlotDevelopmentView = () => {
   const [plotData, setPlotData] = useState(initialPlotData);
   const [selectedTemplate, setSelectedTemplate] = useState<PlotTemplate | null>(null);
@@ -291,11 +225,11 @@ export const PlotDevelopmentView = () => {
   const session = useSession();
 
   const { data: existingTimeline } = useQuery({
-    queryKey: ['timeline', selectedStory?.id, timelineTitle],
+    queryKey: ['timeline', selectedStory?.id],
     queryFn: async () => {
-      if (!selectedStory?.id || !timelineTitle) return null;
+      if (!selectedStory?.id) return null;
 
-      const { data, error } = await supabase
+      const { data: documents, error: docsError } = await supabase
         .from('documents')
         .select(`
           id,
@@ -307,23 +241,20 @@ export const PlotDevelopmentView = () => {
           )
         `)
         .eq('story_id', selectedStory.id)
-        .eq('title', timelineTitle.trim())
-        .maybeSingle();
+        .eq('title', 'like', '%Timeline')
+        .order('created_at', { ascending: false })
+        .limit(1);
 
-      if (error) {
-        console.error('Error fetching timeline:', error);
-        toast({
-          title: "Error",
-          description: "Failed to fetch timeline data",
-          variant: "destructive",
-        });
+      if (docsError) {
+        console.error('Error fetching timeline:', docsError);
         return null;
       }
 
-      if (!data) return null;
+      if (!documents || documents.length === 0) return null;
 
-      const templateData = data.content ? JSON.parse(data.content) : null;
-      const timelineSection = data.document_sections?.find(s => s.type === 'timeline');
+      const document = documents[0];
+      const templateData = document.content ? JSON.parse(document.content) : null;
+      const timelineSection = document.document_sections?.find(s => s.type === 'timeline');
       const timelineData = timelineSection?.content ? JSON.parse(timelineSection.content) : null;
 
       const { data: events, error: eventsError } = await supabase
@@ -339,14 +270,14 @@ export const PlotDevelopmentView = () => {
       }
 
       return {
-        document: data,
+        document,
         events: events || [],
         template: templateData,
         timelineData,
         timelineSection: timelineSection
       };
     },
-    enabled: !!selectedStory?.id && !!timelineTitle
+    enabled: !!selectedStory?.id
   });
 
   useEffect(() => {
@@ -354,6 +285,7 @@ export const PlotDevelopmentView = () => {
       const template = plotTemplates.find(t => t.name === existingTimeline.template.templateName);
       if (template) {
         setSelectedTemplate(template);
+        setTimelineTitle(`${template.name} Timeline`);
       }
     }
 
