@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Timeline } from "@/components/ui/timeline";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
-const plotData = [
+const initialPlotData = [
   {
     title: "Act 1",
     content: (
@@ -68,10 +71,50 @@ const plotData = [
 ];
 
 export const PlotDevelopmentView = () => {
+  const [plotData, setPlotData] = useState(initialPlotData);
+
+  const addNewAct = () => {
+    const newActNumber = plotData.length + 1;
+    setPlotData([
+      ...plotData,
+      {
+        title: `Act ${newActNumber}`,
+        content: (
+          <div>
+            <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
+              New Act Development
+            </p>
+            <div className="mb-8">
+              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+                ✅ Define key events
+              </div>
+              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+                ✅ Advance the plot
+              </div>
+              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+                ✅ Further character growth
+              </div>
+            </div>
+          </div>
+        ),
+      },
+    ]);
+  };
+
   return (
     <div className="min-h-screen w-full">
       <div className="w-full">
         <Timeline data={plotData} />
+        <div className="flex justify-center mt-8 mb-16">
+          <Button
+            onClick={addNewAct}
+            variant="outline"
+            className="gap-2 text-neutral-700 dark:text-neutral-300"
+          >
+            <Plus className="h-4 w-4" />
+            Add New Act
+          </Button>
+        </div>
       </div>
     </div>
   );
