@@ -402,28 +402,37 @@ export const PlotDevelopmentView = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user?.id) throw new Error("User not authenticated");
 
-      // Create a new document
+      // Create a new document with template information
       const { data: document, error: documentError } = await supabase
         .from('documents')
         .insert({
           title: title,
           story_id: selectedStory.id,
           user_id: user.id,
-          content: '',
+          content: JSON.stringify({
+            templateName: template.name,
+            plotPoints: template.plotPoints,
+            subEvents: template.subEvents || [],
+          }),
         })
         .select()
         .single();
 
       if (documentError) throw documentError;
 
-      // Create a document section for the timeline
+      // Create a document section for the timeline with complete template data
       const { data: section, error: sectionError } = await supabase
         .from('document_sections')
         .insert({
           document_id: document.id,
           type: 'timeline',
           title: 'Plot Timeline',
-          content: JSON.stringify(template.plotPoints),
+          content: JSON.stringify({
+            template: template.name,
+            plotPoints: template.plotPoints,
+            subEvents: template.subEvents || [],
+            description: `Timeline based on ${template.name}`,
+          }),
           order_index: 0,
         })
         .select()
@@ -431,7 +440,7 @@ export const PlotDevelopmentView = () => {
 
       if (sectionError) throw sectionError;
 
-      // Create plot events
+      // Create detailed plot events
       const plotEvents = template.plotPoints.map((point, index) => ({
         story_id: selectedStory.id,
         user_id: user.id,
