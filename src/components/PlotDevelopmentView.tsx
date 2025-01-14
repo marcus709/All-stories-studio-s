@@ -288,7 +288,6 @@ export const PlotDevelopmentView = () => {
   const { selectedStory } = useStory();
   const queryClient = useQueryClient();
 
-  // Update the query to properly handle template data
   const { data: existingTimeline } = useQuery({
     queryKey: ['timeline', selectedStory?.id, timelineTitle],
     queryFn: async () => {
