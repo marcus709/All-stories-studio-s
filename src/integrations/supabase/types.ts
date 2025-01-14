@@ -1209,6 +1209,7 @@ export type Database = {
         Row: {
           created_at: string | null
           description: string | null
+          document_section_id: string | null
           id: string
           order_index: number
           stage: string
@@ -1220,6 +1221,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           description?: string | null
+          document_section_id?: string | null
           id?: string
           order_index: number
           stage: string
@@ -1231,6 +1233,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           description?: string | null
+          document_section_id?: string | null
           id?: string
           order_index?: number
           stage?: string
@@ -1240,6 +1243,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "plot_events_document_section_id_fkey"
+            columns: ["document_section_id"]
+            isOneToOne: false
+            referencedRelation: "document_sections"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "plot_events_story_id_fkey"
             columns: ["story_id"]
