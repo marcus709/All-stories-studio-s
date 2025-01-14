@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Timeline } from "@/components/ui/timeline";
 import { Button } from "@/components/ui/button";
-import { Plus, LayoutTemplate, BookOpen } from "lucide-react";
+import { Plus, LayoutTemplate, BookOpen, ChevronDown } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -18,6 +18,12 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
@@ -439,12 +445,33 @@ export const PlotDevelopmentView = () => {
             </Button>
           </Card>
 
-          <Card className="p-6 bg-white dark:bg-gray-900 shadow-lg hover:shadow-xl transition-shadow duration-200">
+          <Card className="p-6 bg-white dark:bg-gray-900 shadow-lg hover:shadow-xl transition-shadow duration-200 flex flex-col gap-4">
+            {savedTimelines && savedTimelines.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-full">
+                    <ChevronDown className="h-4 w-4 mr-2" />
+                    Saved Timelines
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  {savedTimelines.map((saved) => (
+                    <DropdownMenuItem
+                      key={saved.id}
+                      onClick={() => loadSavedTimeline(saved.template_name)}
+                    >
+                      {saved.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+
             <Sheet>
               <SheetTrigger asChild>
                 <Button 
                   variant="outline"
-                  className="w-full h-full border-2 border-purple-500 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2"
+                  className="w-full border-2 border-purple-500 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2"
                 >
                   <LayoutTemplate className="h-5 w-5" />
                   Use Template
@@ -458,27 +485,7 @@ export const PlotDevelopmentView = () => {
                   </SheetDescription>
                 </SheetHeader>
                 <ScrollArea className="h-[calc(100vh-200px)] mt-4">
-                  {savedTimelines && savedTimelines.length > 0 && (
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold text-purple-600 mb-4">Saved Timelines</h3>
-                      <div className="space-y-4">
-                        {savedTimelines.map((saved) => (
-                          <Card
-                            key={saved.id}
-                            className="p-4 cursor-pointer hover:shadow-md transition-all duration-200"
-                            onClick={() => loadSavedTimeline(saved.template_name)}
-                          >
-                            <h3 className="text-lg font-semibold text-purple-600 mb-2">{saved.name}</h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              Based on: {saved.template_name}
-                            </p>
-                          </Card>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-purple-600 mb-4">Available Templates</h3>
                     {plotTemplates.map((template, index) => (
                       <Card
                         key={index}
