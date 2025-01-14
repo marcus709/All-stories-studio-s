@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { WYSIWYGEditor } from "@/components/book/WYSIWYGEditor";
 import { DocumentInsights } from "./DocumentInsights";
 import { DocumentNavigationSidebar } from "./DocumentNavigationSidebar";
+import { cn } from "@/lib/utils";
 
 interface DocumentEditorProps {
   document: {
