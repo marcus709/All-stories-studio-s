@@ -382,7 +382,7 @@ export const PlotDevelopmentView = () => {
     }
   };
 
-  const createTimelineDocument = async (template: PlotTemplate, title: string) => {
+  const createTimelineDocument = async (template: PlotTemplate) => {
     if (!session?.user?.id || !selectedStory?.id) return;
     
     setIsProcessing(true);
@@ -390,7 +390,7 @@ export const PlotDevelopmentView = () => {
       const { data: document, error: documentError } = await supabase
         .from('documents')
         .insert({
-          title,
+          title: timelineTitle,
           story_id: selectedStory.id,
           user_id: session.user.id,
           content: JSON.stringify({
@@ -468,7 +468,7 @@ export const PlotDevelopmentView = () => {
 
   const handleTimelineCreate = async () => {
     if (!selectedTemplate || !timelineTitle.trim()) return;
-    await createTimelineDocument(selectedTemplate, timelineTitle);
+    await createTimelineDocument(selectedTemplate);
     setIsNamingDialogOpen(false);
 
     setTimeout(() => {
