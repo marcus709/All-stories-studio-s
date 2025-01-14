@@ -44,16 +44,33 @@ export const DocumentsList = ({
     if (!documentToDelete) return;
 
     try {
-      const { error } = await supabase
+      // First delete all related sections
+      const { error: sectionsError } = await supabase
+        .from('document_sections')
+        .delete()
+        .eq('document_id', documentToDelete.id);
+
+      if (sectionsError) throw sectionsError;
+
+      // Then delete all related references
+      const { error: referencesError } = await supabase
+        .from('document_references')
+        .delete()
+        .eq('document_id', documentToDelete.id);
+
+      if (referencesError) throw referencesError;
+
+      // Finally delete the document itself
+      const { error: documentError } = await supabase
         .from('documents')
         .delete()
         .eq('id', documentToDelete.id);
 
-      if (error) throw error;
+      if (documentError) throw documentError;
 
       toast({
         title: "Document deleted",
-        description: "The document has been successfully deleted",
+        description: "The document and its related content have been successfully deleted",
       });
 
       // Force reload of documents by refreshing the page
@@ -229,7 +246,7 @@ export const DocumentsList = ({
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the document
-              "{documentToDelete?.title}".
+              "{documentToDelete?.title}" and all its related content.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
