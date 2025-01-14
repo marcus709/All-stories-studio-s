@@ -379,6 +379,34 @@ export const PlotDevelopmentView = () => {
     }
   }, [existingTimeline]);
 
+  const addNewAct = () => {
+    const newActNumber = plotData.length + 1;
+    setPlotData([
+      ...plotData,
+      {
+        title: `Act ${newActNumber}`,
+        content: (
+          <div>
+            <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
+              New Act Development
+            </p>
+            <div className="mb-8">
+              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+                ✅ Define key events
+              </div>
+              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+                ✅ Advance the plot
+              </div>
+              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+                ✅ Further character growth
+              </div>
+            </div>
+          </div>
+        ),
+      },
+    ]);
+  };
+
   const createTimelineDocument = async (template: PlotTemplate, title: string) => {
     if (!selectedStory?.id) return;
     
