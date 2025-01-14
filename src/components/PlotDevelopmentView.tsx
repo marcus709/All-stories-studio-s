@@ -13,7 +13,19 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useStory } from "@/contexts/StoryContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 type PlotTemplate = {
   name: string;
@@ -268,8 +280,13 @@ const initialPlotData = [
 export const PlotDevelopmentView = () => {
   const [plotData, setPlotData] = useState(initialPlotData);
   const [selectedTemplate, setSelectedTemplate] = useState<PlotTemplate | null>(null);
+  const [isNamingDialogOpen, setIsNamingDialogOpen] = useState(false);
+  const [timelineTitle, setTimelineTitle] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
   const timelineRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { selectedStory } = useStory();
+  const queryClient = useQueryClient();
 
   const addNewAct = () => {
     const newActNumber = plotData.length + 1;
@@ -299,44 +316,123 @@ export const PlotDevelopmentView = () => {
     ]);
   };
 
-  const applyTemplate = (template: PlotTemplate) => {
-    const newPlotData = template.plotPoints.map((point, index) => ({
-      title: point,
-      content: (
-        <div>
-          <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
-            {template.subEvents?.[index] || "Development Stage"}
-          </p>
-          <div className="mb-8">
-            <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-              ✅ Define key events
-            </div>
-            <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-              ✅ Advance the plot
-            </div>
-            <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-              ✅ Further character growth
+  const createTimelineDocument = async (template: PlotTemplate, title: string) => {
+    if (!selectedStory?.id) return;
+    
+    setIsProcessing(true);
+    try {
+      // Create a new document
+      const { data: document, error: documentError } = await supabase
+        .from('documents')
+        .insert({
+          title: title,
+          story_id: selectedStory.id,
+          user_id: (await supabase.auth.getUser()).data.user?.id,
+          content: '',
+        })
+        .select()
+        .single();
+
+      if (documentError) throw documentError;
+
+      // Create a document section for the timeline
+      const { data: section, error: sectionError } = await supabase
+        .from('document_sections')
+        .insert({
+          document_id: document.id,
+          type: 'timeline',
+          title: 'Plot Timeline',
+          content: JSON.stringify(template.plotPoints),
+          order_index: 0,
+        })
+        .select()
+        .single();
+
+      if (sectionError) throw sectionError;
+
+      // Create plot events
+      const plotEvents = template.plotPoints.map((point, index) => ({
+        story_id: selectedStory.id,
+        user_id: (await supabase.auth.getUser()).data.user?.id,
+        stage: point,
+        title: point,
+        description: template.subEvents?.[index] || "Development Stage",
+        order_index: index,
+        document_section_id: section.id,
+      }));
+
+      const { error: eventsError } = await supabase
+        .from('plot_events')
+        .insert(plotEvents);
+
+      if (eventsError) throw eventsError;
+
+      // Invalidate queries to refresh the documents list
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+
+      toast({
+        title: "Timeline Created",
+        description: `Timeline "${title}" has been created and saved to your documents.`,
+      });
+
+      return document;
+    } catch (error) {
+      console.error('Error creating timeline document:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create timeline document. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const applyTemplate = async (template: PlotTemplate) => {
+    setSelectedTemplate(template);
+    setTimelineTitle(`${template.name} Timeline`);
+    setIsNamingDialogOpen(true);
+  };
+
+  const handleTimelineCreate = async () => {
+    if (!selectedTemplate || !timelineTitle.trim()) return;
+
+    const document = await createTimelineDocument(selectedTemplate, timelineTitle);
+    if (document) {
+      const newPlotData = selectedTemplate.plotPoints.map((point, index) => ({
+        title: point,
+        content: (
+          <div>
+            <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
+              {selectedTemplate.subEvents?.[index] || "Development Stage"}
+            </p>
+            <div className="mb-8">
+              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+                ✅ Define key events
+              </div>
+              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+                ✅ Advance the plot
+              </div>
+              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+                ✅ Further character growth
+              </div>
             </div>
           </div>
-        </div>
-      ),
-    }));
-    setPlotData(newPlotData);
-    setSelectedTemplate(template);
+        ),
+      }));
 
-    toast({
-      title: "Template Applied",
-      description: `Successfully applied the ${template.name} template to your plot.`,
-    });
+      setPlotData(newPlotData);
+      setIsNamingDialogOpen(false);
 
-    // Scroll to timeline after a short delay to ensure the DOM has updated
-    setTimeout(() => {
-      if (timelineRef.current) {
-        const yOffset = -100; // Adjust this value to control how much of the header remains visible
-        const y = timelineRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
-        window.scrollTo({ top: y, behavior: 'smooth' });
-      }
-    }, 100);
+      // Scroll to timeline after a short delay
+      setTimeout(() => {
+        if (timelineRef.current) {
+          const yOffset = -100;
+          const y = timelineRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }, 100);
+    }
   };
 
   return (
@@ -421,6 +517,40 @@ export const PlotDevelopmentView = () => {
           <Timeline data={plotData} />
         </div>
       </div>
+
+      <Dialog open={isNamingDialogOpen} onOpenChange={setIsNamingDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Name Your Timeline</DialogTitle>
+            <DialogDescription>
+              Enter a name for your timeline. This will be used to create a document in your story.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              value={timelineTitle}
+              onChange={(e) => setTimelineTitle(e.target.value)}
+              placeholder="Enter timeline name"
+              className="w-full"
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsNamingDialogOpen(false)}
+              disabled={isProcessing}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleTimelineCreate}
+              disabled={!timelineTitle.trim() || isProcessing}
+            >
+              {isProcessing ? "Creating..." : "Create Timeline"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
