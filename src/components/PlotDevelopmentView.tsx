@@ -268,6 +268,7 @@ export const PlotDevelopmentView = () => {
   const [plotData, setPlotData] = useState(initialPlotData);
   const [selectedTemplate, setSelectedTemplate] = useState<PlotTemplate | null>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   const addNewAct = () => {
     const newActNumber = plotData.length + 1;
@@ -321,6 +322,11 @@ export const PlotDevelopmentView = () => {
     }));
     setPlotData(newPlotData);
     setSelectedTemplate(template);
+
+    toast({
+      title: "Template Applied",
+      description: `Successfully applied the ${template.name} template to your plot.`,
+    });
 
     // Scroll to timeline after a short delay to ensure the DOM has updated
     setTimeout(() => {
