@@ -118,6 +118,9 @@ export const JoinRequestsDialog = ({ open, onOpenChange }: JoinRequestsDialogPro
 
       if (error) throw error;
 
+      // Refetch the data to update the UI
+      refetch();
+
       toast({
         title: "Success",
         description: `Editing rights ${editingRights ? 'granted' : 'revoked'}`,
