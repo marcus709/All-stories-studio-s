@@ -382,7 +382,7 @@ export const PlotDevelopmentView = () => {
     }
   };
 
-  const createTimelineDocument = async (template: PlotTemplate, storyId: string) => {
+  const createTimelineDocument = async (template: PlotTemplate, storyId: string, title: string) => {
     if (!session?.user?.id) return;
     
     setIsProcessing(true);
@@ -390,7 +390,7 @@ export const PlotDevelopmentView = () => {
       const { data: document, error: documentError } = await supabase
         .from('documents')
         .insert({
-          title: timelineTitle,
+          title,
           story_id: storyId,
           user_id: session.user.id,
           content: JSON.stringify({
@@ -469,41 +469,16 @@ export const PlotDevelopmentView = () => {
   const handleTimelineCreate = async () => {
     if (!selectedTemplate || !timelineTitle.trim() || !selectedStory?.id) return;
 
-    const document = await createTimelineDocument(selectedTemplate, selectedStory.id);
-    if (document) {
-      const newPlotData = selectedTemplate.plotPoints.map((point, index) => ({
-        title: point,
-        content: (
-          <div>
-            <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
-              {selectedTemplate.subEvents?.[index] || "Development Stage"}
-            </p>
-            <div className="mb-8">
-              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                ✅ Define key events
-              </div>
-              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                ✅ Advance the plot
-              </div>
-              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                ✅ Further character growth
-              </div>
-            </div>
-          </div>
-        ),
-      }));
+    await createTimelineDocument(selectedTemplate, selectedStory.id, timelineTitle);
+    setIsNamingDialogOpen(false);
 
-      setPlotData(newPlotData);
-      setIsNamingDialogOpen(false);
-
-      setTimeout(() => {
-        if (timelineRef.current) {
-          const yOffset = -100;
-          const y = timelineRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
-          window.scrollTo({ top: y, behavior: 'smooth' });
-        }
-      }, 100);
-    }
+    setTimeout(() => {
+      if (timelineRef.current) {
+        const yOffset = -100;
+        const y = timelineRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   return (
