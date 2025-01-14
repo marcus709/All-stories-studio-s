@@ -13,8 +13,7 @@ import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
-// Export the View type
-export type View = "story" | "characters" | "plot" | "ideas" | "docs" | "logic";
+type View = "story" | "characters" | "plot" | "ideas" | "docs" | "logic";
 
 interface DashboardContentProps {
   currentView: View;
@@ -49,7 +48,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
           component = <CharactersView />;
           break;
         case "plot":
-          if (handleFeatureAccess("Plot Development", "story_docs")) {
+          if (handleFeatureAccess("Book Creator", "story_docs")) {
             component = <FormattingView />;
           }
           break;

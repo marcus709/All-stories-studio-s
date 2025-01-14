@@ -1,24 +1,57 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Header } from "@/components/Header";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
-import { DashboardContent, View } from "@/components/dashboard/DashboardContent";
+import { DashboardContent } from "@/components/dashboard/DashboardContent";
+import { StoryProvider } from "@/contexts/StoryContext";
+import { useSession } from "@supabase/auth-helpers-react";
+import { useToast } from "@/hooks/use-toast";
+import { StudioAssistant } from "@/components/ai/StudioAssistant";
 
-export const Dashboard = () => {
+type View = "story" | "characters" | "plot" | "ideas" | "docs" | "logic";
+
+function DashboardLayout() {
   const [currentView, setCurrentView] = useState<View>("story");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const session = useSession();
+
+  useEffect(() => {
+    if (!session) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to access the dashboard.",
+      });
+      navigate("/");
+    }
+  }, [session, navigate, toast]);
+
+  if (!session) {
+    return null;
+  }
 
   return (
-    <div className="flex h-screen pt-16"> {/* Added pt-16 for navbar height */}
-      <aside className="w-64 border-r bg-white">
-        <DashboardSidebar
-          currentView={currentView}
-          onViewChange={setCurrentView}
-        />
-      </aside>
-      <main className="flex-1 overflow-auto bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <DashboardSidebar 
+        currentView={currentView} 
+        setCurrentView={setCurrentView}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      />
+      <div className={`pt-16 transition-all duration-300 ${isSidebarCollapsed ? 'ml-12' : 'ml-72'}`}>
         <DashboardContent currentView={currentView} />
-      </main>
+      </div>
+      <StudioAssistant />
     </div>
   );
-};
+}
 
-// Add default export to fix the Routes.tsx import
-export default Dashboard;
+export default function Dashboard() {
+  return (
+    <StoryProvider>
+      <DashboardLayout />
+    </StoryProvider>
+  );
+}
