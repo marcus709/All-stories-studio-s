@@ -382,8 +382,8 @@ export const PlotDevelopmentView = () => {
     }
   };
 
-  const createTimelineDocument = async (template: PlotTemplate) => {
-    if (!selectedStory?.id || !session?.user?.id) return;
+  const createTimelineDocument = async (template: PlotTemplate, storyId: string) => {
+    if (!session?.user?.id) return;
     
     setIsProcessing(true);
     try {
@@ -391,7 +391,7 @@ export const PlotDevelopmentView = () => {
         .from('documents')
         .insert({
           title: timelineTitle,
-          story_id: selectedStory.id,
+          story_id: storyId,
           user_id: session.user.id,
           content: JSON.stringify({
             templateName: template.name,
@@ -424,7 +424,7 @@ export const PlotDevelopmentView = () => {
       if (sectionError) throw sectionError;
 
       const plotEvents = template.plotPoints.map((point, index) => ({
-        story_id: selectedStory.id,
+        story_id: storyId,
         document_section_id: section.id,
         stage: template.subEvents?.[index] || point,
         title: point,
@@ -467,9 +467,9 @@ export const PlotDevelopmentView = () => {
   };
 
   const handleTimelineCreate = async () => {
-    if (!selectedTemplate || !timelineTitle.trim()) return;
+    if (!selectedTemplate || !timelineTitle.trim() || !selectedStory?.id) return;
 
-    const document = await createTimelineDocument(selectedTemplate);
+    const document = await createTimelineDocument(selectedTemplate, selectedStory.id);
     if (document) {
       const newPlotData = selectedTemplate.plotPoints.map((point, index) => ({
         title: point,
