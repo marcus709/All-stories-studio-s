@@ -320,7 +320,6 @@ export const PlotDevelopmentView = () => {
 
       if (!data) return null;
 
-      // Parse the stored template data
       const templateData = data.content ? JSON.parse(data.content) : null;
       const timelineSection = data.document_sections?.find(s => s.type === 'timeline');
       const timelineData = timelineSection?.content ? JSON.parse(timelineSection.content) : null;
@@ -341,13 +340,13 @@ export const PlotDevelopmentView = () => {
         document: data,
         events: events || [],
         template: templateData,
-        timelineData
+        timelineData,
+        timelineSection: timelineSection
       };
     },
     enabled: !!selectedStory?.id && !!timelineTitle
   });
 
-  // Load timeline data when it exists
   useEffect(() => {
     if (existingTimeline?.template) {
       const template = plotTemplates.find(t => t.name === existingTimeline.template.templateName);
@@ -356,7 +355,7 @@ export const PlotDevelopmentView = () => {
       }
     }
 
-    if (existingTimeline?.events) {
+    if (existingTimeline?.events && existingTimeline.events.length > 0) {
       const newPlotData = existingTimeline.events.map(event => ({
         title: event.title,
         content: (
@@ -365,9 +364,9 @@ export const PlotDevelopmentView = () => {
               {event.description || "Development Stage"}
             </p>
             <div className="mb-8">
-              {existingTimeline.timelineData?.subEvents?.map((subEvent: string, index: number) => (
+              {event.stage.split(',').map((subEvent: string, index: number) => (
                 <div key={index} className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                  ✅ {subEvent}
+                  ✅ {subEvent.trim()}
                 </div>
               ))}
             </div>
@@ -378,32 +377,72 @@ export const PlotDevelopmentView = () => {
     }
   }, [existingTimeline]);
 
-  const addNewAct = () => {
+  const addNewAct = async () => {
+    if (!selectedStory?.id || !existingTimeline?.timelineSection?.id) {
+      toast({
+        title: "Error",
+        description: "Please create a timeline first",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const newActNumber = plotData.length + 1;
-    setPlotData([
-      ...plotData,
-      {
-        title: `Act ${newActNumber}`,
-        content: (
-          <div>
-            <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
-              New Act Development
-            </p>
-            <div className="mb-8">
-              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                ✅ Define key events
-              </div>
-              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                ✅ Advance the plot
-              </div>
-              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                ✅ Further character growth
-              </div>
+    const newAct = {
+      title: `Act ${newActNumber}`,
+      content: (
+        <div>
+          <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
+            New Act Development
+          </p>
+          <div className="mb-8">
+            <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+              ✅ Define key events
+            </div>
+            <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+              ✅ Advance the plot
+            </div>
+            <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+              ✅ Further character growth
             </div>
           </div>
-        ),
-      },
-    ]);
+        </div>
+      ),
+    };
+
+    try {
+      const { data: newEvent, error: eventError } = await supabase
+        .from('plot_events')
+        .insert({
+          story_id: selectedStory.id,
+          document_section_id: existingTimeline.timelineSection.id,
+          stage: `Define key events, Advance the plot, Further character growth`,
+          title: `Act ${newActNumber}`,
+          description: "New Act Development",
+          order_index: plotData.length
+        })
+        .select()
+        .single();
+
+      if (eventError) throw eventError;
+
+      setPlotData([...plotData, newAct]);
+      
+      // Refresh the timeline data
+      queryClient.invalidateQueries({ queryKey: ['timeline'] });
+
+      toast({
+        title: "Success",
+        description: "New act added successfully",
+      });
+    } catch (error) {
+      console.error('Error adding new act:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add new act",
+        variant: "destructive",
+      });
+    }
   };
 
   const createTimelineDocument = async (template: PlotTemplate, title: string) => {
@@ -432,7 +471,7 @@ export const PlotDevelopmentView = () => {
 
       if (documentError) throw documentError;
 
-      // Create a document section for the timeline with complete template data
+      // Create a document section for the timeline
       const { data: section, error: sectionError } = await supabase
         .from('document_sections')
         .insert({
@@ -452,15 +491,14 @@ export const PlotDevelopmentView = () => {
 
       if (sectionError) throw sectionError;
 
-      // Create detailed plot events with document section reference
+      // Create plot events with document section reference
       const plotEvents = template.plotPoints.map((point, index) => ({
         story_id: selectedStory.id,
-        user_id: user.id,
-        stage: point,
-        title: point,
-        description: template.subEvents?.[index] || "Development Stage",
-        order_index: index,
         document_section_id: section.id,
+        stage: template.subEvents?.[index] || point,
+        title: point,
+        description: "Development Stage",
+        order_index: index,
       }));
 
       const { error: eventsError } = await supabase
