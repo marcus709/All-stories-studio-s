@@ -4,18 +4,16 @@ import { DashboardContent, View } from "@/components/dashboard/DashboardContent"
 
 export const Dashboard = () => {
   const [currentView, setCurrentView] = useState<View>("story");
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <DashboardSidebar
-        currentView={currentView}
-        setCurrentView={setCurrentView}
-        isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-      />
-      
-      <main className={`flex-1 ${isSidebarCollapsed ? 'ml-12' : 'ml-72'}`}>
+    <div className="flex h-screen pt-16"> {/* Added pt-16 for navbar height */}
+      <aside className="w-64 border-r bg-white">
+        <DashboardSidebar
+          currentView={currentView}
+          onViewChange={setCurrentView}
+        />
+      </aside>
+      <main className="flex-1 overflow-auto bg-gray-50">
         <DashboardContent currentView={currentView} />
       </main>
     </div>
