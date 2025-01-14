@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Timeline } from "@/components/ui/timeline";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useStory } from "@/contexts/StoryContext";
 import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 type PlotTemplate = {
   name: string;
@@ -288,16 +288,52 @@ export const PlotDevelopmentView = () => {
   const { selectedStory } = useStory();
   const queryClient = useQueryClient();
 
-  const addNewAct = () => {
-    const newActNumber = plotData.length + 1;
-    setPlotData([
-      ...plotData,
-      {
-        title: `Act ${newActNumber}`,
+  // Add query to fetch existing timeline
+  const { data: existingTimeline } = useQuery({
+    queryKey: ['timeline', selectedStory?.id],
+    queryFn: async () => {
+      if (!selectedStory?.id) return null;
+
+      const { data: document } = await supabase
+        .from('documents')
+        .select(`
+          id,
+          document_sections (
+            id,
+            content
+          )
+        `)
+        .eq('story_id', selectedStory.id)
+        .eq('title', timelineTitle)
+        .single();
+
+      if (!document) return null;
+
+      const { data: events } = await supabase
+        .from('plot_events')
+        .select('*')
+        .eq('story_id', selectedStory.id)
+        .order('order_index');
+
+      if (!events) return null;
+
+      return {
+        document,
+        events
+      };
+    },
+    enabled: !!selectedStory?.id
+  });
+
+  // Load timeline data when it exists
+  useEffect(() => {
+    if (existingTimeline?.events) {
+      const newPlotData = existingTimeline.events.map(event => ({
+        title: event.title,
         content: (
           <div>
             <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
-              New Act Development
+              {event.description || "Development Stage"}
             </p>
             <div className="mb-8">
               <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
@@ -312,9 +348,10 @@ export const PlotDevelopmentView = () => {
             </div>
           </div>
         ),
-      },
-    ]);
-  };
+      }));
+      setPlotData(newPlotData);
+    }
+  }, [existingTimeline]);
 
   const createTimelineDocument = async (template: PlotTemplate, title: string) => {
     if (!selectedStory?.id) return;
@@ -370,7 +407,8 @@ export const PlotDevelopmentView = () => {
 
       if (eventsError) throw eventsError;
 
-      // Invalidate queries to refresh the documents list
+      // Invalidate queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ['timeline'] });
       queryClient.invalidateQueries({ queryKey: ['documents'] });
 
       toast({

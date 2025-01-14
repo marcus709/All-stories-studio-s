@@ -2054,7 +2054,7 @@ export type Database = {
     Enums: {
       ai_model_type: "gpt-4o" | "gpt-4o-mini"
       challenge_difficulty: "easy" | "medium" | "hard"
-      document_section_type: "chapter" | "scene" | "note"
+      document_section_type: "chapter" | "scene" | "note" | "timeline"
       goal_frequency: "daily" | "weekly" | "monthly"
       goal_type: "word_count" | "time_based"
       group_privacy: "public" | "private"
