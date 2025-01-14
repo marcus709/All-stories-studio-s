@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { CharactersView } from "@/components/CharactersView";
 import { FormattingView } from "@/components/FormattingView";
-import { BackwardsStoryPlanningView } from "@/components/backwards-planning/BackwardsStoryPlanningView";
 import { StoryIdeasView } from "@/components/StoryIdeasView";
 import { StoryDocsView } from "@/components/docs/StoryDocsView";
 import { StoryView } from "./views/StoryView";
@@ -14,7 +13,7 @@ import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
-type View = "story" | "characters" | "plot" | "dream" | "ideas" | "docs" | "logic";
+type View = "story" | "characters" | "plot" | "ideas" | "docs" | "logic";
 
 interface DashboardContentProps {
   currentView: View;
@@ -51,11 +50,6 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
         case "plot":
           if (handleFeatureAccess("Book Creator", "story_docs")) {
             component = <FormattingView />;
-          }
-          break;
-        case "dream":
-          if (handleFeatureAccess("Backwards Planning", "story_docs")) {
-            component = <BackwardsStoryPlanningView />;
           }
           break;
         case "ideas":
