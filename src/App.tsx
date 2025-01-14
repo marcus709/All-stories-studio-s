@@ -13,7 +13,8 @@ import { useToast } from "@/components/ui/use-toast";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,
+      retry: 3, // Increase retries for failed requests
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
       refetchOnWindowFocus: false,
       staleTime: 1000 * 60 * 5, // 5 minutes
     },
@@ -27,17 +28,26 @@ function App() {
 
   useEffect(() => {
     let mounted = true;
+    let retryCount = 0;
+    const maxRetries = 3;
 
-    // Get initial session
+    // Get initial session with retry logic
     const initializeSession = async () => {
       try {
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         if (error) {
           console.error("Error fetching session:", error);
+          if (retryCount < maxRetries) {
+            retryCount++;
+            console.log(`Retrying session fetch (${retryCount}/${maxRetries})...`);
+            setTimeout(initializeSession, 1000 * retryCount);
+            return;
+          }
           throw error;
         }
         if (mounted) {
           setSession(initialSession);
+          setIsLoading(false);
         }
       } catch (error) {
         console.error("Error initializing session:", error);
@@ -47,9 +57,6 @@ function App() {
             description: "There was an error loading your session. Please try signing in again.",
             variant: "destructive",
           });
-        }
-      } finally {
-        if (mounted) {
           setIsLoading(false);
         }
       }
