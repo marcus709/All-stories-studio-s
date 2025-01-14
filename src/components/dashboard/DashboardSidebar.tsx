@@ -22,12 +22,10 @@ type View = (typeof navigationItems)[number]["id"];
 
 interface DashboardSidebarProps {
   currentView: View;
-  setCurrentView: (view: View) => void;
-  isCollapsed: boolean;
-  onToggleCollapse: () => void;
+  onViewChange: (view: View) => void;
 }
 
-export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onToggleCollapse }: DashboardSidebarProps) => {
+export const DashboardSidebar = ({ currentView, onViewChange }: DashboardSidebarProps) => {
   const [showStoriesDialog, setShowStoriesDialog] = useState(false);
   const { selectedStory, setSelectedStory } = useStory();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -62,48 +60,9 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
     setShowStoriesDialog(false);
   };
 
-  if (isCollapsed) {
-    return (
-      <div className="fixed left-0 top-16 w-12 h-[calc(100vh-4rem)] border-r bg-white flex flex-col items-center py-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onToggleCollapse}
-          className="mb-4"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-        <nav className="space-y-3">
-          {navigationItems.map(({ id, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setCurrentView(id)}
-              disabled={!selectedStory}
-              className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors
-                ${currentView === id ? "text-purple-600 bg-purple-50" : "text-gray-700 hover:bg-gray-50"}`}
-            >
-              <Icon className="h-5 w-5" />
-            </button>
-          ))}
-        </nav>
-      </div>
-    );
-  }
-
   return (
-    <div className="fixed left-0 top-16 w-72 h-[calc(100vh-4rem)] border-r bg-white">
+    <div className="h-full">
       <div className="flex flex-col h-full">
-        <div className="absolute right-2 top-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onToggleCollapse}
-            className="hover:bg-gray-100"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-        </div>
-
         <div className="flex items-center gap-3 mb-12 px-8 mt-8">
           <div className="w-11 h-11 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-lg font-medium">
             {profile?.username?.[0]?.toUpperCase() || "?"}
@@ -138,7 +97,7 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
             {navigationItems.map(({ id, icon: Icon, label }) => (
               <button
                 key={id}
-                onClick={() => setCurrentView(id)}
+                onClick={() => onViewChange(id)}
                 disabled={!selectedStory}
                 className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-lg transition-colors text-gray-700 text-lg
                   ${currentView === id ? "bg-purple-50 text-purple-600" : "hover:bg-gray-50"}`}
