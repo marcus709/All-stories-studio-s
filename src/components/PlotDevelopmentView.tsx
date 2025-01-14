@@ -288,7 +288,7 @@ export const PlotDevelopmentView = () => {
   const { selectedStory } = useStory();
   const queryClient = useQueryClient();
 
-  // Update the query to properly handle the title parameter and errors
+  // Update the query to properly handle template data
   const { data: existingTimeline } = useQuery({
     queryKey: ['timeline', selectedStory?.id, timelineTitle],
     queryFn: async () => {
@@ -298,9 +298,11 @@ export const PlotDevelopmentView = () => {
         .from('documents')
         .select(`
           id,
+          content,
           document_sections (
             id,
-            content
+            content,
+            type
           )
         `)
         .eq('story_id', selectedStory.id)
@@ -319,10 +321,16 @@ export const PlotDevelopmentView = () => {
 
       if (!data) return null;
 
+      // Parse the stored template data
+      const templateData = data.content ? JSON.parse(data.content) : null;
+      const timelineSection = data.document_sections?.find(s => s.type === 'timeline');
+      const timelineData = timelineSection?.content ? JSON.parse(timelineSection.content) : null;
+
       const { data: events, error: eventsError } = await supabase
         .from('plot_events')
         .select('*')
         .eq('story_id', selectedStory.id)
+        .eq('document_section_id', timelineSection?.id)
         .order('order_index');
 
       if (eventsError) {
@@ -332,7 +340,9 @@ export const PlotDevelopmentView = () => {
 
       return {
         document: data,
-        events: events || []
+        events: events || [],
+        template: templateData,
+        timelineData
       };
     },
     enabled: !!selectedStory?.id && !!timelineTitle
@@ -340,6 +350,13 @@ export const PlotDevelopmentView = () => {
 
   // Load timeline data when it exists
   useEffect(() => {
+    if (existingTimeline?.template) {
+      const template = plotTemplates.find(t => t.name === existingTimeline.template.templateName);
+      if (template) {
+        setSelectedTemplate(template);
+      }
+    }
+
     if (existingTimeline?.events) {
       const newPlotData = existingTimeline.events.map(event => ({
         title: event.title,
@@ -349,15 +366,11 @@ export const PlotDevelopmentView = () => {
               {event.description || "Development Stage"}
             </p>
             <div className="mb-8">
-              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                ✅ Define key events
-              </div>
-              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                ✅ Advance the plot
-              </div>
-              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                ✅ Further character growth
-              </div>
+              {existingTimeline.timelineData?.subEvents?.map((subEvent: string, index: number) => (
+                <div key={index} className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+                  ✅ {subEvent}
+                </div>
+              ))}
             </div>
           </div>
         ),
@@ -365,34 +378,6 @@ export const PlotDevelopmentView = () => {
       setPlotData(newPlotData);
     }
   }, [existingTimeline]);
-
-  const addNewAct = () => {
-    const newActNumber = plotData.length + 1;
-    setPlotData([
-      ...plotData,
-      {
-        title: `Act ${newActNumber}`,
-        content: (
-          <div>
-            <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
-              New Act Development
-            </p>
-            <div className="mb-8">
-              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                ✅ Define key events
-              </div>
-              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                ✅ Advance the plot
-              </div>
-              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                ✅ Further character growth
-              </div>
-            </div>
-          </div>
-        ),
-      },
-    ]);
-  };
 
   const createTimelineDocument = async (template: PlotTemplate, title: string) => {
     if (!selectedStory?.id) return;
@@ -402,7 +387,7 @@ export const PlotDevelopmentView = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user?.id) throw new Error("User not authenticated");
 
-      // Create a new document with template information
+      // Create a new document with complete template information
       const { data: document, error: documentError } = await supabase
         .from('documents')
         .insert({
@@ -440,7 +425,7 @@ export const PlotDevelopmentView = () => {
 
       if (sectionError) throw sectionError;
 
-      // Create detailed plot events
+      // Create detailed plot events with document section reference
       const plotEvents = template.plotPoints.map((point, index) => ({
         story_id: selectedStory.id,
         user_id: user.id,
