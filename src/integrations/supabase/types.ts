@@ -1209,7 +1209,6 @@ export type Database = {
         Row: {
           created_at: string | null
           description: string | null
-          document_section_id: string | null
           id: string
           order_index: number
           stage: string
@@ -1221,7 +1220,6 @@ export type Database = {
         Insert: {
           created_at?: string | null
           description?: string | null
-          document_section_id?: string | null
           id?: string
           order_index: number
           stage: string
@@ -1233,7 +1231,6 @@ export type Database = {
         Update: {
           created_at?: string | null
           description?: string | null
-          document_section_id?: string | null
           id?: string
           order_index?: number
           stage?: string
@@ -1243,13 +1240,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "plot_events_document_section_id_fkey"
-            columns: ["document_section_id"]
-            isOneToOne: false
-            referencedRelation: "document_sections"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "plot_events_story_id_fkey"
             columns: ["story_id"]
@@ -2054,7 +2044,7 @@ export type Database = {
     Enums: {
       ai_model_type: "gpt-4o" | "gpt-4o-mini"
       challenge_difficulty: "easy" | "medium" | "hard"
-      document_section_type: "chapter" | "scene" | "note" | "timeline"
+      document_section_type: "chapter" | "scene" | "note"
       goal_frequency: "daily" | "weekly" | "monthly"
       goal_type: "word_count" | "time_based"
       group_privacy: "public" | "private"

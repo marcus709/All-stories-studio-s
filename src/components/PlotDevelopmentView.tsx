@@ -1,10 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Timeline } from "@/components/ui/timeline";
 import { Button } from "@/components/ui/button";
 import { Plus, LayoutTemplate, BookOpen } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useSession } from "@supabase/auth-helpers-react";
 import {
   Sheet,
   SheetContent,
@@ -12,21 +10,8 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetClose,
 } from "@/components/ui/sheet";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useStory } from "@/contexts/StoryContext";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 type PlotTemplate = {
   name: string;
@@ -212,214 +197,111 @@ const plotTemplates: PlotTemplate[] = [
   }
 ];
 
+const initialPlotData = [
+  {
+    title: "Act 1",
+    content: (
+      <div>
+        <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
+          Setup and Introduction
+        </p>
+        <div className="mb-8">
+          <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+            ✅ Introduce main characters
+          </div>
+          <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+            ✅ Establish the setting
+          </div>
+          <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+            ✅ Present the initial conflict
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    title: "Act 2",
+    content: (
+      <div>
+        <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
+          Rising Action and Complications
+        </p>
+        <div className="mb-8">
+          <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+            ✅ Develop subplots
+          </div>
+          <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+            ✅ Increase tension
+          </div>
+          <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+            ✅ Character development
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    title: "Act 3",
+    content: (
+      <div>
+        <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
+          Resolution and Conclusion
+        </p>
+        <div className="mb-8">
+          <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+            ✅ Climactic scene
+          </div>
+          <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+            ✅ Resolve conflicts
+          </div>
+          <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+            ✅ Character arcs completion
+          </div>
+        </div>
+      </div>
+    ),
+  },
+];
+
 export const PlotDevelopmentView = () => {
-  const [plotData, setPlotData] = useState<{
-    title: string;
-    content: React.ReactNode;
-  }[]>([]);
+  const [plotData, setPlotData] = useState(initialPlotData);
   const [selectedTemplate, setSelectedTemplate] = useState<PlotTemplate | null>(null);
-  const [isNamingDialogOpen, setIsNamingDialogOpen] = useState(false);
-  const [timelineTitle, setTimelineTitle] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
-  const timelineRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast();
-  const { selectedStory } = useStory();
-  const queryClient = useQueryClient();
-  const session = useSession();
 
-  const { data: existingTimeline } = useQuery({
-    queryKey: ['timeline', selectedStory?.id],
-    queryFn: async () => {
-      if (!selectedStory?.id) return null;
-
-      const { data: documents, error: docsError } = await supabase
-        .from('documents')
-        .select(`
-          id,
-          content,
-          document_sections (
-            id,
-            content,
-            type
-          )
-        `)
-        .eq('story_id', selectedStory.id)
-        .eq('title', 'like', '%Timeline')
-        .order('created_at', { ascending: false })
-        .limit(1);
-
-      if (docsError) {
-        console.error('Error fetching timeline:', docsError);
-        return null;
-      }
-
-      if (!documents || documents.length === 0) return null;
-
-      const document = documents[0];
-      const templateData = document.content ? JSON.parse(document.content) : null;
-      const timelineSection = document.document_sections?.find(s => s.type === 'timeline');
-      const timelineData = timelineSection?.content ? JSON.parse(timelineSection.content) : null;
-
-      const { data: events, error: eventsError } = await supabase
-        .from('plot_events')
-        .select('*')
-        .eq('story_id', selectedStory.id)
-        .eq('document_section_id', timelineSection?.id)
-        .order('order_index');
-
-      if (eventsError) {
-        console.error('Error fetching plot events:', eventsError);
-        return null;
-      }
-
-      return {
-        document,
-        events: events || [],
-        template: templateData,
-        timelineData,
-        timelineSection: timelineSection
-      };
-    },
-    enabled: !!selectedStory?.id
-  });
-
-  useEffect(() => {
-    if (existingTimeline?.template) {
-      const template = plotTemplates.find(t => t.name === existingTimeline.template.templateName);
-      if (template) {
-        setSelectedTemplate(template);
-        setTimelineTitle(`${template.name} Timeline`);
-      }
-    }
-
-    if (existingTimeline?.events && existingTimeline.events.length > 0) {
-      const newPlotData = existingTimeline.events.map(event => ({
-        title: event.title,
+  const addNewAct = () => {
+    const newActNumber = plotData.length + 1;
+    setPlotData([
+      ...plotData,
+      {
+        title: `Act ${newActNumber}`,
         content: (
           <div>
             <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
-              {event.description || "Development Stage"}
+              New Act Development
             </p>
             <div className="mb-8">
-              {event.stage.split(',').map((subEvent: string, index: number) => (
-                <div key={index} className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                  ✅ {subEvent.trim()}
-                </div>
-              ))}
+              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+                ✅ Define key events
+              </div>
+              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+                ✅ Advance the plot
+              </div>
+              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+                ✅ Further character growth
+              </div>
             </div>
           </div>
         ),
-      }));
-      setPlotData(newPlotData);
-    }
-  }, [existingTimeline]);
-
-  const createTimelineDocument = async (template: PlotTemplate, title: string) => {
-    if (!session?.user?.id || !selectedStory?.id || !template) {
-      toast({
-        title: "Error",
-        description: "Missing required information to create timeline",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsProcessing(true);
-    try {
-      // Create the document
-      const { data: document, error: documentError } = await supabase
-        .from('documents')
-        .insert({
-          title: title,
-          story_id: selectedStory.id,
-          user_id: session.user.id,
-          content: JSON.stringify({
-            templateName: template.name,
-            plotPoints: template.plotPoints,
-            subEvents: template.subEvents || [],
-          }),
-        })
-        .select()
-        .single();
-
-      if (documentError) throw documentError;
-
-      // Create the timeline section
-      const { data: section, error: sectionError } = await supabase
-        .from('document_sections')
-        .insert({
-          document_id: document.id,
-          type: 'timeline',
-          title: 'Plot Timeline',
-          content: JSON.stringify({
-            template: template.name,
-            plotPoints: template.plotPoints,
-            subEvents: template.subEvents || [],
-            description: `Timeline based on ${template.name}`,
-          }),
-          order_index: 0,
-        })
-        .select()
-        .single();
-
-      if (sectionError) throw sectionError;
-
-      // Create plot events
-      const plotEvents = template.plotPoints.map((point, index) => ({
-        story_id: selectedStory.id,
-        document_section_id: section.id,
-        stage: template.subEvents?.[index] || point,
-        title: point,
-        description: "Development Stage",
-        order_index: index,
-        user_id: session.user.id
-      }));
-
-      const { error: eventsError } = await supabase
-        .from('plot_events')
-        .insert(plotEvents);
-
-      if (eventsError) throw eventsError;
-
-      await queryClient.invalidateQueries({ queryKey: ['timeline'] });
-      await queryClient.invalidateQueries({ queryKey: ['documents'] });
-
-      toast({
-        title: "Timeline Created",
-        description: `Timeline "${title}" has been created and saved.`,
-      });
-
-      return document;
-    } catch (error) {
-      console.error('Error creating timeline document:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create timeline. Please try again.",
-        variant: "destructive",
-      });
-      return null;
-    } finally {
-      setIsProcessing(false);
-    }
+      },
+    ]);
   };
 
-  const addNewAct = async () => {
-    if (!selectedStory?.id || !existingTimeline?.timelineSection?.id || !session?.user?.id) {
-      toast({
-        title: "Error",
-        description: "Please create a timeline first and ensure you're logged in",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const newActNumber = plotData.length + 1;
-    const newAct = {
-      title: `Act ${newActNumber}`,
+  const applyTemplate = (template: PlotTemplate) => {
+    const newPlotData = template.plotPoints.map((point, index) => ({
+      title: point,
       content: (
         <div>
           <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
-            New Act Development
+            {template.subEvents?.[index] || "Development Stage"}
           </p>
           <div className="mb-8">
             <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
@@ -434,64 +316,9 @@ export const PlotDevelopmentView = () => {
           </div>
         </div>
       ),
-    };
-
-    try {
-      const { data: newEvent, error: eventError } = await supabase
-        .from('plot_events')
-        .insert({
-          story_id: selectedStory.id,
-          document_section_id: existingTimeline.timelineSection.id,
-          stage: `Define key events, Advance the plot, Further character growth`,
-          title: `Act ${newActNumber}`,
-          description: "New Act Development",
-          order_index: plotData.length,
-          user_id: session.user.id
-        })
-        .select()
-        .single();
-
-      if (eventError) throw eventError;
-
-      setPlotData([...plotData, newAct]);
-      
-      await queryClient.invalidateQueries({ queryKey: ['timeline'] });
-
-      toast({
-        title: "Success",
-        description: "New act added successfully",
-      });
-    } catch (error) {
-      console.error('Error adding new act:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add new act",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const applyTemplate = (template: PlotTemplate) => {
+    }));
+    setPlotData(newPlotData);
     setSelectedTemplate(template);
-    setTimelineTitle(`${template.name} Timeline`);
-    setIsNamingDialogOpen(true);
-  };
-
-  const handleTimelineCreate = async () => {
-    if (!selectedTemplate || !timelineTitle.trim()) return;
-    
-    const document = await createTimelineDocument(selectedTemplate, timelineTitle);
-    if (document) {
-      setIsNamingDialogOpen(false);
-
-      setTimeout(() => {
-        if (timelineRef.current) {
-          const yOffset = -100;
-          const y = timelineRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
-          window.scrollTo({ top: y, behavior: 'smooth' });
-        }
-      }, 100);
-    }
   };
 
   return (
@@ -549,21 +376,20 @@ export const PlotDevelopmentView = () => {
                 <ScrollArea className="h-[calc(100vh-200px)] mt-4">
                   <div className="space-y-4 pr-4">
                     {plotTemplates.map((template, index) => (
-                      <SheetClose key={index} asChild>
-                        <Card
-                          className="p-4 cursor-pointer hover:shadow-md transition-all duration-200"
-                          onClick={() => applyTemplate(template)}
-                        >
-                          <h3 className="text-lg font-semibold text-purple-600 mb-2">{template.name}</h3>
-                          <div className="space-y-2">
-                            {template.plotPoints.map((point, pointIndex) => (
-                              <p key={pointIndex} className="text-sm text-gray-600 dark:text-gray-300">
-                                {pointIndex + 1}. {point}
-                              </p>
-                            ))}
-                          </div>
-                        </Card>
-                      </SheetClose>
+                      <Card
+                        key={index}
+                        className="p-4 cursor-pointer hover:shadow-md transition-all duration-200"
+                        onClick={() => applyTemplate(template)}
+                      >
+                        <h3 className="text-lg font-semibold text-purple-600 mb-2">{template.name}</h3>
+                        <div className="space-y-2">
+                          {template.plotPoints.map((point, pointIndex) => (
+                            <p key={pointIndex} className="text-sm text-gray-600 dark:text-gray-300">
+                              {pointIndex + 1}. {point}
+                            </p>
+                          ))}
+                        </div>
+                      </Card>
                     ))}
                   </div>
                 </ScrollArea>
@@ -572,44 +398,10 @@ export const PlotDevelopmentView = () => {
           </Card>
         </div>
 
-        <div className="w-full" ref={timelineRef}>
+        <div className="w-full">
           <Timeline data={plotData} />
         </div>
       </div>
-
-      <Dialog open={isNamingDialogOpen} onOpenChange={setIsNamingDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Name Your Timeline</DialogTitle>
-            <DialogDescription>
-              Enter a name for your timeline. This will be used to create a document in your story.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <Input
-              value={timelineTitle}
-              onChange={(e) => setTimelineTitle(e.target.value)}
-              placeholder="Enter timeline name"
-              className="w-full"
-            />
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsNamingDialogOpen(false)}
-              disabled={isProcessing}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleTimelineCreate}
-              disabled={!timelineTitle.trim() || isProcessing}
-            >
-              {isProcessing ? "Creating..." : "Create Timeline"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

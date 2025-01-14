@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Share, FileText, Plus, MoreVertical, Trash2 } from "lucide-react";
+import { Share, FileText, Plus, MoreVertical } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ShareDocumentDialog } from "./ShareDocumentDialog";
 import { Document } from "@/types/story";
@@ -10,18 +10,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 
 interface DocumentsListProps {
   documents: Document[];
@@ -37,8 +25,6 @@ export const DocumentsList = ({
   isGridView 
 }: DocumentsListProps) => {
   const [shareDocument, setShareDocument] = useState<Document | null>(null);
-  const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
-  const { toast } = useToast();
 
   if (!documents?.length) {
     return (
@@ -58,97 +44,6 @@ export const DocumentsList = ({
       day: 'numeric'
     });
   };
-
-  const handleDeleteDocument = async () => {
-    if (!documentToDelete) return;
-
-    try {
-      // First get all document sections for this document
-      const { data: sections, error: sectionsQueryError } = await supabase
-        .from('document_sections')
-        .select('id')
-        .eq('document_id', documentToDelete.id);
-
-      if (sectionsQueryError) throw sectionsQueryError;
-
-      // Delete plot events referencing any of these sections
-      if (sections && sections.length > 0) {
-        const sectionIds = sections.map(s => s.id);
-        
-        // Delete plot emotions first (they reference plot events)
-        const { error: plotEmotionsError } = await supabase
-          .from('plot_emotions')
-          .delete()
-          .in('plot_event_id', (
-            await supabase
-              .from('plot_events')
-              .select('id')
-              .in('document_section_id', sectionIds)
-          ).data?.map(pe => pe.id) || []);
-
-        if (plotEmotionsError) throw plotEmotionsError;
-
-        // Then delete plot events
-        const { error: plotEventsError } = await supabase
-          .from('plot_events')
-          .delete()
-          .in('document_section_id', sectionIds);
-
-        if (plotEventsError) throw plotEventsError;
-      }
-
-      // Delete document references
-      const { error: referencesError } = await supabase
-        .from('document_references')
-        .delete()
-        .eq('document_id', documentToDelete.id);
-
-      if (referencesError) throw referencesError;
-
-      // Delete document shares
-      const { error: sharesError } = await supabase
-        .from('document_shares')
-        .delete()
-        .eq('document_id', documentToDelete.id);
-
-      if (sharesError) throw sharesError;
-
-      // Delete document sections
-      const { error: sectionsError } = await supabase
-        .from('document_sections')
-        .delete()
-        .eq('document_id', documentToDelete.id);
-
-      if (sectionsError) throw sectionsError;
-
-      // Finally delete the document itself
-      const { error } = await supabase
-        .from('documents')
-        .delete()
-        .eq('id', documentToDelete.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Document deleted",
-        description: "The document has been permanently deleted.",
-      });
-
-      // Force a page refresh to update the documents list
-      window.location.reload();
-    } catch (error) {
-      console.error('Error deleting document:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete the document. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setDocumentToDelete(null);
-    }
-  };
-
-  // ... keep existing code (rest of the component JSX)
 
   return (
     <div className="relative h-full">
@@ -206,16 +101,6 @@ export const DocumentsList = ({
                           <Share className="h-4 w-4 mr-2" />
                           Share
                         </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDocumentToDelete(doc);
-                          }}
-                          className="text-red-600"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
-                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -239,29 +124,16 @@ export const DocumentsList = ({
                       {formatDate(doc.created_at)}
                     </p>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShareDocument(doc);
-                      }}
-                    >
-                      <Share className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDocumentToDelete(doc);
-                      }}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShareDocument(doc);
+                    }}
+                  >
+                    <Share className="h-4 w-4" />
+                  </Button>
                 </div>
               )}
             </div>
@@ -283,29 +155,6 @@ export const DocumentsList = ({
         open={!!shareDocument}
         onOpenChange={(open) => !open && setShareDocument(null)}
       />
-
-      <AlertDialog open={!!documentToDelete} onOpenChange={(open) => !open && setDocumentToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the document
-              "{documentToDelete?.title}" and all its associated content.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDocumentToDelete(null)}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteDocument}
-              className="bg-red-500 hover:bg-red-600"
-            >
-              Delete Document
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };
