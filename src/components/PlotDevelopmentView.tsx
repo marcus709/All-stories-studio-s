@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Timeline } from "@/components/ui/timeline";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  SheetClose,
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -266,6 +267,7 @@ const initialPlotData = [
 export const PlotDevelopmentView = () => {
   const [plotData, setPlotData] = useState(initialPlotData);
   const [selectedTemplate, setSelectedTemplate] = useState<PlotTemplate | null>(null);
+  const timelineRef = useRef<HTMLDivElement>(null);
 
   const addNewAct = () => {
     const newActNumber = plotData.length + 1;
@@ -319,6 +321,15 @@ export const PlotDevelopmentView = () => {
     }));
     setPlotData(newPlotData);
     setSelectedTemplate(template);
+
+    // Scroll to timeline after a short delay to ensure the DOM has updated
+    setTimeout(() => {
+      if (timelineRef.current) {
+        const yOffset = -100; // Adjust this value to control how much of the header remains visible
+        const y = timelineRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   return (
@@ -376,20 +387,21 @@ export const PlotDevelopmentView = () => {
                 <ScrollArea className="h-[calc(100vh-200px)] mt-4">
                   <div className="space-y-4 pr-4">
                     {plotTemplates.map((template, index) => (
-                      <Card
-                        key={index}
-                        className="p-4 cursor-pointer hover:shadow-md transition-all duration-200"
-                        onClick={() => applyTemplate(template)}
-                      >
-                        <h3 className="text-lg font-semibold text-purple-600 mb-2">{template.name}</h3>
-                        <div className="space-y-2">
-                          {template.plotPoints.map((point, pointIndex) => (
-                            <p key={pointIndex} className="text-sm text-gray-600 dark:text-gray-300">
-                              {pointIndex + 1}. {point}
-                            </p>
-                          ))}
-                        </div>
-                      </Card>
+                      <SheetClose key={index} asChild>
+                        <Card
+                          className="p-4 cursor-pointer hover:shadow-md transition-all duration-200"
+                          onClick={() => applyTemplate(template)}
+                        >
+                          <h3 className="text-lg font-semibold text-purple-600 mb-2">{template.name}</h3>
+                          <div className="space-y-2">
+                            {template.plotPoints.map((point, pointIndex) => (
+                              <p key={pointIndex} className="text-sm text-gray-600 dark:text-gray-300">
+                                {pointIndex + 1}. {point}
+                              </p>
+                            ))}
+                          </div>
+                        </Card>
+                      </SheetClose>
                     ))}
                   </div>
                 </ScrollArea>
@@ -398,7 +410,7 @@ export const PlotDevelopmentView = () => {
           </Card>
         </div>
 
-        <div className="w-full">
+        <div className="w-full" ref={timelineRef}>
           <Timeline data={plotData} />
         </div>
       </div>
