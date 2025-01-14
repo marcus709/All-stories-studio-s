@@ -11,7 +11,19 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
+import { useStory } from "@/contexts/StoryContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 type PlotTemplate = {
   name: string;
@@ -266,6 +278,36 @@ const initialPlotData = [
 export const PlotDevelopmentView = () => {
   const [plotData, setPlotData] = useState(initialPlotData);
   const [selectedTemplate, setSelectedTemplate] = useState<PlotTemplate | null>(null);
+  const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
+  const [templateName, setTemplateName] = useState("");
+  const { toast } = useToast();
+  const { selectedStory } = useStory();
+  const queryClient = useQueryClient();
+
+  const { data: savedTemplates } = useQuery({
+    queryKey: ["plot-templates", selectedStory?.id],
+    queryFn: async () => {
+      if (!selectedStory?.id) return [];
+      
+      const { data, error } = await supabase
+        .from("plot_template_instances")
+        .select("*")
+        .eq("story_id", selectedStory.id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch saved templates",
+          variant: "destructive",
+        });
+        return [];
+      }
+
+      return data;
+    },
+    enabled: !!selectedStory?.id,
+  });
 
   const addNewAct = () => {
     const newActNumber = plotData.length + 1;
@@ -295,30 +337,55 @@ export const PlotDevelopmentView = () => {
     ]);
   };
 
+  const handleSaveTemplate = async () => {
+    if (!selectedStory?.id || !selectedTemplate || !templateName.trim()) {
+      toast({
+        title: "Error",
+        description: "Please provide a name for your template",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { error } = await supabase
+      .from("plot_template_instances")
+      .insert({
+        user_id: (await supabase.auth.getUser()).data.user?.id,
+        story_id: selectedStory.id,
+        name: templateName.trim(),
+        template_name: selectedTemplate.name,
+      });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save template",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: "Template saved successfully",
+    });
+
+    queryClient.invalidateQueries({ queryKey: ["plot-templates"] });
+    setIsTemplateDialogOpen(false);
+    setTemplateName("");
+    applyTemplate(selectedTemplate);
+  };
+
   const applyTemplate = (template: PlotTemplate) => {
-    const newPlotData = template.plotPoints.map((point, index) => ({
-      title: point,
-      content: (
-        <div>
-          <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
-            {template.subEvents?.[index] || "Development Stage"}
-          </p>
-          <div className="mb-8">
-            <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-              ✅ Define key events
-            </div>
-            <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-              ✅ Advance the plot
-            </div>
-            <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-              ✅ Further character growth
-            </div>
-          </div>
-        </div>
-      ),
-    }));
-    setPlotData(newPlotData);
     setSelectedTemplate(template);
+    setIsTemplateDialogOpen(true);
+  };
+
+  const loadSavedTemplate = async (templateName: string) => {
+    const template = plotTemplates.find(t => t.name === templateName);
+    if (template) {
+      applyTemplate(template);
+    }
   };
 
   return (
@@ -374,7 +441,27 @@ export const PlotDevelopmentView = () => {
                   </SheetDescription>
                 </SheetHeader>
                 <ScrollArea className="h-[calc(100vh-200px)] mt-4">
-                  <div className="space-y-4 pr-4">
+                  {savedTemplates && savedTemplates.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold text-purple-600 mb-4">Saved Templates</h3>
+                      <div className="space-y-4">
+                        {savedTemplates.map((saved) => (
+                          <Card
+                            key={saved.id}
+                            className="p-4 cursor-pointer hover:shadow-md transition-all duration-200"
+                            onClick={() => loadSavedTemplate(saved.template_name)}
+                          >
+                            <h3 className="text-lg font-semibold text-purple-600 mb-2">{saved.name}</h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              Based on: {saved.template_name}
+                            </p>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-purple-600 mb-4">Available Templates</h3>
                     {plotTemplates.map((template, index) => (
                       <Card
                         key={index}
@@ -402,6 +489,34 @@ export const PlotDevelopmentView = () => {
           <Timeline data={plotData} />
         </div>
       </div>
+
+      <Dialog open={isTemplateDialogOpen} onOpenChange={setIsTemplateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save Template</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <label htmlFor="templateName" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Template Name
+            </label>
+            <Input
+              id="templateName"
+              value={templateName}
+              onChange={(e) => setTemplateName(e.target.value)}
+              placeholder="Enter a name for your template"
+              className="mt-1"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsTemplateDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveTemplate}>
+              Save Template
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
