@@ -70,7 +70,7 @@ const plotData = [
 export const PlotDevelopmentView = () => {
   return (
     <div className="min-h-screen w-full">
-      <div className="absolute top-0 left-0 w-full">
+      <div className="w-full">
         <Timeline data={plotData} />
       </div>
     </div>
