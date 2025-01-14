@@ -7,6 +7,7 @@ import { useDocuments } from "@/hooks/useDocuments";
 import { useToast } from "@/hooks/use-toast";
 import { WYSIWYGEditor } from "@/components/book/WYSIWYGEditor";
 import { DocumentInsights } from "./DocumentInsights";
+import { DocumentNavigationSidebar } from "./DocumentNavigationSidebar";
 
 interface DocumentEditorProps {
   document: {
@@ -23,6 +24,7 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
+  const [isNavSidebarCollapsed, setIsNavSidebarCollapsed] = useState(false);
   const { updateDocument } = useDocuments(storyId);
   const { toast } = useToast();
 
@@ -57,14 +59,11 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
   };
 
   const handleReplaceWord = (oldWord: string, newWord: string, index: number) => {
-    // Implementation for word replacement
     const newContent = content.replace(new RegExp(oldWord, 'g'), newWord);
     setContent(newContent);
   };
 
   const handleJumpToLocation = (index: number) => {
-    // Implementation for jumping to word location
-    // This would need to be implemented with the editor's API
     console.log("Jumping to location:", index);
   };
 
@@ -103,7 +102,17 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
       </div>
 
       <div className="flex-1 flex">
-        <ScrollArea className={`flex-1 p-8 ${showInsights ? 'border-r' : ''}`}>
+        <DocumentNavigationSidebar
+          content={content}
+          isCollapsed={isNavSidebarCollapsed}
+          onToggleCollapse={() => setIsNavSidebarCollapsed(!isNavSidebarCollapsed)}
+        />
+        
+        <ScrollArea className={cn(
+          "flex-1 p-8",
+          showInsights ? 'border-r' : '',
+          isNavSidebarCollapsed ? 'ml-8' : 'ml-12'
+        )}>
           <div className="max-w-[850px] mx-auto">
             <WYSIWYGEditor
               content={content}
