@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Timeline } from "@/components/ui/timeline";
 import { Button } from "@/components/ui/button";
-import { Plus, Template, BookOpen } from "lucide-react";
+import { Plus, LayoutTemplate, BookOpen } from "lucide-react";
 
 const initialPlotData = [
   {
@@ -140,7 +140,7 @@ export const PlotDevelopmentView = () => {
               variant="outline"
               className="w-full h-full border-2 border-purple-500 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2"
             >
-              <Template className="h-5 w-5" />
+              <LayoutTemplate className="h-5 w-5" />
               Use Template
             </Button>
           </Card>
