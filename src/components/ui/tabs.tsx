@@ -1,30 +1,37 @@
 "use client";
 
+import * as React from "react";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import * as TabsPrimitive from "@radix-ui/react-tabs";
 
+// Type for animated tabs
 type Tab = {
   title: string;
   value: string;
   content?: string | React.ReactNode | any;
 };
 
-export const Tabs = ({
-  tabs: propTabs,
-  containerClassName,
-  activeTabClassName,
-  tabClassName,
-  contentClassName,
-}: {
+interface AnimatedTabsProps {
   tabs: Tab[];
   containerClassName?: string;
   activeTabClassName?: string;
   tabClassName?: string;
   contentClassName?: string;
-}) => {
+}
+
+// Animated Tabs Component
+export const AnimatedTabs = ({
+  tabs: propTabs,
+  containerClassName,
+  activeTabClassName,
+  tabClassName,
+  contentClassName,
+}: AnimatedTabsProps) => {
   const [active, setActive] = useState<Tab>(propTabs[0]);
   const [tabs, setTabs] = useState<Tab[]>(propTabs);
+  const [hovering, setHovering] = useState(false);
 
   const moveSelectedTabToTop = (idx: number) => {
     const newTabs = [...propTabs];
@@ -33,8 +40,6 @@ export const Tabs = ({
     setTabs(newTabs);
     setActive(newTabs[0]);
   };
-
-  const [hovering, setHovering] = useState(false);
 
   return (
     <>
@@ -67,7 +72,6 @@ export const Tabs = ({
                 )}
               />
             )}
-
             <span className="relative block text-black dark:text-white">
               {tab.title}
             </span>
@@ -122,3 +126,15 @@ export const FadeInDiv = ({
     </div>
   );
 };
+
+// Regular Tabs Components
+export const Tabs = TabsPrimitive.Root;
+export const TabsList = TabsPrimitive.List;
+export const TabsTrigger = TabsPrimitive.Trigger;
+export const TabsContent = TabsPrimitive.Content;
+
+export default Object.assign(Tabs, {
+  List: TabsList,
+  Trigger: TabsTrigger,
+  Content: TabsContent,
+});
