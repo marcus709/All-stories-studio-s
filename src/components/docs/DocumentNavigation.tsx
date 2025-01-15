@@ -104,8 +104,8 @@ export const DocumentNavigation = ({
           </Button>
         </div>
         
-        <div className="flex-1 overflow-hidden relative" ref={navigationRef}>
-          <div ref={minimapRef} className="p-4">
+        <div className="flex-1 overflow-y-auto" ref={navigationRef}>
+          <div ref={minimapRef} className="relative p-4">
             {lines.map((line, index) => {
               const width = (line.length / maxLineLength) * 100;
               return (
