@@ -6,6 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useSession } from "@supabase/auth-helpers-react";
 
 interface AIFormattingDialogProps {
   onConfigSubmit: (config: FormattingConfig) => void;
@@ -25,6 +28,7 @@ interface FormattingConfig {
 }
 
 export function AIFormattingDialog({ onConfigSubmit, disabled, onConfigSelect, selectedConfig }: AIFormattingDialogProps) {
+  const session = useSession();
   const [config, setConfig] = useState<FormattingConfig>({
     style: 'professional',
     format: 'standard',
@@ -33,6 +37,23 @@ export function AIFormattingDialog({ onConfigSubmit, disabled, onConfigSelect, s
     preserveIndentation: true,
     pageBreaks: 'auto',
     headerFooter: true
+  });
+
+  const { data: configurations = [] } = useQuery({
+    queryKey: ["aiConfigurations", session?.user?.id],
+    queryFn: async () => {
+      if (!session?.user?.id) return [];
+      
+      const { data, error } = await supabase
+        .from("ai_configurations")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!session?.user?.id,
   });
 
   const handleSubmit = () => {
@@ -71,8 +92,11 @@ export function AIFormattingDialog({ onConfigSubmit, disabled, onConfigSelect, s
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="new">Create New Configuration</SelectItem>
-                <SelectItem value="config1">Configuration 1</SelectItem>
-                <SelectItem value="config2">Configuration 2</SelectItem>
+                {configurations.map((config) => (
+                  <SelectItem key={config.id} value={config.id}>
+                    {config.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
