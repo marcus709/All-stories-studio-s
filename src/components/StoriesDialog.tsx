@@ -34,7 +34,6 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
     description: "",
   });
 
-  // Query to check if user is admin in the group
   const { data: isGroupAdmin } = useQuery({
     queryKey: ["groupRole", selectedStory?.shared_group_id],
     queryFn: async () => {
@@ -58,7 +57,6 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
     enabled: !!selectedStory?.shared_group_id,
   });
 
-  // Add query for user's editing rights in shared stories
   const { data: userEditingRights = {} } = useQuery({
     queryKey: ["userEditingRights"],
     queryFn: async () => {
@@ -81,7 +79,6 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
     enabled: true,
   });
 
-  // Query to get current group memberships
   const { data: userGroupMemberships = [] } = useQuery({
     queryKey: ["userGroupMemberships"],
     queryFn: async () => {
@@ -101,7 +98,6 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
     enabled: true,
   });
 
-  // Filter stories to only show those the user should see
   const visibleStories = stories.filter(async story => {
     const { data: { user } } = await supabase.auth.getUser();
     // Show user's own stories
@@ -160,7 +156,6 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
         setSelectedStory(null);
       }
 
-      // Invalidate both stories and group memberships queries
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["stories"] }),
         queryClient.invalidateQueries({ queryKey: ["userGroupMemberships"] })
@@ -195,6 +190,11 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
 
       if (error) throw error;
 
+      // First close the delete confirmation dialog
+      setShowDeleteAlert(false);
+      setStoryToDelete(null);
+
+      // Then show success message
       toast({
         title: "Story deleted",
         description: "The story has been permanently deleted.",
@@ -212,8 +212,10 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
         refetch()
       ]);
 
-      setShowDeleteAlert(false);
-      setStoryToDelete(null);
+      // If this was the last story, close the dialog
+      if (stories.length === 1) {
+        onOpenChange(false);
+      }
     } catch (error) {
       console.error("Error deleting story:", error);
       toast({
@@ -226,7 +228,18 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog 
+        open={open} 
+        onOpenChange={(newOpen) => {
+          // Reset states when closing the dialog
+          if (!newOpen) {
+            setShowNewStory(false);
+            setShowDeleteAlert(false);
+            setStoryToDelete(null);
+          }
+          onOpenChange(newOpen);
+        }}
+      >
         <DialogContent className="max-w-4xl p-0 gap-0">
           <StoriesDialogHeader 
             showNewStory={showNewStory}
@@ -261,7 +274,15 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
+      <AlertDialog 
+        open={showDeleteAlert} 
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowDeleteAlert(false);
+            setStoryToDelete(null);
+          }
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
