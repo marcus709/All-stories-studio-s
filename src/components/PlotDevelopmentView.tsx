@@ -296,7 +296,6 @@ export const PlotDevelopmentView = () => {
         story_id: selectedStory.id,
         name: timelineName.trim(),
         template_name: selectedTemplate.name,
-        last_used: new Date().toISOString(),
       });
 
     if (error) {
@@ -403,7 +402,7 @@ export const PlotDevelopmentView = () => {
 
           <Card className="p-6 bg-white dark:bg-gray-900 shadow-lg hover:shadow-xl transition-shadow duration-200">
             <Button 
-              onClick={addNewAct}
+              onClick={() => {}}
               className="w-full h-full bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2"
             >
               <Plus className="h-5 w-5" />
