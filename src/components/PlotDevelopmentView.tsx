@@ -183,6 +183,8 @@ export const PlotDevelopmentView = () => {
     if (!selectedStory?.id || !selectedTemplate) return;
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
       // Create new template instance
       const { data: templateInstance, error: templateError } = await supabase
         .from("plot_template_instances")
@@ -191,7 +193,7 @@ export const PlotDevelopmentView = () => {
           template_name: selectedTemplate.name,
           name: timelineName,
           last_used: new Date().toISOString(),
-          user_id: supabase.auth.getUser()?.data?.user?.id || "",
+          user_id: user?.id || "",
         })
         .select()
         .single();
