@@ -252,30 +252,30 @@ export const PlotDevelopmentView = () => {
   const { selectedStory } = useStory();
   const queryClient = useQueryClient();
   const session = useSession();
-
-  const { data: savedTimelines, refetch: refetchTimelines } = useQuery({
-    queryKey: ["plot-timelines", selectedStory?.id],
+  const [selectedConfig, setSelectedConfig] = useState<string>("");
+  const { data: aiConfigurations = [] } = useQuery({
+    queryKey: ["aiConfigurations", session?.user?.id],
     queryFn: async () => {
-      if (!selectedStory?.id) return [];
+      if (!session?.user?.id) return [];
       
       const { data, error } = await supabase
-        .from("plot_template_instances")
+        .from("ai_configurations")
         .select("*")
-        .eq("story_id", selectedStory.id)
-        .order("last_used", { ascending: false });
+        .eq("user_id", session.user.id)
+        .order("created_at", { ascending: false });
 
       if (error) {
         toast({
           title: "Error",
-          description: "Failed to fetch saved timelines",
+          description: "Failed to fetch AI configurations",
           variant: "destructive",
         });
         return [];
       }
 
-      return data || [];
+      return data;
     },
-    enabled: !!selectedStory?.id,
+    enabled: !!session?.user?.id,
   });
 
   const resetAllStates = useCallback(() => {
@@ -628,6 +628,12 @@ export const PlotDevelopmentView = () => {
     }
 
     try {
+      const selectedAIConfig = selectedConfig ? await supabase
+        .from("ai_configurations")
+        .select("*")
+        .eq("id", selectedConfig)
+        .single() : null;
+
       const systemPrompt = `Create a story template based on the following description. The response MUST be a valid JSON object with this exact structure:
 {
   "name": "Template Name",
@@ -641,7 +647,7 @@ Keep plot points between 5-8 points, and sub-events between 3-5 events. Make sur
         "suggestions",
         {
           storyDescription: selectedStory?.description || "",
-          aiConfig: {
+          aiConfig: selectedAIConfig?.data || {
             model_type: "gpt-4o",
             system_prompt: systemPrompt,
             temperature: 0.7,
@@ -652,11 +658,9 @@ Keep plot points between 5-8 points, and sub-events between 3-5 events. Make sur
 
       if (result) {
         try {
-          // Clean the response string to ensure it's valid JSON
           const cleanedResult = result.replace(/[\r\n\t]/g, '').trim();
           const template = JSON.parse(cleanedResult);
           
-          // Validate the template structure
           if (!template.name || !Array.isArray(template.plotPoints)) {
             throw new Error("Invalid template structure");
           }
@@ -684,6 +688,18 @@ Keep plot points between 5-8 points, and sub-events between 3-5 events. Make sur
         title: "Error",
         description: "Failed to generate template. Please try again.",
         variant: "destructive",
+      });
+    }
+  };
+
+  const handleSelectChange = (value: string) => {
+    if (value === "new") {
+      setIsConfigDialogOpen(true);
+    } else {
+      setSelectedConfig(value);
+      toast({
+        title: "AI Configuration Selected",
+        description: "The selected configuration will be used for generating the template.",
       });
     }
   };
@@ -885,7 +901,25 @@ Keep plot points between 5-8 points, and sub-events between 3-5 events. Make sur
           <DialogHeader>
             <DialogTitle>Create Custom Template</DialogTitle>
           </DialogHeader>
-          <div className="py-4">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Select value={selectedConfig} onValueChange={handleSelectChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select AI Configuration" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>AI Configurations</SelectLabel>
+                    {aiConfigurations.map((config) => (
+                      <SelectItem key={config.id} value={config.id}>
+                        {config.name}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="new">+ Create New Configuration</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
             <Textarea
               value={customPrompt}
               onChange={(e) => setCustomPrompt(e.target.value)}
