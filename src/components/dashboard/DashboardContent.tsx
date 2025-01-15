@@ -50,6 +50,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
     setError(null);
   }, [selectedStory]);
 
+  // Handle component mounting and error recovery
   useEffect(() => {
     try {
       let component: React.ReactNode = null;
@@ -59,29 +60,29 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
       if (selectedStory || currentView === "story") {
         switch (currentView) {
           case "characters":
-            component = <CharactersView />;
+            component = <CharactersView key={`characters-${selectedStory?.id}`} />;
             break;
           case "plot":
             if (handleFeatureAccess("Book Creator", "story_docs")) {
-              component = <FormattingView />;
+              component = <FormattingView key={`plot-${selectedStory?.id}`} />;
             }
             break;
           case "dream":
             if (handleFeatureAccess("Plot Development", "story_docs")) {
-              component = <PlotDevelopmentView />;
+              component = <PlotDevelopmentView key={`dream-${selectedStory?.id}`} />;
             }
             break;
           case "ideas":
-            component = <StoryIdeasView />;
+            component = <StoryIdeasView key={`ideas-${selectedStory?.id}`} />;
             break;
           case "docs":
             if (handleFeatureAccess("Story Documentation", "story_docs")) {
-              component = <StoryDocsView />;
+              component = <StoryDocsView key={`docs-${selectedStory?.id}`} />;
             }
             break;
           case "logic":
             if (handleFeatureAccess("Story Logic", "story_logic")) {
-              component = <StoryLogicView />;
+              component = <StoryLogicView key={`logic-${selectedStory?.id}`} />;
             }
             break;
           case "story":
@@ -110,6 +111,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
       setCurrentComponent(component);
       setError(null);
     } catch (err) {
+      console.error("Error in DashboardContent:", err);
       setError(err instanceof Error ? err : new Error('An unexpected error occurred'));
     }
   }, [currentView, selectedStory, handleFeatureAccess]);
@@ -125,7 +127,11 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
             <div className="mt-4">
               <Button 
                 variant="outline" 
-                onClick={() => setError(null)}
+                onClick={() => {
+                  setError(null);
+                  // Force a re-render of the current view
+                  setCurrentComponent(null);
+                }}
               >
                 Try Again
               </Button>
