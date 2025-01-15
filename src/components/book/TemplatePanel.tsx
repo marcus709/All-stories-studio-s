@@ -4,6 +4,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useSession } from "@supabase/auth-helpers-react";
 
 interface TemplatePanelProps {
   templates: Template[];
@@ -16,6 +21,34 @@ export const TemplatePanel = ({
   selectedTemplate,
   onTemplateSelect,
 }: TemplatePanelProps) => {
+  const session = useSession();
+  const { toast } = useToast();
+
+  const { data: aiConfigurations = [] } = useQuery({
+    queryKey: ["aiConfigurations", session?.user?.id],
+    queryFn: async () => {
+      if (!session?.user?.id) return [];
+      
+      const { data, error } = await supabase
+        .from("ai_configurations")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch AI configurations",
+          variant: "destructive",
+        });
+        return [];
+      }
+
+      return data;
+    },
+    enabled: !!session?.user?.id,
+  });
+
   const handleAIConfigChange = (field: keyof Template['aiConfig'], value: any) => {
     if (!selectedTemplate) return;
 
@@ -27,6 +60,27 @@ export const TemplatePanel = ({
       }
     };
     onTemplateSelect(updatedTemplate);
+  };
+
+  const handleApplyAIConfig = async (configId: string) => {
+    const selectedConfig = aiConfigurations.find(config => config.id === configId);
+    if (!selectedConfig || !selectedTemplate) return;
+
+    const updatedTemplate = {
+      ...selectedTemplate,
+      aiConfig: {
+        tone: selectedConfig.tone,
+        style: selectedConfig.response_style,
+        focusAreas: selectedConfig.focus_area.split(','),
+        customInstructions: selectedConfig.custom_prompt
+      }
+    };
+    onTemplateSelect(updatedTemplate);
+
+    toast({
+      title: "Success",
+      description: "AI configuration applied to template",
+    });
   };
 
   return (
@@ -58,7 +112,24 @@ export const TemplatePanel = ({
 
       {selectedTemplate && (
         <div className="mt-8 space-y-6 bg-gray-50 p-6 rounded-lg">
-          <h3 className="text-lg font-semibold">AI Configuration</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">AI Configuration</h3>
+            
+            <Select
+              onValueChange={handleApplyAIConfig}
+            >
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Apply AI Config" />
+              </SelectTrigger>
+              <SelectContent>
+                {aiConfigurations.map((config) => (
+                  <SelectItem key={config.id} value={config.id}>
+                    {config.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           
           <div className="space-y-4">
             <div className="space-y-2">
