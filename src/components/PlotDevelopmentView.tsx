@@ -248,6 +248,7 @@ export const PlotDevelopmentView = () => {
     content: string;
     index: number;
   } | null>(null);
+  const [selectedAIConfig, setSelectedAIConfig] = useState<string>("");
   const { toast } = useToast();
   const { selectedStory } = useStory();
   const queryClient = useQueryClient();
@@ -617,6 +618,31 @@ export const PlotDevelopmentView = () => {
   const [customPrompt, setCustomPrompt] = useState("");
   const { generateContent, isLoading: isGeneratingTemplate } = useAI();
 
+  const { data: aiConfigurations = [] } = useQuery({
+    queryKey: ["aiConfigurations", session?.user?.id],
+    queryFn: async () => {
+      if (!session?.user?.id) return [];
+      
+      const { data, error } = await supabase
+        .from("ai_configurations")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch AI configurations",
+          variant: "destructive",
+        });
+        return [];
+      }
+
+      return data;
+    },
+    enabled: !!session?.user?.id,
+  });
+
   const handleCreateCustomTemplate = async () => {
     if (!customPrompt.trim()) {
       toast({
@@ -628,6 +654,12 @@ export const PlotDevelopmentView = () => {
     }
 
     try {
+      const selectedAIConfigData = selectedAIConfig ? await supabase
+        .from("ai_configurations")
+        .select("*")
+        .eq("id", selectedAIConfig)
+        .single() : null;
+
       const systemPrompt = `Create a story template based on the following description. The response MUST be a valid JSON object with this exact structure:
 {
   "name": "Template Name",
@@ -641,8 +673,8 @@ Keep plot points between 5-8 points, and sub-events between 3-5 events. Make sur
         "suggestions",
         {
           storyDescription: selectedStory?.description || "",
-          aiConfig: {
-            model_type: "gpt-4o",
+          aiConfig: selectedAIConfigData?.data || {
+            model_type: "gpt-4o-mini",
             system_prompt: systemPrompt,
             temperature: 0.7,
             max_tokens: 1000,
@@ -652,11 +684,9 @@ Keep plot points between 5-8 points, and sub-events between 3-5 events. Make sur
 
       if (result) {
         try {
-          // Clean the response string to ensure it's valid JSON
           const cleanedResult = result.replace(/[\r\n\t]/g, '').trim();
           const template = JSON.parse(cleanedResult);
           
-          // Validate the template structure
           if (!template.name || !Array.isArray(template.plotPoints)) {
             throw new Error("Invalid template structure");
           }
@@ -885,7 +915,26 @@ Keep plot points between 5-8 points, and sub-events between 3-5 events. Make sur
           <DialogHeader>
             <DialogTitle>Create Custom Template</DialogTitle>
           </DialogHeader>
-          <div className="py-4">
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label>AI Configuration</Label>
+              <Select
+                value={selectedAIConfig}
+                onValueChange={setSelectedAIConfig}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an AI configuration" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Default Configuration</SelectItem>
+                  {aiConfigurations.map((config) => (
+                    <SelectItem key={config.id} value={config.id}>
+                      {config.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <Textarea
               value={customPrompt}
               onChange={(e) => setCustomPrompt(e.target.value)}
