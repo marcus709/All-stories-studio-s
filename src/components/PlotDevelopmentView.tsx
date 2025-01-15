@@ -370,13 +370,23 @@ export const PlotDevelopmentView = () => {
         <Card className="p-6">
           <h2 className="text-xl font-semibold mb-4">Plot Events</h2>
           <Timeline
-            data={plotEvents}
+            data={plotEvents.map(event => ({
+              id: event.id,
+              title: event.title,
+              content: event.description || "",
+              date: event.created_at,
+              icon: "default",
+              metadata: {
+                stage: event.stage,
+                order_index: event.order_index
+              }
+            }))}
             onDragEnd={handleDragEnd}
-            renderItem={(event: PlotEvent) => (
+            renderItem={(event: any) => (
               <div className="flex items-center justify-between p-4 bg-white rounded-lg shadow">
                 <div>
                   <h3 className="font-medium">{event.title}</h3>
-                  <p className="text-sm text-gray-500">{event.stage}</p>
+                  <p className="text-sm text-gray-500">{event.metadata.stage}</p>
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -386,13 +396,21 @@ export const PlotDevelopmentView = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuItem onClick={() => {
-                      setSelectedEvent(event);
-                      setIsEditorOpen(true);
+                      const originalEvent = plotEvents.find(e => e.id === event.id);
+                      if (originalEvent) {
+                        setSelectedEvent(originalEvent);
+                        setIsEditorOpen(true);
+                      }
                     }}>
                       <Edit className="w-4 h-4 mr-2" />
                       Edit
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleEventDelete(event)}>
+                    <DropdownMenuItem onClick={() => {
+                      const originalEvent = plotEvents.find(e => e.id === event.id);
+                      if (originalEvent) {
+                        handleEventDelete(originalEvent);
+                      }
+                    }}>
                       <Trash2 className="w-4 h-4 mr-2" />
                       Delete
                     </DropdownMenuItem>
