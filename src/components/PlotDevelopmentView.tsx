@@ -357,46 +357,73 @@ export const PlotDevelopmentView = () => {
         return;
       }
 
-      const newPlotData = template.plotPoints.map((point, index) => ({
-        title: point,
-        content: (
-          <div>
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal">
-                {point}
-              </p>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="ml-2"
-                onClick={() => setEditingPlotPoint({
-                  title: point,
-                  content: "",
-                  index
-                })}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="mb-8">
-              {template.subEvents && template.subEvents.map((subEvent, subIndex) => (
-                <div key={subIndex} className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                  ✅ {subEvent}
+      // First get the saved notes for this timeline
+      const { data: savedInstance, error: fetchError } = await supabase
+        .from('plot_template_instances')
+        .select('notes')
+        .eq('story_id', selectedStory?.id)
+        .eq('template_name', templateName)
+        .single();
+
+      if (fetchError) {
+        console.error("Error fetching saved notes:", fetchError);
+      }
+
+      const savedNotes = savedInstance?.notes || [];
+
+      const newPlotData = template.plotPoints.map((point, index) => {
+        const savedNote = savedNotes.find(note => note.plotPoint === point);
+        const noteContent = savedNote?.notes?.content || '';
+
+        return {
+          title: point,
+          content: (
+            <div>
+              <div className="flex justify-between items-start mb-4">
+                <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal">
+                  {point}
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-2 text-purple-500 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                    onClick={() => setEditingPlotPoint({
+                      title: point,
+                      content: noteContent,
+                      index
+                    })}
+                  >
+                    <FileText className="h-4 w-4" />
+                  </Button>
                 </div>
-              ))}
+              </div>
+              {noteContent && (
+                <div className="text-neutral-700 dark:text-neutral-300 text-xs md:text-sm whitespace-pre-wrap">
+                  {noteContent}
+                </div>
+              )}
+              <div className="mb-8">
+                {template.subEvents && template.subEvents.map((subEvent, subIndex) => (
+                  <div key={subIndex} className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+                    ✅ {subEvent}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        ),
-      }));
+          ),
+          notes: noteContent
+        };
+      });
 
       setPlotData(newPlotData);
 
       if (selectedStory?.id && templateName) {
         const { error } = await supabase
-          .from("plot_template_instances")
+          .from('plot_template_instances')
           .update({ last_used: new Date().toISOString() })
-          .eq("story_id", selectedStory.id)
-          .eq("template_name", templateName);
+          .eq('story_id', selectedStory.id)
+          .eq('template_name', templateName);
 
         if (error) {
           console.error("Error updating last_used timestamp:", error);
@@ -535,10 +562,8 @@ export const PlotDevelopmentView = () => {
               </div>
             </div>
             {content && (
-              <div className="hidden">
-                <div className="text-neutral-700 dark:text-neutral-300 text-xs md:text-sm whitespace-pre-wrap">
-                  {content}
-                </div>
+              <div className="text-neutral-700 dark:text-neutral-300 text-xs md:text-sm whitespace-pre-wrap">
+                {content}
               </div>
             )}
           </div>
@@ -555,11 +580,7 @@ export const PlotDevelopmentView = () => {
           plotPoint: point.title,
           notes: point.notes ? {
             content: point.notes,
-            lastEdited: new Date().toISOString(),
-            formattedContent: point.notes.split('\n').filter(line => line.trim() !== '').map(line => ({
-              text: line.trim(),
-              type: line.startsWith('#') ? 'heading' : 'paragraph'
-            }))
+            lastEdited: new Date().toISOString()
           } : null
         }));
 
