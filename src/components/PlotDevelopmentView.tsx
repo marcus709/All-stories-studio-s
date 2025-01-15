@@ -41,6 +41,7 @@ import { useStory } from "@/contexts/StoryContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { PlotPointEditorDialog } from "./plot/PlotPointEditorDialog";
+import { useSession } from "@supabase/auth-helpers-react"; // Add this import
 
 type PlotTemplate = {
   name: string;
@@ -240,6 +241,7 @@ export const PlotDevelopmentView = () => {
   const { toast } = useToast();
   const { selectedStory } = useStory();
   const queryClient = useQueryClient();
+  const session = useSession(); // Add this line
 
   const { data: savedTimelines } = useQuery({
     queryKey: ["plot-timelines", selectedStory?.id],
