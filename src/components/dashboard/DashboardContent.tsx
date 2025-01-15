@@ -27,7 +27,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
   const { selectedStory, setSelectedStory, stories } = useStory();
   const [error, setError] = useState<Error | null>(null);
   const [currentComponent, setCurrentComponent] = useState<React.ReactNode | null>(null);
-  const [key, setKey] = useState(0); // Add a key for forcing remounts
+  const [remountKey, setRemountKey] = useState(0);
 
   const handleFeatureAccess = (feature: string, requiredFeature: FeatureKey) => {
     if (!checkFeatureAccess(requiredFeature)) {
@@ -41,21 +41,27 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
     return true;
   };
 
-  // Reset error state and force remount when view changes
+  // Force remount and reset error state when view changes
   useEffect(() => {
     setError(null);
-    setKey(prev => prev + 1);
+    setRemountKey(prev => prev + 1);
   }, [currentView]);
 
-  // Reset error state and force remount when story changes
+  // Handle story changes and deletions
   useEffect(() => {
-    setError(null);
-    setKey(prev => prev + 1);
-    
-    // If the selected story was deleted, select the first available story
-    if (selectedStory && !stories.find(s => s.id === selectedStory.id)) {
-      setSelectedStory(stories[0] || null);
-    }
+    const handleStoryChange = async () => {
+      setError(null);
+      setRemountKey(prev => prev + 1);
+      
+      // If the selected story was deleted, select the first available story
+      if (selectedStory && !stories.find(s => s.id === selectedStory.id)) {
+        setSelectedStory(stories[0] || null);
+        // Force an additional remount after story selection changes
+        setTimeout(() => setRemountKey(prev => prev + 1), 0);
+      }
+    };
+
+    handleStoryChange();
   }, [selectedStory, stories, setSelectedStory]);
 
   // Handle component mounting and error recovery
@@ -66,35 +72,37 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
       // Only attempt to render components that require a story if one is selected
       // or if we're on the story view which handles the no-story case internally
       if (selectedStory || currentView === "story") {
+        const viewKey = `${currentView}-${selectedStory?.id}-${remountKey}`;
+        
         switch (currentView) {
           case "characters":
-            component = <CharactersView key={`characters-${selectedStory?.id}-${key}`} />;
+            component = <CharactersView key={viewKey} />;
             break;
           case "plot":
             if (handleFeatureAccess("Book Creator", "story_docs")) {
-              component = <FormattingView key={`plot-${selectedStory?.id}-${key}`} />;
+              component = <FormattingView key={viewKey} />;
             }
             break;
           case "dream":
             if (handleFeatureAccess("Plot Development", "story_docs")) {
-              component = <PlotDevelopmentView key={`dream-${selectedStory?.id}-${key}`} />;
+              component = <PlotDevelopmentView key={viewKey} />;
             }
             break;
           case "ideas":
-            component = <StoryIdeasView key={`ideas-${selectedStory?.id}-${key}`} />;
+            component = <StoryIdeasView key={viewKey} />;
             break;
           case "docs":
             if (handleFeatureAccess("Story Documentation", "story_docs")) {
-              component = <StoryDocsView key={`docs-${selectedStory?.id}-${key}`} />;
+              component = <StoryDocsView key={viewKey} />;
             }
             break;
           case "logic":
             if (handleFeatureAccess("Story Logic", "story_logic")) {
-              component = <StoryLogicView key={`logic-${selectedStory?.id}-${key}`} />;
+              component = <StoryLogicView key={viewKey} />;
             }
             break;
           case "story":
-            component = <StoryView key={`story-${key}`} />;
+            component = <StoryView key={`story-${remountKey}`} />;
             break;
           default:
             component = (
@@ -122,7 +130,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
       console.error("Error in DashboardContent:", err);
       setError(err instanceof Error ? err : new Error('An unexpected error occurred'));
     }
-  }, [currentView, selectedStory, handleFeatureAccess, key]);
+  }, [currentView, selectedStory, handleFeatureAccess, remountKey]);
 
   if (error) {
     return (
@@ -137,7 +145,8 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
                 variant="outline" 
                 onClick={() => {
                   setError(null);
-                  setKey(prev => prev + 1); // Force a complete remount
+                  setRemountKey(prev => prev + 1);
+                  setCurrentComponent(null);
                 }}
               >
                 Try Again
