@@ -183,18 +183,24 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
         return;
       }
 
-      // Close the delete confirmation dialog first
+      // Close the delete confirmation dialog immediately
       setShowDeleteAlert(false);
+
+      // Store the story ID for later comparison
+      const storyIdToDelete = storyToDelete.id;
+      
+      // Clear the storyToDelete state
+      setStoryToDelete(null);
 
       const { error } = await supabase
         .from("stories")
         .delete()
-        .eq("id", storyToDelete.id);
+        .eq("id", storyIdToDelete);
 
       if (error) throw error;
 
       // Clear selection if the deleted story was selected
-      if (selectedStory?.id === storyToDelete.id) {
+      if (selectedStory?.id === storyIdToDelete) {
         setSelectedStory(null);
       }
 
@@ -205,19 +211,17 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
         refetch()
       ]);
 
-      // Show success message after data is updated
+      // If this was the last story, close the dialog
+      if (stories.length <= 1) {
+        onOpenChange(false);
+      }
+
+      // Show success message after everything is updated
       toast({
         title: "Story deleted",
         description: "The story has been permanently deleted.",
       });
 
-      // Reset the storyToDelete state
-      setStoryToDelete(null);
-
-      // If this was the last story, close the dialog
-      if (stories.length <= 1) {
-        onOpenChange(false);
-      }
     } catch (error) {
       console.error("Error deleting story:", error);
       toast({
@@ -225,8 +229,6 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
         description: "Failed to delete the story.",
         variant: "destructive",
       });
-      setShowDeleteAlert(false);
-      setStoryToDelete(null);
     }
   };
 
@@ -234,6 +236,7 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
     if (!newOpen) {
       // Reset all states when closing the dialog
       setShowNewStory(false);
+      setShowNewSharedStory(false);
       setShowDeleteAlert(false);
       setStoryToDelete(null);
       setNewStory({ title: "", description: "" });
