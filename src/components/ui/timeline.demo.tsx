@@ -4,6 +4,7 @@ import { Timeline } from "@/components/ui/timeline";
 export function TimelineDemo() {
   const data = [
     {
+      id: "2024",
       title: "2024",
       content: (
         <div>
@@ -36,6 +37,7 @@ export function TimelineDemo() {
       ),
     },
     {
+      id: "early-2023",
       title: "Early 2023",
       content: (
         <div>
@@ -73,6 +75,7 @@ export function TimelineDemo() {
       ),
     },
     {
+      id: "changelog",
       title: "Changelog",
       content: (
         <div>
