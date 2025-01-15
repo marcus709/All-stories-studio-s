@@ -88,46 +88,29 @@ export const DocumentNavigation = ({
   const maxLineLength = Math.max(...lines.map(line => line.length));
 
   return (
-    <div className="fixed left-12 top-16 w-16 h-[calc(100vh-4rem)] bg-white border-r flex flex-col z-10 shadow-sm">
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onToggleCollapse}
-        className="absolute right-2 top-2 text-gray-400 hover:text-gray-600"
-      >
-        <ChevronRight className="h-4 w-4" />
-      </Button>
-      
-      <div 
-        ref={navigationRef}
-        className="flex-1 mt-12 px-2 relative overflow-hidden cursor-pointer"
-      >
-        <div 
-          ref={minimapRef}
-          className="absolute inset-0 mt-12"
-        >
-          {lines.map((line, index) => {
-            const width = (line.length / maxLineLength) * 100;
-            return (
-              <div
-                key={index}
-                className={cn(
-                  "h-[2px] mb-[1px] transition-all duration-75",
-                  line.length > 0 ? "bg-gray-200" : "bg-transparent"
-                )}
-                style={{ width: `${Math.max(width, 10)}%` }}
-              />
-            );
-          })}
-          <div
-            className="absolute right-0 bg-gray-400/20 w-1 transition-all duration-75"
-            style={{
-              top: `${viewportPosition}%`,
-              height: `${viewportHeight}%`,
-              opacity: isDragging.current ? '0.4' : '0.2'
-            }}
-          />
-        </div>
+    <div className="flex-1 mt-12 px-2 relative overflow-hidden cursor-pointer" ref={navigationRef}>
+      <div ref={minimapRef} className="absolute inset-0 mt-12">
+        {lines.map((line, index) => {
+          const width = (line.length / maxLineLength) * 100;
+          return (
+            <div
+              key={index}
+              className={cn(
+                "h-[2px] mb-[1px] transition-all duration-75",
+                line.length > 0 ? "bg-gray-200" : "bg-transparent"
+              )}
+              style={{ width: `${Math.max(width, 10)}%` }}
+            />
+          );
+        })}
+        <div
+          className="absolute right-0 bg-gray-400/20 w-1 transition-all duration-75"
+          style={{
+            top: `${viewportPosition}%`,
+            height: `${viewportHeight}%`,
+            opacity: isDragging.current ? '0.4' : '0.2'
+          }}
+        />
       </div>
     </div>
   );
