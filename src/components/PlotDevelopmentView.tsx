@@ -524,6 +524,102 @@ export const PlotDevelopmentView = () => {
     }
   };
 
+  const applyTemplate = (template: PlotTemplate) => {
+    setSelectedTemplate(template);
+    setTimelineName(template.name);
+    setIsTemplateDialogOpen(true);
+  };
+
+  const handleSaveTimeline = async () => {
+    if (!selectedTemplate || !timelineName || !selectedStory?.id) {
+      toast({
+        title: "Error",
+        description: "Please select a template and provide a name",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('plot_template_instances')
+        .insert({
+          user_id: session?.user?.id,
+          story_id: selectedStory.id,
+          name: timelineName,
+          template_name: selectedTemplate.name,
+          notes: []
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Timeline saved successfully",
+      });
+      
+      setIsTemplateDialogOpen(false);
+      await refetchTimelines();
+    } catch (error) {
+      console.error("Error saving timeline:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save timeline",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpdatePlotPoint = async (title: string, content: string) => {
+    if (!selectedStory?.id || !savedTimelines?.[0]?.id) return;
+
+    try {
+      const currentNotes = (savedTimelines[0].notes || []) as SavedNote[];
+      const updatedNotes = [...currentNotes];
+      const existingNoteIndex = updatedNotes.findIndex(note => note.plotPoint === title);
+
+      if (existingNoteIndex !== -1) {
+        updatedNotes[existingNoteIndex] = {
+          plotPoint: title,
+          notes: {
+            content,
+            lastEdited: new Date().toISOString()
+          }
+        };
+      } else {
+        updatedNotes.push({
+          plotPoint: title,
+          notes: {
+            content,
+            lastEdited: new Date().toISOString()
+          }
+        });
+      }
+
+      const { error } = await supabase
+        .from('plot_template_instances')
+        .update({ notes: updatedNotes })
+        .eq('id', savedTimelines[0].id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Plot point updated successfully",
+      });
+
+      setEditingPlotPoint(null);
+      await refetchTimelines();
+    } catch (error) {
+      console.error("Error updating plot point:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update plot point",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       {/* Header Section */}
