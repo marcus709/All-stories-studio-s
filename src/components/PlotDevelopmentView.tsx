@@ -263,12 +263,7 @@ export const PlotDevelopmentView = () => {
         return [];
       }
 
-      // Auto-load the most recent timeline
-      if (data && data.length > 0 && plotData.length === 0) {
-        loadSavedTimeline(data[0].template_name);
-      }
-
-      return data;
+      return data || [];
     },
     enabled: !!selectedStory?.id,
   });
@@ -288,18 +283,19 @@ export const PlotDevelopmentView = () => {
       setSelectedTemplate(null);
       setTimelineName("");
       setEditingPlotPoint(null);
-      
-      // Invalidate queries and close dialogs
-      queryClient.invalidateQueries({ queryKey: ["plot-timelines"] });
       setDeleteTimelineId(null);
       setIsTemplateDialogOpen(false);
+      
+      // Invalidate queries
+      queryClient.invalidateQueries({ queryKey: ["plot-timelines", selectedStory?.id] });
       
       toast({
         title: "Success",
         description: "Timeline deleted successfully",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Error deleting timeline:", error);
       toast({
         title: "Error",
         description: "Failed to delete timeline",
@@ -309,51 +305,54 @@ export const PlotDevelopmentView = () => {
     },
   });
 
-  const loadSavedTimeline = async (templateName) => {
+  const loadSavedTimeline = async (templateName: string) => {
     try {
       const template = plotTemplates.find(t => t.name === templateName);
-      if (template) {
-        const newPlotData = template.plotPoints.map((point, index) => ({
-          title: point,
-          content: (
-            <div>
-              <div className="flex justify-between items-start mb-4">
-                <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal">
-                  {point}
-                </p>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="ml-2"
-                  onClick={() => setEditingPlotPoint({
-                    title: point,
-                    content: "",
-                    index
-                  })}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="mb-8">
-                {template.subEvents && template.subEvents.map((subEvent, subIndex) => (
-                  <div key={subIndex} className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                    ✅ {subEvent}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ),
-        }));
-        setPlotData(newPlotData);
+      if (!template) {
+        console.error("Template not found:", templateName);
+        return;
+      }
 
-        // Update last_used timestamp only if we have a valid story and template
-        if (selectedStory?.id && templateName) {
-          await supabase
-            .from("plot_template_instances")
-            .update({ last_used: new Date().toISOString() })
-            .eq("story_id", selectedStory.id)
-            .eq("template_name", templateName);
-        }
+      const newPlotData = template.plotPoints.map((point, index) => ({
+        title: point,
+        content: (
+          <div>
+            <div className="flex justify-between items-start mb-4">
+              <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal">
+                {point}
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-2"
+                onClick={() => setEditingPlotPoint({
+                  title: point,
+                  content: "",
+                  index
+                })}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="mb-8">
+              {template.subEvents && template.subEvents.map((subEvent, subIndex) => (
+                <div key={subIndex} className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+                  ✅ {subEvent}
+                </div>
+              ))}
+            </div>
+          </div>
+        ),
+      }));
+      setPlotData(newPlotData);
+
+      // Update last_used timestamp
+      if (selectedStory?.id && templateName) {
+        await supabase
+          .from("plot_template_instances")
+          .update({ last_used: new Date().toISOString() })
+          .eq("story_id", selectedStory.id)
+          .eq("template_name", templateName);
       }
     } catch (error) {
       console.error("Error loading timeline:", error);
