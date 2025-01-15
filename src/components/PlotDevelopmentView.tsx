@@ -52,6 +52,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { PlotPointEditorDialog } from "./plot/PlotPointEditorDialog";
 import { useSession } from "@supabase/auth-helpers-react";
+import { Json } from "@/integrations/supabase/types";
 
 const plotTemplates = [
   {
@@ -570,17 +571,17 @@ export const PlotDevelopmentView = () => {
     }
   };
 
-  const handleUpdatePlotPoint = async (title: string, content: string) => {
+  const handleUpdatePlotPoint = async (content: string, title?: string) => {
     if (!selectedStory?.id || !savedTimelines?.[0]?.id) return;
 
     try {
       const currentNotes = (savedTimelines[0].notes as unknown as SavedNote[]) || [];
       const updatedNotes = [...currentNotes];
-      const existingNoteIndex = updatedNotes.findIndex(note => note.plotPoint === title);
+      const existingNoteIndex = updatedNotes.findIndex(note => note.plotPoint === (title || editingPlotPoint?.title));
 
       if (existingNoteIndex !== -1) {
         updatedNotes[existingNoteIndex] = {
-          plotPoint: title,
+          plotPoint: title || editingPlotPoint?.title || '',
           notes: {
             content,
             lastEdited: new Date().toISOString()
@@ -588,7 +589,7 @@ export const PlotDevelopmentView = () => {
         };
       } else {
         updatedNotes.push({
-          plotPoint: title,
+          plotPoint: title || editingPlotPoint?.title || '',
           notes: {
             content,
             lastEdited: new Date().toISOString()
