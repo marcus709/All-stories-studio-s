@@ -281,12 +281,16 @@ export const PlotDevelopmentView = () => {
       if (error) throw error;
     },
     onSuccess: () => {
+      // Clear the plot data and reset states after successful deletion
+      setPlotData([]);
       queryClient.invalidateQueries({ queryKey: ["plot-timelines"] });
       toast({
         title: "Success",
         description: "Timeline deleted successfully",
       });
       setDeleteTimelineId(null);
+      setSelectedTemplate(null);
+      setTimelineName("");
     },
     onError: () => {
       toast({
@@ -294,6 +298,7 @@ export const PlotDevelopmentView = () => {
         description: "Failed to delete timeline",
         variant: "destructive",
       });
+      setDeleteTimelineId(null);
     },
   });
 
