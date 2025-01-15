@@ -20,6 +20,8 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
+    console.log('Received plot points:', plotPoints);
+
     // Call OpenAI to analyze and sort plot points
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -36,21 +38,47 @@ serve(async (req) => {
           },
           {
             role: 'user',
-            content: `Sort these plot points: ${JSON.stringify(plotPoints)}`
+            content: `Analyze and sort these plot points into main plot points and subplots: ${JSON.stringify(plotPoints)}`
           }
         ],
+        temperature: 0.7,
+        max_tokens: 1000,
       }),
     });
 
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('OpenAI API error:', error);
+      throw new Error(`OpenAI API error: ${error}`);
+    }
+
     const data = await response.json();
-    const sortedPoints = JSON.parse(data.choices[0].message.content);
+    console.log('OpenAI response:', data);
+
+    let sortedPoints;
+    try {
+      // Try to parse the response content as JSON first
+      sortedPoints = JSON.parse(data.choices[0].message.content);
+    } catch (e) {
+      console.error('Failed to parse OpenAI response as JSON:', e);
+      // If parsing fails, create a default structure
+      sortedPoints = {
+        mainPlotPoints: plotPoints,
+        subPlotPoints: []
+      };
+    }
+
+    console.log('Sorted points:', sortedPoints);
 
     return new Response(JSON.stringify(sortedPoints), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
     console.error('Error sorting plot points:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      status: 'error'
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

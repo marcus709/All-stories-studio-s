@@ -41,35 +41,43 @@ export const PlotPointEditorDialog = ({
   const debouncedSave = debounce(async (content: string, docId: string) => {
     try {
       // First update the document
-      await supabase
+      const { error: updateError } = await supabase
         .from("documents")
         .update({ content })
         .eq("id", docId);
 
+      if (updateError) throw updateError;
+
       // Then get all plot points for sorting
-      const { data: plotPoints } = await supabase
+      const { data: plotPoints, error: fetchError } = await supabase
         .from("timeline_documents")
-        .select("*")
+        .select("document_id")
         .eq("timeline_id", timelineId);
 
-      // Call the sorting function
+      if (fetchError) throw fetchError;
+
+      // Call the sorting function with proper JSON data
       const { data: sortedPoints, error: sortError } = await supabase.functions
         .invoke("sort-plot-points", {
-          body: { plotPoints },
+          body: { 
+            plotPoints: plotPoints.map(p => ({
+              id: p.document_id,
+              content: content
+            }))
+          }
         });
 
       if (sortError) throw sortError;
 
       // Update document with sorted points
-      await supabase
+      const { error: finalUpdateError } = await supabase
         .from("documents")
         .update({ 
-          content: JSON.stringify({
-            mainPlotPoints: sortedPoints.mainPlotPoints,
-            subPlotPoints: sortedPoints.subPlotPoints
-          }, null, 2)
+          content: JSON.stringify(sortedPoints, null, 2)
         })
         .eq("id", docId);
+
+      if (finalUpdateError) throw finalUpdateError;
 
       // Invalidate queries to refresh the UI
       queryClient.invalidateQueries({ queryKey: ["documents", storyId] });
