@@ -2,7 +2,17 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Timeline } from "@/components/ui/timeline";
 import { Button } from "@/components/ui/button";
-import { Plus, LayoutTemplate, BookOpen, ChevronDown, Trash2 } from "lucide-react";
+import { Plus, LayoutTemplate, BookOpen, ChevronDown, Trash2, Edit } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Sheet,
   SheetContent,
@@ -30,6 +40,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useStory } from "@/contexts/StoryContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { PlotPointEditorDialog } from "./plot/PlotPointEditorDialog";
 
 type PlotTemplate = {
   name: string;
@@ -220,6 +231,12 @@ export const PlotDevelopmentView = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
   const [timelineName, setTimelineName] = useState("");
+  const [deleteTimelineId, setDeleteTimelineId] = useState<string | null>(null);
+  const [editingPlotPoint, setEditingPlotPoint] = useState<{
+    title: string;
+    content: string;
+    index: number;
+  } | null>(null);
   const { toast } = useToast();
   const { selectedStory } = useStory();
   const queryClient = useQueryClient();
@@ -269,6 +286,7 @@ export const PlotDevelopmentView = () => {
         title: "Success",
         description: "Timeline deleted successfully",
       });
+      setDeleteTimelineId(null);
     },
     onError: () => {
       toast({
@@ -289,14 +307,16 @@ export const PlotDevelopmentView = () => {
       return;
     }
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("plot_template_instances")
       .insert({
         user_id: (await supabase.auth.getUser()).data.user?.id,
         story_id: selectedStory.id,
         name: timelineName.trim(),
         template_name: selectedTemplate.name,
-      });
+      })
+      .select()
+      .single();
 
     if (error) {
       toast({
@@ -320,9 +340,23 @@ export const PlotDevelopmentView = () => {
       title: point,
       content: (
         <div>
-          <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
-            {point}
-          </p>
+          <div className="flex justify-between items-start mb-4">
+            <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal">
+              {point}
+            </p>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-2"
+              onClick={() => setEditingPlotPoint({
+                title: point,
+                content: "",
+                index
+              })}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          </div>
           <div className="mb-8">
             {selectedTemplate.subEvents && selectedTemplate.subEvents.map((subEvent, subIndex) => (
               <div key={subIndex} className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
@@ -338,6 +372,52 @@ export const PlotDevelopmentView = () => {
     queryClient.invalidateQueries({ queryKey: ["plot-timelines"] });
   };
 
+  const handleUpdatePlotPoint = (content: string) => {
+    if (!editingPlotPoint) return;
+
+    const newPlotData = [...plotData];
+    const point = newPlotData[editingPlotPoint.index];
+    
+    newPlotData[editingPlotPoint.index] = {
+      ...point,
+      content: (
+        <div>
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex-1">
+              <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
+                {editingPlotPoint.title}
+              </p>
+              <p className="text-neutral-700 dark:text-neutral-300 text-xs md:text-sm whitespace-pre-wrap">
+                {content}
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-2"
+              onClick={() => setEditingPlotPoint({
+                title: editingPlotPoint.title,
+                content,
+                index: editingPlotPoint.index
+              })}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="mb-8">
+            {point.subEvents && point.subEvents.map((subEvent, subIndex) => (
+              <div key={subIndex} className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+                ✅ {subEvent}
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
+    };
+
+    setPlotData(newPlotData);
+  };
+
   const applyTemplate = (template) => {
     setSelectedTemplate(template);
     setIsTemplateDialogOpen(true);
@@ -350,9 +430,23 @@ export const PlotDevelopmentView = () => {
         title: point,
         content: (
           <div>
-            <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
-              {point}
-            </p>
+            <div className="flex justify-between items-start mb-4">
+              <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal">
+                {point}
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-2"
+                onClick={() => setEditingPlotPoint({
+                  title: point,
+                  content: "",
+                  index
+                })}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            </div>
             <div className="mb-8">
               {template.subEvents && template.subEvents.map((subEvent, subIndex) => (
                 <div key={subIndex} className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
@@ -437,7 +531,7 @@ export const PlotDevelopmentView = () => {
                         className="h-8 w-8 p-0"
                         onClick={(e) => {
                           e.stopPropagation();
-                          deleteTimelineMutation.mutate(saved.id);
+                          setDeleteTimelineId(saved.id);
                         }}
                       >
                         <Trash2 className="h-4 w-4 text-red-500" />
@@ -522,6 +616,42 @@ export const PlotDevelopmentView = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteTimelineId} onOpenChange={() => setDeleteTimelineId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this timeline. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-500 hover:bg-red-600"
+              onClick={() => {
+                if (deleteTimelineId) {
+                  deleteTimelineMutation.mutate(deleteTimelineId);
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {editingPlotPoint && (
+        <PlotPointEditorDialog
+          isOpen={!!editingPlotPoint}
+          onClose={() => setEditingPlotPoint(null)}
+          title={editingPlotPoint.title}
+          content={editingPlotPoint.content}
+          storyId={selectedStory?.id || ""}
+          timelineId={savedTimelines?.[0]?.id || ""}
+          onSave={handleUpdatePlotPoint}
+        />
+      )}
     </div>
   );
 };

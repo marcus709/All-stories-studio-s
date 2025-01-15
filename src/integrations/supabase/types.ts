@@ -1822,6 +1822,42 @@ export type Database = {
           },
         ]
       }
+      timeline_documents: {
+        Row: {
+          created_at: string | null
+          document_id: string
+          id: string
+          timeline_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          document_id: string
+          id?: string
+          timeline_id: string
+        }
+        Update: {
+          created_at?: string | null
+          document_id?: string
+          id?: string
+          timeline_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timeline_documents_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timeline_documents_timeline_id_fkey"
+            columns: ["timeline_id"]
+            isOneToOne: false
+            referencedRelation: "plot_template_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       timeline_events: {
         Row: {
           created_at: string | null
