@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import { EmotionTracker } from "./plot/EmotionTracker";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const PlotDevelopmentView = () => {
   const { selectedStory } = useStory();
@@ -85,7 +86,6 @@ export const PlotDevelopmentView = () => {
     try {
       console.log("Loading saved timeline:", templateName);
       
-      // First get the most recent instance of this template
       const { data: existingTemplate, error: templateError } = await supabase
         .from("plot_template_instances")
         .select("*")
@@ -102,7 +102,6 @@ export const PlotDevelopmentView = () => {
       if (existingTemplate) {
         console.log("Found existing template:", existingTemplate);
         
-        // Get the plot points for this template
         const { data: plotPoints, error: plotError } = await supabase
           .from("plot_events")
           .select("*")
@@ -115,7 +114,6 @@ export const PlotDevelopmentView = () => {
           setPlotData(plotPoints);
           setTimelineName(existingTemplate.name);
           
-          // Find and set the matching template
           const matchingTemplate = plotTemplates.find(t => t.name === templateName);
           if (matchingTemplate) {
             setSelectedTemplate(matchingTemplate);
@@ -127,7 +125,6 @@ export const PlotDevelopmentView = () => {
           });
         }
 
-        // Update last_used timestamp
         const { error } = await supabase
           .from("plot_template_instances")
           .update({ last_used: new Date().toISOString() })
@@ -185,7 +182,6 @@ export const PlotDevelopmentView = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
-      // Create new template instance
       const { data: templateInstance, error: templateError } = await supabase
         .from("plot_template_instances")
         .insert({
@@ -200,7 +196,6 @@ export const PlotDevelopmentView = () => {
 
       if (templateError) throw templateError;
 
-      // Create plot events
       const plotEvents = plotData.map(event => ({
         ...event,
         template_instance_id: templateInstance.id,
@@ -264,14 +259,16 @@ export const PlotDevelopmentView = () => {
 
         <div>
           <h2 className="text-lg font-semibold mb-4">Saved Timelines</h2>
-          {timelines?.map((timeline) => (
-            <PlotTimeline
-              key={timeline.id}
-              timeline={timeline}
-              onDelete={() => setDeleteTimelineId(timeline.id)}
-              onLoad={() => loadSavedTimeline(timeline.template_name)}
-            />
-          ))}
+          <ScrollArea className="h-[400px] w-full rounded-md border p-4">
+            {timelines?.map((timeline) => (
+              <PlotTimeline
+                key={timeline.id}
+                timeline={timeline}
+                onDelete={() => setDeleteTimelineId(timeline.id)}
+                onLoad={() => loadSavedTimeline(timeline.template_name)}
+              />
+            ))}
+          </ScrollArea>
         </div>
       </div>
 
