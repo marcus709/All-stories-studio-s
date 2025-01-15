@@ -1,5 +1,5 @@
 import { Document } from "@/types/story";
-import { Tabs } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DocumentCard } from "./DocumentCard";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -33,28 +33,32 @@ export const DocumentsList = ({
     );
   }
 
-  const tabs = documents.map((doc) => ({
-    title: doc.title,
-    value: doc.id,
-    content: (
-      <div className="w-full overflow-hidden relative h-full rounded-2xl p-6 bg-white border border-gray-200">
-        <div className="prose max-w-none">
-          <h2 className="text-2xl font-bold mb-4">{doc.title}</h2>
-          <div className="text-gray-700 whitespace-pre-wrap">{doc.content}</div>
-        </div>
-      </div>
-    ),
-  }));
-
   return (
     <div className="h-[calc(100vh-16rem)] relative flex flex-col max-w-5xl mx-auto w-full items-start justify-start">
-      <Tabs 
-        tabs={tabs}
-        containerClassName="mb-8"
-        activeTabClassName="bg-violet-100 dark:bg-violet-900/20"
-        tabClassName="text-sm font-medium"
-        contentClassName="mt-4"
-      />
+      <Tabs defaultValue={documents[0]?.id} className="w-full">
+        <TabsList className="mb-8">
+          {documents.map((doc) => (
+            <TabsTrigger
+              key={doc.id}
+              value={doc.id}
+              className="text-sm font-medium"
+              onClick={() => onSelectDocument(doc.id)}
+            >
+              {doc.title}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        {documents.map((doc) => (
+          <TabsContent key={doc.id} value={doc.id}>
+            <div className="w-full overflow-hidden relative h-full rounded-2xl p-6 bg-white border border-gray-200">
+              <div className="prose max-w-none">
+                <h2 className="text-2xl font-bold mb-4">{doc.title}</h2>
+                <div className="text-gray-700 whitespace-pre-wrap">{doc.content}</div>
+              </div>
+            </div>
+          </TabsContent>
+        ))}
+      </Tabs>
     </div>
   );
 };
