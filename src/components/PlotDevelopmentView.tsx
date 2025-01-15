@@ -291,52 +291,26 @@ export const PlotDevelopmentView = () => {
       if (error) throw error;
       return timelineId;
     },
-    onMutate: async (timelineId) => {
-      await queryClient.cancelQueries({ queryKey: ["plot-timelines", selectedStory?.id] });
-      
-      const previousTimelines = queryClient.getQueryData(["plot-timelines", selectedStory?.id]);
-      
-      // Only update the cache if we have data
-      if (previousTimelines) {
-        queryClient.setQueryData(
-          ["plot-timelines", selectedStory?.id],
-          (old: any[] | undefined) => old?.filter(t => t.id !== timelineId) || []
-        );
-      }
-      
-      return { previousTimelines };
-    },
-    onError: (error, variables, context) => {
-      console.error("Error deleting timeline:", error);
-      if (context?.previousTimelines) {
-        queryClient.setQueryData(["plot-timelines", selectedStory?.id], context.previousTimelines);
-      }
-      toast({
-        title: "Error",
-        description: "Failed to delete timeline",
-        variant: "destructive",
-      });
-    },
     onSuccess: () => {
       toast({
         title: "Success",
         description: "Timeline deleted successfully",
       });
-    },
-    onSettled: () => {
-      // First close the modal
       setDeleteTimelineId(null);
-      
-      // Then reset states in the next tick to avoid React update conflicts
-      setTimeout(() => {
-        resetAllStates();
-        // Finally refetch in the background
-        queryClient.invalidateQueries({ 
-          queryKey: ["plot-timelines", selectedStory?.id],
-          exact: true
-        });
-      }, 0);
+      resetAllStates();
+      queryClient.invalidateQueries({ 
+        queryKey: ["plot-timelines", selectedStory?.id],
+        exact: true
+      });
     },
+    onError: (error) => {
+      console.error("Error deleting timeline:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete timeline",
+        variant: "destructive",
+      });
+    }
   });
 
   const loadSavedTimeline = useCallback(async (templateName: string) => {
@@ -400,11 +374,6 @@ export const PlotDevelopmentView = () => {
 
         if (error) {
           console.error("Error updating last_used timestamp:", error);
-          toast({
-            title: "Warning",
-            description: "Timeline loaded but couldn't update last used timestamp",
-            variant: "default",
-          });
         }
       }
     } catch (error) {
@@ -417,11 +386,10 @@ export const PlotDevelopmentView = () => {
     }
   }, [selectedStory?.id, toast]);
 
-  const applyTemplate = useCallback(async (template: PlotTemplate) => {
+  const applyTemplate = useCallback((template: PlotTemplate) => {
     try {
       setSelectedTemplate(template);
       setTimelineName(template.name);
-      setIsTemplateDialogOpen(true);
       
       const newPlotData = template.plotPoints.map((point, index) => ({
         title: point,
@@ -456,6 +424,7 @@ export const PlotDevelopmentView = () => {
       }));
 
       setPlotData(newPlotData);
+      setIsTemplateDialogOpen(true);
     } catch (error) {
       console.error("Error applying template:", error);
       toast({
@@ -464,7 +433,7 @@ export const PlotDevelopmentView = () => {
         variant: "destructive",
       });
     }
-  }, [setSelectedTemplate, setTimelineName, setIsTemplateDialogOpen, setPlotData, toast]);
+  }, []);
 
   const handleSaveTimeline = useCallback(async () => {
     if (!selectedStory?.id || !selectedTemplate || !timelineName) {
