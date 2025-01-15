@@ -904,8 +904,7 @@ export const PlotDevelopmentView = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddActDialog
-Open(false)}>
+            <Button variant="outline" onClick={() => setIsAddActDialogOpen(false)}>
               Cancel
             </Button>
             <Button onClick={handleAddNewAct}>
