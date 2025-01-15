@@ -52,7 +52,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { PlotPointEditorDialog } from "./plot/PlotPointEditorDialog";
 import { useSession } from "@supabase/auth-helpers-react";
-import { useAI } from "@/hooks/useAI";
 
 const plotTemplates = [
   {
@@ -248,7 +247,7 @@ interface PlotTemplate {
 
 export const PlotDevelopmentView = () => {
   const [plotData, setPlotData] = useState([]);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<PlotTemplate | null>(null);
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
   const [timelineName, setTimelineName] = useState("");
   const [deleteTimelineId, setDeleteTimelineId] = useState<string | null>(null);
@@ -266,7 +265,7 @@ export const PlotDevelopmentView = () => {
   const session = useSession();
   const [selectedConfig, setSelectedConfig] = useState<string>("");
   const [isGeneratingTemplate, setIsGeneratingTemplate] = useState(false);
-  
+
   const { data: aiConfigurations = [] } = useQuery({
     queryKey: ["aiConfigurations", session?.user?.id],
     queryFn: async () => {
@@ -407,7 +406,7 @@ export const PlotDevelopmentView = () => {
         .select('notes')
         .eq('story_id', selectedStory?.id)
         .eq('template_name', templateName)
-        .single();
+        .maybeSingle();
 
       if (fetchError) {
         console.error("Error fetching saved notes:", fetchError);
@@ -488,170 +487,6 @@ export const PlotDevelopmentView = () => {
     }
   }, [selectedStory?.id, toast]);
 
-  const applyTemplate = useCallback(async (template: PlotTemplate) => {
-    try {
-      setSelectedTemplate(template);
-      setTimelineName(template.name);
-      setIsTemplateDialogOpen(true);
-      
-      const newPlotData = template.plotPoints.map((point, index) => ({
-        title: point,
-        content: (
-          <div>
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal">
-                {point}
-              </p>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="ml-2"
-                onClick={() => setEditingPlotPoint({
-                  title: point,
-                  content: "",
-                  index
-                })}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="mb-8">
-              {template.subEvents && template.subEvents.map((subEvent, subIndex) => (
-                <div key={subIndex} className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                  ✅ {subEvent}
-                </div>
-              ))}
-            </div>
-          </div>
-        ),
-      }));
-
-      setPlotData(newPlotData);
-    } catch (error) {
-      console.error("Error applying template:", error);
-      toast({
-        title: "Error",
-        description: "Failed to apply template",
-        variant: "destructive",
-      });
-    }
-  }, [setSelectedTemplate, setTimelineName, setIsTemplateDialogOpen, setPlotData, toast]);
-
-  const handleSaveTimeline = useCallback(async () => {
-    if (!selectedStory?.id || !selectedTemplate || !timelineName) {
-      toast({
-        title: "Error",
-        description: "Missing required information",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from("plot_template_instances")
-        .insert({
-          user_id: session?.user?.id,
-          story_id: selectedStory.id,
-          name: timelineName,
-          template_name: selectedTemplate.name,
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Timeline saved successfully",
-      });
-
-      setIsTemplateDialogOpen(false);
-      resetAllStates();
-      await refetchTimelines();
-    } catch (error) {
-      console.error("Error saving timeline:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save timeline",
-        variant: "destructive",
-      });
-    }
-  }, [selectedStory?.id, selectedTemplate, timelineName, session?.user?.id, toast, resetAllStates, refetchTimelines]);
-
-  const handleUpdatePlotPoint = useCallback(async (content: string) => {
-    if (!editingPlotPoint) return;
-    
-    try {
-      const newPlotData = [...plotData];
-      newPlotData[editingPlotPoint.index] = {
-        ...newPlotData[editingPlotPoint.index],
-        content: (
-          <div>
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal">
-                {editingPlotPoint.title}
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="ml-2 text-purple-500 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20"
-                  onClick={() => setEditingPlotPoint({
-                    title: editingPlotPoint.title,
-                    content: content,
-                    index: editingPlotPoint.index
-                  })}
-                >
-                  <FileText className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            {content && (
-              <div className="text-neutral-700 dark:text-neutral-300 text-xs md:text-sm whitespace-pre-wrap">
-                {content}
-              </div>
-            )}
-          </div>
-        ),
-        notes: content
-      };
-
-      setPlotData(newPlotData);
-      setEditingPlotPoint(null);
-
-      if (selectedStory?.id && timelineName) {
-        const formattedNotes = newPlotData.map(point => ({
-          plotPoint: point.title,
-          notes: point.notes ? {
-            content: point.notes,
-            lastEdited: new Date().toISOString()
-          } : null
-        }));
-
-        const { error } = await supabase
-          .from('plot_template_instances')
-          .update({ 
-            notes: formattedNotes
-          })
-          .eq('story_id', selectedStory.id)
-          .eq('name', timelineName);
-
-        if (error) throw error;
-      }
-
-      toast({
-        title: "Success",
-        description: "Plot point notes updated successfully",
-      });
-    } catch (error) {
-      console.error("Error updating plot point:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update plot point",
-        variant: "destructive",
-      });
-    }
-  }, [plotData, editingPlotPoint, setPlotData, selectedStory?.id, timelineName, toast]);
-
   const handleSelectChange = (value: string) => {
     setSelectedConfig(value);
     if (value === "new") {
@@ -672,7 +507,6 @@ export const PlotDevelopmentView = () => {
     setIsGeneratingTemplate(true);
     try {
       // Here you would implement the actual template generation logic
-      // For now, we'll just close the dialog
       setIsCustomTemplateDialogOpen(false);
       toast({
         title: "Success",
