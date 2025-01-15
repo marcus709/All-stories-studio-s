@@ -191,6 +191,7 @@ export const PlotDevelopmentView = () => {
           template_name: selectedTemplate.name,
           name: timelineName,
           last_used: new Date().toISOString(),
+          user_id: supabase.auth.getUser()?.data?.user?.id || "",
         })
         .select()
         .single();
