@@ -417,6 +417,141 @@ export const PlotDevelopmentView = () => {
     }
   }, [selectedStory?.id, toast]);
 
+  const applyTemplate = useCallback(async (template: PlotTemplate) => {
+    try {
+      setSelectedTemplate(template);
+      setTimelineName(template.name);
+      setIsTemplateDialogOpen(true);
+      
+      const newPlotData = template.plotPoints.map((point, index) => ({
+        title: point,
+        content: (
+          <div>
+            <div className="flex justify-between items-start mb-4">
+              <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal">
+                {point}
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-2"
+                onClick={() => setEditingPlotPoint({
+                  title: point,
+                  content: "",
+                  index
+                })}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="mb-8">
+              {template.subEvents && template.subEvents.map((subEvent, subIndex) => (
+                <div key={subIndex} className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+                  ✅ {subEvent}
+                </div>
+              ))}
+            </div>
+          </div>
+        ),
+      }));
+
+      setPlotData(newPlotData);
+    } catch (error) {
+      console.error("Error applying template:", error);
+      toast({
+        title: "Error",
+        description: "Failed to apply template",
+        variant: "destructive",
+      });
+    }
+  }, [setSelectedTemplate, setTimelineName, setIsTemplateDialogOpen, setPlotData, toast]);
+
+  const handleSaveTimeline = useCallback(async () => {
+    if (!selectedStory?.id || !selectedTemplate || !timelineName) {
+      toast({
+        title: "Error",
+        description: "Missing required information",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("plot_template_instances")
+        .insert({
+          user_id: session?.user?.id,
+          story_id: selectedStory.id,
+          name: timelineName,
+          template_name: selectedTemplate.name,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Timeline saved successfully",
+      });
+
+      setIsTemplateDialogOpen(false);
+      resetAllStates();
+      await refetchTimelines();
+    } catch (error) {
+      console.error("Error saving timeline:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save timeline",
+        variant: "destructive",
+      });
+    }
+  }, [selectedStory?.id, selectedTemplate, timelineName, session?.user?.id, toast, resetAllStates, refetchTimelines]);
+
+  const handleUpdatePlotPoint = useCallback(async (updatedPoint: { title: string; content: string; index: number }) => {
+    try {
+      const newPlotData = [...plotData];
+      newPlotData[updatedPoint.index] = {
+        ...newPlotData[updatedPoint.index],
+        content: (
+          <div>
+            <div className="flex justify-between items-start mb-4">
+              <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal">
+                {updatedPoint.title}
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-2"
+                onClick={() => setEditingPlotPoint(updatedPoint)}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="mb-8">
+              <div className="text-neutral-700 dark:text-neutral-300 text-xs md:text-sm whitespace-pre-wrap">
+                {updatedPoint.content}
+              </div>
+            </div>
+          </div>
+        ),
+      };
+
+      setPlotData(newPlotData);
+      setEditingPlotPoint(null);
+
+      toast({
+        title: "Success",
+        description: "Plot point updated successfully",
+      });
+    } catch (error) {
+      console.error("Error updating plot point:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update plot point",
+        variant: "destructive",
+      });
+    }
+  }, [plotData, setPlotData, toast]);
+
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       {/* Header Section */}
