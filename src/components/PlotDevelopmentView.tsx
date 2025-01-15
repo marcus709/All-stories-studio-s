@@ -281,16 +281,21 @@ export const PlotDevelopmentView = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      // Clear the plot data and reset states after successful deletion
+      // Clear all related states
       setPlotData([]);
+      setSelectedTemplate(null);
+      setTimelineName("");
+      setEditingPlotPoint(null);
+      
+      // Invalidate queries and close dialogs
       queryClient.invalidateQueries({ queryKey: ["plot-timelines"] });
+      setDeleteTimelineId(null);
+      setIsTemplateDialogOpen(false);
+      
       toast({
         title: "Success",
         description: "Timeline deleted successfully",
       });
-      setDeleteTimelineId(null);
-      setSelectedTemplate(null);
-      setTimelineName("");
     },
     onError: () => {
       toast({
@@ -302,176 +307,59 @@ export const PlotDevelopmentView = () => {
     },
   });
 
-  const handleSaveTimeline = async () => {
-    if (!selectedStory?.id || !selectedTemplate || !timelineName.trim()) {
-      toast({
-        title: "Error",
-        description: "Please provide a name for your timeline",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from("plot_template_instances")
-      .insert({
-        user_id: (await supabase.auth.getUser()).data.user?.id,
-        story_id: selectedStory.id,
-        name: timelineName.trim(),
-        template_name: selectedTemplate.name,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save timeline",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "Success",
-      description: "Timeline saved successfully",
-    });
-
-    setIsTemplateDialogOpen(false);
-    setTimelineName("");
-    
-    // Apply the template immediately
-    const newPlotData = selectedTemplate.plotPoints.map((point, index) => ({
-      title: point,
-      content: (
-        <div>
-          <div className="flex justify-between items-start mb-4">
-            <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal">
-              {point}
-            </p>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-2"
-              onClick={() => setEditingPlotPoint({
-                title: point,
-                content: "",
-                index
-              })}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-          </div>
-          <div className="mb-8">
-            {selectedTemplate.subEvents && selectedTemplate.subEvents.map((subEvent, subIndex) => (
-              <div key={subIndex} className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                ✅ {subEvent}
-              </div>
-            ))}
-          </div>
-        </div>
-      ),
-    }));
-    setPlotData(newPlotData);
-
-    queryClient.invalidateQueries({ queryKey: ["plot-timelines"] });
-  };
-
-  const handleUpdatePlotPoint = (content: string) => {
-    if (!editingPlotPoint) return;
-
-    const newPlotData = [...plotData];
-    const point = newPlotData[editingPlotPoint.index];
-    
-    newPlotData[editingPlotPoint.index] = {
-      ...point,
-      content: (
-        <div>
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex-1">
-              <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
-                {editingPlotPoint.title}
-              </p>
-              <p className="text-neutral-700 dark:text-neutral-300 text-xs md:text-sm whitespace-pre-wrap">
-                {content}
-              </p>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-2"
-              onClick={() => setEditingPlotPoint({
-                title: editingPlotPoint.title,
-                content,
-                index: editingPlotPoint.index
-              })}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-          </div>
-          <div className="mb-8">
-            {point.subEvents && point.subEvents.map((subEvent, subIndex) => (
-              <div key={subIndex} className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                ✅ {subEvent}
-              </div>
-            ))}
-          </div>
-        </div>
-      ),
-    };
-
-    setPlotData(newPlotData);
-  };
-
-  const applyTemplate = (template) => {
-    setSelectedTemplate(template);
-    setIsTemplateDialogOpen(true);
-  };
-
   const loadSavedTimeline = async (templateName) => {
-    const template = plotTemplates.find(t => t.name === templateName);
-    if (template) {
-      const newPlotData = template.plotPoints.map((point, index) => ({
-        title: point,
-        content: (
-          <div>
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal">
-                {point}
-              </p>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="ml-2"
-                onClick={() => setEditingPlotPoint({
-                  title: point,
-                  content: "",
-                  index
-                })}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
+    try {
+      const template = plotTemplates.find(t => t.name === templateName);
+      if (template) {
+        const newPlotData = template.plotPoints.map((point, index) => ({
+          title: point,
+          content: (
+            <div>
+              <div className="flex justify-between items-start mb-4">
+                <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal">
+                  {point}
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="ml-2"
+                  onClick={() => setEditingPlotPoint({
+                    title: point,
+                    content: "",
+                    index
+                  })}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="mb-8">
+                {template.subEvents && template.subEvents.map((subEvent, subIndex) => (
+                  <div key={subIndex} className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+                    ✅ {subEvent}
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="mb-8">
-              {template.subEvents && template.subEvents.map((subEvent, subIndex) => (
-                <div key={subIndex} className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                  ✅ {subEvent}
-                </div>
-              ))}
-            </div>
-          </div>
-        ),
-      }));
-      setPlotData(newPlotData);
+          ),
+        }));
+        setPlotData(newPlotData);
 
-      // Update last_used timestamp
-      if (selectedStory?.id) {
-        await supabase
-          .from("plot_template_instances")
-          .update({ last_used: new Date().toISOString() })
-          .eq("story_id", selectedStory.id)
-          .eq("template_name", templateName);
+        // Update last_used timestamp only if we have a valid story and template
+        if (selectedStory?.id && templateName) {
+          await supabase
+            .from("plot_template_instances")
+            .update({ last_used: new Date().toISOString() })
+            .eq("story_id", selectedStory.id)
+            .eq("template_name", templateName);
+        }
       }
+    } catch (error) {
+      console.error("Error loading timeline:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load timeline",
+        variant: "destructive",
+      });
     }
   };
 
