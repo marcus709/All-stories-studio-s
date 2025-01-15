@@ -19,6 +19,7 @@ export function ProfileSettings() {
     username: "",
     bio: "",
     avatar_url: "",
+    background_url: "",
   });
 
   React.useEffect(() => {
@@ -31,7 +32,7 @@ export function ProfileSettings() {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("username, bio, avatar_url")
+        .select("username, bio, avatar_url, background_url")
         .eq("id", session?.user?.id)
         .maybeSingle();
 
@@ -53,6 +54,7 @@ export function ProfileSettings() {
           username: session?.user?.email?.split("@")[0] || "",
           bio: "",
           avatar_url: "",
+          background_url: "",
         });
         return;
       }
@@ -61,6 +63,7 @@ export function ProfileSettings() {
         username: data.username || "",
         bio: data.bio || "",
         avatar_url: data.avatar_url || "",
+        background_url: data.background_url || "",
       });
     } catch (error) {
       console.error("Error loading profile:", error);
@@ -83,6 +86,7 @@ export function ProfileSettings() {
           id: session?.user?.id,
           username: profile.username,
           bio: profile.bio,
+          background_url: profile.background_url,
         });
 
       if (error) throw error;
@@ -139,11 +143,15 @@ export function ProfileSettings() {
 
           <TabsContent value="profile">
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="flex justify-center">
+              <div className="mb-12">
                 <AvatarUpload
                   avatarUrl={profile.avatar_url}
+                  backgroundUrl={profile.background_url}
                   onAvatarChange={(url) =>
                     setProfile((prev) => ({ ...prev, avatar_url: url }))
+                  }
+                  onBackgroundChange={(url) =>
+                    setProfile((prev) => ({ ...prev, background_url: url }))
                   }
                 />
               </div>
