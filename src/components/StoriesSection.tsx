@@ -13,6 +13,15 @@ const stories = [
     rating: 4.9,
     category: "Mystery",
     isShared: false
+  },
+  {
+    title: "Echoes of Tomorrow",
+    description: "A young scientist discovers a way to hear fragments of future conversations, but each revelation comes with an unforeseen cost...",
+    author: "Marcus Rivera",
+    image: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&q=80",
+    rating: 4.7,
+    category: "Science Fiction",
+    isShared: true
   }
 ];
 
@@ -29,57 +38,61 @@ export const StoriesSection = () => {
           </p>
         </div>
         
-        <div className="grid gap-16">
-          {/* Featured Story Card */}
-          <Card 
-            className={`group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm ${
-              stories[0].isShared ? 'border-l-4 border-l-blue-500' : ''
-            }`}
-          >
-            <div className="relative h-64 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
-              <img
-                src={stories[0].image}
-                alt={stories[0].title}
-                className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute top-4 right-4 z-20 flex gap-2">
-                {stories[0].isShared && (
-                  <Badge className="bg-blue-500 text-white hover:bg-blue-600">
-                    <Users className="h-3 w-3 mr-1" />
-                    Shared
-                  </Badge>
-                )}
-                <Badge 
-                  className="bg-white/90 text-purple-600 hover:bg-white"
-                >
-                  {stories[0].category}
-                </Badge>
-              </div>
-            </div>
-            
-            <CardContent className="relative p-6">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm text-gray-500">By {stories[0].author}</span>
-                <div className="flex items-center space-x-1">
-                  <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                  <span className="text-sm font-medium">{stories[0].rating}</span>
+        <div className="space-y-16">
+          <div className="grid md:grid-cols-2 gap-8">
+            {stories.map((story, index) => (
+              <Card 
+                key={index}
+                className={`group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm ${
+                  story.isShared ? 'border-l-4 border-l-blue-500' : ''
+                }`}
+              >
+                <div className="relative h-64 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
+                  <img
+                    src={story.image}
+                    alt={story.title}
+                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute top-4 right-4 z-20 flex gap-2">
+                    {story.isShared && (
+                      <Badge className="bg-blue-500 text-white hover:bg-blue-600">
+                        <Users className="h-3 w-3 mr-1" />
+                        Shared
+                      </Badge>
+                    )}
+                    <Badge 
+                      className="bg-white/90 text-purple-600 hover:bg-white"
+                    >
+                      {story.category}
+                    </Badge>
+                  </div>
                 </div>
-              </div>
-              
-              <h3 className="text-2xl font-semibold mb-3 group-hover:text-purple-600 transition-colors">
-                {stories[0].title}
-              </h3>
-              
-              <p className="text-gray-600 mb-4 line-clamp-2">
-                {stories[0].description}
-              </p>
-              
-              <div className="flex items-center text-purple-600">
-                <BookOpen className="h-4 w-4" />
-              </div>
-            </CardContent>
-          </Card>
+                
+                <CardContent className="relative p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm text-gray-500">By {story.author}</span>
+                    <div className="flex items-center space-x-1">
+                      <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                      <span className="text-sm font-medium">{story.rating}</span>
+                    </div>
+                  </div>
+                  
+                  <h3 className="text-2xl font-semibold mb-3 group-hover:text-purple-600 transition-colors">
+                    {story.title}
+                  </h3>
+                  
+                  <p className="text-gray-600 mb-4 line-clamp-2">
+                    {story.description}
+                  </p>
+                  
+                  <div className="flex items-center text-purple-600">
+                    <BookOpen className="h-4 w-4" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
           {/* Lamp Feature */}
           <div className="w-full h-[600px]">
