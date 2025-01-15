@@ -257,6 +257,9 @@ export const PlotDevelopmentView = () => {
     content: string;
     index: number;
   } | null>(null);
+  const [isAddActDialogOpen, setIsAddActDialogOpen] = useState(false);
+  const [newActPosition, setNewActPosition] = useState<number>(0);
+  const [newActTitle, setNewActTitle] = useState("");
   const [isCustomTemplateDialogOpen, setIsCustomTemplateDialogOpen] = useState(false);
   const [customPrompt, setCustomPrompt] = useState("");
   const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false);
@@ -525,6 +528,57 @@ export const PlotDevelopmentView = () => {
     }
   };
 
+  const handleAddNewAct = () => {
+    if (!newActTitle.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a title for the new act",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newPlotData = [...plotData];
+    const newAct = {
+      title: newActTitle,
+      content: (
+        <div>
+          <div className="flex justify-between items-start mb-4">
+            <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal">
+              {newActTitle}
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-2 text-purple-500 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                onClick={() => setEditingPlotPoint({
+                  title: newActTitle,
+                  content: "",
+                  index: newActPosition
+                })}
+              >
+                <FileText className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      ),
+      notes: ""
+    };
+
+    newPlotData.splice(newActPosition, 0, newAct);
+    setPlotData(newPlotData);
+    setIsAddActDialogOpen(false);
+    setNewActTitle("");
+    setNewActPosition(0);
+
+    toast({
+      title: "Success",
+      description: "New act added successfully",
+    });
+  };
+
   const applyTemplate = (template: PlotTemplate) => {
     setSelectedTemplate(template);
     setTimelineName(template.name);
@@ -647,7 +701,7 @@ export const PlotDevelopmentView = () => {
 
           <Card className="p-6 bg-white dark:bg-gray-900 shadow-lg hover:shadow-xl transition-shadow duration-200">
             <Button 
-              onClick={() => {}}
+              onClick={() => setIsAddActDialogOpen(true)}
               className="w-full h-full bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2"
             >
               <Plus className="h-5 w-5" />
@@ -812,6 +866,56 @@ export const PlotDevelopmentView = () => {
           onSave={handleUpdatePlotPoint}
         />
       )}
+
+      <Dialog open={isAddActDialogOpen} onOpenChange={setIsAddActDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Act</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="actTitle" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Act Title
+              </label>
+              <Input
+                id="actTitle"
+                value={newActTitle}
+                onChange={(e) => setNewActTitle(e.target.value)}
+                placeholder="Enter act title"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <label htmlFor="actPosition" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Position
+              </label>
+              <Select
+                value={newActPosition.toString()}
+                onValueChange={(value) => setNewActPosition(parseInt(value))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select position" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: plotData.length + 1 }, (_, i) => (
+                    <SelectItem key={i} value={i.toString()}>
+                      {i === 0 ? "At the beginning" : i === plotData.length ? "At the end" : `After act ${i}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddActDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddNewAct}>
+              Add Act
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isCustomTemplateDialogOpen} onOpenChange={setIsCustomTemplateDialogOpen}>
         <DialogContent>
