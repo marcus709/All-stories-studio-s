@@ -412,7 +412,7 @@ export const PlotDevelopmentView = () => {
         console.error("Error fetching saved notes:", fetchError);
       }
 
-      const savedNotes = (savedInstance?.notes || []) as SavedNote[];
+      const savedNotes = (savedInstance?.notes as unknown as SavedNote[]) || [];
 
       const newPlotData = template.plotPoints.map((point, index) => {
         const savedNote = savedNotes.find(note => note.plotPoint === point);
@@ -574,7 +574,7 @@ export const PlotDevelopmentView = () => {
     if (!selectedStory?.id || !savedTimelines?.[0]?.id) return;
 
     try {
-      const currentNotes = (savedTimelines[0].notes || []) as SavedNote[];
+      const currentNotes = (savedTimelines[0].notes as unknown as SavedNote[]) || [];
       const updatedNotes = [...currentNotes];
       const existingNoteIndex = updatedNotes.findIndex(note => note.plotPoint === title);
 
@@ -598,7 +598,7 @@ export const PlotDevelopmentView = () => {
 
       const { error } = await supabase
         .from('plot_template_instances')
-        .update({ notes: updatedNotes })
+        .update({ notes: updatedNotes as unknown as Json })
         .eq('id', savedTimelines[0].id);
 
       if (error) throw error;
