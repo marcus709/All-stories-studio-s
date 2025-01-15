@@ -63,8 +63,8 @@ function App() {
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       console.log('Auth state changed:', _event);
       
+      // Only clear cache and storage on explicit sign out
       if (_event === 'SIGNED_OUT') {
-        // Clear any local storage data
         queryClient.clear();
         localStorage.clear();
       }
