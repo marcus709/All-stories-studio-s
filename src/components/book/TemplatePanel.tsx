@@ -66,15 +66,29 @@ export const TemplatePanel = ({
     const selectedConfig = aiConfigurations.find(config => config.id === configId);
     if (!selectedConfig || !selectedTemplate) return;
 
+    // Helper function to validate tone
+    const validateTone = (tone: string): Template['aiConfig']['tone'] => {
+      const validTones = ['formal', 'casual', 'professional', 'creative'] as const;
+      return validTones.includes(tone as any) ? tone as Template['aiConfig']['tone'] : 'professional';
+    };
+
+    // Helper function to validate style
+    const validateStyle = (style: string): Template['aiConfig']['style'] => {
+      const validStyles = ['descriptive', 'concise', 'technical', 'narrative'] as const;
+      return validStyles.includes(style as any) ? style as Template['aiConfig']['style'] : 'descriptive';
+    };
+
     const updatedTemplate = {
       ...selectedTemplate,
       aiConfig: {
-        tone: selectedConfig.tone,
-        style: selectedConfig.response_style,
-        focusAreas: selectedConfig.focus_area.split(','),
-        customInstructions: selectedConfig.custom_prompt
+        ...selectedTemplate.aiConfig,
+        tone: validateTone(selectedConfig.tone),
+        style: validateStyle(selectedConfig.response_style),
+        focusAreas: selectedConfig.focus_area.split(',') as Template['aiConfig']['focusAreas'],
+        customInstructions: selectedConfig.custom_prompt || ''
       }
     };
+    
     onTemplateSelect(updatedTemplate);
 
     toast({
