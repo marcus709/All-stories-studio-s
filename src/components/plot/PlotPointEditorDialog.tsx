@@ -1,43 +1,38 @@
 import { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { RichTextEditor } from "@/components/editor/RichTextEditor";
 import debounce from "lodash/debounce";
 
 interface PlotPointEditorDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
-  content: string;
-  storyId: string;
+  documentId: string;
   timelineId: string;
-  onSave: (content: string) => void;
+  storyId: string;
+  initialContent?: string;
 }
 
 export const PlotPointEditorDialog = ({
   isOpen,
   onClose,
-  title,
-  content,
-  storyId,
+  documentId,
   timelineId,
-  onSave,
+  storyId,
+  initialContent = "",
 }: PlotPointEditorDialogProps) => {
-  const [editedContent, setEditedContent] = useState(content);
-  const [documentId, setDocumentId] = useState<string | null>(null);
+  const [content, setContent] = useState(initialContent);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Auto-save debounced function
+  useEffect(() => {
+    setContent(initialContent);
+  }, [initialContent]);
+
   const debouncedSave = debounce(async (content: string, docId: string) => {
     try {
       // First update the document
@@ -69,12 +64,39 @@ export const PlotPointEditorDialog = ({
 
       if (sortError) throw sortError;
 
-      // Update document with sorted points
+      // Format the content in a more structured way
+      const formattedContent = `
+<div class="plot-points-container">
+  <div class="main-plot">
+    <h2 class="text-xl font-bold mb-4 text-purple-700">Main Plot Points</h2>
+    <div class="space-y-4">
+      ${sortedPoints.mainPlotPoints.map((point: any, index: number) => `
+        <div class="bg-white p-4 rounded-lg shadow-sm border border-purple-100 hover:border-purple-300 transition-colors">
+          <span class="text-sm font-medium text-purple-600">#${index + 1}</span>
+          <div class="mt-2">${point.content}</div>
+        </div>
+      `).join('')}
+    </div>
+  </div>
+  
+  <div class="sub-plots mt-8">
+    <h2 class="text-xl font-bold mb-4 text-indigo-700">Sub Plots</h2>
+    <div class="space-y-4">
+      ${sortedPoints.subPlotPoints.map((point: any, index: number) => `
+        <div class="bg-white p-4 rounded-lg shadow-sm border border-indigo-100 hover:border-indigo-300 transition-colors">
+          <span class="text-sm font-medium text-indigo-600">Subplot ${index + 1}</span>
+          <div class="mt-2">${point.content}</div>
+        </div>
+      `).join('')}
+    </div>
+  </div>
+</div>
+      `.trim();
+
+      // Update document with formatted content
       const { error: finalUpdateError } = await supabase
         .from("documents")
-        .update({ 
-          content: JSON.stringify(sortedPoints, null, 2)
-        })
+        .update({ content: formattedContent })
         .eq("id", docId);
 
       if (finalUpdateError) throw finalUpdateError;
@@ -82,108 +104,45 @@ export const PlotPointEditorDialog = ({
       // Invalidate queries to refresh the UI
       queryClient.invalidateQueries({ queryKey: ["documents", storyId] });
       
+      toast({
+        title: "Success",
+        description: "Plot points saved and organized",
+      });
     } catch (error) {
-      console.error("Error auto-saving:", error);
+      console.error("Error saving document:", error);
       toast({
         title: "Error",
-        description: "Failed to auto-save content",
+        description: "Failed to save document",
         variant: "destructive",
       });
     }
   }, 1000);
 
-  useEffect(() => {
-    const fetchOrCreateDocument = async () => {
-      try {
-        // Check if document exists
-        const { data: existingDoc, error: fetchError } = await supabase
-          .from("timeline_documents")
-          .select("document_id")
-          .eq("timeline_id", timelineId)
-          .maybeSingle();
-
-        if (fetchError) throw fetchError;
-
-        if (existingDoc) {
-          setDocumentId(existingDoc.document_id);
-          return;
-        }
-
-        // Create new document if none exists
-        const { data: newDoc, error: docError } = await supabase
-          .from("documents")
-          .insert({
-            story_id: storyId,
-            title: `Timeline Notes - ${title}`,
-            content: content,
-            user_id: (await supabase.auth.getUser()).data.user?.id,
-          })
-          .select()
-          .single();
-
-        if (docError) throw docError;
-
-        // Link document to timeline
-        const { error: linkError } = await supabase
-          .from("timeline_documents")
-          .insert({
-            timeline_id: timelineId,
-            document_id: newDoc.id,
-          });
-
-        if (linkError) throw linkError;
-
-        setDocumentId(newDoc.id);
-      } catch (error) {
-        console.error("Error managing document:", error);
-        toast({
-          title: "Error",
-          description: "Failed to manage timeline document",
-          variant: "destructive",
-        });
-      }
-    };
-
-    if (isOpen && timelineId) {
-      fetchOrCreateDocument();
-    }
-  }, [isOpen, timelineId, storyId, title, content, toast]);
-
-  // Trigger auto-save when content changes
-  useEffect(() => {
-    if (documentId && editedContent !== content) {
-      debouncedSave(editedContent, documentId);
-    }
-  }, [editedContent, documentId, content]);
-
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setEditedContent(e.target.value);
-  };
-
-  const handleClose = () => {
-    onSave(editedContent);
-    onClose();
+  const handleContentChange = (newContent: string) => {
+    setContent(newContent);
+    debouncedSave(newContent, documentId);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl h-[80vh]">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle>Edit Plot Point</DialogTitle>
         </DialogHeader>
-        <div className="py-4">
-          <Textarea
-            value={editedContent}
-            onChange={handleContentChange}
-            className="min-h-[300px]"
-            placeholder="Write your plot point details here..."
-          />
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={handleClose}>
+        <ScrollArea className="flex-1 px-4">
+          <div className="prose max-w-none">
+            <RichTextEditor
+              content={content}
+              onChange={handleContentChange}
+              className="min-h-[60vh]"
+            />
+          </div>
+        </ScrollArea>
+        <div className="flex justify-end gap-2 pt-4">
+          <Button variant="outline" onClick={onClose}>
             Close
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
