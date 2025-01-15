@@ -59,6 +59,11 @@ interface PlotEvent {
   description: string;
   stage: string;
   order_index: number;
+  story_id: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+  document_section_id: string;
 }
 
 export const PlotDevelopmentView = () => {
@@ -365,9 +370,9 @@ export const PlotDevelopmentView = () => {
         <Card className="p-6">
           <h2 className="text-xl font-semibold mb-4">Plot Events</h2>
           <Timeline
-            items={plotEvents}
+            data={plotEvents}
             onDragEnd={handleDragEnd}
-            renderItem={(event) => (
+            renderItem={(event: PlotEvent) => (
               <div className="flex items-center justify-between p-4 bg-white rounded-lg shadow">
                 <div>
                   <h3 className="font-medium">{event.title}</h3>
@@ -435,8 +440,18 @@ export const PlotDevelopmentView = () => {
           setIsEditorOpen(false);
           setSelectedEvent(null);
         }}
-        event={selectedEvent}
-        onSave={handleEventUpdate}
+        title={selectedEvent?.title || ""}
+        content={selectedEvent?.description || ""}
+        storyId={selectedStory?.id || ""}
+        timelineId={selectedEvent?.id || ""}
+        onSave={async (content: string) => {
+          if (selectedEvent) {
+            await handleEventUpdate({
+              ...selectedEvent,
+              description: content
+            });
+          }
+        }}
       />
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
