@@ -105,7 +105,7 @@ export const DocumentNavigation = ({
         </div>
         
         <div className="flex-1 overflow-hidden relative" ref={navigationRef}>
-          <div ref={minimapRef} className="absolute inset-0 p-4">
+          <div ref={minimapRef} className="p-4">
             {lines.map((line, index) => {
               const width = (line.length / maxLineLength) * 100;
               return (
