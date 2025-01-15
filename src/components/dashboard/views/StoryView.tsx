@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { BookOpen, LineChart, Wand, Settings, MessageSquare } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel, SelectSeparator } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useStory } from "@/contexts/StoryContext";
@@ -116,6 +116,10 @@ export const StoryView = () => {
       setIsConfigDialogOpen(true);
     } else {
       setSelectedConfig(value);
+      toast({
+        title: "AI Configuration Selected",
+        description: "The selected configuration will be used for generating suggestions.",
+      });
     }
   };
 
@@ -187,6 +191,33 @@ export const StoryView = () => {
             )}
           </div>
         </div>
+      </div>
+
+      <div className="flex items-center gap-4 mb-4">
+        <Select value={selectedConfig} onValueChange={handleSelectChange}>
+          <SelectTrigger className="w-[250px]">
+            <SelectValue placeholder="Select AI Configuration" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>AI Configurations</SelectLabel>
+              {aiConfigurations.map((config) => (
+                <SelectItem key={config.id} value={config.id}>
+                  {config.name}
+                </SelectItem>
+              ))}
+              <SelectItem value="new">+ Create New Configuration</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+        <Button
+          onClick={handleGetSuggestions}
+          disabled={isLoading || !selectedConfig}
+          className="gap-2"
+        >
+          <Wand className="h-4 w-4" />
+          Get AI Suggestions
+        </Button>
       </div>
 
       <div className={`bg-white rounded-xl shadow-sm p-8 mt-6 relative ${!selectedStory ? "opacity-50" : ""}`}>
