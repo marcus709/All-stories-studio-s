@@ -1283,6 +1283,7 @@ export type Database = {
           id: string
           last_used: string | null
           name: string
+          notes: Json | null
           story_id: string
           template_name: string
           updated_at: string | null
@@ -1293,6 +1294,7 @@ export type Database = {
           id?: string
           last_used?: string | null
           name: string
+          notes?: Json | null
           story_id: string
           template_name: string
           updated_at?: string | null
@@ -1303,6 +1305,7 @@ export type Database = {
           id?: string
           last_used?: string | null
           name?: string
+          notes?: Json | null
           story_id?: string
           template_name?: string
           updated_at?: string | null

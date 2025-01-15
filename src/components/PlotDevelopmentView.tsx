@@ -551,13 +551,15 @@ export const PlotDevelopmentView = () => {
 
       // Save to Supabase
       if (selectedStory?.id && timelineName) {
+        const notesData = newPlotData.map(point => ({
+          title: point.title,
+          content: point.notes || ''
+        }));
+
         const { error } = await supabase
           .from('plot_template_instances')
           .update({ 
-            notes: newPlotData.map(point => ({
-              title: point.title,
-              content: point.notes || ''
-            }))
+            notes: notesData
           })
           .eq('story_id', selectedStory.id)
           .eq('name', timelineName);
