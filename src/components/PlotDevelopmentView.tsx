@@ -241,9 +241,9 @@ export const PlotDevelopmentView = () => {
   const { toast } = useToast();
   const { selectedStory } = useStory();
   const queryClient = useQueryClient();
-  const session = useSession(); // Add this line
+  const session = useSession();
 
-  const { data: savedTimelines } = useQuery({
+  const { data: savedTimelines, refetch: refetchTimelines } = useQuery({
     queryKey: ["plot-timelines", selectedStory?.id],
     queryFn: async () => {
       if (!selectedStory?.id) return [];
@@ -268,6 +268,15 @@ export const PlotDevelopmentView = () => {
     enabled: !!selectedStory?.id,
   });
 
+  const resetAllStates = () => {
+    setPlotData([]);
+    setSelectedTemplate(null);
+    setTimelineName("");
+    setEditingPlotPoint(null);
+    setIsTemplateDialogOpen(false);
+    setDeleteTimelineId(null);
+  };
+
   const deleteTimelineMutation = useMutation({
     mutationFn: async (timelineId: string) => {
       if (!timelineId) {
@@ -280,43 +289,44 @@ export const PlotDevelopmentView = () => {
         .eq("id", timelineId);
 
       if (error) throw error;
+      return timelineId;
     },
-    onSuccess: () => {
-      // First invalidate the query to refresh data
-      queryClient.invalidateQueries({ 
-        queryKey: ["plot-timelines", selectedStory?.id],
-        exact: true 
-      });
-
-      // Then reset UI state
-      setDeleteTimelineId(null);
+    onMutate: async (timelineId) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["plot-timelines", selectedStory?.id] });
       
-      // Finally reset all other states
-      setPlotData([]);
-      setSelectedTemplate(null);
-      setTimelineName("");
-      setEditingPlotPoint(null);
-      setIsTemplateDialogOpen(false);
+      // Optimistically remove the timeline from the UI
+      const previousTimelines = queryClient.getQueryData(["plot-timelines", selectedStory?.id]);
+      queryClient.setQueryData(
+        ["plot-timelines", selectedStory?.id],
+        (old: any[]) => old?.filter(t => t.id !== timelineId) || []
+      );
       
-      toast({
-        title: "Success",
-        description: "Timeline deleted successfully",
-      });
+      return { previousTimelines };
     },
-    onError: (error) => {
+    onError: (error, variables, context) => {
       console.error("Error deleting timeline:", error);
-      // Reset delete state on error
-      setDeleteTimelineId(null);
+      // Revert to the previous state if there was an error
+      if (context?.previousTimelines) {
+        queryClient.setQueryData(["plot-timelines", selectedStory?.id], context.previousTimelines);
+      }
       toast({
         title: "Error",
         description: "Failed to delete timeline",
         variant: "destructive",
       });
     },
-    onSettled: () => {
-      // Ensure delete modal is closed regardless of outcome
-      setDeleteTimelineId(null);
-    }
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Timeline deleted successfully",
+      });
+    },
+    onSettled: async () => {
+      resetAllStates();
+      // Refetch the timelines to ensure we have the latest data
+      await refetchTimelines();
+    },
   });
 
   const loadSavedTimeline = async (templateName: string) => {
@@ -704,7 +714,7 @@ export const PlotDevelopmentView = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setDeleteTimelineId(null)}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-500 hover:bg-red-600"
               onClick={() => {
