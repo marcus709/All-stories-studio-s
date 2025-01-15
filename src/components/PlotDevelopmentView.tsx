@@ -543,23 +543,30 @@ export const PlotDevelopmentView = () => {
             )}
           </div>
         ),
-        notes: content // Store notes separately for later access
+        notes: content
       };
 
       setPlotData(newPlotData);
       setEditingPlotPoint(null);
 
-      // Save to Supabase
+      // Save to Supabase with a more natural structure
       if (selectedStory?.id && timelineName) {
-        const notesData = newPlotData.map(point => ({
-          title: point.title,
-          content: point.notes || ''
+        const formattedNotes = newPlotData.map(point => ({
+          plotPoint: point.title,
+          notes: point.notes ? {
+            content: point.notes,
+            lastEdited: new Date().toISOString(),
+            formattedContent: point.notes.split('\n').filter(line => line.trim() !== '').map(line => ({
+              text: line.trim(),
+              type: line.startsWith('#') ? 'heading' : 'paragraph'
+            }))
+          } : null
         }));
 
         const { error } = await supabase
           .from('plot_template_instances')
           .update({ 
-            notes: notesData
+            notes: formattedNotes
           })
           .eq('story_id', selectedStory.id)
           .eq('name', timelineName);
