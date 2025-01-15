@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
+import { MessageSquare, Heart, User } from "lucide-react";
 
 interface UserProfileViewProps {
   userId?: string;
@@ -11,6 +12,7 @@ interface UserProfileViewProps {
     username: string;
     avatar_url: string;
     bio: string;
+    background_url?: string;
     id: string;
   };
   onClose?: () => void;
@@ -23,12 +25,17 @@ export function UserProfileView({ userId, user, onClose }: UserProfileViewProps)
     username: string;
     avatar_url: string;
     bio: string;
+    background_url?: string;
   } | null>(null);
-  const [loadingState, setLoadingState] = React.useState<"planned" | "exact" | "estimated">("planned");
+  const [stats, setStats] = React.useState({
+    posts: 0,
+    likes: 0,
+  });
 
   React.useEffect(() => {
     if (user) {
       setProfile(user);
+      fetchStats(user.id);
     } else if (userId) {
       getProfile();
     }
@@ -36,10 +43,9 @@ export function UserProfileView({ userId, user, onClose }: UserProfileViewProps)
 
   async function getProfile() {
     try {
-      setLoadingState("exact");
       const { data, error } = await supabase
         .from("profiles")
-        .select("username, avatar_url, bio")
+        .select("username, avatar_url, bio, background_url")
         .eq("id", userId)
         .single();
 
@@ -48,6 +54,7 @@ export function UserProfileView({ userId, user, onClose }: UserProfileViewProps)
       }
 
       setProfile(data);
+      if (userId) fetchStats(userId);
     } catch (error) {
       console.error("Error loading profile:", error);
       toast({
@@ -55,8 +62,29 @@ export function UserProfileView({ userId, user, onClose }: UserProfileViewProps)
         description: "Failed to load profile. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setLoadingState("planned");
+    }
+  }
+
+  async function fetchStats(profileId: string) {
+    try {
+      // Fetch posts count
+      const { count: postsCount } = await supabase
+        .from('posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', profileId);
+
+      // Fetch likes count
+      const { count: likesCount } = await supabase
+        .from('post_likes')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', profileId);
+
+      setStats({
+        posts: postsCount || 0,
+        likes: likesCount || 0,
+      });
+    } catch (error) {
+      console.error('Error fetching stats:', error);
     }
   }
 
@@ -69,24 +97,56 @@ export function UserProfileView({ userId, user, onClose }: UserProfileViewProps)
   }
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex items-center space-x-4">
-        <Avatar className="h-16 w-16">
+    <div className="flex flex-col items-center w-full max-w-2xl mx-auto">
+      {/* Background Image */}
+      <div className="relative w-full h-48 rounded-t-lg overflow-hidden">
+        {profile.background_url ? (
+          <img
+            src={profile.background_url}
+            alt="Profile background"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100" />
+        )}
+      </div>
+
+      {/* Profile Info */}
+      <div className="relative -mt-16 flex flex-col items-center px-4 w-full">
+        <Avatar className="h-32 w-32 border-4 border-white shadow-lg">
           <AvatarImage src={profile.avatar_url} alt={profile.username} />
           <AvatarFallback>{profile.username[0]?.toUpperCase()}</AvatarFallback>
         </Avatar>
-        <div>
-          <h2 className="text-xl font-bold">{profile.username}</h2>
-          <p className="text-sm text-gray-500">{profile.bio}</p>
+
+        <h2 className="text-2xl font-bold mt-4">{profile.username}</h2>
+        <p className="text-gray-600 text-center mt-2 max-w-md">{profile.bio}</p>
+
+        {/* Stats Bar */}
+        <div className="flex gap-8 mt-6 p-4 bg-white rounded-lg shadow-sm border w-full max-w-md">
+          <div className="flex items-center gap-2 flex-1 justify-center">
+            <MessageSquare className="w-5 h-5 text-gray-500" />
+            <div className="text-center">
+              <p className="font-semibold">{stats.posts}</p>
+              <p className="text-sm text-gray-500">Posts</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 flex-1 justify-center">
+            <Heart className="w-5 h-5 text-gray-500" />
+            <div className="text-center">
+              <p className="font-semibold">{stats.likes}</p>
+              <p className="text-sm text-gray-500">Likes</p>
+            </div>
+          </div>
         </div>
+
+        {onClose && (
+          <div className="mt-6">
+            <Button onClick={onClose} variant="outline">
+              Close
+            </Button>
+          </div>
+        )}
       </div>
-      {onClose && (
-        <div className="flex justify-end">
-          <Button onClick={onClose} variant="outline">
-            Close
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
