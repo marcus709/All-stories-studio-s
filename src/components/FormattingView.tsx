@@ -215,6 +215,8 @@ export const FormattingView = () => {
             <AIFormattingDialog 
               onConfigSubmit={handleFormatConfig}
               disabled={!selectedDocument}
+              onConfigSelect={handleConfigSelect}
+              selectedConfig={selectedConfig}
             />
           )}
           <div className="relative">
