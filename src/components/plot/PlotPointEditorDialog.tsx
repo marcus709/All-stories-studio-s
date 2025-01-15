@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import debounce from "lodash/debounce";
 
 interface PlotPointEditorDialogProps {
   isOpen: boolean;
@@ -31,13 +33,61 @@ export const PlotPointEditorDialog = ({
   onSave,
 }: PlotPointEditorDialogProps) => {
   const [editedContent, setEditedContent] = useState(content);
-  const { toast } = useToast();
   const [documentId, setDocumentId] = useState<string | null>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Auto-save debounced function
+  const debouncedSave = debounce(async (content: string, docId: string) => {
+    try {
+      // First update the document
+      await supabase
+        .from("documents")
+        .update({ content })
+        .eq("id", docId);
+
+      // Then get all plot points for sorting
+      const { data: plotPoints } = await supabase
+        .from("timeline_documents")
+        .select("*")
+        .eq("timeline_id", timelineId);
+
+      // Call the sorting function
+      const { data: sortedPoints, error: sortError } = await supabase.functions
+        .invoke("sort-plot-points", {
+          body: { plotPoints },
+        });
+
+      if (sortError) throw sortError;
+
+      // Update document with sorted points
+      await supabase
+        .from("documents")
+        .update({ 
+          content: JSON.stringify({
+            mainPlotPoints: sortedPoints.mainPlotPoints,
+            subPlotPoints: sortedPoints.subPlotPoints
+          }, null, 2)
+        })
+        .eq("id", docId);
+
+      // Invalidate queries to refresh the UI
+      queryClient.invalidateQueries({ queryKey: ["documents", storyId] });
+      
+    } catch (error) {
+      console.error("Error auto-saving:", error);
+      toast({
+        title: "Error",
+        description: "Failed to auto-save content",
+        variant: "destructive",
+      });
+    }
+  }, 1000);
 
   useEffect(() => {
     const fetchOrCreateDocument = async () => {
       try {
-        // Check if document already exists for this timeline
+        // Check if document exists
         const { data: existingDoc, error: fetchError } = await supabase
           .from("timeline_documents")
           .select("document_id")
@@ -51,7 +101,7 @@ export const PlotPointEditorDialog = ({
           return;
         }
 
-        // Create new document
+        // Create new document if none exists
         const { data: newDoc, error: docError } = await supabase
           .from("documents")
           .insert({
@@ -91,34 +141,24 @@ export const PlotPointEditorDialog = ({
     }
   }, [isOpen, timelineId, storyId, title, content, toast]);
 
-  const handleSave = async () => {
-    try {
-      if (documentId) {
-        await supabase
-          .from("documents")
-          .update({ content: editedContent })
-          .eq("id", documentId);
-      }
-      
-      onSave(editedContent);
-      onClose();
-      
-      toast({
-        title: "Success",
-        description: "Content saved successfully",
-      });
-    } catch (error) {
-      console.error("Error saving content:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save content",
-        variant: "destructive",
-      });
+  // Trigger auto-save when content changes
+  useEffect(() => {
+    if (documentId && editedContent !== content) {
+      debouncedSave(editedContent, documentId);
     }
+  }, [editedContent, documentId, content]);
+
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setEditedContent(e.target.value);
+  };
+
+  const handleClose = () => {
+    onSave(editedContent);
+    onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
@@ -126,16 +166,15 @@ export const PlotPointEditorDialog = ({
         <div className="py-4">
           <Textarea
             value={editedContent}
-            onChange={(e) => setEditedContent(e.target.value)}
+            onChange={handleContentChange}
             className="min-h-[300px]"
             placeholder="Write your plot point details here..."
           />
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancel
+          <Button variant="outline" onClick={handleClose}>
+            Close
           </Button>
-          <Button onClick={handleSave}>Save</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
