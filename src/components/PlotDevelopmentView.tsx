@@ -506,29 +506,35 @@ export const PlotDevelopmentView = () => {
     }
   }, [selectedStory?.id, selectedTemplate, timelineName, session?.user?.id, toast, resetAllStates, refetchTimelines]);
 
-  const handleUpdatePlotPoint = useCallback(async (updatedPoint: { title: string; content: string; index: number }) => {
+  const handleUpdatePlotPoint = useCallback(async (content: string) => {
+    if (!editingPlotPoint) return;
+    
     try {
       const newPlotData = [...plotData];
-      newPlotData[updatedPoint.index] = {
-        ...newPlotData[updatedPoint.index],
+      newPlotData[editingPlotPoint.index] = {
+        ...newPlotData[editingPlotPoint.index],
         content: (
           <div>
             <div className="flex justify-between items-start mb-4">
               <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal">
-                {updatedPoint.title}
+                {editingPlotPoint.title}
               </p>
               <Button
                 variant="ghost"
                 size="sm"
                 className="ml-2"
-                onClick={() => setEditingPlotPoint(updatedPoint)}
+                onClick={() => setEditingPlotPoint({
+                  title: editingPlotPoint.title,
+                  content: content,
+                  index: editingPlotPoint.index
+                })}
               >
                 <Edit className="h-4 w-4" />
               </Button>
             </div>
             <div className="mb-8">
               <div className="text-neutral-700 dark:text-neutral-300 text-xs md:text-sm whitespace-pre-wrap">
-                {updatedPoint.content}
+                {content}
               </div>
             </div>
           </div>
@@ -550,7 +556,7 @@ export const PlotDevelopmentView = () => {
         variant: "destructive",
       });
     }
-  }, [plotData, setPlotData, toast]);
+  }, [plotData, editingPlotPoint, setPlotData, toast]);
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
