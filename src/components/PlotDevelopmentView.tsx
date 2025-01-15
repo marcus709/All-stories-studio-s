@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Timeline } from "@/components/ui/timeline";
 import { Button } from "@/components/ui/button";
@@ -268,14 +268,14 @@ export const PlotDevelopmentView = () => {
     enabled: !!selectedStory?.id,
   });
 
-  const resetAllStates = () => {
+  const resetAllStates = useCallback(() => {
     setPlotData([]);
     setSelectedTemplate(null);
     setTimelineName("");
     setEditingPlotPoint(null);
     setIsTemplateDialogOpen(false);
     setDeleteTimelineId(null);
-  };
+  }, []);
 
   const deleteTimelineMutation = useMutation({
     mutationFn: async (timelineId: string) => {
@@ -292,21 +292,22 @@ export const PlotDevelopmentView = () => {
       return timelineId;
     },
     onMutate: async (timelineId) => {
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: ["plot-timelines", selectedStory?.id] });
       
-      // Optimistically remove the timeline from the UI
       const previousTimelines = queryClient.getQueryData(["plot-timelines", selectedStory?.id]);
-      queryClient.setQueryData(
-        ["plot-timelines", selectedStory?.id],
-        (old: any[]) => old?.filter(t => t.id !== timelineId) || []
-      );
+      
+      // Only update the cache if we have data
+      if (previousTimelines) {
+        queryClient.setQueryData(
+          ["plot-timelines", selectedStory?.id],
+          (old: any[] | undefined) => old?.filter(t => t.id !== timelineId) || []
+        );
+      }
       
       return { previousTimelines };
     },
     onError: (error, variables, context) => {
       console.error("Error deleting timeline:", error);
-      // Revert to the previous state if there was an error
       if (context?.previousTimelines) {
         queryClient.setQueryData(["plot-timelines", selectedStory?.id], context.previousTimelines);
       }
@@ -322,14 +323,23 @@ export const PlotDevelopmentView = () => {
         description: "Timeline deleted successfully",
       });
     },
-    onSettled: async () => {
-      resetAllStates();
-      // Refetch the timelines to ensure we have the latest data
-      await refetchTimelines();
+    onSettled: () => {
+      // First close the modal
+      setDeleteTimelineId(null);
+      
+      // Then reset states in the next tick to avoid React update conflicts
+      setTimeout(() => {
+        resetAllStates();
+        // Finally refetch in the background
+        queryClient.invalidateQueries({ 
+          queryKey: ["plot-timelines", selectedStory?.id],
+          exact: true
+        });
+      }, 0);
     },
   });
 
-  const loadSavedTimeline = async (templateName: string) => {
+  const loadSavedTimeline = useCallback(async (templateName: string) => {
     if (!templateName) {
       console.error("No template name provided");
       return;
@@ -381,7 +391,6 @@ export const PlotDevelopmentView = () => {
 
       setPlotData(newPlotData);
 
-      // Update last_used timestamp
       if (selectedStory?.id && templateName) {
         const { error } = await supabase
           .from("plot_template_instances")
@@ -406,157 +415,7 @@ export const PlotDevelopmentView = () => {
         variant: "destructive",
       });
     }
-  };
-
-  const applyTemplate = async (template) => {
-    try {
-      if (!selectedStory?.id) {
-        toast({
-          title: "Error",
-          description: "Please select a story first",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setSelectedTemplate(template);
-      setTimelineName(`${template.name} - ${new Date().toLocaleDateString()}`);
-      setIsTemplateDialogOpen(true);
-
-      const newPlotData = template.plotPoints.map((point, index) => ({
-        title: point,
-        content: (
-          <div>
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal">
-                {point}
-              </p>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="ml-2"
-                onClick={() => setEditingPlotPoint({
-                  title: point,
-                  content: "",
-                  index
-                })}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="mb-8">
-              {template.subEvents && template.subEvents.map((subEvent, subIndex) => (
-                <div key={subIndex} className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                  ✅ {subEvent}
-                </div>
-              ))}
-            </div>
-          </div>
-        ),
-      }));
-      setPlotData(newPlotData);
-    } catch (error) {
-      console.error("Error applying template:", error);
-      toast({
-        title: "Error",
-        description: "Failed to apply template",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleSaveTimeline = async () => {
-    try {
-      if (!selectedStory?.id || !selectedTemplate || !timelineName.trim()) {
-        toast({
-          title: "Error",
-          description: "Missing required information",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const { error } = await supabase
-        .from("plot_template_instances")
-        .insert({
-          user_id: session?.user?.id,
-          story_id: selectedStory.id,
-          name: timelineName,
-          template_name: selectedTemplate.name,
-        });
-
-      if (error) throw error;
-
-      queryClient.invalidateQueries({ queryKey: ["plot-timelines"] });
-      setIsTemplateDialogOpen(false);
-      setTimelineName("");
-
-      toast({
-        title: "Success",
-        description: "Timeline saved successfully",
-      });
-    } catch (error) {
-      console.error("Error saving timeline:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save timeline",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleUpdatePlotPoint = async (updatedPoint) => {
-    try {
-      if (!editingPlotPoint) return;
-
-      const newPlotData = [...plotData];
-      newPlotData[editingPlotPoint.index] = {
-        ...newPlotData[editingPlotPoint.index],
-        content: (
-          <div>
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal">
-                {updatedPoint.title}
-              </p>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="ml-2"
-                onClick={() => setEditingPlotPoint({
-                  ...updatedPoint,
-                  index: editingPlotPoint.index
-                })}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="mb-8">
-              {selectedTemplate?.subEvents && selectedTemplate.subEvents.map((subEvent, subIndex) => (
-                <div key={subIndex} className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                  ✅ {subEvent}
-                </div>
-              ))}
-            </div>
-          </div>
-        ),
-      };
-
-      setPlotData(newPlotData);
-      setEditingPlotPoint(null);
-
-      toast({
-        title: "Success",
-        description: "Plot point updated successfully",
-      });
-    } catch (error) {
-      console.error("Error updating plot point:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update plot point",
-        variant: "destructive",
-      });
-    }
-  };
+  }, [selectedStory?.id, toast]);
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
