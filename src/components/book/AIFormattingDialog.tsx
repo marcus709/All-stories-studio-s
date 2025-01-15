@@ -10,6 +10,8 @@ import { Switch } from "@/components/ui/switch";
 interface AIFormattingDialogProps {
   onConfigSubmit: (config: FormattingConfig) => void;
   disabled?: boolean;
+  onConfigSelect?: (value: string) => void;
+  selectedConfig?: string;
 }
 
 interface FormattingConfig {
@@ -22,7 +24,7 @@ interface FormattingConfig {
   headerFooter: boolean;
 }
 
-export function AIFormattingDialog({ onConfigSubmit, disabled }: AIFormattingDialogProps) {
+export function AIFormattingDialog({ onConfigSubmit, disabled, onConfigSelect, selectedConfig }: AIFormattingDialogProps) {
   const [config, setConfig] = useState<FormattingConfig>({
     style: 'professional',
     format: 'standard',
@@ -58,6 +60,23 @@ export function AIFormattingDialog({ onConfigSubmit, disabled }: AIFormattingDia
         </DialogHeader>
 
         <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label>Configuration</Label>
+            <Select
+              value={selectedConfig}
+              onValueChange={onConfigSelect}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select configuration" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="new">Create New Configuration</SelectItem>
+                <SelectItem value="config1">Configuration 1</SelectItem>
+                <SelectItem value="config2">Configuration 2</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="space-y-2">
             <Label>Style</Label>
             <Select 
