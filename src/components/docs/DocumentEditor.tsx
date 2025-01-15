@@ -60,8 +60,8 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
   };
 
   return (
-    <div className="h-full flex flex-col bg-gray-50">
-      <div className="flex items-center justify-between p-4 bg-white border-b">
+    <div className="h-full flex flex-col bg-white">
+      <div className="flex items-center justify-between p-4 border-b">
         <h2 className="text-lg font-semibold">{document.title}</h2>
         <div className="flex gap-2">
           <Button
@@ -100,22 +100,18 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
           onToggleCollapse={() => setIsNavigationCollapsed(!isNavigationCollapsed)}
         />
         
-        <ScrollArea className={cn(
-          "flex-1 p-8",
-          showInsights ? 'border-r' : '',
-          !isNavigationCollapsed ? 'ml-28' : ''
-        )}>
-          <div className="max-w-[850px] mx-auto">
+        <ScrollArea className="flex-1">
+          <div className="max-w-4xl mx-auto p-8">
             <WYSIWYGEditor
               content={content}
               onChange={handleContentChange}
-              className="min-h-[1100px] bg-white shadow-sm rounded-sm"
+              className="min-h-[calc(100vh-12rem)] bg-white"
             />
           </div>
         </ScrollArea>
 
         {showInsights && (
-          <div className="w-[400px] flex flex-col bg-white border-l">
+          <div className="w-[400px] border-l">
             <DocumentInsights 
               content={content}
               onReplaceWord={() => {}}
