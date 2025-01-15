@@ -8,7 +8,6 @@ import { useToast } from "@/hooks/use-toast";
 import { WYSIWYGEditor } from "@/components/book/WYSIWYGEditor";
 import { DocumentInsights } from "./DocumentInsights";
 import { DocumentNavigation } from "./DocumentNavigation";
-import { cn } from "@/lib/utils";
 
 interface DocumentEditorProps {
   document: {
@@ -25,7 +24,6 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
-  const [isNavigationCollapsed, setIsNavigationCollapsed] = useState(false);
   const { updateDocument } = useDocuments(storyId);
   const { toast } = useToast();
 
@@ -60,66 +58,65 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
   };
 
   return (
-    <div className="h-full flex flex-col bg-white">
-      <div className="flex items-center justify-between p-4 border-b">
-        <h2 className="text-lg font-semibold">{document.title}</h2>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            onClick={() => setShowInsights(!showInsights)}
-          >
-            <Eye className="h-4 w-4" />
-            Insights
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            onClick={() => setIsShareDialogOpen(true)}
-          >
-            <Share className="h-4 w-4" />
-            Share
-          </Button>
-          <Button 
-            size="sm" 
-            onClick={handleSave}
-            disabled={isSaving}
-            className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600"
-          >
-            {isSaving ? "Saving..." : "Save"}
-          </Button>
+    <div className="h-full flex bg-white">
+      <div className="w-72 border-r flex flex-col">
+        <div className="flex items-center justify-between p-4 border-b">
+          <h2 className="text-lg font-semibold">{document.title}</h2>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => setShowInsights(!showInsights)}
+            >
+              <Eye className="h-4 w-4" />
+              Insights
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => setIsShareDialogOpen(true)}
+            >
+              <Share className="h-4 w-4" />
+              Share
+            </Button>
+            <Button 
+              size="sm" 
+              onClick={handleSave}
+              disabled={isSaving}
+              className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600"
+            >
+              {isSaving ? "Saving..." : "Save"}
+            </Button>
+          </div>
         </div>
-      </div>
-
-      <div className="flex-1 flex">
         <DocumentNavigation 
           content={content}
-          isCollapsed={isNavigationCollapsed}
-          onToggleCollapse={() => setIsNavigationCollapsed(!isNavigationCollapsed)}
+          isCollapsed={false}
+          onToggleCollapse={() => {}}
         />
-        
-        <ScrollArea className="flex-1">
-          <div className="max-w-4xl mx-auto p-8">
-            <WYSIWYGEditor
-              content={content}
-              onChange={handleContentChange}
-              className="min-h-[calc(100vh-12rem)] bg-white"
-            />
-          </div>
-        </ScrollArea>
-
-        {showInsights && (
-          <div className="w-[400px] border-l">
-            <DocumentInsights 
-              content={content}
-              onReplaceWord={() => {}}
-              onJumpToLocation={() => {}}
-            />
-          </div>
-        )}
       </div>
+
+      <ScrollArea className="flex-1">
+        <div className="max-w-4xl mx-auto p-8">
+          <WYSIWYGEditor
+            content={content}
+            onChange={handleContentChange}
+            className="min-h-[calc(100vh-12rem)] bg-white"
+          />
+        </div>
+      </ScrollArea>
+
+      {showInsights && (
+        <div className="w-[400px] border-l">
+          <DocumentInsights 
+            content={content}
+            onReplaceWord={() => {}}
+            onJumpToLocation={() => {}}
+          />
+        </div>
+      )}
 
       <ShareDocumentDialog
         document={document}
