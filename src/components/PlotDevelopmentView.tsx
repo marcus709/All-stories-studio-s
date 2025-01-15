@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Timeline } from "@/components/ui/timeline";
 import { Button } from "@/components/ui/button";
-import { Plus, LayoutTemplate, BookOpen, ChevronDown, Trash2, Edit, FileText } from "lucide-react";
+import { Plus, LayoutTemplate, BookOpen, ChevronDown, Trash2, Edit, FileText, Wand } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,12 +36,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useStory } from "@/contexts/StoryContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { PlotPointEditorDialog } from "./plot/PlotPointEditorDialog";
 import { useSession } from "@supabase/auth-helpers-react"; // Add this import
+import { useAI } from "@/hooks/useAI";
 
 type PlotTemplate = {
   name: string;
@@ -609,6 +611,73 @@ export const PlotDevelopmentView = () => {
     }
   }, [plotData, editingPlotPoint, setPlotData, selectedStory?.id, timelineName, toast]);
 
+  const [isCustomTemplateDialogOpen, setIsCustomTemplateDialogOpen] = useState(false);
+  const [customPrompt, setCustomPrompt] = useState("");
+  const { generateContent, isLoading: isGeneratingTemplate } = useAI();
+
+  const handleCreateCustomTemplate = async () => {
+    if (!customPrompt.trim()) {
+      toast({
+        title: "Error",
+        description: "Please provide a description for your template",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const systemPrompt = `Create a story template based on the following description. Format the response as a JSON object with the following structure:
+      {
+        "name": "Template Name",
+        "plotPoints": ["Point 1", "Point 2", ...],
+        "subEvents": ["Sub Event 1", "Sub Event 2", ...]
+      }
+      Keep plot points between 5-8 points, and sub-events between 3-5 events.`;
+
+      const result = await generateContent(
+        customPrompt,
+        "suggestions",
+        {
+          storyDescription: selectedStory?.description || "",
+          aiConfig: {
+            model_type: "gpt-4o",
+            system_prompt: systemPrompt,
+            temperature: 0.7,
+            max_tokens: 1000,
+          },
+        }
+      );
+
+      if (result) {
+        try {
+          const template = JSON.parse(result);
+          applyTemplate(template);
+          setIsCustomTemplateDialogOpen(false);
+          setCustomPrompt("");
+          
+          toast({
+            title: "Success",
+            description: "Custom template created successfully",
+          });
+        } catch (error) {
+          console.error("Error parsing template:", error);
+          toast({
+            title: "Error",
+            description: "Failed to parse AI response",
+            variant: "destructive",
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error generating template:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate template",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       {/* Header Section */}
@@ -695,29 +764,38 @@ export const PlotDevelopmentView = () => {
                 <SheetHeader>
                   <SheetTitle>Choose a Template</SheetTitle>
                   <SheetDescription>
-                    Select a template to structure your story's plot points
+                    Select a template or create a custom one to structure your story's plot points
                   </SheetDescription>
                 </SheetHeader>
-                <ScrollArea className="h-[calc(100vh-200px)] mt-4">
-                  <div className="space-y-4">
-                    {plotTemplates.map((template, index) => (
-                      <Card
-                        key={index}
-                        className="p-4 cursor-pointer hover:shadow-md transition-all duration-200"
-                        onClick={() => applyTemplate(template)}
-                      >
-                        <h3 className="text-lg font-semibold text-purple-600 mb-2">{template.name}</h3>
-                        <div className="space-y-2">
-                          {template.plotPoints.map((point, pointIndex) => (
-                            <p key={pointIndex} className="text-sm text-gray-600 dark:text-gray-300">
-                              {pointIndex + 1}. {point}
-                            </p>
-                          ))}
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                </ScrollArea>
+                <div className="mt-4 space-y-4">
+                  <Button
+                    onClick={() => setIsCustomTemplateDialogOpen(true)}
+                    className="w-full bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600"
+                  >
+                    <Wand className="h-4 w-4 mr-2" />
+                    Create Custom Template
+                  </Button>
+                  <ScrollArea className="h-[calc(100vh-300px)]">
+                    <div className="space-y-4">
+                      {plotTemplates.map((template, index) => (
+                        <Card
+                          key={index}
+                          className="p-4 cursor-pointer hover:shadow-md transition-all duration-200"
+                          onClick={() => applyTemplate(template)}
+                        >
+                          <h3 className="text-lg font-semibold text-purple-600 mb-2">{template.name}</h3>
+                          <div className="space-y-2">
+                            {template.plotPoints.map((point, pointIndex) => (
+                              <p key={pointIndex} className="text-sm text-gray-600 dark:text-gray-300">
+                                {pointIndex + 1}. {point}
+                              </p>
+                            ))}
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
               </SheetContent>
             </Sheet>
           </Card>
@@ -791,6 +869,44 @@ export const PlotDevelopmentView = () => {
           onSave={handleUpdatePlotPoint}
         />
       )}
+
+      <Dialog open={isCustomTemplateDialogOpen} onOpenChange={setIsCustomTemplateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Custom Template</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Textarea
+              value={customPrompt}
+              onChange={(e) => setCustomPrompt(e.target.value)}
+              placeholder="Describe your story template (e.g., 'Create a template for a mystery story where the protagonist is an amateur detective investigating a series of art thefts')"
+              className="min-h-[150px]"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCustomTemplateDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleCreateCustomTemplate}
+              disabled={isGeneratingTemplate || !customPrompt.trim()}
+              className="bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600"
+            >
+              {isGeneratingTemplate ? (
+                <>
+                  <Wand className="h-4 w-4 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Wand className="h-4 w-4 mr-2" />
+                  Generate Template
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
