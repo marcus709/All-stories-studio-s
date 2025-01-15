@@ -24,7 +24,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
   const [showPaywallAlert, setShowPaywallAlert] = useState(false);
   const [blockedFeature, setBlockedFeature] = useState<{ name: string; plan: string } | null>(null);
   const { checkFeatureAccess, getRequiredPlan } = useFeatureAccess();
-  const { selectedStory } = useStory();
+  const { selectedStory, setSelectedStory } = useStory();
   const [error, setError] = useState<Error | null>(null);
   const [currentComponent, setCurrentComponent] = useState<React.ReactNode | null>(null);
 
@@ -40,46 +40,71 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
     return true;
   };
 
+  // Reset error state when view changes
+  useEffect(() => {
+    setError(null);
+  }, [currentView]);
+
+  // Reset error state when story changes
+  useEffect(() => {
+    setError(null);
+  }, [selectedStory]);
+
   useEffect(() => {
     try {
       let component: React.ReactNode = null;
       
-      switch (currentView) {
-        case "characters":
-          component = <CharactersView />;
-          break;
-        case "plot":
-          if (handleFeatureAccess("Book Creator", "story_docs")) {
-            component = <FormattingView />;
-          }
-          break;
-        case "dream":
-          if (handleFeatureAccess("Plot Development", "story_docs")) {
-            component = <PlotDevelopmentView />;
-          }
-          break;
-        case "ideas":
-          component = <StoryIdeasView />;
-          break;
-        case "docs":
-          if (handleFeatureAccess("Story Documentation", "story_docs")) {
-            component = <StoryDocsView />;
-          }
-          break;
-        case "logic":
-          if (handleFeatureAccess("Story Logic", "story_logic")) {
-            component = <StoryLogicView />;
-          }
-          break;
-        case "story":
-          component = <StoryView />;
-          break;
-        default:
-          component = (
-            <div className="flex items-center justify-center h-full text-gray-500">
-              This feature is coming soon!
-            </div>
-          );
+      // Only attempt to render components that require a story if one is selected
+      // or if we're on the story view which handles the no-story case internally
+      if (selectedStory || currentView === "story") {
+        switch (currentView) {
+          case "characters":
+            component = <CharactersView />;
+            break;
+          case "plot":
+            if (handleFeatureAccess("Book Creator", "story_docs")) {
+              component = <FormattingView />;
+            }
+            break;
+          case "dream":
+            if (handleFeatureAccess("Plot Development", "story_docs")) {
+              component = <PlotDevelopmentView />;
+            }
+            break;
+          case "ideas":
+            component = <StoryIdeasView />;
+            break;
+          case "docs":
+            if (handleFeatureAccess("Story Documentation", "story_docs")) {
+              component = <StoryDocsView />;
+            }
+            break;
+          case "logic":
+            if (handleFeatureAccess("Story Logic", "story_logic")) {
+              component = <StoryLogicView />;
+            }
+            break;
+          case "story":
+            component = <StoryView />;
+            break;
+          default:
+            component = (
+              <div className="flex items-center justify-center h-full text-gray-500">
+                This feature is coming soon!
+              </div>
+            );
+        }
+      } else {
+        // Show a friendly message when no story is selected
+        component = (
+          <div className="flex flex-col items-center justify-center h-full gap-4">
+            <AlertCircle className="w-12 h-12 text-gray-400" />
+            <h2 className="text-xl font-semibold text-gray-900">No Story Selected</h2>
+            <p className="text-gray-600 max-w-md text-center">
+              Please select or create a story to access this feature.
+            </p>
+          </div>
+        );
       }
       
       setCurrentComponent(component);
@@ -87,7 +112,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
     } catch (err) {
       setError(err instanceof Error ? err : new Error('An unexpected error occurred'));
     }
-  }, [currentView, handleFeatureAccess]);
+  }, [currentView, selectedStory, handleFeatureAccess]);
 
   if (error) {
     return (
@@ -107,17 +132,6 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
             </div>
           </AlertDescription>
         </Alert>
-      </div>
-    );
-  }
-
-  if (!selectedStory && currentView !== "story") {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-4rem)] bg-gray-50">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">No Story Selected</h2>
-          <p className="text-gray-600 mb-4">Please select or create a story to access this feature.</p>
-        </div>
       </div>
     );
   }
