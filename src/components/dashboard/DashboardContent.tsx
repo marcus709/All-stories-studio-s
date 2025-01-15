@@ -24,9 +24,10 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
   const [showPaywallAlert, setShowPaywallAlert] = useState(false);
   const [blockedFeature, setBlockedFeature] = useState<{ name: string; plan: string } | null>(null);
   const { checkFeatureAccess, getRequiredPlan } = useFeatureAccess();
-  const { selectedStory, setSelectedStory } = useStory();
+  const { selectedStory, setSelectedStory, stories } = useStory();
   const [error, setError] = useState<Error | null>(null);
   const [currentComponent, setCurrentComponent] = useState<React.ReactNode | null>(null);
+  const [key, setKey] = useState(0); // Add a key for forcing remounts
 
   const handleFeatureAccess = (feature: string, requiredFeature: FeatureKey) => {
     if (!checkFeatureAccess(requiredFeature)) {
@@ -40,15 +41,22 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
     return true;
   };
 
-  // Reset error state when view changes
+  // Reset error state and force remount when view changes
   useEffect(() => {
     setError(null);
+    setKey(prev => prev + 1);
   }, [currentView]);
 
-  // Reset error state when story changes
+  // Reset error state and force remount when story changes
   useEffect(() => {
     setError(null);
-  }, [selectedStory]);
+    setKey(prev => prev + 1);
+    
+    // If the selected story was deleted, select the first available story
+    if (selectedStory && !stories.find(s => s.id === selectedStory.id)) {
+      setSelectedStory(stories[0] || null);
+    }
+  }, [selectedStory, stories, setSelectedStory]);
 
   // Handle component mounting and error recovery
   useEffect(() => {
@@ -60,33 +68,33 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
       if (selectedStory || currentView === "story") {
         switch (currentView) {
           case "characters":
-            component = <CharactersView key={`characters-${selectedStory?.id}`} />;
+            component = <CharactersView key={`characters-${selectedStory?.id}-${key}`} />;
             break;
           case "plot":
             if (handleFeatureAccess("Book Creator", "story_docs")) {
-              component = <FormattingView key={`plot-${selectedStory?.id}`} />;
+              component = <FormattingView key={`plot-${selectedStory?.id}-${key}`} />;
             }
             break;
           case "dream":
             if (handleFeatureAccess("Plot Development", "story_docs")) {
-              component = <PlotDevelopmentView key={`dream-${selectedStory?.id}`} />;
+              component = <PlotDevelopmentView key={`dream-${selectedStory?.id}-${key}`} />;
             }
             break;
           case "ideas":
-            component = <StoryIdeasView key={`ideas-${selectedStory?.id}`} />;
+            component = <StoryIdeasView key={`ideas-${selectedStory?.id}-${key}`} />;
             break;
           case "docs":
             if (handleFeatureAccess("Story Documentation", "story_docs")) {
-              component = <StoryDocsView key={`docs-${selectedStory?.id}`} />;
+              component = <StoryDocsView key={`docs-${selectedStory?.id}-${key}`} />;
             }
             break;
           case "logic":
             if (handleFeatureAccess("Story Logic", "story_logic")) {
-              component = <StoryLogicView key={`logic-${selectedStory?.id}`} />;
+              component = <StoryLogicView key={`logic-${selectedStory?.id}-${key}`} />;
             }
             break;
           case "story":
-            component = <StoryView />;
+            component = <StoryView key={`story-${key}`} />;
             break;
           default:
             component = (
@@ -114,7 +122,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
       console.error("Error in DashboardContent:", err);
       setError(err instanceof Error ? err : new Error('An unexpected error occurred'));
     }
-  }, [currentView, selectedStory, handleFeatureAccess]);
+  }, [currentView, selectedStory, handleFeatureAccess, key]);
 
   if (error) {
     return (
@@ -129,8 +137,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
                 variant="outline" 
                 onClick={() => {
                   setError(null);
-                  // Force a re-render of the current view
-                  setCurrentComponent(null);
+                  setKey(prev => prev + 1); // Force a complete remount
                 }}
               >
                 Try Again
