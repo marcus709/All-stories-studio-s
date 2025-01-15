@@ -38,11 +38,13 @@ export const PlotPointEditorDialog = ({
     const fetchOrCreateDocument = async () => {
       try {
         // Check if document already exists for this timeline
-        const { data: existingDoc } = await supabase
+        const { data: existingDoc, error: fetchError } = await supabase
           .from("timeline_documents")
           .select("document_id")
           .eq("timeline_id", timelineId)
-          .single();
+          .maybeSingle();
+
+        if (fetchError) throw fetchError;
 
         if (existingDoc) {
           setDocumentId(existingDoc.document_id);
