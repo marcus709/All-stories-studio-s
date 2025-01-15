@@ -310,10 +310,32 @@ export const PlotDevelopmentView = () => {
       description: "Timeline saved successfully",
     });
 
-    queryClient.invalidateQueries({ queryKey: ["plot-timelines"] });
+    // Close the dialog
     setIsTemplateDialogOpen(false);
     setTimelineName("");
-    applyTemplate(selectedTemplate);
+    
+    // Apply the template immediately
+    const newPlotData = selectedTemplate.plotPoints.map((point, index) => ({
+      title: point,
+      content: (
+        <div>
+          <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
+            {point}
+          </p>
+          <div className="mb-8">
+            {selectedTemplate.subEvents && selectedTemplate.subEvents.map((subEvent, subIndex) => (
+              <div key={subIndex} className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
+                ✅ {subEvent}
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
+    }));
+    setPlotData(newPlotData);
+
+    // Refresh the saved timelines list
+    queryClient.invalidateQueries({ queryKey: ["plot-timelines"] });
   };
 
   const applyTemplate = (template) => {
