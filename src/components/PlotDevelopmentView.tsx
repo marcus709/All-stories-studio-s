@@ -278,7 +278,7 @@ export const PlotDevelopmentView = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      // Clear all related states
+      // Reset all states to their initial values
       setPlotData([]);
       setSelectedTemplate(null);
       setTimelineName("");
@@ -287,7 +287,10 @@ export const PlotDevelopmentView = () => {
       setIsTemplateDialogOpen(false);
       
       // Invalidate queries
-      queryClient.invalidateQueries({ queryKey: ["plot-timelines", selectedStory?.id] });
+      queryClient.invalidateQueries({ 
+        queryKey: ["plot-timelines", selectedStory?.id],
+        exact: true 
+      });
       
       toast({
         title: "Success",
@@ -306,6 +309,11 @@ export const PlotDevelopmentView = () => {
   });
 
   const loadSavedTimeline = async (templateName: string) => {
+    if (!templateName) {
+      console.error("No template name provided");
+      return;
+    }
+
     try {
       const template = plotTemplates.find(t => t.name === templateName);
       if (!template) {
@@ -344,15 +352,20 @@ export const PlotDevelopmentView = () => {
           </div>
         ),
       }));
+
       setPlotData(newPlotData);
 
       // Update last_used timestamp
       if (selectedStory?.id && templateName) {
-        await supabase
+        const { error } = await supabase
           .from("plot_template_instances")
           .update({ last_used: new Date().toISOString() })
           .eq("story_id", selectedStory.id)
           .eq("template_name", templateName);
+
+        if (error) {
+          console.error("Error updating last_used timestamp:", error);
+        }
       }
     } catch (error) {
       console.error("Error loading timeline:", error);
