@@ -29,7 +29,7 @@ export const StoriesSection = () => {
           </p>
         </div>
         
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid gap-16">
           {/* Featured Story Card */}
           <Card 
             className={`group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm ${
@@ -82,8 +82,8 @@ export const StoriesSection = () => {
           </Card>
 
           {/* Lamp Feature */}
-          <div className="h-full">
-            <LampContainer className="h-full min-h-[400px]">
+          <div className="w-full h-[600px]">
+            <LampContainer className="w-full h-full">
               <motion.h1
                 initial={{ opacity: 0.5, y: 100 }}
                 whileInView={{ opacity: 1, y: 0 }}
