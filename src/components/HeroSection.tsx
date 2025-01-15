@@ -30,34 +30,33 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   };
 
   return (
-    <section className="relative pt-32 pb-20 overflow-hidden">
+    <section className="relative pt-32 pb-20 overflow-hidden bg-slate-950">
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-purple-50 border border-purple-100 mb-8 animate-fade-in">
-            <Sparkles className="w-4 h-4 text-purple-600 mr-2" />
-            <span className="text-sm text-purple-600 font-medium">
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-slate-900 border border-slate-800 mb-8 animate-fade-in">
+            <Sparkles className="w-4 h-4 text-cyan-400 mr-2" />
+            <span className="text-sm text-cyan-400 font-medium">
               Where Stories Come to Life - Join Our Creative Community
             </span>
           </div>
           
-          <h1 className="text-6xl md:text-7xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 animate-text">
+          <h1 className="text-6xl md:text-7xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-400 animate-text">
             Transform Your Writing Journey
           </h1>
           
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed animate-fade-in opacity-0" style={{ animationDelay: '300ms' }}>
+          <p className="text-xl text-slate-400 mb-8 max-w-2xl mx-auto leading-relaxed animate-fade-in opacity-0" style={{ animationDelay: '300ms' }}>
             Create deeper characters, richer plots, and more engaging narratives with our AI-powered storytelling platform.
           </p>
           
-          {/* Main CTA button */}
           <Button 
             size="lg"
             onClick={handleStartWriting}
-            className="relative group px-8 py-6 mb-12 overflow-hidden rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:scale-105 hover:from-purple-500 hover:to-pink-500"
+            className="relative group px-8 py-6 mb-12 overflow-hidden rounded-full bg-gradient-to-r from-cyan-600 to-cyan-500 text-white shadow-xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:scale-105 hover:from-cyan-500 hover:to-cyan-400"
           >
             <span className="relative z-10 text-lg font-medium">
               Start Writing Now
             </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </Button>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in opacity-0" style={{ animationDelay: '600ms' }}>
@@ -65,7 +64,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
               size="lg"
               variant="outline"
               onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-              className="px-8 py-6 rounded-full text-lg hover:bg-purple-50 transition-colors duration-300"
+              className="px-8 py-6 rounded-full text-lg border-slate-800 text-slate-300 hover:bg-slate-900 hover:text-cyan-400 transition-colors duration-300"
             >
               Explore Features
             </Button>
@@ -78,10 +77,10 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
               { label: 'AI Suggestions', value: '1M+' }
             ].map((stat, index) => (
               <div key={stat.label} className="space-y-2">
-                <div className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600">
+                <div className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-cyan-500">
                   {stat.value}
                 </div>
-                <div className="text-sm text-gray-500">{stat.label}</div>
+                <div className="text-sm text-slate-400">{stat.label}</div>
               </div>
             ))}
           </div>
