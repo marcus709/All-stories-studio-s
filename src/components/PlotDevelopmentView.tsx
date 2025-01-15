@@ -42,13 +42,21 @@ import { useStory } from "@/contexts/StoryContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { PlotPointEditorDialog } from "./plot/PlotPointEditorDialog";
-import { useSession } from "@supabase/auth-helpers-react"; // Add this import
+import { useSession } from "@supabase/auth-helpers-react";
 import { useAI } from "@/hooks/useAI";
 
 type PlotTemplate = {
   name: string;
   plotPoints: string[];
   subEvents?: string[];
+};
+
+type SavedNote = {
+  plotPoint: string;
+  notes: {
+    content: string;
+    lastEdited?: string;
+  } | null;
 };
 
 const plotTemplates: PlotTemplate[] = [
@@ -84,7 +92,7 @@ const plotTemplates: PlotTemplate[] = [
     subEvents: [
       "Eerie foreshadowing (strange symbols, cryptic warnings)",
       "Tension-building set pieces (dark basements, locked rooms, night scenes)",
-      "Internal conflicts—some characters don’t believe the danger, leading to poor decisions",
+      "Internal conflicts—some characters don't believe the danger, leading to poor decisions",
       "Moments of false security that get shattered by the next scare"
     ]
   },
@@ -123,7 +131,7 @@ const plotTemplates: PlotTemplate[] = [
       "Tech breakdown or sabotage leading to tense repairs",
       "Internal conflicts—crew members with hidden agendas",
       "Cultural clash with alien species or futuristic societies",
-      "Scientific breakthroughs that change the mission’s course"
+      "Scientific breakthroughs that change the mission's course"
     ]
   },
   {
@@ -200,7 +208,7 @@ const plotTemplates: PlotTemplate[] = [
     name: "Historical Fiction Template",
     plotPoints: [
       "Historical Setting",
-      "Protagonist’s Intro",
+      "Protagonist's Intro",
       "Conflict Triggered by History",
       "Immediate Consequences",
       "Immersion in Historical Events",
@@ -215,7 +223,7 @@ const plotTemplates: PlotTemplate[] = [
     ]
   },
   {
-    name: "Children’s Story Template",
+    name: "Children's Story Template",
     plotPoints: [
       "Friendly Introduction",
       "Problem or Quest",
@@ -298,7 +306,6 @@ export const PlotDevelopmentView = () => {
       
       const previousTimelines = queryClient.getQueryData(["plot-timelines", selectedStory?.id]);
       
-      // Only update the cache if we have data
       if (previousTimelines) {
         queryClient.setQueryData(
           ["plot-timelines", selectedStory?.id],
@@ -326,13 +333,10 @@ export const PlotDevelopmentView = () => {
       });
     },
     onSettled: () => {
-      // First close the modal
       setDeleteTimelineId(null);
       
-      // Then reset states in the next tick to avoid React update conflicts
       setTimeout(() => {
         resetAllStates();
-        // Finally refetch in the background
         queryClient.invalidateQueries({ 
           queryKey: ["plot-timelines", selectedStory?.id],
           exact: true
@@ -359,7 +363,6 @@ export const PlotDevelopmentView = () => {
         return;
       }
 
-      // First get the saved notes for this timeline
       const { data: savedInstance, error: fetchError } = await supabase
         .from('plot_template_instances')
         .select('notes')
@@ -371,7 +374,7 @@ export const PlotDevelopmentView = () => {
         console.error("Error fetching saved notes:", fetchError);
       }
 
-      const savedNotes = savedInstance?.notes || [];
+      const savedNotes = (savedInstance?.notes || []) as SavedNote[];
 
       const newPlotData = template.plotPoints.map((point, index) => {
         const savedNote = savedNotes.find(note => note.plotPoint === point);
@@ -576,7 +579,6 @@ export const PlotDevelopmentView = () => {
       setPlotData(newPlotData);
       setEditingPlotPoint(null);
 
-      // Save to Supabase with a more natural structure
       if (selectedStory?.id && timelineName) {
         const formattedNotes = newPlotData.map(point => ({
           plotPoint: point.title,
