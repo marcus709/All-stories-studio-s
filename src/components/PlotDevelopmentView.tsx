@@ -58,13 +58,13 @@ const plotTemplates = [
   {
     name: "Romance Template",
     plotPoints: [
-      "Meet-Cute / First Encounter",
-      "Initial Spark / Attraction",
-      "Growing Connection",
-      "Conflict / Misunderstanding",
-      "Moment of Truth",
-      "Reconciliation / Grand Gesture",
-      "Resolution / HEA"
+      "Meeting",
+      "Attraction", 
+      "Connection",
+      "Conflict",
+      "Truth",
+      "Resolution",
+      "Ending"
     ],
     subEvents: [
       "Minor side characters offering advice or complicating matters",
@@ -76,13 +76,13 @@ const plotTemplates = [
   {
     name: "Horror Template",
     plotPoints: [
-      "Ordinary World",
-      "Inciting Incident",
-      "Unfolding Dread",
-      "First Showdown",
-      "Mounting Tension",
-      "Climax / True Terror",
-      "Aftermath / Survival or Doom"
+      "Normal",
+      "Incident",
+      "Dread",
+      "Confrontation",
+      "Tension",
+      "Terror",
+      "Aftermath"
     ],
     subEvents: [
       "Eerie foreshadowing (strange symbols, cryptic warnings)",
@@ -94,14 +94,14 @@ const plotTemplates = [
   {
     name: "Fantasy (Epic Quest) Template",
     plotPoints: [
-      "Prologue / Mythic Backstory",
-      "Call to Adventure",
-      "Gathering Allies",
-      "Crossing into the Unknown",
-      "Trials & Tests",
-      "Darkest Hour",
-      "Climactic Battle",
-      "Resolution / Return"
+      "Prologue",
+      "Call",
+      "Gathering",
+      "Journey",
+      "Trials", 
+      "Crisis",
+      "Battle",
+      "Return"
     ],
     subEvents: [
       "Encounters with wise mentors or magical beings providing cryptic clues",
@@ -113,14 +113,14 @@ const plotTemplates = [
   {
     name: "Science Fiction Template",
     plotPoints: [
-      "Futuristic / Alternate Setting",
-      "Inciting Problem",
-      "Assembling the Crew",
-      "Exploration / Investigation",
-      "Technological / Moral Dilemma",
-      "Escalation",
+      "Setting",
+      "Problem",
+      "Team",
+      "Discovery",
+      "Dilemma",
+      "Crisis",
       "Climax",
-      "Aftermath"
+      "Resolution"
     ],
     subEvents: [
       "Tech breakdown or sabotage leading to tense repairs",
@@ -132,14 +132,14 @@ const plotTemplates = [
   {
     name: "Detective / Crime Template",
     plotPoints: [
-      "Crime Intro",
-      "Investigator Hook",
-      "Initial Clues & Suspects",
-      "False Leads & Red Herrings",
-      "Mounting Pressure",
-      "Breakthrough",
-      "Confrontation / Reveal",
-      "Resolution"
+      "Crime",
+      "Hook",
+      "Clues",
+      "Leads",
+      "Pressure",
+      "Discovery",
+      "Reveal",
+      "Justice"
     ],
     subEvents: [
       "Tense interrogations with suspects",
@@ -152,10 +152,10 @@ const plotTemplates = [
     name: "Comedic Short Story Template",
     plotPoints: [
       "Setup",
-      "Inciting Mishap",
-      "Escalating Chaos",
-      "Turning Point",
-      "Peak Comedy Moment",
+      "Mishap",
+      "Chaos",
+      "Turn",
+      "Peak",
       "Resolution"
     ],
     subEvents: [
@@ -168,12 +168,12 @@ const plotTemplates = [
   {
     name: "Personal Essay Template",
     plotPoints: [
-      "Opening Anecdote",
-      "Context / Background",
-      "Deep Dive / Reflection",
-      "Main Conflict / Discovery",
-      "Resolution / Growth",
-      "Closing Insight"
+      "Opening",
+      "Context",
+      "Reflection",
+      "Conflict",
+      "Growth",
+      "Insight"
     ],
     subEvents: [
       "Flashbacks to earlier life events that shaped your perspective",
@@ -184,14 +184,13 @@ const plotTemplates = [
   {
     name: "Biography Template",
     plotPoints: [
-      "Introduction",
-      "Early Life",
-      "Challenges & Turning Points",
-      "Rise to Prominence",
-      "Peak Achievements",
-      "Obstacles / Setbacks",
-      "Legacy & Later Years",
-      "Conclusion"
+      "Birth",
+      "Youth",
+      "Rise",
+      "Peak",
+      "Challenge",
+      "Legacy",
+      "End"
     ],
     subEvents: [
       "Anecdotes that reveal character traits",
@@ -202,14 +201,14 @@ const plotTemplates = [
   {
     name: "Historical Fiction Template",
     plotPoints: [
-      "Historical Setting",
-      "Protagonist's Intro",
-      "Conflict Triggered by History",
-      "Immediate Consequences",
-      "Immersion in Historical Events",
-      "Personal vs. Historical Stakes",
+      "Era",
+      "Hero",
+      "Conflict",
+      "Impact",
+      "Events",
+      "Stakes",
       "Climax",
-      "Aftermath"
+      "Change"
     ],
     subEvents: [
       "Scenes featuring real historical figures cameoing or guiding events",
@@ -220,13 +219,13 @@ const plotTemplates = [
   {
     name: "Children's Story Template",
     plotPoints: [
-      "Friendly Introduction",
-      "Problem or Quest",
-      "Magical / Educational Encounters",
-      "Challenges",
-      "Climax",
-      "Lesson Learned",
-      "Happy Ending"
+      "Start",
+      "Quest",
+      "Friends",
+      "Challenge",
+      "Victory",
+      "Lesson",
+      "Joy"
     ],
     subEvents: []
   }
