@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Timeline } from "@/components/ui/timeline";
 import { Button } from "@/components/ui/button";
-import { Plus, LayoutTemplate, BookOpen, ChevronDown, Trash2, Edit } from "lucide-react";
+import { Plus, LayoutTemplate, BookOpen, ChevronDown, Trash2, Edit, FileText } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -519,22 +519,19 @@ export const PlotDevelopmentView = () => {
               <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal">
                 {editingPlotPoint.title}
               </p>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="ml-2"
-                onClick={() => setEditingPlotPoint({
-                  title: editingPlotPoint.title,
-                  content: content,
-                  index: editingPlotPoint.index
-                })}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="mb-8">
-              <div className="text-neutral-700 dark:text-neutral-300 text-xs md:text-sm whitespace-pre-wrap">
-                {content}
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="ml-2 text-purple-500 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                  onClick={() => setEditingPlotPoint({
+                    title: editingPlotPoint.title,
+                    content: content,
+                    index: editingPlotPoint.index
+                  })}
+                >
+                  <FileText className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </div>

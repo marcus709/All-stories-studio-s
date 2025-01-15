@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { RichTextEditor } from "@/components/editor/RichTextEditor";
-import debounce from "lodash/debounce";
 
 interface PlotPointEditorDialogProps {
   isOpen: boolean;
@@ -28,6 +26,7 @@ export const PlotPointEditorDialog = ({
   onSave,
 }: PlotPointEditorDialogProps) => {
   const [content, setContent] = useState(initialContent);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -35,8 +34,9 @@ export const PlotPointEditorDialog = ({
     setContent(initialContent);
   }, [initialContent]);
 
-  const debouncedSave = debounce(async (content: string) => {
+  const handleSave = async () => {
     try {
+      setIsSaving(true);
       await onSave(content);
       
       // Invalidate queries to refresh the UI
@@ -53,12 +53,13 @@ export const PlotPointEditorDialog = ({
         description: "Failed to save document",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
-  }, 1000);
+  };
 
   const handleContentChange = (newContent: string) => {
     setContent(newContent);
-    debouncedSave(newContent);
   };
 
   return (
@@ -76,11 +77,18 @@ export const PlotPointEditorDialog = ({
             />
           </div>
         </ScrollArea>
-        <div className="flex justify-end gap-2 pt-4">
+        <DialogFooter className="flex justify-end gap-2 pt-4">
           <Button variant="outline" onClick={onClose}>
-            Close
+            Cancel
           </Button>
-        </div>
+          <Button 
+            onClick={handleSave}
+            disabled={isSaving}
+            className="bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600"
+          >
+            {isSaving ? "Saving..." : "Save Changes"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
