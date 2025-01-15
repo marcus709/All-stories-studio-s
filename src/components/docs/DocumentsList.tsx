@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface DocumentsListProps {
   documents: Document[];
@@ -39,6 +40,7 @@ export const DocumentsList = ({
   const [shareDocument, setShareDocument] = useState<Document | null>(null);
   const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const handleDeleteDocument = async () => {
     if (!documentToDelete) return;
@@ -91,8 +93,8 @@ export const DocumentsList = ({
         description: "The document and its related content have been successfully deleted",
       });
 
-      // Force reload of documents by refreshing the page
-      window.location.reload();
+      // Invalidate the documents query to refresh the list
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
     } catch (error) {
       console.error('Error deleting document:', error);
       toast({
@@ -105,6 +107,14 @@ export const DocumentsList = ({
     }
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
   if (!documents?.length) {
     return (
       <div className="text-center p-8 bg-gray-50 rounded-lg">
@@ -115,14 +125,6 @@ export const DocumentsList = ({
       </div>
     );
   }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
 
   return (
     <div className="relative h-full">
