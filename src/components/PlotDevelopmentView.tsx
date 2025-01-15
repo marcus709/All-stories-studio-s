@@ -628,13 +628,13 @@ export const PlotDevelopmentView = () => {
     }
 
     try {
-      const systemPrompt = `Create a story template based on the following description. Format the response as a JSON object with the following structure:
-      {
-        "name": "Template Name",
-        "plotPoints": ["Point 1", "Point 2", ...],
-        "subEvents": ["Sub Event 1", "Sub Event 2", ...]
-      }
-      Keep plot points between 5-8 points, and sub-events between 3-5 events.`;
+      const systemPrompt = `Create a story template based on the following description. The response MUST be a valid JSON object with this exact structure:
+{
+  "name": "Template Name",
+  "plotPoints": ["Point 1", "Point 2", "Point 3"],
+  "subEvents": ["Sub Event 1", "Sub Event 2"]
+}
+Keep plot points between 5-8 points, and sub-events between 3-5 events. Make sure to escape any special characters.`;
 
       const result = await generateContent(
         customPrompt,
@@ -652,7 +652,15 @@ export const PlotDevelopmentView = () => {
 
       if (result) {
         try {
-          const template = JSON.parse(result);
+          // Clean the response string to ensure it's valid JSON
+          const cleanedResult = result.replace(/[\r\n\t]/g, '').trim();
+          const template = JSON.parse(cleanedResult);
+          
+          // Validate the template structure
+          if (!template.name || !Array.isArray(template.plotPoints)) {
+            throw new Error("Invalid template structure");
+          }
+          
           applyTemplate(template);
           setIsCustomTemplateDialogOpen(false);
           setCustomPrompt("");
@@ -661,11 +669,11 @@ export const PlotDevelopmentView = () => {
             title: "Success",
             description: "Custom template created successfully",
           });
-        } catch (error) {
-          console.error("Error parsing template:", error);
+        } catch (parseError) {
+          console.error("Error parsing template:", parseError);
           toast({
             title: "Error",
-            description: "Failed to parse AI response",
+            description: "Failed to create template. Please try again with a different description.",
             variant: "destructive",
           });
         }
@@ -674,7 +682,7 @@ export const PlotDevelopmentView = () => {
       console.error("Error generating template:", error);
       toast({
         title: "Error",
-        description: "Failed to generate template",
+        description: "Failed to generate template. Please try again.",
         variant: "destructive",
       });
     }
