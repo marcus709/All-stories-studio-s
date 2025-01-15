@@ -270,6 +270,10 @@ export const PlotDevelopmentView = () => {
 
   const deleteTimelineMutation = useMutation({
     mutationFn: async (timelineId: string) => {
+      if (!timelineId) {
+        throw new Error("No timeline ID provided");
+      }
+
       const { error } = await supabase
         .from("plot_template_instances")
         .delete()
@@ -278,19 +282,21 @@ export const PlotDevelopmentView = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      // Reset all states to their initial values
-      setPlotData([]);
-      setSelectedTemplate(null);
-      setTimelineName("");
-      setEditingPlotPoint(null);
-      setDeleteTimelineId(null);
-      setIsTemplateDialogOpen(false);
-      
-      // Invalidate queries
+      // First invalidate the query to refresh data
       queryClient.invalidateQueries({ 
         queryKey: ["plot-timelines", selectedStory?.id],
         exact: true 
       });
+
+      // Then reset UI state
+      setDeleteTimelineId(null);
+      
+      // Finally reset all other states
+      setPlotData([]);
+      setSelectedTemplate(null);
+      setTimelineName("");
+      setEditingPlotPoint(null);
+      setIsTemplateDialogOpen(false);
       
       toast({
         title: "Success",
@@ -299,13 +305,18 @@ export const PlotDevelopmentView = () => {
     },
     onError: (error) => {
       console.error("Error deleting timeline:", error);
+      // Reset delete state on error
+      setDeleteTimelineId(null);
       toast({
         title: "Error",
         description: "Failed to delete timeline",
         variant: "destructive",
       });
-      setDeleteTimelineId(null);
     },
+    onSettled: () => {
+      // Ensure delete modal is closed regardless of outcome
+      setDeleteTimelineId(null);
+    }
   });
 
   const loadSavedTimeline = async (templateName: string) => {
@@ -318,6 +329,11 @@ export const PlotDevelopmentView = () => {
       const template = plotTemplates.find(t => t.name === templateName);
       if (!template) {
         console.error("Template not found:", templateName);
+        toast({
+          title: "Error",
+          description: "Template not found",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -365,6 +381,11 @@ export const PlotDevelopmentView = () => {
 
         if (error) {
           console.error("Error updating last_used timestamp:", error);
+          toast({
+            title: "Warning",
+            description: "Timeline loaded but couldn't update last used timestamp",
+            variant: "default",
+          });
         }
       }
     } catch (error) {
