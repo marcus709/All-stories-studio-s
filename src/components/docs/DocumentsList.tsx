@@ -44,15 +44,25 @@ export const DocumentsList = ({
     if (!documentToDelete) return;
 
     try {
-      // First delete all related plot events
-      const { error: plotEventsError } = await supabase
-        .from('plot_events')
-        .delete()
-        .eq('document_section_id', documentToDelete.id);
+      // First delete all plot events that reference document sections
+      const { data: sections } = await supabase
+        .from('document_sections')
+        .select('id')
+        .eq('document_id', documentToDelete.id);
 
-      if (plotEventsError) throw plotEventsError;
+      if (sections && sections.length > 0) {
+        const sectionIds = sections.map(section => section.id);
+        
+        // Delete plot events referencing these sections
+        const { error: plotEventsError } = await supabase
+          .from('plot_events')
+          .delete()
+          .in('document_section_id', sectionIds);
 
-      // Then delete all related sections
+        if (plotEventsError) throw plotEventsError;
+      }
+
+      // Then delete all document sections
       const { error: sectionsError } = await supabase
         .from('document_sections')
         .delete()
@@ -60,7 +70,7 @@ export const DocumentsList = ({
 
       if (sectionsError) throw sectionsError;
 
-      // Then delete all related references
+      // Then delete all document references
       const { error: referencesError } = await supabase
         .from('document_references')
         .delete()
