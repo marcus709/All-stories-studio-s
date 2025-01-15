@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Timeline } from "@/components/ui/timeline";
 import { Button } from "@/components/ui/button";
-import { Plus, LayoutTemplate, BookOpen, ChevronDown } from "lucide-react";
+import { Plus, LayoutTemplate, BookOpen, ChevronDown, Trash2 } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -29,7 +29,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { useStory } from "@/contexts/StoryContext";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 
 type PlotTemplate = {
   name: string;
@@ -233,7 +233,7 @@ export const PlotDevelopmentView = () => {
         .from("plot_template_instances")
         .select("*")
         .eq("story_id", selectedStory.id)
-        .order("created_at", { ascending: false });
+        .order("last_used", { ascending: false });
 
       if (error) {
         toast({
@@ -244,38 +244,40 @@ export const PlotDevelopmentView = () => {
         return [];
       }
 
+      // Auto-load the most recent timeline
+      if (data && data.length > 0 && plotData.length === 0) {
+        loadSavedTimeline(data[0].template_name);
+      }
+
       return data;
     },
     enabled: !!selectedStory?.id,
   });
 
-  const addNewAct = () => {
-    const newActNumber = plotData.length + 1;
-    setPlotData([
-      ...plotData,
-      {
-        title: `Act ${newActNumber}`,
-        content: (
-          <div>
-            <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
-              New Act Development
-            </p>
-            <div className="mb-8">
-              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                ✅ Define key events
-              </div>
-              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                ✅ Advance the plot
-              </div>
-              <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                ✅ Further character growth
-              </div>
-            </div>
-          </div>
-        ),
-      },
-    ]);
-  };
+  const deleteTimelineMutation = useMutation({
+    mutationFn: async (timelineId: string) => {
+      const { error } = await supabase
+        .from("plot_template_instances")
+        .delete()
+        .eq("id", timelineId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["plot-timelines"] });
+      toast({
+        title: "Success",
+        description: "Timeline deleted successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete timeline",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleSaveTimeline = async () => {
     if (!selectedStory?.id || !selectedTemplate || !timelineName.trim()) {
@@ -294,6 +296,7 @@ export const PlotDevelopmentView = () => {
         story_id: selectedStory.id,
         name: timelineName.trim(),
         template_name: selectedTemplate.name,
+        last_used: new Date().toISOString(),
       });
 
     if (error) {
@@ -310,7 +313,6 @@ export const PlotDevelopmentView = () => {
       description: "Timeline saved successfully",
     });
 
-    // Close the dialog
     setIsTemplateDialogOpen(false);
     setTimelineName("");
     
@@ -334,7 +336,6 @@ export const PlotDevelopmentView = () => {
     }));
     setPlotData(newPlotData);
 
-    // Refresh the saved timelines list
     queryClient.invalidateQueries({ queryKey: ["plot-timelines"] });
   };
 
@@ -364,6 +365,15 @@ export const PlotDevelopmentView = () => {
         ),
       }));
       setPlotData(newPlotData);
+
+      // Update last_used timestamp
+      if (selectedStory?.id) {
+        await supabase
+          .from("plot_template_instances")
+          .update({ last_used: new Date().toISOString() })
+          .eq("story_id", selectedStory.id)
+          .eq("template_name", templateName);
+      }
     }
   };
 
@@ -414,9 +424,25 @@ export const PlotDevelopmentView = () => {
                   {savedTimelines.map((saved) => (
                     <DropdownMenuItem
                       key={saved.id}
-                      onClick={() => loadSavedTimeline(saved.template_name)}
+                      className="flex justify-between items-center"
                     >
-                      {saved.name}
+                      <span 
+                        className="flex-1 cursor-pointer"
+                        onClick={() => loadSavedTimeline(saved.template_name)}
+                      >
+                        {saved.name}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteTimelineMutation.mutate(saved.id);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
