@@ -24,7 +24,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
   const [showPaywallAlert, setShowPaywallAlert] = useState(false);
   const [blockedFeature, setBlockedFeature] = useState<{ name: string; plan: string } | null>(null);
   const { checkFeatureAccess, getRequiredPlan } = useFeatureAccess();
-  const { selectedStory, setSelectedStory, stories } = useStory();
+  const { selectedStory, stories } = useStory();
   const [error, setError] = useState<Error | null>(null);
   const [currentComponent, setCurrentComponent] = useState<React.ReactNode | null>(null);
   const [remountKey, setRemountKey] = useState(0);
@@ -41,36 +41,18 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
     return true;
   };
 
-  // Force remount and reset error state when view changes
+  // Force remount when view or story changes
   useEffect(() => {
     setError(null);
     setRemountKey(prev => prev + 1);
-  }, [currentView]);
-
-  // Handle story changes and deletions
-  useEffect(() => {
-    const handleStoryChange = async () => {
-      setError(null);
-      setRemountKey(prev => prev + 1);
-      
-      // If the selected story was deleted, select the first available story
-      if (selectedStory && !stories.find(s => s.id === selectedStory.id)) {
-        setSelectedStory(stories[0] || null);
-        // Force an additional remount after story selection changes
-        setTimeout(() => setRemountKey(prev => prev + 1), 0);
-      }
-    };
-
-    handleStoryChange();
-  }, [selectedStory, stories, setSelectedStory]);
+    setCurrentComponent(null); // Clear current component before remounting
+  }, [currentView, selectedStory?.id]);
 
   // Handle component mounting and error recovery
   useEffect(() => {
     try {
       let component: React.ReactNode = null;
       
-      // Only attempt to render components that require a story if one is selected
-      // or if we're on the story view which handles the no-story case internally
       if (selectedStory || currentView === "story") {
         const viewKey = `${currentView}-${selectedStory?.id}-${remountKey}`;
         
@@ -112,7 +94,6 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
             );
         }
       } else {
-        // Show a friendly message when no story is selected
         component = (
           <div className="flex flex-col items-center justify-center h-full gap-4">
             <AlertCircle className="w-12 h-12 text-gray-400" />
@@ -130,7 +111,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
       console.error("Error in DashboardContent:", err);
       setError(err instanceof Error ? err : new Error('An unexpected error occurred'));
     }
-  }, [currentView, selectedStory, handleFeatureAccess, remountKey]);
+  }, [currentView, selectedStory, handleFeatureAccess, remountKey, stories]);
 
   if (error) {
     return (
@@ -173,4 +154,3 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
       />
     </>
   );
-};

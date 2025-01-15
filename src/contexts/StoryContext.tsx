@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import { useToast } from "@/hooks/use-toast";
@@ -10,6 +10,7 @@ interface StoryContextType {
   setSelectedStory: (story: Story | null) => void;
   stories: Story[];
   isLoading: boolean;
+  refetchStories: () => Promise<void>;
 }
 
 const StoryContext = createContext<StoryContextType | null>(null);
@@ -18,8 +19,9 @@ export function StoryProvider({ children }: { children: ReactNode }) {
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const { session } = useSessionContext();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const { data: stories = [], isLoading } = useQuery({
+  const { data: stories = [], isLoading, refetch } = useQuery({
     queryKey: ["stories"],
     queryFn: async () => {
       if (!session?.user) {
@@ -46,8 +48,29 @@ export function StoryProvider({ children }: { children: ReactNode }) {
     enabled: !!session?.user,
   });
 
+  // Handle story deletion and selection cleanup
+  useEffect(() => {
+    if (selectedStory && stories.length > 0 && !stories.find(s => s.id === selectedStory.id)) {
+      console.log("Selected story was deleted, updating selection...");
+      setSelectedStory(stories[0]);
+      queryClient.invalidateQueries({ queryKey: ["stories"] });
+    } else if (stories.length === 0) {
+      setSelectedStory(null);
+    }
+  }, [stories, selectedStory, queryClient]);
+
+  const refetchStories = async () => {
+    await refetch();
+  };
+
   return (
-    <StoryContext.Provider value={{ selectedStory, setSelectedStory, stories, isLoading }}>
+    <StoryContext.Provider value={{ 
+      selectedStory, 
+      setSelectedStory, 
+      stories, 
+      isLoading,
+      refetchStories 
+    }}>
       {children}
     </StoryContext.Provider>
   );
