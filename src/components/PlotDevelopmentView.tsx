@@ -1,249 +1,29 @@
 import { useState, useCallback } from "react";
-import { Card } from "@/components/ui/card";
-import { Timeline } from "@/components/ui/timeline";
-import { Button } from "@/components/ui/button";
-import { Plus, LayoutTemplate, BookOpen, ChevronDown, Trash2, Edit } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/hooks/use-toast";
 import { useStory } from "@/contexts/StoryContext";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { PlotPointEditorDialog } from "./plot/PlotPointEditorDialog";
-import { useSession } from "@supabase/auth-helpers-react"; // Add this import
-
-type PlotTemplate = {
-  name: string;
-  plotPoints: string[];
-  subEvents?: string[];
-};
-
-const plotTemplates: PlotTemplate[] = [
-  {
-    name: "Romance Template",
-    plotPoints: [
-      "Meet-Cute / First Encounter",
-      "Initial Spark / Attraction",
-      "Growing Connection",
-      "Conflict / Misunderstanding",
-      "Moment of Truth",
-      "Reconciliation / Grand Gesture",
-      "Resolution / HEA"
-    ],
-    subEvents: [
-      "Minor side characters offering advice or complicating matters",
-      "Moments of comedic relief—awkward dates, family dinners, or social slip-ups",
-      "Personal revelations about each character's past",
-      "Intimate 'close call' moments where romantic tension spikes"
-    ]
-  },
-  {
-    name: "Horror Template",
-    plotPoints: [
-      "Ordinary World",
-      "Inciting Incident",
-      "Unfolding Dread",
-      "First Showdown",
-      "Mounting Tension",
-      "Climax / True Terror",
-      "Aftermath / Survival or Doom"
-    ],
-    subEvents: [
-      "Eerie foreshadowing (strange symbols, cryptic warnings)",
-      "Tension-building set pieces (dark basements, locked rooms, night scenes)",
-      "Internal conflicts—some characters don’t believe the danger, leading to poor decisions",
-      "Moments of false security that get shattered by the next scare"
-    ]
-  },
-  {
-    name: "Fantasy (Epic Quest) Template",
-    plotPoints: [
-      "Prologue / Mythic Backstory",
-      "Call to Adventure",
-      "Gathering Allies",
-      "Crossing into the Unknown",
-      "Trials & Tests",
-      "Darkest Hour",
-      "Climactic Battle",
-      "Resolution / Return"
-    ],
-    subEvents: [
-      "Encounters with wise mentors or magical beings providing cryptic clues",
-      "Political intrigue among kingdoms or factions",
-      "Internal conflicts—jealousy or distrust among allies",
-      "Magical training sequences or artifact discoveries"
-    ]
-  },
-  {
-    name: "Science Fiction Template",
-    plotPoints: [
-      "Futuristic / Alternate Setting",
-      "Inciting Problem",
-      "Assembling the Crew",
-      "Exploration / Investigation",
-      "Technological / Moral Dilemma",
-      "Escalation",
-      "Climax",
-      "Aftermath"
-    ],
-    subEvents: [
-      "Tech breakdown or sabotage leading to tense repairs",
-      "Internal conflicts—crew members with hidden agendas",
-      "Cultural clash with alien species or futuristic societies",
-      "Scientific breakthroughs that change the mission’s course"
-    ]
-  },
-  {
-    name: "Detective / Crime Template",
-    plotPoints: [
-      "Crime Intro",
-      "Investigator Hook",
-      "Initial Clues & Suspects",
-      "False Leads & Red Herrings",
-      "Mounting Pressure",
-      "Breakthrough",
-      "Confrontation / Reveal",
-      "Resolution"
-    ],
-    subEvents: [
-      "Tense interrogations with suspects",
-      "Evidence lab visits or forensic breakthroughs",
-      "Shadowing / stakeout scenes",
-      "Allies who unwittingly hide info or keep secrets"
-    ]
-  },
-  {
-    name: "Comedic Short Story Template",
-    plotPoints: [
-      "Setup",
-      "Inciting Mishap",
-      "Escalating Chaos",
-      "Turning Point",
-      "Peak Comedy Moment",
-      "Resolution"
-    ],
-    subEvents: [
-      "Minor pranks gone wrong",
-      "Characters mishearing each other",
-      "Overheard conversations that lead to comedic twists",
-      "A comedic ally or sidekick who constantly worsens the situation"
-    ]
-  },
-  {
-    name: "Personal Essay Template",
-    plotPoints: [
-      "Opening Anecdote",
-      "Context / Background",
-      "Deep Dive / Reflection",
-      "Main Conflict / Discovery",
-      "Resolution / Growth",
-      "Closing Insight"
-    ],
-    subEvents: [
-      "Flashbacks to earlier life events that shaped your perspective",
-      "Moments of epiphany—realizing a hidden truth about yourself or others",
-      "Contrasting your past mindset with your present one"
-    ]
-  },
-  {
-    name: "Biography Template",
-    plotPoints: [
-      "Introduction",
-      "Early Life",
-      "Challenges & Turning Points",
-      "Rise to Prominence",
-      "Peak Achievements",
-      "Obstacles / Setbacks",
-      "Legacy & Later Years",
-      "Conclusion"
-    ],
-    subEvents: [
-      "Anecdotes that reveal character traits",
-      "Key relationships that shaped decisions",
-      "Cultural and historical context that influenced their path"
-    ]
-  },
-  {
-    name: "Historical Fiction Template",
-    plotPoints: [
-      "Historical Setting",
-      "Protagonist’s Intro",
-      "Conflict Triggered by History",
-      "Immediate Consequences",
-      "Immersion in Historical Events",
-      "Personal vs. Historical Stakes",
-      "Climax",
-      "Aftermath"
-    ],
-    subEvents: [
-      "Scenes featuring real historical figures cameoing or guiding events",
-      "Cultural details—food, customs, clothing",
-      "Letters, diaries, or forms of communication typical of the era"
-    ]
-  },
-  {
-    name: "Children’s Story Template",
-    plotPoints: [
-      "Friendly Introduction",
-      "Problem or Quest",
-      "Magical / Educational Encounters",
-      "Challenges",
-      "Climax",
-      "Lesson Learned",
-      "Happy Ending"
-    ],
-    subEvents: []
-  }
-];
+import { PlotTemplate } from "@/types/plot";
+import { plotTemplates } from "@/lib/plot-templates";
+import { PlotTimeline } from "./plot/PlotTimeline";
+import { TemplatePanel } from "./plot/TemplatePanel";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
+import { EmotionTracker } from "./plot/EmotionTracker";
 
 export const PlotDevelopmentView = () => {
-  const [plotData, setPlotData] = useState([]);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const { selectedStory } = useStory();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [selectedTemplate, setSelectedTemplate] = useState<PlotTemplate | null>(null);
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
   const [timelineName, setTimelineName] = useState("");
+  const [plotData, setPlotData] = useState<any[]>([]);
   const [deleteTimelineId, setDeleteTimelineId] = useState<string | null>(null);
-  const [editingPlotPoint, setEditingPlotPoint] = useState<{
-    title: string;
-    content: string;
-    index: number;
-  } | null>(null);
-  const { toast } = useToast();
-  const { selectedStory } = useStory();
-  const queryClient = useQueryClient();
-  const session = useSession();
 
-  const { data: savedTimelines, refetch: refetchTimelines } = useQuery({
+  const { data: timelines } = useQuery({
     queryKey: ["plot-timelines", selectedStory?.id],
     queryFn: async () => {
       if (!selectedStory?.id) return [];
@@ -252,37 +32,23 @@ export const PlotDevelopmentView = () => {
         .from("plot_template_instances")
         .select("*")
         .eq("story_id", selectedStory.id)
-        .order("last_used", { ascending: false });
+        .order("created_at", { ascending: false });
 
-      if (error) {
-        toast({
-          title: "Error",
-          description: "Failed to fetch saved timelines",
-          variant: "destructive",
-        });
-        return [];
-      }
-
-      return data || [];
+      if (error) throw error;
+      return data;
     },
     enabled: !!selectedStory?.id,
   });
 
-  const resetAllStates = useCallback(() => {
-    setPlotData([]);
+  const resetAllStates = () => {
     setSelectedTemplate(null);
     setTimelineName("");
-    setEditingPlotPoint(null);
+    setPlotData([]);
     setIsTemplateDialogOpen(false);
-    setDeleteTimelineId(null);
-  }, []);
+  };
 
   const deleteTimelineMutation = useMutation({
     mutationFn: async (timelineId: string) => {
-      if (!timelineId) {
-        throw new Error("No timeline ID provided");
-      }
-
       const { error } = await supabase
         .from("plot_template_instances")
         .delete()
@@ -314,63 +80,58 @@ export const PlotDevelopmentView = () => {
   });
 
   const loadSavedTimeline = useCallback(async (templateName: string) => {
-    if (!templateName) {
-      console.error("No template name provided");
-      return;
-    }
+    if (!selectedStory?.id) return;
 
     try {
-      const template = plotTemplates.find(t => t.name === templateName);
-      if (!template) {
-        console.error("Template not found:", templateName);
-        toast({
-          title: "Error",
-          description: "Template not found",
-          variant: "destructive",
-        });
-        return;
+      console.log("Loading saved timeline:", templateName);
+      
+      // First get the most recent instance of this template
+      const { data: existingTemplate, error: templateError } = await supabase
+        .from("plot_template_instances")
+        .select("*")
+        .eq("story_id", selectedStory.id)
+        .eq("template_name", templateName)
+        .order("last_used", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (templateError && templateError.code !== 'PGRST116') {
+        throw templateError;
       }
 
-      const newPlotData = template.plotPoints.map((point, index) => ({
-        title: point,
-        content: (
-          <div>
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal">
-                {point}
-              </p>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="ml-2"
-                onClick={() => setEditingPlotPoint({
-                  title: point,
-                  content: "",
-                  index
-                })}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="mb-8">
-              {template.subEvents && template.subEvents.map((subEvent, subIndex) => (
-                <div key={subIndex} className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                  ✅ {subEvent}
-                </div>
-              ))}
-            </div>
-          </div>
-        ),
-      }));
+      if (existingTemplate) {
+        console.log("Found existing template:", existingTemplate);
+        
+        // Get the plot points for this template
+        const { data: plotPoints, error: plotError } = await supabase
+          .from("plot_events")
+          .select("*")
+          .eq("story_id", selectedStory.id)
+          .order("order_index", { ascending: true });
 
-      setPlotData(newPlotData);
+        if (plotError) throw plotError;
 
-      if (selectedStory?.id && templateName) {
+        if (plotPoints) {
+          setPlotData(plotPoints);
+          setTimelineName(existingTemplate.name);
+          
+          // Find and set the matching template
+          const matchingTemplate = plotTemplates.find(t => t.name === templateName);
+          if (matchingTemplate) {
+            setSelectedTemplate(matchingTemplate);
+          }
+
+          toast({
+            title: "Success",
+            description: "Timeline loaded successfully",
+          });
+        }
+
+        // Update last_used timestamp
         const { error } = await supabase
           .from("plot_template_instances")
           .update({ last_used: new Date().toISOString() })
-          .eq("story_id", selectedStory.id)
-          .eq("template_name", templateName);
+          .eq("id", existingTemplate.id);
 
         if (error) {
           console.error("Error updating last_used timestamp:", error);
@@ -388,39 +149,22 @@ export const PlotDevelopmentView = () => {
 
   const applyTemplate = useCallback((template: PlotTemplate) => {
     try {
+      console.log("Applying template:", template);
+      
       setSelectedTemplate(template);
       setTimelineName(template.name);
       
       const newPlotData = template.plotPoints.map((point, index) => ({
+        id: crypto.randomUUID(),
+        story_id: selectedStory?.id || "",
+        user_id: "",
+        stage: template.stages[Math.floor(index / (template.plotPoints.length / template.stages.length))] || "unknown",
         title: point,
-        content: (
-          <div>
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal">
-                {point}
-              </p>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="ml-2"
-                onClick={() => setEditingPlotPoint({
-                  title: point,
-                  content: "",
-                  index
-                })}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="mb-8">
-              {template.subEvents && template.subEvents.map((subEvent, subIndex) => (
-                <div key={subIndex} className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
-                  ✅ {subEvent}
-                </div>
-              ))}
-            </div>
-          </div>
-        ),
+        description: "",
+        order_index: index,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        document_section_id: null
       }));
 
       setPlotData(newPlotData);
@@ -433,38 +177,49 @@ export const PlotDevelopmentView = () => {
         variant: "destructive",
       });
     }
-  }, []);
+  }, [selectedStory?.id, toast]);
 
-  const handleSaveTimeline = useCallback(async () => {
-    if (!selectedStory?.id || !selectedTemplate || !timelineName) {
-      toast({
-        title: "Error",
-        description: "Missing required information",
-        variant: "destructive",
-      });
-      return;
-    }
+  const handleSaveTimeline = async () => {
+    if (!selectedStory?.id || !selectedTemplate) return;
 
     try {
-      const { error } = await supabase
+      // Create new template instance
+      const { data: templateInstance, error: templateError } = await supabase
         .from("plot_template_instances")
         .insert({
-          user_id: session?.user?.id,
           story_id: selectedStory.id,
-          name: timelineName,
           template_name: selectedTemplate.name,
-        });
+          name: timelineName,
+          last_used: new Date().toISOString(),
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (templateError) throw templateError;
+
+      // Create plot events
+      const plotEvents = plotData.map(event => ({
+        ...event,
+        template_instance_id: templateInstance.id,
+      }));
+
+      const { error: eventsError } = await supabase
+        .from("plot_events")
+        .insert(plotEvents);
+
+      if (eventsError) throw eventsError;
 
       toast({
         title: "Success",
         description: "Timeline saved successfully",
       });
 
+      queryClient.invalidateQueries({ 
+        queryKey: ["plot-timelines", selectedStory.id],
+        exact: true
+      });
+      
       setIsTemplateDialogOpen(false);
-      resetAllStates();
-      await refetchTimelines();
     } catch (error) {
       console.error("Error saving timeline:", error);
       toast({
@@ -473,242 +228,95 @@ export const PlotDevelopmentView = () => {
         variant: "destructive",
       });
     }
-  }, [selectedStory?.id, selectedTemplate, timelineName, session?.user?.id, toast, resetAllStates, refetchTimelines]);
+  };
 
-  const handleUpdatePlotPoint = useCallback(async (content: string) => {
-    if (!editingPlotPoint) return;
-    
-    try {
-      const newPlotData = [...plotData];
-      newPlotData[editingPlotPoint.index] = {
-        ...newPlotData[editingPlotPoint.index],
-        content: (
-          <div>
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal">
-                {editingPlotPoint.title}
-              </p>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="ml-2"
-                onClick={() => setEditingPlotPoint({
-                  title: editingPlotPoint.title,
-                  content: content,
-                  index: editingPlotPoint.index
-                })}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="mb-8">
-              <div className="text-neutral-700 dark:text-neutral-300 text-xs md:text-sm whitespace-pre-wrap">
-                {content}
-              </div>
-            </div>
-          </div>
-        ),
-      };
-
-      setPlotData(newPlotData);
-      setEditingPlotPoint(null);
-
-      toast({
-        title: "Success",
-        description: "Plot point updated successfully",
-      });
-    } catch (error) {
-      console.error("Error updating plot point:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update plot point",
-        variant: "destructive",
-      });
-    }
-  }, [plotData, editingPlotPoint, setPlotData, toast]);
+  if (!selectedStory) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            Please select a story to view plot development tools
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      {/* Header Section */}
-      <div className="w-full bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-800">
-        <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">Plot Development Timeline</h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
-            Track your story's progression through the three-act structure
-          </p>
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Plot Development</h1>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div>
+          <h2 className="text-lg font-semibold mb-4">Plot Templates</h2>
+          <TemplatePanel
+            templates={plotTemplates}
+            selectedTemplate={selectedTemplate}
+            onTemplateSelect={applyTemplate}
+          />
+        </div>
+
+        <div>
+          <h2 className="text-lg font-semibold mb-4">Saved Timelines</h2>
+          {timelines?.map((timeline) => (
+            <PlotTimeline
+              key={timeline.id}
+              timeline={timeline}
+              onDelete={() => setDeleteTimelineId(timeline.id)}
+              onLoad={() => loadSavedTimeline(timeline.template_name)}
+            />
+          ))}
         </div>
       </div>
 
-      {/* Dashboard Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card className="p-6 bg-white dark:bg-gray-900 shadow-lg hover:shadow-xl transition-shadow duration-200">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Current Acts</h3>
-              <BookOpen className="h-5 w-5 text-purple-500" />
-            </div>
-            <p className="text-3xl font-bold text-purple-600">{plotData.length}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Total story acts</p>
-          </Card>
-
-          <Card className="p-6 bg-white dark:bg-gray-900 shadow-lg hover:shadow-xl transition-shadow duration-200">
-            <Button 
-              onClick={() => {}}
-              className="w-full h-full bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2"
-            >
-              <Plus className="h-5 w-5" />
-              Add New Act
-            </Button>
-          </Card>
-
-          <Card className="p-6 bg-white dark:bg-gray-900 shadow-lg hover:shadow-xl transition-shadow duration-200 flex flex-col gap-4">
-            {savedTimelines && savedTimelines.length > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-full">
-                    <ChevronDown className="h-4 w-4 mr-2" />
-                    Saved Timelines
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
-                  {savedTimelines.map((saved) => (
-                    <DropdownMenuItem
-                      key={saved.id}
-                      className="flex justify-between items-center"
-                    >
-                      <span 
-                        className="flex-1 cursor-pointer"
-                        onClick={() => loadSavedTimeline(saved.template_name)}
-                      >
-                        {saved.name}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeleteTimelineId(saved.id);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button 
-                  variant="outline"
-                  className="w-full border-2 border-purple-500 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2"
-                >
-                  <LayoutTemplate className="h-5 w-5" />
-                  Use Template
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="w-[400px] sm:w-[540px]">
-                <SheetHeader>
-                  <SheetTitle>Choose a Template</SheetTitle>
-                  <SheetDescription>
-                    Select a template to structure your story's plot points
-                  </SheetDescription>
-                </SheetHeader>
-                <ScrollArea className="h-[calc(100vh-200px)] mt-4">
-                  <div className="space-y-4">
-                    {plotTemplates.map((template, index) => (
-                      <Card
-                        key={index}
-                        className="p-4 cursor-pointer hover:shadow-md transition-all duration-200"
-                        onClick={() => applyTemplate(template)}
-                      >
-                        <h3 className="text-lg font-semibold text-purple-600 mb-2">{template.name}</h3>
-                        <div className="space-y-2">
-                          {template.plotPoints.map((point, pointIndex) => (
-                            <p key={pointIndex} className="text-sm text-gray-600 dark:text-gray-300">
-                              {pointIndex + 1}. {point}
-                            </p>
-                          ))}
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </SheetContent>
-            </Sheet>
-          </Card>
-        </div>
-
-        <div className="w-full">
-          <Timeline data={plotData} />
-        </div>
-      </div>
+      <EmotionTracker
+        plotEvents={plotData}
+        selectedDocument={null}
+        onDocumentSelect={() => {}}
+      />
 
       <Dialog open={isTemplateDialogOpen} onOpenChange={setIsTemplateDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Name Your Timeline</DialogTitle>
+            <DialogTitle>Save Timeline</DialogTitle>
           </DialogHeader>
-          <div className="py-4">
-            <label htmlFor="timelineName" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Timeline Name
-            </label>
-            <Input
-              id="timelineName"
-              value={timelineName}
-              onChange={(e) => setTimelineName(e.target.value)}
-              placeholder="Enter a name for your timeline"
-              className="mt-1"
-            />
+          <div className="space-y-4 py-4">
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsTemplateDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveTimeline}>
+                Save Timeline
+              </Button>
+            </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsTemplateDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveTimeline}>
-              Create Timeline
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={!!deleteTimelineId} onOpenChange={() => setDeleteTimelineId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete this timeline. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDeleteTimelineId(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-red-500 hover:bg-red-600"
-              onClick={() => {
-                if (deleteTimelineId) {
-                  deleteTimelineMutation.mutate(deleteTimelineId);
-                }
-              }}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {editingPlotPoint && (
-        <PlotPointEditorDialog
-          isOpen={!!editingPlotPoint}
-          onClose={() => setEditingPlotPoint(null)}
-          title={editingPlotPoint.title}
-          content={editingPlotPoint.content}
-          storyId={selectedStory?.id || ""}
-          timelineId={savedTimelines?.[0]?.id || ""}
-          onSave={handleUpdatePlotPoint}
-        />
-      )}
+      <Dialog open={!!deleteTimelineId} onOpenChange={() => setDeleteTimelineId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Timeline</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p>Are you sure you want to delete this timeline?</p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setDeleteTimelineId(null)}>
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={() => deleteTimelineId && deleteTimelineMutation.mutate(deleteTimelineId)}
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
