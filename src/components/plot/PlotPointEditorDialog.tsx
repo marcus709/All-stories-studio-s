@@ -66,7 +66,9 @@ export const PlotPointEditorDialog = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl h-[80vh]">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle className="text-xl font-semibold text-purple-600">
+            Notes for: {title}
+          </DialogTitle>
         </DialogHeader>
         <ScrollArea className="flex-1 px-4">
           <div className="prose max-w-none">

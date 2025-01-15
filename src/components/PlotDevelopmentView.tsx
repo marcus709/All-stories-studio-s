@@ -534,16 +534,40 @@ export const PlotDevelopmentView = () => {
                 </Button>
               </div>
             </div>
+            {content && (
+              <div className="hidden">
+                <div className="text-neutral-700 dark:text-neutral-300 text-xs md:text-sm whitespace-pre-wrap">
+                  {content}
+                </div>
+              </div>
+            )}
           </div>
         ),
+        notes: content // Store notes separately for later access
       };
 
       setPlotData(newPlotData);
       setEditingPlotPoint(null);
 
+      // Save to Supabase
+      if (selectedStory?.id && timelineName) {
+        const { error } = await supabase
+          .from('plot_template_instances')
+          .update({ 
+            notes: newPlotData.map(point => ({
+              title: point.title,
+              content: point.notes || ''
+            }))
+          })
+          .eq('story_id', selectedStory.id)
+          .eq('name', timelineName);
+
+        if (error) throw error;
+      }
+
       toast({
         title: "Success",
-        description: "Plot point updated successfully",
+        description: "Plot point notes updated successfully",
       });
     } catch (error) {
       console.error("Error updating plot point:", error);
@@ -553,7 +577,7 @@ export const PlotDevelopmentView = () => {
         variant: "destructive",
       });
     }
-  }, [plotData, editingPlotPoint, setPlotData, toast]);
+  }, [plotData, editingPlotPoint, setPlotData, selectedStory?.id, timelineName, toast]);
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
