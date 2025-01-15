@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Timeline } from "@/components/ui/timeline";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
@@ -45,21 +54,7 @@ import { PlotPointEditorDialog } from "./plot/PlotPointEditorDialog";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useAI } from "@/hooks/useAI";
 
-type PlotTemplate = {
-  name: string;
-  plotPoints: string[];
-  subEvents?: string[];
-};
-
-type SavedNote = {
-  plotPoint: string;
-  notes: {
-    content: string;
-    lastEdited?: string;
-  } | null;
-};
-
-const plotTemplates: PlotTemplate[] = [
+const plotTemplates = [
   {
     name: "Romance Template",
     plotPoints: [
@@ -248,11 +243,15 @@ export const PlotDevelopmentView = () => {
     content: string;
     index: number;
   } | null>(null);
+  const [isCustomTemplateDialogOpen, setIsCustomTemplateDialogOpen] = useState(false);
+  const [customPrompt, setCustomPrompt] = useState("");
+  const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false);
   const { toast } = useToast();
   const { selectedStory } = useStory();
   const queryClient = useQueryClient();
   const session = useSession();
   const [selectedConfig, setSelectedConfig] = useState<string>("");
+  
   const { data: aiConfigurations = [] } = useQuery({
     queryKey: ["aiConfigurations", session?.user?.id],
     queryFn: async () => {
@@ -276,6 +275,31 @@ export const PlotDevelopmentView = () => {
       return data;
     },
     enabled: !!session?.user?.id,
+  });
+
+  const { data: savedTimelines, refetch: refetchTimelines } = useQuery({
+    queryKey: ["plot-timelines", selectedStory?.id],
+    queryFn: async () => {
+      if (!selectedStory?.id) return [];
+      
+      const { data, error } = await supabase
+        .from("plot_template_instances")
+        .select("*")
+        .eq("story_id", selectedStory.id)
+        .order("last_used", { ascending: false });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch saved timelines",
+          variant: "destructive",
+        });
+        return [];
+      }
+
+      return data || [];
+    },
+    enabled: !!selectedStory?.id,
   });
 
   const resetAllStates = useCallback(() => {
@@ -612,97 +636,6 @@ export const PlotDevelopmentView = () => {
       });
     }
   }, [plotData, editingPlotPoint, setPlotData, selectedStory?.id, timelineName, toast]);
-
-  const [isCustomTemplateDialogOpen, setIsCustomTemplateDialogOpen] = useState(false);
-  const [customPrompt, setCustomPrompt] = useState("");
-  const { generateContent, isLoading: isGeneratingTemplate } = useAI();
-
-  const handleCreateCustomTemplate = async () => {
-    if (!customPrompt.trim()) {
-      toast({
-        title: "Error",
-        description: "Please provide a description for your template",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const selectedAIConfig = selectedConfig ? await supabase
-        .from("ai_configurations")
-        .select("*")
-        .eq("id", selectedConfig)
-        .single() : null;
-
-      const systemPrompt = `Create a story template based on the following description. The response MUST be a valid JSON object with this exact structure:
-{
-  "name": "Template Name",
-  "plotPoints": ["Point 1", "Point 2", "Point 3"],
-  "subEvents": ["Sub Event 1", "Sub Event 2"]
-}
-Keep plot points between 5-8 points, and sub-events between 3-5 events. Make sure to escape any special characters.`;
-
-      const result = await generateContent(
-        customPrompt,
-        "suggestions",
-        {
-          storyDescription: selectedStory?.description || "",
-          aiConfig: selectedAIConfig?.data || {
-            model_type: "gpt-4o",
-            system_prompt: systemPrompt,
-            temperature: 0.7,
-            max_tokens: 1000,
-          },
-        }
-      );
-
-      if (result) {
-        try {
-          const cleanedResult = result.replace(/[\r\n\t]/g, '').trim();
-          const template = JSON.parse(cleanedResult);
-          
-          if (!template.name || !Array.isArray(template.plotPoints)) {
-            throw new Error("Invalid template structure");
-          }
-          
-          applyTemplate(template);
-          setIsCustomTemplateDialogOpen(false);
-          setCustomPrompt("");
-          
-          toast({
-            title: "Success",
-            description: "Custom template created successfully",
-          });
-        } catch (parseError) {
-          console.error("Error parsing template:", parseError);
-          toast({
-            title: "Error",
-            description: "Failed to create template. Please try again with a different description.",
-            variant: "destructive",
-          });
-        }
-      }
-    } catch (error) {
-      console.error("Error generating template:", error);
-      toast({
-        title: "Error",
-        description: "Failed to generate template. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleSelectChange = (value: string) => {
-    if (value === "new") {
-      setIsConfigDialogOpen(true);
-    } else {
-      setSelectedConfig(value);
-      toast({
-        title: "AI Configuration Selected",
-        description: "The selected configuration will be used for generating the template.",
-      });
-    }
-  };
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
