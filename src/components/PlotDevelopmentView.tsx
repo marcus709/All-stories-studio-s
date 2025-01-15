@@ -232,6 +232,20 @@ const plotTemplates = [
   }
 ];
 
+interface SavedNote {
+  plotPoint: string;
+  notes?: {
+    content: string;
+    lastEdited: string;
+  };
+}
+
+interface PlotTemplate {
+  name: string;
+  plotPoints: string[];
+  subEvents: string[];
+}
+
 export const PlotDevelopmentView = () => {
   const [plotData, setPlotData] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
@@ -251,6 +265,7 @@ export const PlotDevelopmentView = () => {
   const queryClient = useQueryClient();
   const session = useSession();
   const [selectedConfig, setSelectedConfig] = useState<string>("");
+  const [isGeneratingTemplate, setIsGeneratingTemplate] = useState(false);
   
   const { data: aiConfigurations = [] } = useQuery({
     queryKey: ["aiConfigurations", session?.user?.id],
@@ -636,6 +651,44 @@ export const PlotDevelopmentView = () => {
       });
     }
   }, [plotData, editingPlotPoint, setPlotData, selectedStory?.id, timelineName, toast]);
+
+  const handleSelectChange = (value: string) => {
+    setSelectedConfig(value);
+    if (value === "new") {
+      setIsConfigDialogOpen(true);
+    }
+  };
+
+  const handleCreateCustomTemplate = async () => {
+    if (!selectedConfig || !customPrompt.trim()) {
+      toast({
+        title: "Error",
+        description: "Please select an AI configuration and enter a prompt",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGeneratingTemplate(true);
+    try {
+      // Here you would implement the actual template generation logic
+      // For now, we'll just close the dialog
+      setIsCustomTemplateDialogOpen(false);
+      toast({
+        title: "Success",
+        description: "Template created successfully",
+      });
+    } catch (error) {
+      console.error("Error creating template:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create template",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingTemplate(false);
+    }
+  };
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
