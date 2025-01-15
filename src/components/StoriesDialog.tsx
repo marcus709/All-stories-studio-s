@@ -183,22 +183,15 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
         return;
       }
 
+      // Close the delete confirmation dialog first
+      setShowDeleteAlert(false);
+
       const { error } = await supabase
         .from("stories")
         .delete()
         .eq("id", storyToDelete.id);
 
       if (error) throw error;
-
-      // First close the delete confirmation dialog
-      setShowDeleteAlert(false);
-      setStoryToDelete(null);
-
-      // Then show success message
-      toast({
-        title: "Story deleted",
-        description: "The story has been permanently deleted.",
-      });
 
       // Clear selection if the deleted story was selected
       if (selectedStory?.id === storyToDelete.id) {
@@ -212,8 +205,17 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
         refetch()
       ]);
 
+      // Show success message after data is updated
+      toast({
+        title: "Story deleted",
+        description: "The story has been permanently deleted.",
+      });
+
+      // Reset the storyToDelete state
+      setStoryToDelete(null);
+
       // If this was the last story, close the dialog
-      if (stories.length === 1) {
+      if (stories.length <= 1) {
         onOpenChange(false);
       }
     } catch (error) {
@@ -223,23 +225,25 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
         description: "Failed to delete the story.",
         variant: "destructive",
       });
+      setShowDeleteAlert(false);
+      setStoryToDelete(null);
     }
+  };
+
+  const handleCloseDialog = (newOpen: boolean) => {
+    if (!newOpen) {
+      // Reset all states when closing the dialog
+      setShowNewStory(false);
+      setShowDeleteAlert(false);
+      setStoryToDelete(null);
+      setNewStory({ title: "", description: "" });
+    }
+    onOpenChange(newOpen);
   };
 
   return (
     <>
-      <Dialog 
-        open={open} 
-        onOpenChange={(newOpen) => {
-          // Reset states when closing the dialog
-          if (!newOpen) {
-            setShowNewStory(false);
-            setShowDeleteAlert(false);
-            setStoryToDelete(null);
-          }
-          onOpenChange(newOpen);
-        }}
-      >
+      <Dialog open={open} onOpenChange={handleCloseDialog}>
         <DialogContent className="max-w-4xl p-0 gap-0">
           <StoriesDialogHeader 
             showNewStory={showNewStory}
@@ -258,7 +262,7 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
             />
           ) : (
             <StoriesGrid
-              stories={visibleStories}
+              stories={stories}
               onSelect={onStorySelect}
               isLoading={isLoading}
               onClose={() => onOpenChange(false)}
@@ -275,7 +279,7 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
       </Dialog>
 
       <AlertDialog 
-        open={showDeleteAlert} 
+        open={showDeleteAlert}
         onOpenChange={(open) => {
           if (!open) {
             setShowDeleteAlert(false);
