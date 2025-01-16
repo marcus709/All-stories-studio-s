@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Book, Users, LineChart, Lightbulb, FileText, AlertTriangle, Rewind, ChevronLeft, ChevronRight, Home } from "lucide-react";
+import { Home, Book, Users, LineChart, Lightbulb, FileText, AlertTriangle, Rewind, ChevronLeft, ChevronRight } from "lucide-react";
 import { StoriesDialog } from "../StoriesDialog";
 import { useStory } from "@/contexts/StoryContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,7 +12,8 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
 const navigationItems = [
-  { id: "story", icon: Home, label: "Story Editor" },
+  { id: "home", icon: Home, label: "Home" },
+  { id: "story", icon: Book, label: "Story Editor" },
   { id: "characters", icon: Users, label: "Characters" },
   { id: "plot", icon: LineChart, label: "Formatting" },
   { id: "dream", icon: Rewind, label: "Plot Development" },
