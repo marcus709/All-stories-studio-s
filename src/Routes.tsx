@@ -5,7 +5,6 @@ import InvitePage from "./pages/InvitePage";
 import { Header } from "./components/Header";
 import Dashboard from "./pages/Dashboard";
 import { ProfileSettings } from "./pages/ProfileSettings";
-import { FormattingView } from "./components/FormattingView";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -32,14 +31,6 @@ export default function AppRoutes() {
         element={
           <AppLayout>
             <Dashboard />
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/dashboard/formatting"
-        element={
-          <AppLayout>
-            <FormattingView />
           </AppLayout>
         }
       />
