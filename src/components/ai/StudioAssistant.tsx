@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bot, X, Send } from "lucide-react";
+import { Bot, X, Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAI } from "@/hooks/useAI";
@@ -104,89 +104,96 @@ export const StudioAssistant = () => {
     };
   }, [isDragging]);
 
-  if (!isOpen) {
-    return (
-      <Button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-gradient-to-r from-purple-500/90 to-pink-500/90 hover:from-purple-600 hover:to-pink-600 shadow-xl backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105 p-0 flex items-center justify-center"
-      >
-        <Bot className="h-6 w-6 text-white" />
-      </Button>
-    );
-  }
-
   return (
-    <div 
-      style={{ height: `${height}px` }}
-      className="fixed bottom-6 right-6 w-96 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-gray-800/50 flex flex-col overflow-hidden transition-all duration-300 animate-in slide-in-from-bottom-6 z-50"
-    >
-      <div 
-        onMouseDown={handleMouseDown}
-        className="flex items-center justify-between p-4 border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-purple-500/10 to-pink-500/10 cursor-ns-resize"
-      >
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
-            <Bot className="h-4 w-4 text-white" />
-          </div>
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Studio Assistant</h3>
-        </div>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => setIsOpen(false)}
-          className="hover:bg-gray-500/10"
+    <>
+      {!isOpen ? (
+        <Button
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-gradient-to-r from-violet-500/90 to-fuchsia-500/90 hover:from-violet-600 hover:to-fuchsia-600 shadow-xl backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105 p-0 flex items-center justify-center group"
         >
-          <X className="h-4 w-4" />
+          <Bot className="h-6 w-6 text-white transition-transform duration-300 group-hover:scale-110" />
+          <div className="absolute -top-2 -right-2 h-4 w-4 rounded-full bg-violet-400 animate-pulse" />
         </Button>
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-200 hover:scrollbar-thumb-gray-300 scrollbar-track-transparent">
-        {conversation.map((msg, index) => (
-          <div
-            key={index}
-            className={`flex ${msg.role === 'assistant' ? 'justify-start' : 'justify-end'}`}
+      ) : (
+        <div 
+          style={{ height: `${height}px` }}
+          className="fixed bottom-6 right-6 w-96 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-gray-800/50 flex flex-col overflow-hidden transition-all duration-300 animate-in slide-in-from-bottom-6 z-50"
+        >
+          <div 
+            onMouseDown={handleMouseDown}
+            className="flex items-center justify-between p-4 border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 cursor-ns-resize"
           >
-            <div
-              className={`max-w-[80%] rounded-2xl p-3.5 shadow-sm
-                ${msg.role === 'assistant' 
-                  ? 'bg-gray-100/80 dark:bg-gray-800/80 text-gray-800 dark:text-gray-200 rounded-tl-sm' 
-                  : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-tr-sm'}`}
-            >
-              {msg.content}
-            </div>
-          </div>
-        ))}
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-gray-100/80 dark:bg-gray-800/80 rounded-2xl rounded-tl-sm p-4 max-w-[80%] shadow-sm">
-              <div className="flex gap-1.5">
-                <div className="w-2 h-2 bg-purple-500/60 rounded-full animate-bounce" />
-                <div className="w-2 h-2 bg-purple-500/60 rounded-full animate-bounce [animation-delay:0.2s]" />
-                <div className="w-2 h-2 bg-purple-500/60 rounded-full animate-bounce [animation-delay:0.4s]" />
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg">
+                <Bot className="h-4 w-4 text-white" />
+              </div>
+              <div className="flex flex-col">
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Studio Assistant</h3>
+                <span className="text-xs text-gray-500">Powered by AI</span>
               </div>
             </div>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setIsOpen(false)}
+              className="hover:bg-gray-500/10"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
-        )}
-      </div>
 
-      <form onSubmit={handleSubmit} className="p-4 border-t border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-purple-500/5 to-pink-500/5">
-        <div className="flex gap-2">
-          <Textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Ask me anything about your story..."
-            className="min-h-[60px] resize-none bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border-gray-200/50 dark:border-gray-800/50 focus:border-purple-500/50 focus:ring-purple-500/30"
-          />
-          <Button 
-            type="submit" 
-            size="icon"
-            disabled={isLoading || !message.trim()}
-            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-md hover:shadow-lg transition-all duration-300"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-200 hover:scrollbar-thumb-gray-300 scrollbar-track-transparent">
+            {conversation.map((msg, index) => (
+              <div
+                key={index}
+                className={`flex ${msg.role === 'assistant' ? 'justify-start' : 'justify-end'} animate-in slide-in-from-bottom-2 duration-300`}
+              >
+                <div
+                  className={`max-w-[80%] rounded-2xl p-3.5 shadow-sm backdrop-blur-sm
+                    ${msg.role === 'assistant' 
+                      ? 'bg-gradient-to-br from-gray-100/90 to-gray-50/90 dark:from-gray-800/90 dark:to-gray-900/90 text-gray-800 dark:text-gray-200 rounded-tl-sm border border-gray-200/50 dark:border-gray-700/50' 
+                      : 'bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white rounded-tr-sm'}`}
+                >
+                  {msg.role === 'assistant' && (
+                    <Sparkles className="h-3.5 w-3.5 mb-1.5 text-violet-500" />
+                  )}
+                  <div className="text-sm leading-relaxed">{msg.content}</div>
+                </div>
+              </div>
+            ))}
+            {isLoading && (
+              <div className="flex justify-start animate-in fade-in">
+                <div className="bg-gradient-to-br from-gray-100/90 to-gray-50/90 dark:from-gray-800/90 dark:to-gray-900/90 rounded-2xl rounded-tl-sm p-4 max-w-[80%] shadow-sm border border-gray-200/50 dark:border-gray-700/50">
+                  <div className="flex gap-1.5">
+                    <div className="w-2 h-2 bg-violet-500/60 rounded-full animate-bounce" />
+                    <div className="w-2 h-2 bg-fuchsia-500/60 rounded-full animate-bounce [animation-delay:0.2s]" />
+                    <div className="w-2 h-2 bg-violet-500/60 rounded-full animate-bounce [animation-delay:0.4s]" />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <form onSubmit={handleSubmit} className="p-4 border-t border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-violet-500/5 to-fuchsia-500/5">
+            <div className="flex gap-2">
+              <Textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Ask me anything about your story..."
+                className="min-h-[60px] resize-none bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border-gray-200/50 dark:border-gray-800/50 focus:border-violet-500/50 focus:ring-violet-500/30 rounded-xl"
+              />
+              <Button 
+                type="submit" 
+                size="icon"
+                disabled={isLoading || !message.trim()}
+                className="bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 shadow-md hover:shadow-lg transition-all duration-300 rounded-xl"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+          </form>
         </div>
-      </form>
-    </div>
+      )}
+    </>
   );
 };
