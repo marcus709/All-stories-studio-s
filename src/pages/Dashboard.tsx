@@ -11,7 +11,7 @@ import { StudioAssistant } from "@/components/ai/StudioAssistant";
 type View = "home" | "story" | "characters" | "plot" | "dream" | "ideas" | "docs" | "logic";
 
 function DashboardLayout() {
-  const [currentView, setCurrentView] = useState<View>("story");
+  const [currentView, setCurrentView] = useState<View>("home");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -36,7 +36,7 @@ function DashboardLayout() {
       <Header />
       <DashboardSidebar 
         currentView={currentView} 
-        setCurrentView={(view: View) => setCurrentView(view)}
+        setCurrentView={setCurrentView}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
