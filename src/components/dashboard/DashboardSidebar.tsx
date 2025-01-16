@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Book, Users, LineChart, Lightbulb, FileText, AlertTriangle, Rewind, ChevronLeft, ChevronRight, Home, Bookmark, LayersIcon, Twitter } from "lucide-react";
+import { Book, Users, LineChart, Lightbulb, FileText, AlertTriangle, Rewind, ChevronLeft, ChevronRight, Home } from "lucide-react";
 import { StoriesDialog } from "../StoriesDialog";
 import { useStory } from "@/contexts/StoryContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { StoryButtons } from "../stories/StoryButtons";
 import { Story } from "@/types/story";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 const navigationItems = [
   { id: "story", icon: Home, label: "Home" },
@@ -18,12 +19,6 @@ const navigationItems = [
   { id: "ideas", icon: Lightbulb, label: "Story Ideas" },
   { id: "docs", icon: FileText, label: "Story Docs" },
   { id: "logic", icon: AlertTriangle, label: "Story Logic" },
-] as const;
-
-const resourceItems = [
-  { id: "bookmarks", icon: Bookmark, label: "Bookmarks" },
-  { id: "stack", icon: LayersIcon, label: "Stack" },
-  { id: "twitter", icon: Twitter, label: "Twitter" },
 ] as const;
 
 type View = (typeof navigationItems)[number]["id"];
@@ -39,6 +34,8 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
   const [showStoriesDialog, setShowStoriesDialog] = useState(false);
   const { selectedStory, setSelectedStory } = useStory();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<string>("");
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -57,6 +54,26 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
     };
 
     fetchProfile();
+  }, []);
+
+  useEffect(() => {
+    // Get user's location
+    fetch('https://api.ipapi.com/api/check?access_key=YOUR_API_KEY')
+      .then(response => response.json())
+      .then(data => {
+        setCurrentLocation(`${data.city}, ${data.country_name}`);
+      })
+      .catch(() => {
+        // Fallback to Riga, Latvia if location fetch fails
+        setCurrentLocation("Riga, Latvia");
+      });
+
+    // Update time every minute
+    const timer = setInterval(() => {
+      setCurrentDate(new Date());
+    }, 60000);
+
+    return () => clearInterval(timer);
   }, []);
 
   const handleStorySelect = (story: Story) => {
@@ -159,28 +176,18 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
                 <span>{label}</span>
               </button>
             ))}
-
-            {/* Resources Section */}
-            <div className="pt-6 pb-2">
-              <h4 className="px-4 text-xs font-medium text-muted-foreground mb-2">RESOURCES</h4>
-              {resourceItems.map(({ id, icon: Icon, label }) => (
-                <button
-                  key={id}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm font-medium text-muted-foreground hover:bg-accent"
-                >
-                  <Icon className="h-5 w-5" />
-                  <span>{label}</span>
-                </button>
-              ))}
-            </div>
           </nav>
         </ScrollArea>
 
         {/* Footer */}
         <div className="p-4 mt-auto border-t border-border/50">
           <div className="bg-accent/50 rounded-lg p-3">
-            <div className="text-sm text-muted-foreground">9/11/2024</div>
-            <div className="text-xs text-muted-foreground/70">Riga, Latvia</div>
+            <div className="text-sm text-muted-foreground">
+              {format(currentDate, "M/d/yyyy")}
+            </div>
+            <div className="text-xs text-muted-foreground/70">
+              {currentLocation}
+            </div>
           </div>
         </div>
       </div>
