@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAI } from "@/hooks/useAI";
 import { useToast } from "@/hooks/use-toast";
-import { Target, Send, Brain, FileText, Users } from "lucide-react";
+import { Target, Send, Brain, FileText, Users, Clock, ArrowRight } from "lucide-react";
 import { Profile } from "@/integrations/supabase/types/tables.types";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -14,6 +14,7 @@ import { Character } from "@/types/character";
 import { Document } from "@/types/story";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const HomeView = () => {
   const session = useSession();
@@ -114,40 +115,40 @@ export const HomeView = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl space-y-8">
+    <div className="container mx-auto px-4 py-8">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="space-y-8"
+        className="space-y-6"
       >
-        <div className="space-y-2">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">
-            Welcome back, {profile?.username || 'Writer'}
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Let's plan your writing session for today
-          </p>
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              Welcome back, {profile?.username || 'Writer'}
+            </h1>
+            <p className="text-muted-foreground">
+              Here's an overview of your writing progress
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <motion.div 
-            whileHover={{ scale: 1.02 }}
-            className="col-span-2 p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm"
-          >
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-purple-500 dark:text-purple-400">
-                <Target className="h-5 w-5" />
-                <h2 className="text-lg font-semibold">Today's Writing Plan</h2>
-              </div>
-              
+          {/* Writing Plan Card */}
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-purple-500" />
+                Today's Writing Plan
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <Textarea
                 value={writingGoal}
                 onChange={(e) => setWritingGoal(e.target.value)}
                 placeholder="What would you like to work on today? (e.g., 'I want to develop the conflict in chapter 3' or 'I need help brainstorming character motivations')"
                 className="min-h-[120px] bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 resize-none"
               />
-
               <Button
                 onClick={handlePlanSession}
                 disabled={isLoading || !writingGoal.trim()}
@@ -162,32 +163,48 @@ export const HomeView = () => {
                   </>
                 )}
               </Button>
-            </div>
-          </motion.div>
+            </CardContent>
+          </Card>
 
-          <motion.div 
-            whileHover={{ scale: 1.02 }}
-            className="space-y-4"
-          >
-            <div className="p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm">
-              <div className="flex items-center gap-2 text-pink-500 dark:text-pink-400 mb-3">
-                <Brain className="h-5 w-5" />
-                <h3 className="font-semibold">Writing Assistant</h3>
-              </div>
+          {/* Quick Stats Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Brain className="h-5 w-5 text-pink-500" />
+                Writing Assistant
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
                 Share your writing goals, and I'll help you create a focused plan for today's session.
               </p>
-            </div>
+            </CardContent>
+          </Card>
+        </div>
 
-            {/* Recent Documents */}
-            <div className="p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2 text-blue-500">
-                  <FileText className="h-5 w-5" />
-                  <h3 className="font-semibold">Recent Documents</h3>
+        {/* Recent Activity Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Recent Documents */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-blue-500" />
+                  Recent Documents
                 </div>
-              </div>
-              <ScrollArea className="h-[120px]">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => navigate('/dashboard/formatting')}
+                  className="text-sm text-muted-foreground hover:text-primary"
+                >
+                  View All
+                  <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[200px]">
                 <div className="space-y-2">
                   {recentDocuments?.map((doc) => (
                     <Button
@@ -197,25 +214,46 @@ export const HomeView = () => {
                       onClick={() => navigate(`/dashboard/formatting?doc=${doc.id}`)}
                     >
                       <FileText className="h-4 w-4 mr-2 text-blue-500" />
-                      {doc.title}
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">{doc.title}</span>
+                        <span className="text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3 inline mr-1" />
+                          {new Date(doc.updated_at).toLocaleDateString()}
+                        </span>
+                      </div>
                     </Button>
                   ))}
                   {(!recentDocuments || recentDocuments.length === 0) && (
-                    <p className="text-sm text-muted-foreground">No recent documents</p>
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No recent documents
+                    </p>
                   )}
                 </div>
               </ScrollArea>
-            </div>
+            </CardContent>
+          </Card>
 
-            {/* Recent Characters */}
-            <div className="p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2 text-green-500">
-                  <Users className="h-5 w-5" />
-                  <h3 className="font-semibold">Recent Characters</h3>
+          {/* Recent Characters */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-green-500" />
+                  Recent Characters
                 </div>
-              </div>
-              <ScrollArea className="h-[120px]">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => navigate('/dashboard/characters')}
+                  className="text-sm text-muted-foreground hover:text-primary"
+                >
+                  View All
+                  <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[200px]">
                 <div className="space-y-2">
                   {recentCharacters?.map((character) => (
                     <Button
@@ -225,33 +263,46 @@ export const HomeView = () => {
                       onClick={() => navigate('/dashboard/characters')}
                     >
                       <Users className="h-4 w-4 mr-2 text-green-500" />
-                      {character.name}
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">{character.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {character.role || 'No role specified'}
+                        </span>
+                      </div>
                     </Button>
                   ))}
                   {(!recentCharacters || recentCharacters.length === 0) && (
-                    <p className="text-sm text-muted-foreground">No recent characters</p>
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No recent characters
+                    </p>
                   )}
                 </div>
               </ScrollArea>
-            </div>
-          </motion.div>
+            </CardContent>
+          </Card>
         </div>
 
         {aiResponse && (
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/10 dark:to-pink-950/10 rounded-xl border border-purple-100 dark:border-purple-900/20"
+            className="mt-6"
           >
-            <div className="prose dark:prose-invert max-w-none">
-              <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Brain className="h-5 w-5 text-purple-500" />
-                Your Writing Plan
-              </h3>
-              <div className="whitespace-pre-wrap">
-                {aiResponse}
-              </div>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="h-5 w-5 text-purple-500" />
+                  Your Writing Plan
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose dark:prose-invert max-w-none">
+                  <div className="whitespace-pre-wrap">
+                    {aiResponse}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </motion.div>
         )}
       </motion.div>
