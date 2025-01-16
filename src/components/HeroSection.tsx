@@ -2,8 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useToast } from "./ui/use-toast";
-import { Sparkles } from "lucide-react";
-import { AuroraBackground } from "./ui/aurora-background";
+import { ChevronDown } from "lucide-react";
 
 interface HeroSectionProps {
   onShowAuth?: (view: "signin" | "signup") => void;
@@ -31,62 +30,67 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   };
 
   return (
-    <AuroraBackground className="pt-32 pb-20">
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-purple-50/10 border border-purple-100/20 mb-8 animate-fade-in backdrop-blur-sm">
-            <Sparkles className="w-4 h-4 text-purple-300 mr-2" />
-            <span className="text-sm text-purple-300 font-medium">
-              Where Stories Come to Life - Join Our Creative Community
-            </span>
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      {/* Background overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-black pointer-events-none" />
+
+      <div className="container mx-auto px-4 pt-32 pb-20 relative z-10">
+        <div className="max-w-5xl mx-auto">
+          <div className="space-y-8 text-center">
+            <h1 className="hero-title">
+              Story Creator
+              <br />
+              <span className="hero-subtitle">&amp; Writer</span>
+            </h1>
+            
+            <p className="hero-description max-w-2xl mx-auto">
+              Premium story creation tools and AI-powered writing assistance
+              to help your stories come to life.
+            </p>
+            
+            <div className="pt-8">
+              <Button 
+                onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                variant="ghost"
+                className="rounded-full border border-[#E5DDD3]/20 text-[#E5DDD3] hover:bg-[#E5DDD3]/10"
+              >
+                <span className="mr-2">MY SERVICES</span>
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-          
-          <h1 className="text-6xl md:text-7xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 animate-text">
-            Transform Your Writing Journey
-          </h1>
-          
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed animate-fade-in opacity-0" style={{ animationDelay: '300ms' }}>
-            Create deeper characters, richer plots, and more engaging narratives with our AI-powered storytelling platform.
-          </p>
-          
-          <Button 
-            size="lg"
-            onClick={handleStartWriting}
-            className="relative group px-8 py-6 mb-12 overflow-hidden rounded-full bg-gradient-to-r from-purple-600/80 to-pink-600/80 text-white shadow-xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:scale-105 hover:from-purple-500/90 hover:to-pink-500/90 backdrop-blur-sm"
-          >
-            <span className="relative z-10 text-lg font-medium">
-              Start Writing Now
-            </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-pink-600/80 to-purple-600/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          </Button>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in opacity-0" style={{ animationDelay: '600ms' }}>
-            <Button 
-              size="lg"
-              variant="outline"
-              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-              className="px-8 py-6 rounded-full text-lg hover:bg-purple-50/10 transition-colors duration-300 border-purple-200/20 text-purple-200"
-            >
-              Explore Features
-            </Button>
+
+          {/* Partner logos */}
+          <div className="mt-32 grid grid-cols-2 md:grid-cols-6 gap-8 items-center opacity-50">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="flex items-center justify-center">
+                <div className="w-24 h-8 bg-[#E5DDD3]/10 rounded" />
+              </div>
+            ))}
           </div>
-          
-          <div className="mt-16 grid grid-cols-3 gap-8 max-w-3xl mx-auto text-center animate-fade-in opacity-0" style={{ animationDelay: '900ms' }}>
+
+          {/* Service cards */}
+          <div className="mt-32 grid md:grid-cols-3 gap-8">
             {[
-              { label: 'Active Writers', value: '10,000+' },
-              { label: 'Stories Created', value: '50,000+' },
-              { label: 'AI Suggestions', value: '1M+' }
-            ].map((stat, index) => (
-              <div key={stat.label} className="space-y-2">
-                <div className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-pink-300">
-                  {stat.value}
-                </div>
-                <div className="text-sm text-gray-400">{stat.label}</div>
+              { number: "01", title: "STORY CREATION", description: "Create compelling narratives with our intuitive story development tools." },
+              { number: "02", title: "CHARACTER DEVELOPMENT", description: "Build deep, realistic characters with AI-powered assistance." },
+              { number: "03", title: "PLOT & STRUCTURE", description: "Organize and perfect your story's structure with advanced plotting tools." }
+            ].map((service) => (
+              <div key={service.number} className="p-8 border border-[#E5DDD3]/10 rounded-lg bg-black/50 backdrop-blur-sm">
+                <div className="text-sm text-[#E5DDD3]/50 mb-4">{service.number}</div>
+                <h3 className="text-[#E5DDD3] text-lg font-medium mb-4">{service.title}</h3>
+                <p className="text-[#E5DDD3]/70 text-sm leading-relaxed">{service.description}</p>
+                <Button 
+                  variant="ghost" 
+                  className="mt-6 text-[#E5DDD3]/50 hover:text-[#E5DDD3] hover:bg-transparent p-0 h-auto"
+                >
+                  Learn More →
+                </Button>
               </div>
             ))}
           </div>
         </div>
       </div>
-    </AuroraBackground>
+    </div>
   );
 };

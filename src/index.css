@@ -58,6 +58,21 @@
   }
 }
 
+.hero-title {
+  @apply font-serif text-[5rem] leading-tight tracking-tight;
+  color: #E5DDD3;
+}
+
+.hero-subtitle {
+  @apply font-serif text-3xl italic tracking-wide;
+  color: #E5DDD3;
+}
+
+.hero-description {
+  @apply text-base tracking-wide;
+  color: rgba(229, 221, 211, 0.7);
+}
+
 @layer utilities {
   .animate-text {
     animation: text 8s ease infinite;
