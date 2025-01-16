@@ -5,6 +5,9 @@ import InvitePage from "./pages/InvitePage";
 import { Header } from "./components/Header";
 import Dashboard from "./pages/Dashboard";
 import { ProfileSettings } from "./pages/ProfileSettings";
+import { CharactersView } from "./components/CharactersView";
+import { FormattingView } from "./components/FormattingView";
+import { StoryDocsView } from "./components/docs/StoryDocsView";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -27,13 +30,17 @@ export default function AppRoutes() {
         }
       />
       <Route
-        path="/dashboard"
+        path="/dashboard/*"
         element={
           <AppLayout>
             <Dashboard />
           </AppLayout>
         }
-      />
+      >
+        <Route path="characters" element={<CharactersView />} />
+        <Route path="formatting" element={<FormattingView />} />
+        <Route path="docs" element={<StoryDocsView />} />
+      </Route>
       <Route
         path="/community/*"
         element={
