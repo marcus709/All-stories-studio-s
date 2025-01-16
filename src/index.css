@@ -60,11 +60,13 @@
 
 .hero-title {
   @apply font-serif text-[5rem] leading-tight tracking-tight;
+  font-family: 'Instagram Sans Draft', serif;
   color: #E5DDD3;
 }
 
 .hero-subtitle {
   @apply font-serif text-3xl italic tracking-wide;
+  font-family: 'Instagram Sans Draft', serif;
   color: #E5DDD3;
 }
 

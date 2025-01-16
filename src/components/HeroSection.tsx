@@ -30,25 +30,33 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden">
-      {/* Background overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-black pointer-events-none" />
+    <div className="min-h-screen relative overflow-hidden bg-[#1A1F2C]">
+      {/* Background image */}
+      <div 
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: 'url(/scenes/hands.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          opacity: 0.2
+        }}
+      />
 
       <div className="container mx-auto px-4 pt-32 pb-20 relative z-10">
         <div className="max-w-5xl mx-auto">
-          <div className="space-y-8 text-center">
-            <h1 className="hero-title">
+          <div className="space-y-8">
+            <h1 className="hero-title text-center">
               Story Creator
               <br />
               <span className="hero-subtitle">&amp; Writer</span>
             </h1>
             
-            <p className="hero-description max-w-2xl mx-auto">
+            <p className="hero-description text-center max-w-2xl mx-auto">
               Premium story creation tools and AI-powered writing assistance
               to help your stories come to life.
             </p>
             
-            <div className="pt-8">
+            <div className="pt-8 text-center">
               <Button 
                 onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
                 variant="ghost"
@@ -76,7 +84,11 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
               { number: "02", title: "CHARACTER DEVELOPMENT", description: "Build deep, realistic characters with AI-powered assistance." },
               { number: "03", title: "PLOT & STRUCTURE", description: "Organize and perfect your story's structure with advanced plotting tools." }
             ].map((service) => (
-              <div key={service.number} className="p-8 border border-[#E5DDD3]/10 rounded-lg bg-black/50 backdrop-blur-sm">
+              <div 
+                key={service.number} 
+                className="p-8 border border-[#E5DDD3]/10 rounded-lg bg-[#1A1F2C]/50 backdrop-blur-sm 
+                         hover:border-[#E5DDD3]/20 transition-all duration-300"
+              >
                 <div className="text-sm text-[#E5DDD3]/50 mb-4">{service.number}</div>
                 <h3 className="text-[#E5DDD3] text-lg font-medium mb-4">{service.title}</h3>
                 <p className="text-[#E5DDD3]/70 text-sm leading-relaxed">{service.description}</p>
