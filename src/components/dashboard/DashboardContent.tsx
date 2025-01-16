@@ -88,17 +88,17 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
             break;
           default:
             component = (
-              <div className="flex items-center justify-center h-full text-gray-500">
+              <div className="flex items-center justify-center h-full text-gray-400">
                 This feature is coming soon!
               </div>
             );
         }
       } else {
         component = (
-          <div className="flex flex-col items-center justify-center h-full gap-4">
-            <AlertCircle className="w-12 h-12 text-gray-400" />
-            <h2 className="text-xl font-semibold text-gray-900">No Story Selected</h2>
-            <p className="text-gray-600 max-w-md text-center">
+          <div className="flex flex-col items-center justify-center h-full gap-4 text-gray-400">
+            <AlertCircle className="w-12 h-12" />
+            <h2 className="text-xl font-semibold text-gray-300">No Story Selected</h2>
+            <p className="text-gray-400 max-w-md text-center">
               Please select or create a story to access this feature.
             </p>
           </div>
