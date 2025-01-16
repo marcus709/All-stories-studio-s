@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
+import { UserProfileDialog } from "./UserProfileDialog";
 
 interface PostLike {
   id: string;
@@ -49,6 +50,7 @@ export const Post = ({ post }: PostProps) => {
   const queryClient = useQueryClient();
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("");
+  const [selectedProfile, setSelectedProfile] = useState<{ id: string; username: string } | null>(null);
 
   const isLiked = post.post_likes.some(
     (like) => like.user_id === session?.user?.id
@@ -146,7 +148,10 @@ export const Post = ({ post }: PostProps) => {
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
+        <div 
+          className="flex items-center gap-3 cursor-pointer hover:opacity-80"
+          onClick={() => setSelectedProfile({ id: post.user_id, username: postUsername })}
+        >
           <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
             {postAvatarUrl ? (
               <img
@@ -231,7 +236,10 @@ export const Post = ({ post }: PostProps) => {
 
               return (
                 <div key={comment.id} className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
+                  <div 
+                    className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center shrink-0 cursor-pointer"
+                    onClick={() => setSelectedProfile({ id: comment.user_id, username: commentUsername })}
+                  >
                     {commentAvatarUrl ? (
                       <img
                         src={commentAvatarUrl}
@@ -246,7 +254,12 @@ export const Post = ({ post }: PostProps) => {
                   </div>
                   <div>
                     <div className="bg-gray-50 rounded-lg p-3">
-                      <p className="font-medium text-sm">@{commentUsername}</p>
+                      <p 
+                        className="font-medium text-sm cursor-pointer hover:opacity-80"
+                        onClick={() => setSelectedProfile({ id: comment.user_id, username: commentUsername })}
+                      >
+                        @{commentUsername}
+                      </p>
                       <p className="text-sm">{comment.content}</p>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
@@ -260,6 +273,14 @@ export const Post = ({ post }: PostProps) => {
             })}
           </div>
         </div>
+      )}
+
+      {selectedProfile && (
+        <UserProfileDialog
+          user={{ id: selectedProfile.id, username: selectedProfile.username }}
+          isOpen={!!selectedProfile}
+          onClose={() => setSelectedProfile(null)}
+        />
       )}
     </div>
   );
