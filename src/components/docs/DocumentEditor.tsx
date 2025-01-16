@@ -65,7 +65,7 @@ export const DocumentEditor = ({ document, storyId, onSave }: DocumentEditorProp
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
-          const editorElement = document.querySelector('.ProseMirror');
+          const editorElement = window.document.querySelector('.ProseMirror');
           if (!editorElement) return;
 
           const trackCursor = (e: MouseEvent) => {
