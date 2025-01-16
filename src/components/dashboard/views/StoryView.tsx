@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BookOpen, LineChart, Wand, Settings, MessageSquare } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -14,12 +14,25 @@ import { useFeatureAccess } from "@/utils/subscriptionUtils";
 import { PaywallAlert } from "@/components/PaywallAlert";
 import { useSession } from "@supabase/auth-helpers-react";
 import { RichTextEditor } from "@/components/editor/RichTextEditor";
+import { RemoteCursor } from "@/components/docs/RemoteCursor";
 import { cn } from "@/lib/utils";
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
 }
+
+interface CursorPosition {
+  x: number;
+  y: number;
+  userId: string;
+  username: string;
+}
+
+const CURSOR_COLORS = [
+  "#FF5733", "#33FF57", "#3357FF", "#FF33F5",
+  "#33FFF5", "#F5FF33", "#FF3333", "#33FF33"
+];
 
 export const StoryView = () => {
   const [wordCount, setWordCount] = useState(1);
@@ -39,31 +52,51 @@ export const StoryView = () => {
   const session = useSession();
   const queryClient = useQueryClient();
   const { currentLimits, getRequiredPlan } = useFeatureAccess();
+  const [cursors, setCursors] = useState<Record<string, CursorPosition>>({});
 
-  const { data: aiConfigurations = [] } = useQuery({
-    queryKey: ["aiConfigurations", session?.user?.id],
-    queryFn: async () => {
-      if (!session?.user?.id) return [];
-      
-      const { data, error } = await supabase
-        .from("ai_configurations")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .order("created_at", { ascending: false });
+  useEffect(() => {
+    if (!selectedStory?.id || !session?.user) return;
 
-      if (error) {
-        toast({
-          title: "Error",
-          description: "Failed to fetch AI configurations",
-          variant: "destructive",
+    const channel = supabase.channel(`story:${selectedStory.id}`)
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState();
+        const newCursors: Record<string, CursorPosition> = {};
+        
+        Object.keys(state).forEach((key) => {
+          const presence = state[key][0] as any;
+          if (presence.userId !== session.user?.id) {
+            newCursors[presence.userId] = presence;
+          }
         });
-        return [];
-      }
+        
+        setCursors(newCursors);
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          const editorElement = window.document.querySelector('.ProseMirror');
+          if (!editorElement) return;
 
-      return data;
-    },
-    enabled: !!session?.user?.id,
-  });
+          const trackCursor = (e: MouseEvent) => {
+            const rect = editorElement.getBoundingClientRect();
+            channel.track({
+              userId: session.user?.id,
+              username: session.user?.email?.split('@')[0] || 'Anonymous',
+              x: e.clientX - rect.left,
+              y: e.clientY - rect.top,
+            });
+          };
+
+          editorElement.addEventListener('mousemove', trackCursor);
+          return () => {
+            editorElement.removeEventListener('mousemove', trackCursor);
+          };
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [selectedStory?.id, session?.user]);
 
   const handleContentChange = (content: string) => {
     if (!selectedStory) return;
@@ -272,12 +305,21 @@ export const StoryView = () => {
             </form>
           </div>
         ) : (
-          <>
+          <div className="relative">
             <RichTextEditor
               content={storyContent}
               onChange={handleContentChange}
               className="min-h-[400px]"
             />
+
+            {Object.entries(cursors).map(([userId, cursor], index) => (
+              <RemoteCursor
+                key={userId}
+                color={CURSOR_COLORS[index % CURSOR_COLORS.length]}
+                position={{ x: cursor.x, y: cursor.y }}
+                username={cursor.username}
+              />
+            ))}
 
             {(isLoading || aiSuggestions) && (
               <div className="bg-purple-50 rounded-lg p-6 relative mt-6">
@@ -296,7 +338,7 @@ export const StoryView = () => {
                 )}
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
 
