@@ -8,7 +8,7 @@ import { useSession } from "@supabase/auth-helpers-react";
 import { useToast } from "@/hooks/use-toast";
 import { StudioAssistant } from "@/components/ai/StudioAssistant";
 
-type View = "story" | "characters" | "plot" | "dream" | "ideas" | "docs" | "logic";
+type View = "home" | "story" | "characters" | "plot" | "dream" | "ideas" | "docs" | "logic";
 
 function DashboardLayout() {
   const [currentView, setCurrentView] = useState<View>("story");
@@ -36,7 +36,7 @@ function DashboardLayout() {
       <Header />
       <DashboardSidebar 
         currentView={currentView} 
-        setCurrentView={setCurrentView}
+        setCurrentView={(view: View) => setCurrentView(view)}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
