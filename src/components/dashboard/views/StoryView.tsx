@@ -54,6 +54,31 @@ export const StoryView = () => {
   const { currentLimits, getRequiredPlan } = useFeatureAccess();
   const [cursors, setCursors] = useState<Record<string, CursorPosition>>({});
 
+  const { data: aiConfigurations = [] } = useQuery({
+    queryKey: ["aiConfigurations", session?.user?.id],
+    queryFn: async () => {
+      if (!session?.user?.id) return [];
+      
+      const { data, error } = await supabase
+        .from("ai_configurations")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch AI configurations",
+          variant: "destructive",
+        });
+        return [];
+      }
+
+      return data;
+    },
+    enabled: !!session?.user?.id,
+  });
+
   useEffect(() => {
     if (!selectedStory?.id || !session?.user) return;
 
@@ -73,11 +98,11 @@ export const StoryView = () => {
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
-          const editorElement = window.document.querySelector('.ProseMirror');
-          if (!editorElement) return;
+          const container = window.document.querySelector('.story-container');
+          if (!container) return;
 
           const trackCursor = (e: MouseEvent) => {
-            const rect = editorElement.getBoundingClientRect();
+            const rect = container.getBoundingClientRect();
             channel.track({
               userId: session.user?.id,
               username: session.user?.email?.split('@')[0] || 'Anonymous',
@@ -86,9 +111,9 @@ export const StoryView = () => {
             });
           };
 
-          editorElement.addEventListener('mousemove', trackCursor);
+          container.addEventListener('mousemove', trackCursor);
           return () => {
-            editorElement.removeEventListener('mousemove', trackCursor);
+            container.removeEventListener('mousemove', trackCursor);
           };
         }
       });
@@ -253,7 +278,7 @@ export const StoryView = () => {
         </Button>
       </div>
 
-      <div className={`bg-white rounded-xl shadow-sm p-8 mt-6 relative ${!selectedStory ? "opacity-50" : ""}`}>
+      <div className={`story-container bg-white rounded-xl shadow-sm p-8 mt-6 relative ${!selectedStory ? "opacity-50" : ""}`}>
         {!selectedStory && (
           <div className="absolute inset-0 bg-transparent z-10" />
         )}
