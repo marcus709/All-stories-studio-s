@@ -5,9 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAI } from "@/hooks/useAI";
 import { useToast } from "@/hooks/use-toast";
-import { Target, Send, Brain } from "lucide-react";
+import { Target, Send, Brain, FileText, Users } from "lucide-react";
 import { Profile } from "@/integrations/supabase/types/tables.types";
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { useStory } from "@/contexts/StoryContext";
+import { Character } from "@/types/character";
+import { Document } from "@/types/story";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useNavigate } from "react-router-dom";
 
 export const HomeView = () => {
   const session = useSession();
@@ -17,12 +23,48 @@ export const HomeView = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { generateContent } = useAI();
   const { toast } = useToast();
+  const { selectedStory } = useStory();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (session?.user?.id) {
       getProfile();
     }
   }, [session?.user?.id]);
+
+  const { data: recentDocuments } = useQuery({
+    queryKey: ["recent-documents", selectedStory?.id],
+    queryFn: async () => {
+      if (!selectedStory?.id) return [];
+      const { data, error } = await supabase
+        .from("documents")
+        .select("*")
+        .eq("story_id", selectedStory.id)
+        .order("updated_at", { ascending: false })
+        .limit(3);
+
+      if (error) throw error;
+      return data as Document[];
+    },
+    enabled: !!selectedStory?.id,
+  });
+
+  const { data: recentCharacters } = useQuery({
+    queryKey: ["recent-characters", selectedStory?.id],
+    queryFn: async () => {
+      if (!selectedStory?.id) return [];
+      const { data, error } = await supabase
+        .from("characters")
+        .select("*")
+        .eq("story_id", selectedStory.id)
+        .order("updated_at", { ascending: false })
+        .limit(3);
+
+      if (error) throw error;
+      return data as Character[];
+    },
+    enabled: !!selectedStory?.id,
+  });
 
   const getProfile = async () => {
     try {
@@ -135,6 +177,62 @@ export const HomeView = () => {
               <p className="text-sm text-muted-foreground">
                 Share your writing goals, and I'll help you create a focused plan for today's session.
               </p>
+            </div>
+
+            {/* Recent Documents */}
+            <div className="p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2 text-blue-500">
+                  <FileText className="h-5 w-5" />
+                  <h3 className="font-semibold">Recent Documents</h3>
+                </div>
+              </div>
+              <ScrollArea className="h-[120px]">
+                <div className="space-y-2">
+                  {recentDocuments?.map((doc) => (
+                    <Button
+                      key={doc.id}
+                      variant="ghost"
+                      className="w-full justify-start text-sm"
+                      onClick={() => navigate(`/dashboard/formatting?doc=${doc.id}`)}
+                    >
+                      <FileText className="h-4 w-4 mr-2 text-blue-500" />
+                      {doc.title}
+                    </Button>
+                  ))}
+                  {(!recentDocuments || recentDocuments.length === 0) && (
+                    <p className="text-sm text-muted-foreground">No recent documents</p>
+                  )}
+                </div>
+              </ScrollArea>
+            </div>
+
+            {/* Recent Characters */}
+            <div className="p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2 text-green-500">
+                  <Users className="h-5 w-5" />
+                  <h3 className="font-semibold">Recent Characters</h3>
+                </div>
+              </div>
+              <ScrollArea className="h-[120px]">
+                <div className="space-y-2">
+                  {recentCharacters?.map((character) => (
+                    <Button
+                      key={character.id}
+                      variant="ghost"
+                      className="w-full justify-start text-sm"
+                      onClick={() => navigate('/dashboard/characters')}
+                    >
+                      <Users className="h-4 w-4 mr-2 text-green-500" />
+                      {character.name}
+                    </Button>
+                  ))}
+                  {(!recentCharacters || recentCharacters.length === 0) && (
+                    <p className="text-sm text-muted-foreground">No recent characters</p>
+                  )}
+                </div>
+              </ScrollArea>
             </div>
           </motion.div>
         </div>
