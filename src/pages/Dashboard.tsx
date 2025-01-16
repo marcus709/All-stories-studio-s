@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Outlet } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
@@ -41,7 +41,10 @@ function DashboardLayout() {
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
       <div className={`pt-16 transition-all duration-300 ${isSidebarCollapsed ? 'ml-12' : 'ml-72'}`}>
-        <DashboardContent currentView={currentView} />
+        <Outlet />
+        {!window.location.pathname.includes("/dashboard/") && (
+          <DashboardContent currentView={currentView} />
+        )}
       </div>
       <StudioAssistant />
     </div>
