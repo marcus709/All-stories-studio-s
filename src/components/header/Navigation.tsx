@@ -10,22 +10,22 @@ export const Navigation = ({ onScrollToSection, onCommunityClick }: NavigationPr
     <nav className="flex items-center space-x-6">
       <button 
         onClick={() => onScrollToSection('features')} 
-        className="text-gray-600 hover:text-gray-900"
+        className="text-white hover:text-gray-200"
       >
         Features
       </button>
       <button 
         onClick={() => onScrollToSection('pricing')} 
-        className="text-gray-600 hover:text-gray-900"
+        className="text-white hover:text-gray-200"
       >
         Pricing
       </button>
-      <Link to="/dashboard" className="text-gray-600 hover:text-gray-900">
+      <Link to="/dashboard" className="text-white hover:text-gray-200">
         Dashboard
       </Link>
       <button
         onClick={onCommunityClick}
-        className="text-gray-600 hover:text-gray-900"
+        className="text-white hover:text-gray-200"
       >
         Community
       </button>
