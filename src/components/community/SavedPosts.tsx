@@ -17,6 +17,7 @@ interface Comment {
   id: string;
   content: string;
   created_at: string;
+  user_id: string;
   get_comment_profiles: Array<{
     username: string;
     avatar_url: string | null;
