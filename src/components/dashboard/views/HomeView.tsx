@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAI } from "@/hooks/useAI";
 import { useToast } from "@/hooks/use-toast";
-import { PenLine, Sparkles, Target, Calendar, Brain, Send } from "lucide-react";
+import { Target, Send, Brain } from "lucide-react";
 import { Profile } from "@/integrations/supabase/types/tables.types";
 import { motion } from "framer-motion";
 
@@ -129,23 +129,12 @@ export const HomeView = () => {
           >
             <div className="p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm">
               <div className="flex items-center gap-2 text-pink-500 dark:text-pink-400 mb-3">
-                <Calendar className="h-5 w-5" />
-                <h3 className="font-semibold">Quick Actions</h3>
+                <Brain className="h-5 w-5" />
+                <h3 className="font-semibold">Writing Assistant</h3>
               </div>
-              <div className="space-y-2">
-                <Button variant="outline" className="w-full justify-start">
-                  <PenLine className="h-4 w-4 mr-2" />
-                  Continue Writing
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <Brain className="h-4 w-4 mr-2" />
-                  Brainstorm Ideas
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Writing Prompts
-                </Button>
-              </div>
+              <p className="text-sm text-muted-foreground">
+                Share your writing goals, and I'll help you create a focused plan for today's session.
+              </p>
             </div>
           </motion.div>
         </div>
@@ -158,7 +147,7 @@ export const HomeView = () => {
           >
             <div className="prose dark:prose-invert max-w-none">
               <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-purple-500" />
+                <Brain className="h-5 w-5 text-purple-500" />
                 Your Writing Plan
               </h3>
               <div className="whitespace-pre-wrap">
