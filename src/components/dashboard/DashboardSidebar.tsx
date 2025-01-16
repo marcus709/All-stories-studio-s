@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
 const navigationItems = [
-  { id: "story", icon: Home, label: "Home" },
+  { id: "story", icon: Home, label: "Story Editor" },
   { id: "characters", icon: Users, label: "Characters" },
   { id: "plot", icon: LineChart, label: "Formatting" },
   { id: "dream", icon: Rewind, label: "Plot Development" },
