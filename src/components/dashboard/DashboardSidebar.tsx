@@ -65,12 +65,12 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
 
   if (isCollapsed) {
     return (
-      <div className="fixed left-0 top-16 w-12 h-[calc(100vh-4rem)] border-r border-slate-800 bg-slate-900 flex flex-col items-center py-4">
+      <div className="fixed left-0 top-16 w-12 h-[calc(100vh-4rem)] border-r bg-white flex flex-col items-center py-4">
         <Button
           variant="ghost"
           size="icon"
           onClick={onToggleCollapse}
-          className="mb-4 text-gray-400 hover:text-gray-200"
+          className="mb-4"
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
@@ -81,7 +81,7 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
               onClick={() => setCurrentView(id)}
               disabled={!selectedStory}
               className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors
-                ${currentView === id ? "text-purple-400 bg-purple-950" : "text-gray-400 hover:bg-slate-800"}`}
+                ${currentView === id ? "text-purple-600 bg-purple-50" : "text-gray-700 hover:bg-gray-50"}`}
             >
               <Icon className="h-5 w-5" />
             </button>
@@ -92,30 +92,32 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
   }
 
   return (
-    <div className="fixed left-0 top-16 w-72 h-[calc(100vh-4rem)] border-r border-slate-800 bg-slate-900">
+    <div className="fixed left-0 top-16 w-72 h-[calc(100vh-4rem)] border-r bg-white">
       <div className="flex flex-col h-full">
         <div className="absolute right-2 top-2">
           <Button
             variant="ghost"
             size="icon"
             onClick={onToggleCollapse}
-            className="hover:bg-slate-800 text-gray-400"
+            className="hover:bg-gray-100"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
         </div>
 
+        {/* Profile Section - Fixed */}
         <div className="flex items-center gap-3 mb-12 px-8 mt-8">
-          <div className="w-11 h-11 rounded-full bg-purple-950 flex items-center justify-center text-purple-300 text-lg font-medium">
+          <div className="w-11 h-11 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-lg font-medium">
             {profile?.username?.[0]?.toUpperCase() || "?"}
           </div>
           <div className="flex flex-col">
-            <h3 className="font-medium text-base text-gray-200">
+            <h3 className="font-medium text-base text-gray-900">
               {profile?.username || "Loading..."}
             </h3>
           </div>
         </div>
 
+        {/* Stories Section - Fixed */}
         <div className="space-y-4 mb-6 px-8">
           <StoryButtons
             selectedStory={selectedStory}
@@ -134,6 +136,7 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
           />
         </div>
 
+        {/* Navigation - Scrollable */}
         <ScrollArea className="flex-1 px-4">
           <nav className="space-y-3 pr-4">
             {navigationItems.map(({ id, icon: Icon, label }) => (
@@ -141,8 +144,8 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
                 key={id}
                 onClick={() => setCurrentView(id)}
                 disabled={!selectedStory}
-                className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-lg transition-colors text-gray-300 text-lg
-                  ${currentView === id ? "bg-purple-950 text-purple-300" : "hover:bg-slate-800"}`}
+                className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-lg transition-colors text-gray-700 text-lg
+                  ${currentView === id ? "bg-purple-50 text-purple-600" : "hover:bg-gray-50"}`}
               >
                 <Icon className="h-6 w-6" />
                 <span className="font-medium">{label}</span>
