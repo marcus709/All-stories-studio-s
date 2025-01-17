@@ -7,11 +7,14 @@ import { useState, useEffect } from "react";
 import { AuthModals } from "@/components/auth/AuthModals";
 import { useLocation } from "react-router-dom";
 import Spline from '@splinetool/react-spline';
+import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [authView, setAuthView] = useState<"signin" | "signup">("signup");
+  const [splineError, setSplineError] = useState(false);
   const location = useLocation();
+  const { toast } = useToast();
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -30,14 +33,26 @@ const Index = () => {
     setShowAuth(true);
   };
 
+  const handleSplineError = () => {
+    setSplineError(true);
+    toast({
+      title: "Background Load Error",
+      description: "Unable to load 3D background. Using fallback background.",
+      variant: "destructive",
+    });
+  };
+
   return (
     <div className="relative min-h-screen overflow-hidden">
       {/* Spline Background */}
-      <div className="fixed inset-0 w-full h-full z-0">
-        <Spline 
-          scene="https://prod.spline.design/27777570ee9ed2811d5f6419b01d90b4/scene.splinecode"
-          style={{ width: '100%', height: '100%' }}
-        />
+      <div className={`fixed inset-0 w-full h-full z-0 ${splineError ? 'bg-gradient-to-br from-black to-gray-900' : ''}`}>
+        {!splineError && (
+          <Spline 
+            scene="https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode"
+            style={{ width: '100%', height: '100%' }}
+            onError={handleSplineError}
+          />
+        )}
       </div>
 
       {/* Content */}
