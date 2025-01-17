@@ -115,218 +115,197 @@ export const HomeView = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0F1C]">
-      <div className="container mx-auto px-8">
-        {/* Main Content Area */}
-        <div className="grid grid-cols-12 gap-8 pt-8">
-          {/* Left Sidebar - Navigation */}
-          <div className="col-span-2 space-y-8">
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <h3 className="text-xs uppercase tracking-wider text-gray-400">Main</h3>
-                <nav className="space-y-2">
-                  {['Explore', 'Projects', 'Explorations', 'Blog', 'About'].map((item) => (
-                    <button
-                      key={item}
-                      className="w-full text-left px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
-                    >
-                      {item}
-                    </button>
-                  ))}
-                </nav>
-              </div>
-
-              <div className="space-y-2">
-                <h3 className="text-xs uppercase tracking-wider text-gray-400">Social</h3>
-                <nav className="space-y-2">
-                  {['LinkedIn', 'Twitter', 'Dribbble', 'Instagram'].map((item) => (
-                    <button
-                      key={item}
-                      className="w-full text-left px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
-                    >
-                      {item}
-                    </button>
-                  ))}
-                </nav>
-              </div>
-            </div>
-          </div>
-
-          {/* Main Content - Center */}
-          <div className="col-span-7">
-            <div className="space-y-8">
-              {/* Hero Section with Glowing Circle */}
-              <div className="relative h-[400px] rounded-2xl bg-gradient-to-b from-[#1a2436] to-[#0A0F1C] overflow-hidden">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                  <div className="w-40 h-40 rounded-full bg-[#33C3F0] blur-2xl opacity-20"></div>
-                </div>
-                <div className="absolute bottom-8 left-8">
-                  <h1 className="text-4xl font-bold text-white mb-4">
-                    {profile?.username || 'Writer'}
-                  </h1>
-                  <p className="text-gray-400 max-w-xl">
-                    Welcome to your writing dashboard. Here's an overview of your creative journey.
-                  </p>
-                </div>
-              </div>
-
-              {/* Project Overview Section */}
-              <div className="space-y-6">
-                <h2 className="text-xl font-semibold text-white">Project Overview</h2>
-                <Card className="bg-[#1a2436]/50 border-0 backdrop-blur-xl">
-                  <CardContent className="p-6">
-                    <Textarea
-                      value={writingGoal}
-                      onChange={(e) => setWritingGoal(e.target.value)}
-                      placeholder="What would you like to work on today?"
-                      className="min-h-[120px] bg-[#0A0F1C]/50 border-gray-800 text-gray-300 resize-none focus:ring-[#33C3F0]"
-                    />
-                    <Button
-                      onClick={handlePlanSession}
-                      disabled={isLoading || !writingGoal.trim()}
-                      className="w-full mt-4 bg-[#33C3F0] hover:bg-[#1EAEDB] text-white"
-                    >
-                      {isLoading ? (
-                        "Creating your plan..."
-                      ) : (
-                        <>
-                          <Send className="h-4 w-4 mr-2" />
-                          Get Personalized Plan
-                        </>
-                      )}
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* AI Response Section */}
-              {aiResponse && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  <Card className="bg-[#1a2436]/50 border-0 backdrop-blur-xl">
-                    <CardHeader>
-                      <CardTitle className="text-white flex items-center gap-2">
-                        <Brain className="h-5 w-5 text-[#33C3F0]" />
-                        Your Writing Plan
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="prose prose-invert max-w-none">
-                        <div className="whitespace-pre-wrap text-gray-300">
-                          {aiResponse}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              )}
-            </div>
-          </div>
-
-          {/* Right Sidebar - Quick Access */}
-          <div className="col-span-3 space-y-8">
-            {/* Recent Activity Cards */}
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-blue-500" />
-                      Recent Documents
-                    </div>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => navigate('/dashboard/formatting')}
-                      className="text-sm text-muted-foreground hover:text-primary"
-                    >
-                      View All
-                      <ArrowRight className="h-4 w-4 ml-1" />
-                    </Button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[200px]">
-                    <div className="space-y-2">
-                      {recentDocuments?.map((doc) => (
-                        <Button
-                          key={doc.id}
-                          variant="ghost"
-                          className="w-full justify-start text-sm"
-                          onClick={() => navigate(`/dashboard/formatting?doc=${doc.id}`)}
-                        >
-                          <FileText className="h-4 w-4 mr-2 text-blue-500" />
-                          <div className="flex flex-col items-start">
-                            <span className="font-medium">{doc.title}</span>
-                            <span className="text-xs text-muted-foreground">
-                              <Clock className="h-3 w-3 inline mr-1" />
-                              {new Date(doc.updated_at).toLocaleDateString()}
-                            </span>
-                          </div>
-                        </Button>
-                      ))}
-                      {(!recentDocuments || recentDocuments.length === 0) && (
-                        <p className="text-sm text-muted-foreground text-center py-4">
-                          No recent documents
-                        </p>
-                      )}
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Users className="h-5 w-5 text-green-500" />
-                      Recent Characters
-                    </div>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => navigate('/dashboard/characters')}
-                      className="text-sm text-muted-foreground hover:text-primary"
-                    >
-                      View All
-                      <ArrowRight className="h-4 w-4 ml-1" />
-                    </Button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[200px]">
-                    <div className="space-y-2">
-                      {recentCharacters?.map((character) => (
-                        <Button
-                          key={character.id}
-                          variant="ghost"
-                          className="w-full justify-start text-sm"
-                          onClick={() => navigate('/dashboard/characters')}
-                        >
-                          <Users className="h-4 w-4 mr-2 text-green-500" />
-                          <div className="flex flex-col items-start">
-                            <span className="font-medium">{character.name}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {character.role || 'No role specified'}
-                            </span>
-                          </div>
-                        </Button>
-                      ))}
-                      {(!recentCharacters || recentCharacters.length === 0) && (
-                        <p className="text-sm text-muted-foreground text-center py-4">
-                          No recent characters
-                        </p>
-                      )}
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-            </div>
+    <div className="container mx-auto px-4 py-8">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="space-y-6"
+      >
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              Welcome back, {profile?.username || 'Writer'}
+            </h1>
+            <p className="text-muted-foreground">
+              Here's an overview of your writing progress
+            </p>
           </div>
         </div>
-      </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Writing Plan Card */}
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-purple-500" />
+                Today's Writing Plan
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Textarea
+                value={writingGoal}
+                onChange={(e) => setWritingGoal(e.target.value)}
+                placeholder="What would you like to work on today? (e.g., 'I want to develop the conflict in chapter 3' or 'I need help brainstorming character motivations')"
+                className="min-h-[120px] bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 resize-none"
+              />
+              <Button
+                onClick={handlePlanSession}
+                disabled={isLoading || !writingGoal.trim()}
+                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-md"
+              >
+                {isLoading ? (
+                  "Creating your plan..."
+                ) : (
+                  <>
+                    <Send className="h-4 w-4 mr-2" />
+                    Get Personalized Plan
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Quick Stats Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Brain className="h-5 w-5 text-pink-500" />
+                Writing Assistant
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Share your writing goals, and I'll help you create a focused plan for today's session.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Recent Activity Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Recent Documents */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-blue-500" />
+                  Recent Documents
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => navigate('/dashboard/formatting')}
+                  className="text-sm text-muted-foreground hover:text-primary"
+                >
+                  View All
+                  <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[200px]">
+                <div className="space-y-2">
+                  {recentDocuments?.map((doc) => (
+                    <Button
+                      key={doc.id}
+                      variant="ghost"
+                      className="w-full justify-start text-sm"
+                      onClick={() => navigate(`/dashboard/formatting?doc=${doc.id}`)}
+                    >
+                      <FileText className="h-4 w-4 mr-2 text-blue-500" />
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">{doc.title}</span>
+                        <span className="text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3 inline mr-1" />
+                          {new Date(doc.updated_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </Button>
+                  ))}
+                  {(!recentDocuments || recentDocuments.length === 0) && (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No recent documents
+                    </p>
+                  )}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+
+          {/* Recent Characters */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-green-500" />
+                  Recent Characters
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => navigate('/dashboard/characters')}
+                  className="text-sm text-muted-foreground hover:text-primary"
+                >
+                  View All
+                  <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[200px]">
+                <div className="space-y-2">
+                  {recentCharacters?.map((character) => (
+                    <Button
+                      key={character.id}
+                      variant="ghost"
+                      className="w-full justify-start text-sm"
+                      onClick={() => navigate('/dashboard/characters')}
+                    >
+                      <Users className="h-4 w-4 mr-2 text-green-500" />
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">{character.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {character.role || 'No role specified'}
+                        </span>
+                      </div>
+                    </Button>
+                  ))}
+                  {(!recentCharacters || recentCharacters.length === 0) && (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No recent characters
+                    </p>
+                  )}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </div>
+
+        {aiResponse && (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-6"
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="h-5 w-5 text-purple-500" />
+                  Your Writing Plan
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose dark:prose-invert max-w-none">
+                  <div className="whitespace-pre-wrap">
+                    {aiResponse}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </motion.div>
     </div>
   );
 };
