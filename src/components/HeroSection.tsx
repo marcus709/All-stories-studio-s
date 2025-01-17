@@ -36,9 +36,9 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center overflow-hidden">
+    <div className="relative h-screen flex items-center overflow-hidden">
       {/* Spline Scene Background */}
-      <div className="fixed inset-0 w-full h-full">
+      <div className="absolute inset-0 w-full h-full">
         {!splineError ? (
           <iframe 
             src='https://my.spline.design/retrofuturismbganimation-27777570ee9ed2811d5f6419b01d90b4/' 
