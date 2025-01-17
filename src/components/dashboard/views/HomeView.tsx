@@ -227,34 +227,6 @@ export const HomeView = () => {
 
           {/* Right Sidebar - Quick Access */}
           <div className="col-span-3 space-y-8">
-            <div className="space-y-4">
-              <h3 className="text-xs uppercase tracking-wider text-gray-400">Contents</h3>
-              <nav className="space-y-2">
-                {['Overview', 'Market trends', 'Information architecture'].map((item) => (
-                  <button
-                    key={item}
-                    className="w-full text-left px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
-                  >
-                    {item}
-                  </button>
-                ))}
-              </nav>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-xs uppercase tracking-wider text-gray-400">Role</h3>
-              <div className="flex flex-wrap gap-2">
-                {['User interface', 'Branding', 'Website development', 'Product strategy'].map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-3 py-1 rounded-full bg-white/5 text-sm text-gray-400"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
             {/* Recent Activity Cards */}
             <div className="space-y-4">
               <Card>
