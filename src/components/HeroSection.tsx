@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useToast } from "./ui/use-toast";
 import { useState } from "react";
+import Spline from '@splinetool/react-spline';
 
 interface HeroSectionProps {
   onShowAuth?: (view: "signin" | "signup") => void;
@@ -13,7 +14,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleIframeError = () => {
+  const handleSplineError = () => {
     setIsLoading(false);
     toast({
       title: "Error",
@@ -33,22 +34,11 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
       
       {/* Background Scene */}
       <div className="absolute inset-0 w-full h-full">
-        <iframe 
-          src="https://my.spline.design/theshipwreck-b47b3f5b7727762a0d6ad2efe92792ae/"
-          frameBorder="0" 
-          width="100%" 
-          height="100%"
+        <Spline
+          scene="https://prod.spline.design/b47b3f5b7727762a0d6ad2efe92792ae/scene.splinecode"
           onLoad={() => setIsLoading(false)}
-          onError={handleIframeError}
-          title="3D Scene Background"
-          className="w-full h-full"
-          style={{ 
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0
-          }}
+          onError={handleSplineError}
+          style={{ width: '100%', height: '100%' }}
         />
       </div>
       
