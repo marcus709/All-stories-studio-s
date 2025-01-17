@@ -5,6 +5,7 @@ declare namespace JSX {
       className?: string;
       'loading-anim'?: boolean;
       'events-target'?: string;
+      onError?: (event: Event) => void;
     };
   }
 }

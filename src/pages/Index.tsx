@@ -3,7 +3,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { AuthModals } from "@/components/auth/AuthModals";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [showAuth, setShowAuth] = useState(false);
@@ -48,6 +48,7 @@ const Index = () => {
             className="w-full h-full"
             loading-anim
             events-target="global"
+            onError={handleSplineError}
           ></spline-viewer>
         )}
       </div>
