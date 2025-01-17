@@ -1,24 +1,16 @@
-import { useNavigate } from "react-router-dom";
-import { useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { useSession } from "@supabase/auth-helpers-react";
-import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/Header";
+import { HeroSection } from "@/components/HeroSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { StoriesSection } from "@/components/StoriesSection";
 import { PricingSection } from "@/components/PricingSection";
+import { useState, useEffect } from "react";
 import { AuthModals } from "@/components/auth/AuthModals";
-import { Button } from "@/components/ui/button";
-import Spline from '@splinetool/react-spline';
+import { useLocation } from "react-router-dom";
 
 const Index = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [authView, setAuthView] = useState<"signin" | "signup">("signup");
-  const [splineError, setSplineError] = useState(false);
   const location = useLocation();
-  const { toast } = useToast();
-  const session = useSession();
-  const navigate = useNavigate();
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -37,73 +29,29 @@ const Index = () => {
     setShowAuth(true);
   };
 
-  const handleStartWriting = () => {
-    if (session) {
-      navigate("/dashboard");
-    } else {
-      if (handleShowAuth) {
-        handleShowAuth("signup");
-      } else {
-        toast({
-          title: "Authentication Required",
-          description: "Please sign up to start writing.",
-          variant: "destructive",
-        });
-      }
-    }
-  };
-
-  const handleSplineError = () => {
-    console.error("Spline scene failed to load");
-    setSplineError(true);
-    toast({
-      title: "Background Load Error",
-      description: "Using fallback background",
-      variant: "destructive",
-    });
-  };
-
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Spline Scene Background */}
-      <div className="fixed inset-0 -z-10">
-        {!splineError ? (
-          <Spline 
-            scene="https://my.spline.design/retrofuturismbganimation-27777570ee9ed2811d5f6419b01d90b4/"
-            onError={handleSplineError}
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-purple-900 via-blue-900 to-black animate-gradient" />
-        )}
-      </div>
-      
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white">
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
       <div className="relative">
         <Header />
         <main className="relative">
-          <div className="min-h-screen flex items-center justify-center px-4">
-            <div className="max-w-2xl mx-auto text-center">
-              <h1 className="text-6xl md:text-7xl font-bold mb-6 text-white leading-[1.1] tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
-                Transform your writing journey
-              </h1>
-              
-              <p className="text-lg text-white/80 mb-10 mx-auto leading-relaxed">
-                Create deeper characters, richer plots, and more engaging narratives.
-              </p>
-
-              <Button 
-                onClick={handleStartWriting}
-                className="px-8 py-6 text-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-full transition-all duration-300 hover:scale-105 backdrop-blur-sm"
-              >
-                Start Writing Now
-              </Button>
-            </div>
+          {/* Decorative gradients */}
+          <div className="absolute top-0 right-0 -translate-y-1/4 animate-pulse">
+            <div className="w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-3xl" />
           </div>
+          <div className="absolute top-1/3 left-0 -translate-x-1/2 animate-pulse delay-700">
+            <div className="w-[500px] h-[500px] bg-pink-500/10 rounded-full blur-3xl" />
+          </div>
+          <div className="absolute bottom-0 right-1/4 translate-y-1/4 animate-pulse delay-1000">
+            <div className="w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-3xl" />
+          </div>
+          
+          <HeroSection onShowAuth={handleShowAuth} />
           <FeaturesSection />
           <StoriesSection />
           <PricingSection />
         </main>
       </div>
-
       <AuthModals
         isOpen={showAuth}
         onClose={() => setShowAuth(false)}
