@@ -27,13 +27,13 @@ const stories = [
 
 export const StoriesSection = () => {
   return (
-    <section className="py-24 px-4 bg-gradient-to-br from-black to-purple-950/30">
+    <section className="py-24 px-4 bg-black">
       <div className="container mx-auto max-w-7xl">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-6 font-mono bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">
+          <h2 className="text-4xl font-bold mb-6 font-mono text-white">
             Featured Stories
           </h2>
-          <p className="text-lg text-purple-200/70 max-w-2xl mx-auto font-light">
+          <p className="text-lg text-gray-400 max-w-2xl mx-auto font-light">
             Discover incredible stories crafted by our community of writers using AI-powered tools.
           </p>
         </div>
@@ -43,7 +43,7 @@ export const StoriesSection = () => {
             {stories.map((story, index) => (
               <Card 
                 key={index}
-                className={`group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-black/40 backdrop-blur-sm ${
+                className={`group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-zinc-900/50 backdrop-blur-sm ${
                   story.isShared ? 'border-l-4 border-l-purple-500' : ''
                 }`}
               >
@@ -62,7 +62,7 @@ export const StoriesSection = () => {
                       </Badge>
                     )}
                     <Badge 
-                      className="bg-black/60 text-purple-200 hover:bg-black/80 backdrop-blur-sm"
+                      className="bg-zinc-800/60 text-purple-200 hover:bg-zinc-700/80 backdrop-blur-sm"
                     >
                       {story.category}
                     </Badge>
@@ -71,10 +71,10 @@ export const StoriesSection = () => {
                 
                 <CardContent className="relative p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm text-purple-200/70">By {story.author}</span>
+                    <span className="text-sm text-gray-400">By {story.author}</span>
                     <div className="flex items-center space-x-1">
                       <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                      <span className="text-sm font-medium text-purple-200">{story.rating}</span>
+                      <span className="text-sm font-medium text-gray-300">{story.rating}</span>
                     </div>
                   </div>
                   
@@ -82,7 +82,7 @@ export const StoriesSection = () => {
                     {story.title}
                   </h3>
                   
-                  <p className="text-purple-200/70 mb-4 line-clamp-2 font-light">
+                  <p className="text-gray-400 mb-4 line-clamp-2 font-light">
                     {story.description}
                   </p>
                   
@@ -94,8 +94,7 @@ export const StoriesSection = () => {
             ))}
           </div>
 
-          {/* Lamp Feature */}
-          <div className="w-full h-[600px]">
+          <div className="w-full h-[600px] bg-black">
             <LampContainer className="w-full h-full">
               <motion.h1
                 initial={{ opacity: 0.5, y: 100 }}
@@ -117,7 +116,7 @@ export const StoriesSection = () => {
                   duration: 0.8,
                   ease: "easeInOut",
                 }}
-                className="text-purple-200/70 mt-4 text-center text-lg"
+                className="text-gray-400 mt-4 text-center text-lg"
               >
                 A platform where your creativity shines bright
               </motion.p>
@@ -127,4 +126,4 @@ export const StoriesSection = () => {
       </div>
     </section>
   );
-};
+}
