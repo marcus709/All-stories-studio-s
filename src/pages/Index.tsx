@@ -30,28 +30,26 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white">
-      <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
-      <div className="relative">
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Spline Background */}
+      <div className="fixed inset-0 w-full h-full z-0">
+        <spline-viewer 
+          url="https://my.spline.design/retrofuturismbganimation-27777570ee9ed2811d5f6419b01d90b4/"
+          class="w-full h-full"
+        />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10">
         <Header />
         <main className="relative">
-          {/* Decorative gradients */}
-          <div className="absolute top-0 right-0 -translate-y-1/4 animate-pulse">
-            <div className="w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-3xl" />
-          </div>
-          <div className="absolute top-1/3 left-0 -translate-x-1/2 animate-pulse delay-700">
-            <div className="w-[500px] h-[500px] bg-pink-500/10 rounded-full blur-3xl" />
-          </div>
-          <div className="absolute bottom-0 right-1/4 translate-y-1/4 animate-pulse delay-1000">
-            <div className="w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-3xl" />
-          </div>
-          
           <HeroSection onShowAuth={handleShowAuth} />
           <FeaturesSection />
           <StoriesSection />
           <PricingSection />
         </main>
       </div>
+
       <AuthModals
         isOpen={showAuth}
         onClose={() => setShowAuth(false)}
