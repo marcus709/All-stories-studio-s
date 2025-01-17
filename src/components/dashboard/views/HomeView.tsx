@@ -10,44 +10,20 @@ import { Profile } from "@/integrations/supabase/types/tables.types";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { useStory } from "@/contexts/StoryContext";
-import { Document } from "@/types/story";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const HomeView = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [writingGoal, setWritingGoal] = useState("");
-  const [aiResponse, setAiResponse] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const { generateContent } = useAI();
-  const { toast } = useToast();
-  const { selectedStory } = useStory();
-  const navigate = useNavigate();
   const session = useSession();
+  const { toast } = useToast();
+  const { generateContent } = useAI();
+  const [isLoading, setIsLoading] = useState(false);
+  const { selectedStory } = useStory();
 
   useEffect(() => {
     if (session?.user?.id) {
       getProfile();
     }
   }, [session?.user?.id]);
-
-  const { data: recentDocuments } = useQuery({
-    queryKey: ["recent-documents", selectedStory?.id],
-    queryFn: async () => {
-      if (!selectedStory?.id) return [];
-      const { data, error } = await supabase
-        .from("documents")
-        .select("*")
-        .eq("story_id", selectedStory.id)
-        .order("updated_at", { ascending: false })
-        .limit(3);
-
-      if (error) throw error;
-      return data as Document[];
-    },
-    enabled: !!selectedStory?.id,
-  });
 
   const getProfile = async () => {
     try {
@@ -64,112 +40,69 @@ export const HomeView = () => {
     }
   };
 
-  const handlePlanSession = async () => {
-    if (!writingGoal.trim()) return;
-    
-    setIsLoading(true);
-    try {
-      const response = await generateContent(
-        `As a writing coach, help me plan my writing session today. Here's what I want to work on: ${writingGoal}`,
-        'suggestions',
-        {
-          aiConfig: {
-            temperature: 0.7,
-            max_tokens: 500,
-            model_type: "gpt-4o-mini",
-            system_prompt: "You are a supportive writing coach that provides clear, actionable steps for planning writing sessions. Focus on time management, specific goals, and practical exercises. Keep responses concise and motivating."
-          }
-        }
-      );
-
-      if (response) {
-        setAiResponse(response);
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to get AI response. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 font-mono">
-      <div className="container mx-auto px-4 py-8">
-        <motion.div 
+    <div className="min-h-screen bg-[#0A192F] text-white font-mono relative overflow-hidden">
+      {/* Hero Section with Glowing Circle */}
+      <div className="relative h-[70vh] flex items-center justify-center">
+        {/* Glowing Circle */}
+        <div className="absolute w-64 h-64 rounded-full border-2 border-[#64FFDA] blur-sm animate-pulse" />
+        
+        {/* Dark Sphere */}
+        <div className="absolute w-32 h-32 bg-[#0A192F] rounded-full shadow-2xl transform translate-y-16" />
+        
+        {/* Platform */}
+        <div className="absolute w-48 h-12 bg-[#112240] bottom-32 transform -translate-y-8" />
+
+        {/* Username */}
+        <motion.h1 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="space-y-6"
+          className="absolute bottom-16 left-16 text-6xl font-bold text-white"
         >
-          <div className="relative mb-12">
-            <div className="absolute inset-0 bg-zinc-900/50 blur-3xl rounded-full" />
-            <div className="relative">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-zinc-100 to-zinc-400 bg-clip-text text-transparent">
-                Welcome back, {profile?.username || 'Writer'}
-              </h1>
-              <p className="text-zinc-400 mt-2">
-                Here's an overview of your writing progress
-              </p>
-            </div>
+          {profile?.username || 'Writer'}
+        </motion.h1>
+      </div>
+
+      {/* Content Section */}
+      <div className="relative z-10 px-16 py-12 bg-[#112240]/80 backdrop-blur-lg">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl font-medium text-[#64FFDA] mb-4">Project overview</h2>
+          <p className="text-gray-400 mb-8 leading-relaxed">
+            Welcome to your writing dashboard. Here you can manage your stories, develop characters,
+            and get AI-powered assistance for your creative process.
+          </p>
+
+          {/* Navigation Links */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+            {['Overview', 'Market trends', 'Information architecture', 'Product strategy'].map((item) => (
+              <div 
+                key={item}
+                className="px-4 py-2 text-sm text-gray-400 hover:text-[#64FFDA] transition-colors cursor-pointer"
+              >
+                {item}
+              </div>
+            ))}
           </div>
 
-          <Card className="bg-zinc-900/50 border-zinc-800 backdrop-blur-xl">
-            <CardHeader>
-              <CardTitle className="text-zinc-100">
-                Today's Writing Plan
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Textarea
-                value={writingGoal}
-                onChange={(e) => setWritingGoal(e.target.value)}
-                placeholder="What would you like to work on today?"
-                className="min-h-[120px] bg-zinc-800/50 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 resize-none"
-              />
-              <Button
-                onClick={handlePlanSession}
-                disabled={isLoading || !writingGoal.trim()}
-                className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 transition-all duration-300"
-              >
-                {isLoading ? (
-                  "Creating your plan..."
-                ) : (
-                  <>
-                    <Send className="h-4 w-4 mr-2" />
-                    Get Personalized Plan
-                  </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-
-          {aiResponse && (
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <Card className="bg-zinc-900/50 border-zinc-800 backdrop-blur-xl">
-                <CardHeader>
-                  <CardTitle className="text-zinc-100">
-                    Your Writing Plan
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="prose dark:prose-invert max-w-none">
-                    <div className="whitespace-pre-wrap text-zinc-300">
-                      {aiResponse}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-        </motion.div>
+          {/* Role Tags */}
+          <div className="mt-12">
+            <h3 className="text-gray-400 mb-4 uppercase text-sm tracking-wider">Role</h3>
+            <div className="flex flex-wrap gap-3">
+              {['User interface', 'Branding', 'Website development', 'Product strategy'].map((tag) => (
+                <span 
+                  key={tag}
+                  className="px-4 py-2 rounded-full border border-[#64FFDA] text-[#64FFDA] text-sm"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Background Gradient */}
+      <div className="fixed inset-0 bg-gradient-to-b from-[#0A192F] to-[#112240] -z-10" />
     </div>
   );
 };
