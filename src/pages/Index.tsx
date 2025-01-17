@@ -48,7 +48,7 @@ const Index = () => {
       <div className={`fixed inset-0 w-full h-full z-0 ${splineError ? 'bg-gradient-to-br from-black to-gray-900' : ''}`}>
         {!splineError && (
           <Spline 
-            scene="https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode"
+            scene="https://prod.spline.design/27777570ee9ed2811d5f6419b01d90b4/scene.splinecode"
             style={{ width: '100%', height: '100%' }}
             onError={handleSplineError}
           />
