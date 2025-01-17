@@ -12,10 +12,10 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   };
 
   return (
-    <div className="relative h-[90vh] w-full flex items-center justify-center overflow-hidden bg-black">
+    <div className="relative h-screen w-full flex items-center justify-center overflow-hidden">
       {/* Loading State */}
       {isLoading && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black">
           <div className="text-white text-xl">Loading 3D Scene...</div>
         </div>
       )}
@@ -29,6 +29,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
           height="100%"
           onLoad={handleIframeLoad}
           title="3D Scene"
+          style={{ backgroundColor: 'transparent' }}
         />
       </div>
     </div>
