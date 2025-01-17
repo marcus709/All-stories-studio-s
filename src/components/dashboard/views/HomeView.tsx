@@ -17,7 +17,6 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const HomeView = () => {
-  const session = useSession();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [writingGoal, setWritingGoal] = useState("");
   const [aiResponse, setAiResponse] = useState("");
@@ -26,6 +25,7 @@ export const HomeView = () => {
   const { toast } = useToast();
   const { selectedStory } = useStory();
   const navigate = useNavigate();
+  const session = useSession();
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -126,7 +126,7 @@ export const HomeView = () => {
           <div className="relative mb-12">
             <div className="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full" />
             <div className="relative">
-              <h1 className="text-4xl font-bold font-mono bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold font-mono bg-gradient-to-r from-zinc-100 to-zinc-400 bg-clip-text text-transparent">
                 Welcome back, {profile?.username || 'Writer'}
               </h1>
               <p className="text-zinc-400 mt-2 font-mono">
@@ -139,7 +139,7 @@ export const HomeView = () => {
             <Card className="md:col-span-2 bg-zinc-900/50 border-zinc-800 backdrop-blur-xl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-zinc-100 font-mono">
-                  <Target className="h-5 w-5 text-blue-500" />
+                  <Target className="h-5 w-5 text-zinc-400" />
                   Today's Writing Plan
                 </CardTitle>
               </CardHeader>
@@ -153,7 +153,7 @@ export const HomeView = () => {
                 <Button
                   onClick={handlePlanSession}
                   disabled={isLoading || !writingGoal.trim()}
-                  className="w-full bg-blue-500 hover:bg-blue-600 text-white font-mono shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300"
+                  className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-mono border border-zinc-700 transition-all duration-300"
                 >
                   {isLoading ? (
                     "Creating your plan..."
@@ -170,7 +170,7 @@ export const HomeView = () => {
             <Card className="bg-zinc-900/50 border-zinc-800 backdrop-blur-xl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-zinc-100 font-mono">
-                  <Brain className="h-5 w-5 text-blue-500" />
+                  <Brain className="h-5 w-5 text-zinc-400" />
                   Writing Assistant
                 </CardTitle>
               </CardHeader>
@@ -187,7 +187,7 @@ export const HomeView = () => {
               <CardHeader>
                 <CardTitle className="flex items-center justify-between text-zinc-100 font-mono">
                   <div className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-blue-500" />
+                    <FileText className="h-5 w-5 text-zinc-400" />
                     Recent Documents
                   </div>
                   <Button 
@@ -208,10 +208,10 @@ export const HomeView = () => {
                       <Button
                         key={doc.id}
                         variant="ghost"
-                        className="w-full justify-start text-sm text-zinc-300 hover:text-zinc-100 hover:bg-blue-500/10 font-mono"
+                        className="w-full justify-start text-sm text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800/50 font-mono"
                         onClick={() => navigate(`/dashboard/formatting?doc=${doc.id}`)}
                       >
-                        <FileText className="h-4 w-4 mr-2 text-blue-500" />
+                        <FileText className="h-4 w-4 mr-2 text-zinc-400" />
                         <div className="flex flex-col items-start">
                           <span className="font-medium">{doc.title}</span>
                           <span className="text-xs text-zinc-500">
@@ -235,7 +235,7 @@ export const HomeView = () => {
               <CardHeader>
                 <CardTitle className="flex items-center justify-between text-zinc-100 font-mono">
                   <div className="flex items-center gap-2">
-                    <Users className="h-5 w-5 text-blue-500" />
+                    <Users className="h-5 w-5 text-zinc-400" />
                     Recent Characters
                   </div>
                   <Button 
@@ -256,10 +256,10 @@ export const HomeView = () => {
                       <Button
                         key={character.id}
                         variant="ghost"
-                        className="w-full justify-start text-sm text-zinc-300 hover:text-zinc-100 hover:bg-blue-500/10 font-mono"
+                        className="w-full justify-start text-sm text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800/50 font-mono"
                         onClick={() => navigate('/dashboard/characters')}
                       >
-                        <Users className="h-4 w-4 mr-2 text-blue-500" />
+                        <Users className="h-4 w-4 mr-2 text-zinc-400" />
                         <div className="flex flex-col items-start">
                           <span className="font-medium">{character.name}</span>
                           <span className="text-xs text-zinc-500">
@@ -288,7 +288,7 @@ export const HomeView = () => {
               <Card className="bg-zinc-900/50 border-zinc-800 backdrop-blur-xl">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-zinc-100 font-mono">
-                    <Brain className="h-5 w-5 text-blue-500" />
+                    <Brain className="h-5 w-5 text-zinc-400" />
                     Your Writing Plan
                   </CardTitle>
                 </CardHeader>
