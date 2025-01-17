@@ -23,16 +23,16 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   };
 
   return (
-    <div className="relative h-[90vh] flex items-center overflow-hidden">
+    <div className="relative h-[90vh] flex items-center justify-center overflow-hidden bg-black">
       {/* Loading State */}
       {isLoading && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black">
-          <div className="text-white">Loading 3D Scene...</div>
+        <div className="absolute inset-0 z-20 flex items-center justify-center">
+          <div className="text-white text-xl">Loading 3D Scene...</div>
         </div>
       )}
       
       {/* Background Scene */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-10">
         <iframe 
           src="https://my.spline.design/theshipwreck-b47b3f5b7727762a0d6ad2efe92792ae/embed"
           frameBorder="0" 
@@ -41,12 +41,12 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
           onLoad={() => setIsLoading(false)}
           onError={handleIframeError}
           title="3D Scene Background"
-          style={{ pointerEvents: 'none' }}
+          className="w-full h-full"
         />
       </div>
       
       {/* Content Container */}
-      <div className="relative z-10 container mx-auto px-8">
+      <div className="relative z-30 container mx-auto px-8">
         {/* Empty container ready for new design */}
       </div>
     </div>
