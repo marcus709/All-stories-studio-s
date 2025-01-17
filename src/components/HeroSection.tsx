@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useToast } from "./ui/use-toast";
 import { useState } from "react";
-import Spline from '@splinetool/react-spline';
 
 interface HeroSectionProps {
   onShowAuth?: (view: "signin" | "signup") => void;
@@ -14,13 +13,8 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleSplineError = () => {
+  const handleIframeLoad = () => {
     setIsLoading(false);
-    toast({
-      title: "Error",
-      description: "Failed to load 3D scene. Please refresh the page.",
-      variant: "destructive",
-    });
   };
 
   return (
@@ -34,11 +28,13 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
       
       {/* Background Scene */}
       <div className="absolute inset-0 w-full h-full">
-        <Spline
-          scene="https://prod.spline.design/b47b3f5b7727762a0d6ad2efe92792ae/scene.splinecode"
-          onLoad={() => setIsLoading(false)}
-          onError={handleSplineError}
-          style={{ width: '100%', height: '100%' }}
+        <iframe 
+          src="https://my.spline.design/theshipwreck-b47b3f5b7727762a0d6ad2efe92792ae/"
+          frameBorder="0"
+          width="100%"
+          height="100%"
+          onLoad={handleIframeLoad}
+          title="3D Scene"
         />
       </div>
       
