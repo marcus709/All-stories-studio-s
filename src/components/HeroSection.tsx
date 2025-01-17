@@ -36,7 +36,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <div className="relative min-h-screen flex items-center overflow-hidden">
       {/* Spline Scene Background */}
       <div className="fixed inset-0 w-full h-full">
         {!splineError ? (
@@ -54,23 +54,23 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4">
-        <div className="max-w-3xl mx-auto text-center">
+      <div className="relative z-10 container mx-auto px-8">
+        <div className="max-w-2xl text-left">
           {/* Main heading */}
-          <h1 className="text-7xl md:text-8xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-white to-purple-200 leading-[1.1] tracking-tight">
+          <h1 className="text-5xl md:text-6xl font-medium mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-white to-purple-200 font-['Space_Mono'] leading-[1.1] tracking-tight">
             Write Your Story
           </h1>
           
-          <p className="text-2xl text-purple-100/90 mb-12 mx-auto leading-relaxed max-w-2xl">
+          <p className="text-lg md:text-xl text-purple-100/80 mb-8 font-['Instagram_Sans_Draft'] leading-relaxed max-w-xl">
             Create deeper characters, richer plots, and more engaging narratives with our AI-powered storytelling platform.
           </p>
 
           {/* CTA Button */}
           <Button 
             onClick={handleStartWriting}
-            className="px-12 py-8 text-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border border-white/20 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20 group"
+            className="px-8 py-6 text-base bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border border-white/20 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20 group"
           >
-            <span className="bg-gradient-to-r from-purple-200 to-white bg-clip-text text-transparent group-hover:text-white transition-colors">
+            <span className="bg-gradient-to-r from-purple-200 to-white bg-clip-text text-transparent group-hover:text-white transition-colors font-['Instagram_Sans_Draft']">
               Start Writing Now
             </span>
           </Button>
