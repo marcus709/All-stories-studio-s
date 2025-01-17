@@ -27,13 +27,13 @@ const stories = [
 
 export const StoriesSection = () => {
   return (
-    <section className="py-24 px-4 bg-gradient-to-br from-purple-50/50 to-pink-50/50">
+    <section className="py-24 px-4 bg-gradient-to-br from-black to-purple-950/30">
       <div className="container mx-auto max-w-7xl">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600">
+          <h2 className="text-4xl font-bold mb-6 font-mono bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">
             Featured Stories
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-purple-200/70 max-w-2xl mx-auto font-light">
             Discover incredible stories crafted by our community of writers using AI-powered tools.
           </p>
         </div>
@@ -43,8 +43,8 @@ export const StoriesSection = () => {
             {stories.map((story, index) => (
               <Card 
                 key={index}
-                className={`group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm ${
-                  story.isShared ? 'border-l-4 border-l-blue-500' : ''
+                className={`group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-black/40 backdrop-blur-sm ${
+                  story.isShared ? 'border-l-4 border-l-purple-500' : ''
                 }`}
               >
                 <div className="relative h-64 overflow-hidden">
@@ -56,13 +56,13 @@ export const StoriesSection = () => {
                   />
                   <div className="absolute top-4 right-4 z-20 flex gap-2">
                     {story.isShared && (
-                      <Badge className="bg-blue-500 text-white hover:bg-blue-600">
+                      <Badge className="bg-purple-500 text-white hover:bg-purple-600">
                         <Users className="h-3 w-3 mr-1" />
                         Shared
                       </Badge>
                     )}
                     <Badge 
-                      className="bg-white/90 text-purple-600 hover:bg-white"
+                      className="bg-black/60 text-purple-200 hover:bg-black/80 backdrop-blur-sm"
                     >
                       {story.category}
                     </Badge>
@@ -71,22 +71,22 @@ export const StoriesSection = () => {
                 
                 <CardContent className="relative p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm text-gray-500">By {story.author}</span>
+                    <span className="text-sm text-purple-200/70">By {story.author}</span>
                     <div className="flex items-center space-x-1">
-                      <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                      <span className="text-sm font-medium">{story.rating}</span>
+                      <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                      <span className="text-sm font-medium text-purple-200">{story.rating}</span>
                     </div>
                   </div>
                   
-                  <h3 className="text-2xl font-semibold mb-3 group-hover:text-purple-600 transition-colors">
+                  <h3 className="text-2xl font-semibold mb-3 group-hover:text-purple-400 transition-colors text-white">
                     {story.title}
                   </h3>
                   
-                  <p className="text-gray-600 mb-4 line-clamp-2">
+                  <p className="text-purple-200/70 mb-4 line-clamp-2 font-light">
                     {story.description}
                   </p>
                   
-                  <div className="flex items-center text-purple-600">
+                  <div className="flex items-center text-purple-400">
                     <BookOpen className="h-4 w-4" />
                   </div>
                 </CardContent>
@@ -117,7 +117,7 @@ export const StoriesSection = () => {
                   duration: 0.8,
                   ease: "easeInOut",
                 }}
-                className="text-slate-300 mt-4 text-center text-lg"
+                className="text-purple-200/70 mt-4 text-center text-lg"
               >
                 A platform where your creativity shines bright
               </motion.p>
