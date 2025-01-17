@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { Menu, MenuItem, HoveredLink } from "@/components/ui/navbar-menu";
 
 interface NavigationProps {
@@ -23,18 +22,30 @@ export const Navigation = ({ onScrollToSection, onCommunityClick }: NavigationPr
           <HoveredLink onClick={() => onScrollToSection('features')}>
             AI Assistance
           </HoveredLink>
+          <HoveredLink onClick={() => onScrollToSection('features')}>
+            Character-Aware AI
+          </HoveredLink>
+          <HoveredLink onClick={() => onScrollToSection('features')}>
+            Dynamic Characters
+          </HoveredLink>
+          <HoveredLink onClick={() => onScrollToSection('features')}>
+            Writing Community
+          </HoveredLink>
+          <HoveredLink onClick={() => onScrollToSection('features')}>
+            Story Logic Analysis
+          </HoveredLink>
         </div>
       </MenuItem>
       <MenuItem setActive={setActive} active={active} item="Pricing">
         <div className="flex flex-col space-y-4 text-sm">
           <HoveredLink onClick={() => onScrollToSection('pricing')}>
-            Free Plan
+            Free Trial
           </HoveredLink>
           <HoveredLink onClick={() => onScrollToSection('pricing')}>
-            Professional
+            Creator Plan
           </HoveredLink>
           <HoveredLink onClick={() => onScrollToSection('pricing')}>
-            Enterprise
+            Professional Plan
           </HoveredLink>
         </div>
       </MenuItem>

@@ -23,7 +23,10 @@ export const MenuItem = ({
   children?: React.ReactNode;
 }) => {
   return (
-    <div onMouseEnter={() => setActive(item)} className="relative">
+    <div 
+      onMouseEnter={() => setActive(item)} 
+      className="relative"
+    >
       <motion.p
         transition={{ duration: 0.3 }}
         className="cursor-pointer text-white hover:opacity-[0.9]"
@@ -37,7 +40,10 @@ export const MenuItem = ({
           transition={transition}
         >
           {active === item && (
-            <div className="absolute top-[calc(100%_+_1.2rem)] left-1/2 transform -translate-x-1/2 pt-4">
+            <div 
+              className="absolute top-[calc(100%_+_1.2rem)] left-1/2 transform -translate-x-1/2 pt-4"
+              onMouseEnter={() => setActive(item)} // Keep menu open when hovering dropdown
+            >
               <motion.div
                 transition={transition}
                 layoutId="active"
@@ -75,13 +81,14 @@ export const Menu = ({
   );
 };
 
-export const HoveredLink = ({ children, ...rest }: any) => {
+export const HoveredLink = ({ children, onClick, ...rest }: any) => {
   return (
-    <Link
+    <div
+      onClick={onClick}
+      className="text-neutral-200 hover:text-white cursor-pointer"
       {...rest}
-      className="text-neutral-300 hover:text-white transition-colors"
     >
       {children}
-    </Link>
+    </div>
   );
 };
