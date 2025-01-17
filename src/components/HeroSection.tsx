@@ -1,6 +1,3 @@
-import { useNavigate } from "react-router-dom";
-import { useSession } from "@supabase/auth-helpers-react";
-import { useToast } from "./ui/use-toast";
 import { useState } from "react";
 
 interface HeroSectionProps {
@@ -8,9 +5,6 @@ interface HeroSectionProps {
 }
 
 export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
-  const session = useSession();
-  const navigate = useNavigate();
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
 
   const handleIframeLoad = () => {
@@ -36,22 +30,6 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
           onLoad={handleIframeLoad}
           title="3D Scene"
         />
-      </div>
-      
-      {/* Content Container */}
-      <div className="relative z-40 container mx-auto px-8 text-center">
-        <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg">
-          Craft Your Story
-        </h1>
-        <p className="text-xl md:text-2xl text-gray-200 mb-8 max-w-2xl mx-auto drop-shadow-lg">
-          Transform your ideas into captivating narratives with our AI-powered writing assistant
-        </p>
-        <button
-          onClick={() => onShowAuth?.("signup")}
-          className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition-colors"
-        >
-          Get Started
-        </button>
       </div>
     </div>
   );
