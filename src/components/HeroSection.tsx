@@ -35,7 +35,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
       {/* Background Scene */}
       <div className="absolute inset-0 w-full h-full">
         <Spline
-          scene="https://my.spline.design/theshipwreck-b47b3f5b7727762a0d6ad2efe92792ae/"
+          scene="https://prod.spline.design/b47b3f5b7727762a0d6ad2efe92792ae/scene.splinecode"
           onLoad={() => setIsLoading(false)}
           onError={handleSplineError}
           style={{ width: '100%', height: '100%' }}
