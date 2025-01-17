@@ -69,7 +69,7 @@ const Index = () => {
       <div className="fixed inset-0 -z-10">
         {!splineError ? (
           <Spline 
-            scene="https://prod.spline.design/retrofuturismbganimation-baa0bb5fdf12278f02de596f71887609/scene.splinecode"
+            scene="https://my.spline.design/retrofuturismbganimation-27777570ee9ed2811d5f6419b01d90b4/"
             onError={handleSplineError}
           />
         ) : (
