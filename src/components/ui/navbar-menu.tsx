@@ -1,6 +1,5 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
 
 const transition = {
   type: "spring",
@@ -24,7 +23,7 @@ export const MenuItem = ({
 }) => {
   return (
     <div 
-      onMouseEnter={() => setActive(item)} 
+      onMouseEnter={() => setActive(item)}
       className="relative"
     >
       <motion.p
@@ -42,12 +41,19 @@ export const MenuItem = ({
           {active === item && (
             <div 
               className="absolute top-[calc(100%_+_1.2rem)] left-1/2 transform -translate-x-1/2 pt-4"
-              onMouseEnter={() => setActive(item)} // Keep menu open when hovering dropdown
+              onMouseEnter={(e) => {
+                e.stopPropagation();
+                setActive(item);
+              }}
             >
               <motion.div
                 transition={transition}
                 layoutId="active"
                 className="bg-black/80 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/[0.2] shadow-xl"
+                onMouseLeave={(e) => {
+                  e.stopPropagation();
+                  setActive(null);
+                }}
               >
                 <motion.div
                   layout
@@ -72,10 +78,7 @@ export const Menu = ({
   children: React.ReactNode;
 }) => {
   return (
-    <nav
-      onMouseLeave={() => setActive(null)}
-      className="relative flex justify-center space-x-4"
-    >
+    <nav className="relative flex justify-center space-x-4">
       {children}
     </nav>
   );
