@@ -46,7 +46,7 @@ const Index = () => {
           <spline-viewer
             url="https://my.spline.design/retrofuturismbganimation-27777570ee9ed2811d5f6419b01d90b4/"
             className="w-full h-full"
-            loading-anim
+            loading-anim="true"
             events-target="global"
             onError={handleSplineError}
           ></spline-viewer>
