@@ -13,13 +13,16 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   const handleSplineLoad = () => {
     setIsLoading(false);
+    setLoadError(false);
   };
 
   const handleSplineError = () => {
     setIsLoading(false);
+    setLoadError(true);
     toast({
       title: "Error",
       description: "Failed to load 3D scene. Please refresh the page.",
@@ -38,12 +41,14 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
       
       {/* Spline Background */}
       <div className="absolute inset-0 z-0">
-        <Spline 
-          scene="https://prod.spline.design/b47b3f5b7727762a0d6ad2efe92792ae/scene.splinecode"
-          onLoad={handleSplineLoad}
-          onError={handleSplineError}
-          className="w-full h-full"
-        />
+        {!loadError && (
+          <Spline 
+            scene="https://my.spline.design/theshipwreck-b47b3f5b7727762a0d6ad2efe92792ae/"
+            onLoad={handleSplineLoad}
+            onError={handleSplineError}
+            className="w-full h-full"
+          />
+        )}
       </div>
       
       {/* Content Container */}
