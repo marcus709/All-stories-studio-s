@@ -46,10 +46,7 @@ export const Header = () => {
 
   const handleSignOut = async () => {
     try {
-      // First, clear local data
       localStorage.clear();
-      
-      // Attempt to sign out from Supabase
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -65,8 +62,6 @@ export const Header = () => {
           description: "You have been signed out successfully.",
         });
       }
-
-      // Force a page refresh to clear any remaining state
       window.location.href = '/';
     } catch (error) {
       console.error("Unexpected error during sign out:", error);
@@ -100,26 +95,27 @@ export const Header = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-black/10 backdrop-blur-sm border-b border-white/10">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center space-x-2">
-            <BookOpen className="h-6 w-6 text-purple-600" />
-            <span className="text-xl font-bold">All Stories Studio</span>
-          </Link>
-
           <div className="flex items-center space-x-6">
+            <Link to="/" className="flex items-center space-x-2">
+              <BookOpen className="h-6 w-6 text-white" />
+              <span className="text-xl font-bold text-white">All Stories Studio</span>
+            </Link>
+
             <Navigation 
               onScrollToSection={scrollToSection}
               onCommunityClick={handleCommunityClick}
             />
-            <UserMenu
-              session={session}
-              profile={profile}
-              onSignOut={handleSignOut}
-              onShowAuth={handleShowAuth}
-            />
           </div>
+
+          <UserMenu
+            session={session}
+            profile={profile}
+            onSignOut={handleSignOut}
+            onShowAuth={handleShowAuth}
+          />
         </div>
       </div>
 
