@@ -13,6 +13,15 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
 
+  const handleIframeError = () => {
+    setIsLoading(false);
+    toast({
+      title: "Error",
+      description: "Failed to load 3D scene. Please refresh the page.",
+      variant: "destructive",
+    });
+  };
+
   return (
     <div className="relative h-screen flex items-center overflow-hidden">
       {/* Loading State */}
@@ -25,12 +34,14 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
       {/* Background Scene */}
       <div className="absolute inset-0 z-0">
         <iframe 
-          src='https://my.spline.design/theshipwreck-b47b3f5b7727762a0d6ad2efe92792ae/' 
-          frameBorder='0' 
-          width='100%' 
-          height='100%'
+          src="https://my.spline.design/theshipwreck-b47b3f5b7727762a0d6ad2efe92792ae/embed"
+          frameBorder="0" 
+          width="100%" 
+          height="100%"
           onLoad={() => setIsLoading(false)}
+          onError={handleIframeError}
           title="3D Scene Background"
+          style={{ pointerEvents: 'none' }}
         />
       </div>
       
