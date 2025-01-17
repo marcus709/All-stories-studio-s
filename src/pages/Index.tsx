@@ -54,6 +54,7 @@ const Index = () => {
   };
 
   const handleSplineError = () => {
+    console.error("Spline scene failed to load");
     setSplineError(true);
     toast({
       title: "Background Load Error",
@@ -68,7 +69,7 @@ const Index = () => {
       <div className="fixed inset-0 -z-10">
         {!splineError ? (
           <Spline 
-            scene="https://prod.spline.design/retrofuturismbganimation-56a5ed935be4c635c1e05876981ad379/scene.splinecode"
+            scene="https://my.spline.design/retrofuturismbganimation-56a5ed935be4c635c1e05876981ad379/"
             onError={handleSplineError}
           />
         ) : (
