@@ -31,14 +31,19 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
     }
   };
 
+  const handleSplineError = () => {
+    console.log('Spline scene failed to load');
+    setSplineError(true);
+  };
+
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Spline Scene Background */}
       <div className="fixed inset-0 w-full h-full">
         {!splineError ? (
           <Spline
-            scene="https://prod.spline.design/ba0b36fbf4c927cc9bd1f05f7954ca35/scene.splinecode"
-            onError={() => setSplineError(true)}
+            scene="https://my.spline.design/retrofuturismbganimation-ba0b36fbf4c927cc9bd1f05f7954ca35/"
+            onError={handleSplineError}
             className="w-full h-full"
           />
         ) : (
