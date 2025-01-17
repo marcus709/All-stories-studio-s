@@ -1,12 +1,8 @@
 import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
-import { FeaturesSection } from "@/components/FeaturesSection";
-import { StoriesSection } from "@/components/StoriesSection";
-import { PricingSection } from "@/components/PricingSection";
 import { useState, useEffect } from "react";
-import { AuthModals } from "@/components/auth/AuthModals";
 import { useLocation } from "react-router-dom";
-import Spline from '@splinetool/react-spline';
+import { AuthModals } from "@/components/auth/AuthModals";
 import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
@@ -47,11 +43,12 @@ const Index = () => {
       {/* Spline Background */}
       <div className={`fixed inset-0 w-full h-full z-0 ${splineError ? 'bg-gradient-to-br from-black to-gray-900' : ''}`}>
         {!splineError && (
-          <Spline 
-            scene="https://prod.spline.design/27777570ee9ed2811d5f6419b01d90b4/embed"
-            style={{ width: '100%', height: '100%' }}
-            onError={handleSplineError}
-          />
+          <spline-viewer
+            url="https://prod.spline.design/27777570ee9ed2811d5f6419b01d90b4/scene.splinecode"
+            class="w-full h-full"
+            loading-anim
+            events-target="global"
+          ></spline-viewer>
         )}
       </div>
 
@@ -60,9 +57,6 @@ const Index = () => {
         <Header />
         <main className="relative">
           <HeroSection onShowAuth={handleShowAuth} />
-          <FeaturesSection />
-          <StoriesSection />
-          <PricingSection />
         </main>
       </div>
 
