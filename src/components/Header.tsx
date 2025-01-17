@@ -98,10 +98,10 @@ export const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-md border-b border-white/5">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-12">
             <Link to="/" className="flex items-center space-x-2">
-              <BookOpen className="h-6 w-6 text-purple-300" />
-              <span className="text-xl font-mono text-purple-100">All Stories Studio</span>
+              <BookOpen className="h-5 w-5 text-white" />
+              <span className="text-lg font-mono text-white">All Stories Studio</span>
             </Link>
 
             <Navigation 
