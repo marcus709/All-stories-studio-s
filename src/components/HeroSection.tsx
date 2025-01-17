@@ -37,7 +37,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
       <div className="fixed inset-0 w-full h-full">
         {!splineError ? (
           <Spline
-            scene="https://prod.spline.design/27777570ee9ed2811d5f6419b01d90b4/scene.splinecode"
+            scene="https://prod.spline.design/ba0b36fbf4c927cc9bd1f05f7954ca35/scene.splinecode"
             onError={() => setSplineError(true)}
             className="w-full h-full"
           />
