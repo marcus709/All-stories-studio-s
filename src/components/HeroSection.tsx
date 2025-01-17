@@ -41,10 +41,13 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
       {/* Spline Scene Background */}
       <div className="fixed inset-0 w-full h-full">
         {!splineError ? (
-          <Spline
-            scene="https://my.spline.design/retrofuturismbganimation-ba0b36fbf4c927cc9bd1f05f7954ca35/"
-            onError={handleSplineError}
+          <iframe 
+            src='https://my.spline.design/retrofuturismbganimation-ba0b36fbf4c927cc9bd1f05f7954ca35/' 
+            frameBorder='0' 
+            width='100%' 
+            height='100%'
             className="w-full h-full"
+            onError={handleSplineError}
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-black via-purple-900 to-black" />
