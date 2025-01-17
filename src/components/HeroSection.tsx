@@ -23,7 +23,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   };
 
   return (
-    <div className="relative h-screen flex items-center overflow-hidden">
+    <div className="relative h-[90vh] flex items-center overflow-hidden">
       {/* Loading State */}
       {isLoading && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-black">
