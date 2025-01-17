@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@supabase/auth-helpers-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/Header";
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { StoriesSection } from "@/components/StoriesSection";
@@ -65,7 +65,7 @@ const Index = () => {
       {/* Spline Scene Background */}
       <div className="fixed inset-0 -z-10">
         <Spline 
-          scene="https://prod.spline.design/baa0bb5fdf12278f02de596f71887609/scene.splinecode"
+          scene="https://prod.spline.design/baa0bb5fdf12278f02de596f71887609/embed"
           onError={handleSplineError}
         />
       </div>
