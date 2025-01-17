@@ -34,11 +34,12 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Spline Scene Background */}
-      <div className="absolute inset-0 w-full h-full z-0">
+      <div className="fixed inset-0 w-full h-full">
         {!splineError ? (
           <Spline
             scene="https://prod.spline.design/27777570ee9ed2811d5f6419b01d90b4/scene.splinecode"
             onError={() => setSplineError(true)}
+            className="w-full h-full"
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-black via-purple-900 to-black" />
