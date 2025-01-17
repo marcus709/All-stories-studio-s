@@ -47,12 +47,13 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
         <Button 
           variant="ghost"
           onClick={() => onShowAuth("signin")}
+          className="text-purple-200 hover:text-purple-100 hover:bg-purple-900/20 font-mono"
         >
           Sign In
         </Button>
         <Button 
           onClick={() => onShowAuth("signup")}
-          className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0"
+          className="bg-purple-500 hover:bg-purple-600 text-white border-0 font-mono"
         >
           Sign Up
         </Button>
@@ -73,7 +74,7 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
       )}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="flex items-center space-x-2 px-2">
+          <Button variant="ghost" className="flex items-center space-x-2 px-2 hover:bg-purple-900/20">
             <Avatar className="h-8 w-8">
               <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.username || undefined} />
               <AvatarFallback>
@@ -81,39 +82,39 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
                  session.user.email?.[0]?.toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <span className="text-sm font-medium">
+            <span className="text-sm font-mono text-purple-100">
               {profile?.username || session.user.email?.split('@')[0]}
             </span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="end" forceMount>
+        <DropdownMenuContent className="w-56 bg-black/80 backdrop-blur-lg border-white/5" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">
+              <p className="text-sm font-medium leading-none text-purple-100">
                 {profile?.username || session.user.email?.split('@')[0]}
               </p>
-              <p className="text-xs leading-none text-muted-foreground">
+              <p className="text-xs leading-none text-purple-300">
                 {session.user.email}
               </p>
               {plan !== 'free' && (
                 <p className={`text-xs font-medium mt-1 ${
-                  plan === 'professional' ? 'text-purple-600' : 'text-blue-600'
+                  plan === 'professional' ? 'text-purple-400' : 'text-blue-400'
                 }`}>
                   {capitalize(plan)} Plan
                 </p>
               )}
             </div>
           </DropdownMenuLabel>
-          <DropdownMenuSeparator />
+          <DropdownMenuSeparator className="bg-white/5" />
           <DropdownMenuItem 
-            className="cursor-pointer"
+            className="cursor-pointer text-purple-200 focus:text-purple-100 focus:bg-purple-900/20"
             onClick={() => navigate("/profile/settings")}
           >
             Profile Settings
           </DropdownMenuItem>
           <DropdownMenuItem 
             onClick={onSignOut}
-            className="text-red-500 hover:text-red-600 cursor-pointer"
+            className="text-red-400 hover:text-red-300 focus:text-red-300 focus:bg-red-900/20 cursor-pointer"
           >
             Sign Out
           </DropdownMenuItem>
