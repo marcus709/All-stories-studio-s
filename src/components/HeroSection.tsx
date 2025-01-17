@@ -48,22 +48,24 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4">
-        <div className="max-w-2xl mx-auto text-center">
+        <div className="max-w-3xl mx-auto text-center">
           {/* Main heading */}
-          <h1 className="text-6xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70 leading-[1.1] tracking-tight">
-            Transform your writing journey
+          <h1 className="text-7xl md:text-8xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-white to-purple-200 leading-[1.1] tracking-tight">
+            Write Your Story
           </h1>
           
-          <p className="text-xl text-white/90 mb-10 mx-auto leading-relaxed">
+          <p className="text-2xl text-purple-100/90 mb-12 mx-auto leading-relaxed max-w-2xl">
             Create deeper characters, richer plots, and more engaging narratives with our AI-powered storytelling platform.
           </p>
 
           {/* CTA Button */}
           <Button 
             onClick={handleStartWriting}
-            className="px-8 py-6 text-lg bg-white hover:bg-white/90 text-black rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-white/20"
+            className="px-12 py-8 text-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border border-white/20 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20 group"
           >
-            Start Writing Now
+            <span className="bg-gradient-to-r from-purple-200 to-white bg-clip-text text-transparent group-hover:text-white transition-colors">
+              Start Writing Now
+            </span>
           </Button>
         </div>
       </div>
