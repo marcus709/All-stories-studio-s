@@ -43,7 +43,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
       <div className="absolute inset-0 z-0">
         {!loadError && (
           <Spline 
-            scene="https://my.spline.design/theshipwreck-b47b3f5b7727762a0d6ad2efe92792ae/"
+            scene="https://prod.spline.design/b47b3f5b7727762a0d6ad2efe92792ae/scene.splinecode"
             onLoad={handleSplineLoad}
             onError={handleSplineError}
             className="w-full h-full"
