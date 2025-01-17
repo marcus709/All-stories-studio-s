@@ -44,8 +44,8 @@ const Index = () => {
       <div className={`fixed inset-0 w-full h-full z-0 ${splineError ? 'bg-gradient-to-br from-black to-gray-900' : ''}`}>
         {!splineError && (
           <spline-viewer
-            url="https://prod.spline.design/27777570ee9ed2811d5f6419b01d90b4/scene.splinecode"
-            class="w-full h-full"
+            url="https://my.spline.design/retrofuturismbganimation-27777570ee9ed2811d5f6419b01d90b4/"
+            className="w-full h-full"
             loading-anim
             events-target="global"
           ></spline-viewer>
