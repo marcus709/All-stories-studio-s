@@ -84,7 +84,7 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
 
   if (isCollapsed) {
     return (
-      <div className="fixed left-0 top-16 w-16 h-[calc(100vh-4rem)] bg-background/80 backdrop-blur-xl border-r border-border/50 flex flex-col items-center py-4">
+      <div className="fixed left-0 top-16 w-16 h-[calc(100vh-4rem)] bg-background/60 backdrop-blur-xl border-r border-border/40 shadow-[0_0_15px_rgba(0,0,0,0.1)] dark:shadow-[0_0_15px_rgba(255,255,255,0.05)] flex flex-col items-center py-4 rounded-r-2xl">
         <Button
           variant="ghost"
           size="icon"
@@ -113,7 +113,7 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
   }
 
   return (
-    <div className="fixed left-0 top-16 w-64 h-[calc(100vh-4rem)] bg-background/80 backdrop-blur-xl border-r border-border/50">
+    <div className="fixed left-0 top-16 w-64 h-[calc(100vh-4rem)] bg-background/60 backdrop-blur-xl border-r border-border/40 shadow-[0_0_15px_rgba(0,0,0,0.1)] dark:shadow-[0_0_15px_rgba(255,255,255,0.05)] rounded-r-2xl">
       <div className="flex flex-col h-full">
         <div className="absolute right-2 top-2">
           <Button
