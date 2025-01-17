@@ -65,7 +65,7 @@ const Index = () => {
       {/* Spline Scene Background */}
       <div className="fixed inset-0 -z-10">
         <Spline 
-          scene="https://prod.spline.design/ZZf9MfaGeuYgfCzd/scene.splinecode"
+          scene="https://prod.spline.design/baa0bb5fdf12278f02de596f71887609/scene.splinecode"
           onError={handleSplineError}
         />
       </div>
