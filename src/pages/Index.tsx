@@ -14,6 +14,7 @@ import Spline from '@splinetool/react-spline';
 const Index = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [authView, setAuthView] = useState<"signin" | "signup">("signup");
+  const [splineError, setSplineError] = useState(false);
   const location = useLocation();
   const { toast } = useToast();
   const session = useSession();
@@ -53,6 +54,7 @@ const Index = () => {
   };
 
   const handleSplineError = () => {
+    setSplineError(true);
     toast({
       title: "Background Load Error",
       description: "Using fallback background",
@@ -64,10 +66,14 @@ const Index = () => {
     <div className="min-h-screen relative overflow-hidden">
       {/* Spline Scene Background */}
       <div className="fixed inset-0 -z-10">
-        <Spline 
-          scene="https://prod.spline.design/baa0bb5fdf12278f02de596f71887609/embed"
-          onError={handleSplineError}
-        />
+        {!splineError ? (
+          <Spline 
+            scene="https://prod.spline.design/baa0bb5fdf12278f02de596f71887609/scene.splinecode"
+            onError={handleSplineError}
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-purple-900 via-blue-900 to-black animate-gradient" />
+        )}
       </div>
       
       <div className="relative">
