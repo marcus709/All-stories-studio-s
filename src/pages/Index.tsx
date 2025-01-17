@@ -34,7 +34,7 @@ const Index = () => {
       {/* Spline Background */}
       <div className="fixed inset-0 w-full h-full z-0">
         <spline-viewer 
-          url="https://my.spline.design/retrofuturismbganimation-27777570ee9ed2811d5f6419b01d90b4/"
+          url="https://prod.spline.design/27777570ee9ed2811d5f6419b01d90b4/scene.splinecode"
           className="w-full h-full"
         />
       </div>
