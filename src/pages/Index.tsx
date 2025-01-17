@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/Header";
@@ -7,8 +8,7 @@ import { FeaturesSection } from "@/components/FeaturesSection";
 import { StoriesSection } from "@/components/StoriesSection";
 import { PricingSection } from "@/components/PricingSection";
 import { AuthModals } from "@/components/auth/AuthModals";
-import { useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
 import Spline from '@splinetool/react-spline';
 
 const Index = () => {
@@ -68,7 +68,7 @@ const Index = () => {
       <div className="fixed inset-0 -z-10">
         {!splineError ? (
           <Spline 
-            scene="https://prod.spline.design/baa0bb5fdf12278f02de596f71887609/scene.splinecode"
+            scene="https://my.spline.design/retrofuturismbganimation-56a5ed935be4c635c1e05876981ad379/"
             onError={handleSplineError}
           />
         ) : (
@@ -81,7 +81,7 @@ const Index = () => {
         <main className="relative">
           <div className="min-h-screen flex items-center justify-center px-4">
             <div className="max-w-2xl mx-auto text-center">
-              <h1 className="text-6xl md:text-7xl font-bold mb-6 text-white leading-[1.1] tracking-tight">
+              <h1 className="text-6xl md:text-7xl font-bold mb-6 text-white leading-[1.1] tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
                 Transform your writing journey
               </h1>
               
