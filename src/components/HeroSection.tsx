@@ -29,10 +29,9 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-transparent flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="container mx-auto px-4">
         <div className="max-w-2xl mx-auto text-center">
-          {/* Main heading */}
           <h1 className="text-6xl md:text-7xl font-bold mb-6 text-white leading-[1.1] tracking-tight">
             Transform your writing journey
           </h1>
@@ -41,10 +40,9 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
             Create deeper characters, richer plots, and more engaging narratives with our AI-powered storytelling platform.
           </p>
 
-          {/* CTA Button */}
           <Button 
             onClick={handleStartWriting}
-            className="px-8 py-6 text-lg bg-white hover:bg-white/90 text-black rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-white/20"
+            className="px-8 py-6 text-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-full transition-all duration-300 hover:scale-105 backdrop-blur-sm"
           >
             Start Writing Now
           </Button>

@@ -1,9 +1,15 @@
-import { Header } from "@/components/Header";
-import { HeroSection } from "@/components/HeroSection";
-import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
-import { AuthModals } from "@/components/auth/AuthModals";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { useSession } from "@supabase/auth-helpers-react";
 import { useToast } from "@/hooks/use-toast";
+import { Header } from "@/components/Header";
+import { FeaturesSection } from "@/components/FeaturesSection";
+import { StoriesSection } from "@/components/StoriesSection";
+import { PricingSection } from "@/components/PricingSection";
+import { AuthModals } from "@/components/auth/AuthModals";
+import { useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import Spline from '@splinetool/react-spline';
 
 const Index = () => {
   const [showAuth, setShowAuth] = useState(false);
@@ -11,6 +17,8 @@ const Index = () => {
   const [splineError, setSplineError] = useState(false);
   const location = useLocation();
   const { toast } = useToast();
+  const session = useSession();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -29,35 +37,69 @@ const Index = () => {
     setShowAuth(true);
   };
 
+  const handleStartWriting = () => {
+    if (session) {
+      navigate("/dashboard");
+    } else {
+      if (handleShowAuth) {
+        handleShowAuth("signup");
+      } else {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign up to start writing.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   const handleSplineError = () => {
     setSplineError(true);
     toast({
       title: "Background Load Error",
-      description: "Unable to load 3D background. Using fallback background.",
+      description: "Using fallback background",
       variant: "destructive",
     });
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      {/* Background */}
-      <div className={`fixed inset-0 w-full h-full z-0 ${splineError ? 'bg-gradient-to-br from-black to-gray-900' : ''}`}>
-        {!splineError && (
-          <spline-viewer
-            url="https://my.spline.design/retrofuturismbganimation-27777570ee9ed2811d5f6419b01d90b4/"
-            className="w-full h-full"
-            loading-anim="true"
-            events-target="global"
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Spline Scene Background */}
+      <div className="fixed inset-0 -z-10">
+        {!splineError ? (
+          <Spline 
+            scene="https://prod.spline.design/baa0bb5fdf12278f02de596f71887609/scene.splinecode"
             onError={handleSplineError}
-          ></spline-viewer>
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-purple-900 via-blue-900 to-black animate-gradient" />
         )}
       </div>
-
-      {/* Content */}
-      <div className="relative z-10">
+      
+      <div className="relative">
         <Header />
         <main className="relative">
-          <HeroSection onShowAuth={handleShowAuth} />
+          <div className="min-h-screen flex items-center justify-center px-4">
+            <div className="max-w-2xl mx-auto text-center">
+              <h1 className="text-6xl md:text-7xl font-bold mb-6 text-white leading-[1.1] tracking-tight">
+                Transform your writing journey
+              </h1>
+              
+              <p className="text-lg text-white/80 mb-10 mx-auto leading-relaxed">
+                Create deeper characters, richer plots, and more engaging narratives.
+              </p>
+
+              <Button 
+                onClick={handleStartWriting}
+                className="px-8 py-6 text-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-full transition-all duration-300 hover:scale-105 backdrop-blur-sm"
+              >
+                Start Writing Now
+              </Button>
+            </div>
+          </div>
+          <FeaturesSection />
+          <StoriesSection />
+          <PricingSection />
         </main>
       </div>
 
