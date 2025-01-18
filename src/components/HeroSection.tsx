@@ -31,8 +31,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
               width: '100%',
               height: '100%',
               backgroundColor: 'transparent',
-              zIndex: 0,
-              pointerEvents: 'none'
+              zIndex: 0
             }}
             allow="autoplay; fullscreen; xr-spatial-tracking"
             onLoad={handleSplineLoad}
@@ -62,8 +61,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
           <div className="flex items-center justify-center gap-4 pt-8">
             <Button
               size="lg"
-              variant="outline"
-              className="bg-white hover:bg-white/90 text-black text-lg px-8 py-6 border-0"
+              className="bg-white hover:bg-white/90 text-black text-lg px-8 py-6"
               onClick={() => onShowAuth("signup")}
             >
               Get Started →
