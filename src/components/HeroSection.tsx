@@ -9,7 +9,6 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   const [splineError, setSplineError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isScrolling, setIsScrolling] = useState(false);
-  const [lastMouseMove, setLastMouseMove] = useState(Date.now());
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [showScrollArea, setShowScrollArea] = useState(false);
   let scrollTimeout: NodeJS.Timeout;
@@ -18,35 +17,24 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolling(true);
-      
-      if (scrollTimeout) {
-        clearTimeout(scrollTimeout);
-      }
-      
-      scrollTimeout = setTimeout(() => {
-        setIsScrolling(false);
-      }, 150);
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => setIsScrolling(false), 150);
     };
 
     const handleWheel = (e: WheelEvent) => {
-      const timeSinceLastMove = Date.now() - lastMouseMove;
-      if (timeSinceLastMove > 500) {
-        window.scrollBy(0, e.deltaY);
-      }
+      // Smoother scroll behavior
+      window.scrollBy({
+        top: e.deltaY,
+        behavior: 'smooth'
+      });
     };
 
     const handleMouseMove = (e: MouseEvent) => {
-      setLastMouseMove(Date.now());
       setMousePosition({ x: e.clientX, y: e.clientY });
       setShowScrollArea(false);
       
-      if (mouseTimeout) {
-        clearTimeout(mouseTimeout);
-      }
-      
-      mouseTimeout = setTimeout(() => {
-        setShowScrollArea(true);
-      }, 100);
+      if (mouseTimeout) clearTimeout(mouseTimeout);
+      mouseTimeout = setTimeout(() => setShowScrollArea(true), 100);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -57,14 +45,10 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('wheel', handleWheel);
       window.removeEventListener('mousemove', handleMouseMove);
-      if (scrollTimeout) {
-        clearTimeout(scrollTimeout);
-      }
-      if (mouseTimeout) {
-        clearTimeout(mouseTimeout);
-      }
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+      if (mouseTimeout) clearTimeout(mouseTimeout);
     };
-  }, [lastMouseMove]);
+  }, []);
 
   const handleSplineLoad = () => {
     setIsLoading(false);
@@ -89,7 +73,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
                 height: '100%',
                 backgroundColor: 'transparent',
                 zIndex: 0,
-                pointerEvents: Date.now() - lastMouseMove > 500 ? 'none' : 'auto',
+                pointerEvents: 'auto', // Always allow interaction
               }}
               allow="autoplay; fullscreen; xr-spatial-tracking"
               onLoad={handleSplineLoad}
@@ -125,7 +109,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
       )}
 
       {/* Content */}
-      <div className={`relative z-10 container mx-auto px-4 text-center ${isScrolling ? 'pointer-events-auto' : 'pointer-events-none'}`}>
+      <div className="relative z-10 container mx-auto px-4 text-center pointer-events-auto">
         <div className="max-w-5xl mx-auto space-y-8">
           <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-white leading-tight tracking-tight">
             All Stories Studio
@@ -134,15 +118,13 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
             Even a shipwreck tells a story. We're here to help you write yours!
           </p>
           <div className="flex items-center justify-center gap-4 pt-8">
-            <div className="pointer-events-auto">
-              <Button
-                size="lg"
-                className="bg-white hover:bg-white/90 text-black text-lg px-8 py-6"
-                onClick={() => onShowAuth("signup")}
-              >
-                Get Started →
-              </Button>
-            </div>
+            <Button
+              size="lg"
+              className="bg-white hover:bg-white/90 text-black text-lg px-8 py-6"
+              onClick={() => onShowAuth("signup")}
+            >
+              Get Started →
+            </Button>
           </div>
         </div>
       </div>
