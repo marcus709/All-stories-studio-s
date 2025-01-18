@@ -2,7 +2,6 @@ import { BookOpen, Star, Users } from "lucide-react";
 import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { motion } from "framer-motion";
-import { LampContainer } from "./ui/lamp";
 
 const stories = [
   {
@@ -38,90 +37,59 @@ export const StoriesSection = () => {
           </p>
         </div>
         
-        <div className="space-y-16">
-          <div className="grid md:grid-cols-2 gap-8">
-            {stories.map((story, index) => (
-              <Card 
-                key={index}
-                className={`group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-zinc-900/50 backdrop-blur-sm ${
-                  story.isShared ? 'border-l-4 border-l-purple-500' : ''
-                }`}
-              >
-                <div className="relative h-64 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
-                  <img
-                    src={story.image}
-                    alt={story.title}
-                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute top-4 right-4 z-20 flex gap-2">
-                    {story.isShared && (
-                      <Badge className="bg-purple-500 text-white hover:bg-purple-600">
-                        <Users className="h-3 w-3 mr-1" />
-                        Shared
-                      </Badge>
-                    )}
-                    <Badge 
-                      className="bg-zinc-800/60 text-purple-200 hover:bg-zinc-700/80 backdrop-blur-sm"
-                    >
-                      {story.category}
+        <div className="grid md:grid-cols-2 gap-8">
+          {stories.map((story, index) => (
+            <Card 
+              key={index}
+              className={`group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-zinc-900/50 backdrop-blur-sm ${
+                story.isShared ? 'border-l-4 border-l-purple-500' : ''
+              }`}
+            >
+              <div className="relative h-64 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
+                <img
+                  src={story.image}
+                  alt={story.title}
+                  className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute top-4 right-4 z-20 flex gap-2">
+                  {story.isShared && (
+                    <Badge className="bg-purple-500 text-white hover:bg-purple-600">
+                      <Users className="h-3 w-3 mr-1" />
+                      Shared
                     </Badge>
+                  )}
+                  <Badge 
+                    className="bg-zinc-800/60 text-purple-200 hover:bg-zinc-700/80 backdrop-blur-sm"
+                  >
+                    {story.category}
+                  </Badge>
+                </div>
+              </div>
+              
+              <CardContent className="relative p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-sm text-gray-400">By {story.author}</span>
+                  <div className="flex items-center space-x-1">
+                    <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                    <span className="text-sm font-medium text-gray-300">{story.rating}</span>
                   </div>
                 </div>
                 
-                <CardContent className="relative p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm text-gray-400">By {story.author}</span>
-                    <div className="flex items-center space-x-1">
-                      <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                      <span className="text-sm font-medium text-gray-300">{story.rating}</span>
-                    </div>
-                  </div>
-                  
-                  <h3 className="text-2xl font-semibold mb-3 group-hover:text-purple-400 transition-colors text-white">
-                    {story.title}
-                  </h3>
-                  
-                  <p className="text-gray-400 mb-4 line-clamp-2 font-light">
-                    {story.description}
-                  </p>
-                  
-                  <div className="flex items-center text-purple-400">
-                    <BookOpen className="h-4 w-4" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="w-full h-[600px] bg-black">
-            <LampContainer className="w-full h-full">
-              <motion.h1
-                initial={{ opacity: 0.5, y: 100 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{
-                  delay: 0.3,
-                  duration: 0.8,
-                  ease: "easeInOut",
-                }}
-                className="mt-8 bg-gradient-to-br from-slate-300 to-slate-500 py-4 bg-clip-text text-center text-4xl font-medium tracking-tight text-transparent md:text-7xl"
-              >
-                Cast Light on <br /> Your Stories
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{
-                  delay: 0.5,
-                  duration: 0.8,
-                  ease: "easeInOut",
-                }}
-                className="text-gray-400 mt-4 text-center text-lg"
-              >
-                A platform where your creativity shines bright
-              </motion.p>
-            </LampContainer>
-          </div>
+                <h3 className="text-2xl font-semibold mb-3 group-hover:text-purple-400 transition-colors text-white">
+                  {story.title}
+                </h3>
+                
+                <p className="text-gray-400 mb-4 line-clamp-2 font-light">
+                  {story.description}
+                </p>
+                
+                <div className="flex items-center text-purple-400">
+                  <BookOpen className="h-4 w-4" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     </section>
