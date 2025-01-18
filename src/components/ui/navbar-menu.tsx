@@ -22,9 +22,25 @@ export const MenuItem = ({
   item: string;
   children?: React.ReactNode;
 }) => {
+  let closeTimeout: ReturnType<typeof setTimeout>;
+
+  const handleMouseLeave = () => {
+    closeTimeout = setTimeout(() => {
+      setActive(null);
+    }, 300); // 300ms delay before closing
+  };
+
+  const handleMouseEnter = () => {
+    if (closeTimeout) {
+      clearTimeout(closeTimeout);
+    }
+    setActive(item);
+  };
+
   return (
     <div 
-      onMouseEnter={() => setActive(item)} 
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       className="relative"
     >
       <motion.p
@@ -43,6 +59,7 @@ export const MenuItem = ({
             <div 
               className="absolute top-[calc(100%_-_0.5rem)] left-1/2 transform -translate-x-1/2"
               onMouseEnter={() => setActive(item)}
+              onMouseLeave={handleMouseLeave}
             >
               <motion.div
                 transition={transition}
@@ -73,7 +90,6 @@ export const Menu = ({
 }) => {
   return (
     <nav
-      onMouseLeave={() => setActive(null)}
       className="relative flex justify-center space-x-4"
     >
       {children}
