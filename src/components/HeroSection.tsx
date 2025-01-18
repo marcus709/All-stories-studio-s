@@ -23,12 +23,20 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
       // Set a timeout to reset isScrolling after scrolling stops
       scrollTimeout = setTimeout(() => {
         setIsScrolling(false);
-      }, 150); // Adjust this value to control how long after scrolling stops before re-enabling 3D interaction
+      }, 150);
+    };
+
+    const handleWheel = (e: WheelEvent) => {
+      // Allow scrolling while maintaining 3D interaction
+      window.scrollBy(0, e.deltaY);
     };
 
     window.addEventListener('scroll', handleScroll);
+    window.addEventListener('wheel', handleWheel, { passive: true });
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('wheel', handleWheel);
       if (scrollTimeout) {
         clearTimeout(scrollTimeout);
       }
@@ -58,7 +66,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
                 height: '100%',
                 backgroundColor: 'transparent',
                 zIndex: 0,
-                pointerEvents: isScrolling ? 'none' : 'auto',
+                pointerEvents: 'auto',
               }}
               allow="autoplay; fullscreen; xr-spatial-tracking"
               onLoad={handleSplineLoad}
