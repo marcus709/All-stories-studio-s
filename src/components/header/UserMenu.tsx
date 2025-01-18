@@ -87,34 +87,45 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
             </span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56 bg-black/80 backdrop-blur-lg border-white/5" align="end" forceMount>
+        <DropdownMenuContent 
+          className="w-56 bg-white border border-gray-200" 
+          align="end" 
+          forceMount
+          onMouseLeave={(e) => {
+            const target = e.target as HTMLElement;
+            const dropdown = target.closest('[role="menu"]');
+            if (dropdown) {
+              (dropdown as any)._closeDropdown?.();
+            }
+          }}
+        >
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none text-purple-100">
+              <p className="text-sm font-medium leading-none text-gray-900">
                 {profile?.username || session.user.email?.split('@')[0]}
               </p>
-              <p className="text-xs leading-none text-purple-300">
+              <p className="text-xs leading-none text-gray-500">
                 {session.user.email}
               </p>
               {plan !== 'free' && (
                 <p className={`text-xs font-medium mt-1 ${
-                  plan === 'professional' ? 'text-purple-400' : 'text-blue-400'
+                  plan === 'professional' ? 'text-purple-600' : 'text-blue-600'
                 }`}>
                   {capitalize(plan)} Plan
                 </p>
               )}
             </div>
           </DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-white/5" />
+          <DropdownMenuSeparator className="bg-gray-100" />
           <DropdownMenuItem 
-            className="cursor-pointer text-purple-200 focus:text-purple-100 focus:bg-purple-900/20"
+            className="cursor-pointer text-gray-700 focus:text-gray-900 focus:bg-gray-50"
             onClick={() => navigate("/profile/settings")}
           >
             Profile Settings
           </DropdownMenuItem>
           <DropdownMenuItem 
             onClick={onSignOut}
-            className="text-red-400 hover:text-red-300 focus:text-red-300 focus:bg-red-900/20 cursor-pointer"
+            className="text-red-500 hover:text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
           >
             Sign Out
           </DropdownMenuItem>
