@@ -8,47 +8,6 @@ interface HeroSectionProps {
 export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   const [splineError, setSplineError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isScrolling, setIsScrolling] = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [showScrollArea, setShowScrollArea] = useState(false);
-  let scrollTimeout: NodeJS.Timeout;
-  let mouseTimeout: NodeJS.Timeout;
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolling(true);
-      if (scrollTimeout) clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(() => setIsScrolling(false), 150);
-    };
-
-    const handleWheel = (e: WheelEvent) => {
-      // Smoother scroll behavior
-      window.scrollBy({
-        top: e.deltaY,
-        behavior: 'smooth'
-      });
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-      setShowScrollArea(false);
-      
-      if (mouseTimeout) clearTimeout(mouseTimeout);
-      mouseTimeout = setTimeout(() => setShowScrollArea(true), 100);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    window.addEventListener('wheel', handleWheel, { passive: true });
-    window.addEventListener('mousemove', handleMouseMove);
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('wheel', handleWheel);
-      window.removeEventListener('mousemove', handleMouseMove);
-      if (scrollTimeout) clearTimeout(scrollTimeout);
-      if (mouseTimeout) clearTimeout(mouseTimeout);
-    };
-  }, []);
 
   const handleSplineLoad = () => {
     setIsLoading(false);
@@ -71,9 +30,9 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
                 position: 'absolute',
                 width: '100%',
                 height: '100%',
+                border: 'none',
                 backgroundColor: 'transparent',
                 zIndex: 0,
-                pointerEvents: 'auto', // Always allow interaction
               }}
               allow="autoplay; fullscreen; xr-spatial-tracking"
               onLoad={handleSplineLoad}
@@ -85,31 +44,15 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
         )}
       </div>
 
-      {/* Scroll Area under cursor */}
-      {showScrollArea && (
-        <div
-          style={{
-            position: 'fixed',
-            left: mousePosition.x - 20,
-            top: mousePosition.y - 20,
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            pointerEvents: 'none',
-            zIndex: 1,
-          }}
-        />
-      )}
-
       {/* Loading Overlay */}
       {isLoading && (
-        <div className="absolute inset-0 bg-black/50 z-20 flex items-center justify-center pointer-events-none">
+        <div className="absolute inset-0 bg-black/50 z-20 flex items-center justify-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white" />
         </div>
       )}
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 text-center pointer-events-auto">
+      <div className="relative z-10 container mx-auto px-4 text-center">
         <div className="max-w-5xl mx-auto space-y-8">
           <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-white leading-tight tracking-tight">
             All Stories Studio

@@ -57,7 +57,7 @@ export const Header = () => {
       <div className="flex items-center space-x-12">
         <Link to="/" className="flex items-center space-x-3">
           <BookOpen className="h-6 w-6 text-white" />
-          <span className="text-xl font-semibold text-white">ASS</span>
+          <span className="text-xl font-semibold text-white">All Stories Studio</span>
         </Link>
         <Navigation 
           onScrollToSection={handleScrollToSection}
@@ -72,6 +72,7 @@ export const Header = () => {
             profile={profile}
             onSignOut={handleSignOut}
             onShowAuth={handleShowAuth}
+            displayAbbreviation={true}
           />
         ) : (
           <>
