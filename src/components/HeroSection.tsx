@@ -1,63 +1,74 @@
 import { useState } from "react";
+import Spline from "@splinetool/react-spline";
+import { Button } from "./ui/button";
 
 interface HeroSectionProps {
-  onShowAuth?: (view: "signin" | "signup") => void;
+  onShowAuth: (view: "signin" | "signup") => void;
 }
 
 export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
+  const [splineError, setSplineError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
 
-  const handleIframeLoad = () => {
-    console.log("Iframe loaded successfully");
+  const handleSplineLoad = () => {
     setIsLoading(false);
-    setHasError(false);
   };
 
-  const handleIframeError = (error: any) => {
-    console.error("Iframe loading error:", error);
+  const handleSplineError = () => {
+    setSplineError(true);
     setIsLoading(false);
-    setHasError(true);
   };
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center bg-black">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Background with Spline */}
+      <div className="absolute inset-0 z-0">
+        {!splineError ? (
+          <iframe
+            src="https://my.spline.design/theshipwreck-bf9cd47c523a3d1014e08cb5b8e80639/"
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'transparent',
+              zIndex: 0
+            }}
+            allow="autoplay; fullscreen; xr-spatial-tracking"
+            onLoad={handleSplineLoad}
+            onError={handleSplineError}
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-gray-900 to-gray-800" />
+        )}
+      </div>
+
+      {/* Loading Overlay */}
       {isLoading && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center">
-          <div className="text-white text-xl">Loading 3D Scene...</div>
+        <div className="absolute inset-0 bg-black/50 z-20 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white" />
         </div>
       )}
-      
-      {hasError ? (
-        <div className="absolute inset-0 z-40 flex items-center justify-center bg-gradient-to-b from-gray-900 to-black">
-          <div className="text-white text-center">
-            <h1 className="text-4xl font-bold mb-4">Welcome to Story Writing Assistant</h1>
-            <p className="text-xl">Your creative journey begins here</p>
+
+      {/* Content */}
+      <div className="relative z-10 container mx-auto px-4 text-center">
+        <div className="max-w-5xl mx-auto space-y-8">
+          <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-white leading-tight tracking-tight">
+            All Stories Studio
+          </h1>
+          <p className="text-2xl md:text-3xl lg:text-4xl text-white/90 font-light max-w-3xl mx-auto leading-relaxed">
+            Create, collaborate, and bring your stories to life with our AI-powered writing studio
+          </p>
+          <div className="flex items-center justify-center gap-4 pt-8">
+            <Button
+              size="lg"
+              className="bg-white text-black hover:bg-white/90 text-lg px-8 py-6"
+              onClick={() => onShowAuth("signup")}
+            >
+              Get Started →
+            </Button>
           </div>
         </div>
-      ) : (
-        <div className="absolute inset-0 w-full h-full">
-          <div className="relative w-full h-full" style={{ paddingBottom: '56.25%' }}>
-            <iframe 
-              src="https://my.spline.design/theshipwreck-bf9cd47c523a3d1014e08cb5b8e80639/"
-              frameBorder="0"
-              onLoad={handleIframeLoad}
-              onError={handleIframeError}
-              title="3D Scene"
-              style={{ 
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                backgroundColor: 'transparent',
-                zIndex: 0
-              }}
-              allow="autoplay; fullscreen; xr-spatial-tracking"
-            />
-          </div>
-        </div>
-      )}
-    </div>
+      </div>
+    </section>
   );
 };
