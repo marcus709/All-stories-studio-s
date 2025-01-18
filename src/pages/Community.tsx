@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate, Routes, Route } from "react-router-dom";
 import { CommunitySidebar } from "@/components/community/CommunitySidebar";
 import { CommunityFeed } from "@/components/community/CommunityFeed";
-import { CommunityHome } from "@/components/community/CommunityHome";
 import { MyGroups } from "@/components/community/MyGroups";
 import { Topics } from "@/components/community/Topics";
 import { SavedPosts } from "@/components/community/SavedPosts";
@@ -47,18 +46,17 @@ const Community = () => {
         <div className="container h-full mx-auto px-4">
           <div className="flex gap-8 h-full">
             {/* Sidebar */}
-            <div className="w-56 shrink-0">
+            <div className="w-64 shrink-0">
               <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg shadow-purple-100/50 p-6 transition-all duration-300 hover:shadow-purple-200/50">
                 <CommunitySidebar />
               </div>
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 max-w-4xl overflow-y-auto pb-8 animate-fade-in">
+            <div className="flex-1 max-w-3xl overflow-y-auto pb-8 animate-fade-in">
               <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg shadow-purple-100/50 p-6 transition-all duration-300 hover:shadow-purple-200/50">
                 <Routes>
-                  <Route index element={<CommunityHome />} />
-                  <Route path="feed" element={<CommunityFeed />} />
+                  <Route index element={<CommunityFeed />} />
                   <Route path="groups/*" element={<MyGroups />} />
                   <Route path="topics" element={<Topics />} />
                   <Route path="saved" element={<SavedPosts />} />
@@ -68,7 +66,9 @@ const Community = () => {
             </div>
 
             {/* Trending Topics */}
-            <TrendingTopics />
+            <div className="w-80 shrink-0">
+              <TrendingTopics />
+            </div>
           </div>
         </div>
       </div>
