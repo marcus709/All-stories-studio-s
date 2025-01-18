@@ -67,7 +67,7 @@ export const TrendingTopics = () => {
   };
 
   return (
-    <div className="w-72 shrink-0 space-y-8 sticky top-24 max-h-[calc(100vh-6rem)] overflow-y-auto pb-8">
+    <div className="w-64 shrink-0 space-y-8 sticky top-24 max-h-[calc(100vh-6rem)] overflow-y-auto pb-8">
       <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg shadow-purple-100/50 p-6 transition-all duration-300 hover:shadow-purple-200/50">
         <h2 className="text-lg font-semibold mb-6 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Trending Topics</h2>
         <p className="text-gray-500 text-sm text-center">
