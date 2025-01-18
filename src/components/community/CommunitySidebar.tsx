@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Home, Newspaper, Users, Bookmark, Hash } from "lucide-react";
+import { Home, MessageSquare, Users, Hash, Bookmark, Settings, Target, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const CommunitySidebar = () => {
@@ -16,11 +16,11 @@ export const CommunitySidebar = () => {
     },
     {
       title: "Feed",
-      icon: Newspaper,
+      icon: MessageSquare,
       href: "/community/feed"
     },
     {
-      title: "Groups",
+      title: "My Groups",
       icon: Users,
       href: "/community/groups"
     },
@@ -33,6 +33,21 @@ export const CommunitySidebar = () => {
       title: "Saved",
       icon: Bookmark,
       href: "/community/saved"
+    },
+    {
+      title: "Settings",
+      icon: Settings,
+      href: "/settings"
+    },
+    {
+      title: "Goals",
+      icon: Target,
+      href: "/community/goals"
+    },
+    {
+      title: "Add Friends",
+      icon: UserPlus,
+      href: "/community/friends/add"
     }
   ];
 
