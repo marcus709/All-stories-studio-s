@@ -68,7 +68,7 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
           variant="secondary" 
           className={`capitalize flex items-center gap-1 ${getPlanColor(plan)}`}
         >
-          <Crown className="h-3 w-3" />
+          <Crown className="h-3 w-3 text-white" />
           {plan} Plan
         </Badge>
       )}
@@ -82,7 +82,7 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
                  session.user.email?.[0]?.toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <span className="text-sm font-mono text-purple-100">
+            <span className="text-sm font-mono text-white">
               {profile?.username || session.user.email?.split('@')[0]}
             </span>
           </Button>
