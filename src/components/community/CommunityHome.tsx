@@ -1,25 +1,31 @@
 import { useSession } from "@supabase/auth-helpers-react";
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 export const CommunityHome = () => {
   const session = useSession();
-  const navigate = useNavigate();
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (!session) {
-      navigate('/');
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to access the community.",
-        variant: "destructive",
-      });
-    }
-  }, [session, navigate, toast]);
+  const { data: profile } = useQuery({
+    queryKey: ["profile"],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", session?.user?.id)
+          .maybeSingle();
 
-  if (!session) return null;
+        if (error) throw error;
+        return data;
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
+    },
+    enabled: !!session?.user?.id,
+  });
 
   return (
     <div className="space-y-8">
