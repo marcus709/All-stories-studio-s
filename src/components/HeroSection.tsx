@@ -72,7 +72,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
 
       <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8">
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6">
-          Write Your Story
+          All Stories Studio
         </h1>
         <p className="text-xl sm:text-2xl text-gray-200 mb-8">
           Even a shipwreck tells a story. We're here to help you write yours!
