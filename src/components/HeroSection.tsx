@@ -9,39 +9,47 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   const [splineError, setSplineError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isScrolling, setIsScrolling] = useState(false);
+  const [lastMouseMove, setLastMouseMove] = useState(Date.now());
   let scrollTimeout: NodeJS.Timeout;
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolling(true);
       
-      // Clear the previous timeout
       if (scrollTimeout) {
         clearTimeout(scrollTimeout);
       }
       
-      // Set a timeout to reset isScrolling after scrolling stops
       scrollTimeout = setTimeout(() => {
         setIsScrolling(false);
       }, 150);
     };
 
     const handleWheel = (e: WheelEvent) => {
-      // Allow scrolling while maintaining 3D interaction
-      window.scrollBy(0, e.deltaY);
+      const timeSinceLastMove = Date.now() - lastMouseMove;
+      // If mouse hasn't moved in the last 500ms, allow scrolling
+      if (timeSinceLastMove > 500) {
+        window.scrollBy(0, e.deltaY);
+      }
+    };
+
+    const handleMouseMove = () => {
+      setLastMouseMove(Date.now());
     };
 
     window.addEventListener('scroll', handleScroll);
     window.addEventListener('wheel', handleWheel, { passive: true });
+    window.addEventListener('mousemove', handleMouseMove);
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('mousemove', handleMouseMove);
       if (scrollTimeout) {
         clearTimeout(scrollTimeout);
       }
     };
-  }, []);
+  }, [lastMouseMove]);
 
   const handleSplineLoad = () => {
     setIsLoading(false);
@@ -66,7 +74,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
                 height: '100%',
                 backgroundColor: 'transparent',
                 zIndex: 0,
-                pointerEvents: 'auto',
+                pointerEvents: Date.now() - lastMouseMove > 500 ? 'none' : 'auto',
               }}
               allow="autoplay; fullscreen; xr-spatial-tracking"
               onLoad={handleSplineLoad}
