@@ -50,7 +50,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
       )}
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 text-center">
+      <div className="relative z-10 container mx-auto px-4 text-center pointer-events-none">
         <div className="max-w-5xl mx-auto space-y-8">
           <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-white leading-tight tracking-tight">
             All Stories Studio
@@ -61,7 +61,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
           <div className="flex items-center justify-center gap-4 pt-8">
             <Button
               size="lg"
-              className="bg-white hover:bg-white/90 text-black text-lg px-8 py-6"
+              className="bg-white hover:bg-white/90 text-black text-lg px-8 py-6 pointer-events-auto"
               onClick={() => onShowAuth("signup")}
             >
               Get Started →
