@@ -37,26 +37,26 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
         </div>
       ) : (
         <div className="absolute inset-0 w-full h-full">
-          <iframe 
-            src="https://my.spline.design/theshipwreck-bf9cd47c523a3d1014e08cb5b8e80639/"
-            frameBorder="0"
-            width="100%"
-            height="100%"
-            onLoad={handleIframeLoad}
-            onError={handleIframeError}
-            title="3D Scene"
-            style={{ 
-              backgroundColor: 'transparent',
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              pointerEvents: 'none',
-              zIndex: 0
-            }}
-            allow="autoplay; fullscreen; xr-spatial-tracking"
-          />
+          <div className="relative w-full h-full" style={{ paddingBottom: '56.25%' }}>
+            <iframe 
+              src="https://my.spline.design/theshipwreck-bf9cd47c523a3d1014e08cb5b8e80639/"
+              frameBorder="0"
+              onLoad={handleIframeLoad}
+              onError={handleIframeError}
+              title="3D Scene"
+              style={{ 
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'transparent',
+                pointerEvents: 'none',
+                zIndex: 0
+              }}
+              allow="autoplay; fullscreen; xr-spatial-tracking"
+            />
+          </div>
         </div>
       )}
     </div>
