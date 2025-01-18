@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 
 interface HeroSectionProps {
@@ -8,6 +8,32 @@ interface HeroSectionProps {
 export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   const [splineError, setSplineError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isScrolling, setIsScrolling] = useState(false);
+  let scrollTimeout: NodeJS.Timeout;
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolling(true);
+      
+      // Clear the previous timeout
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+      
+      // Set a timeout to reset isScrolling after scrolling stops
+      scrollTimeout = setTimeout(() => {
+        setIsScrolling(false);
+      }, 150); // Adjust this value to control how long after scrolling stops before re-enabling 3D interaction
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+    };
+  }, []);
 
   const handleSplineLoad = () => {
     setIsLoading(false);
@@ -32,7 +58,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
                 height: '100%',
                 backgroundColor: 'transparent',
                 zIndex: 0,
-                pointerEvents: 'auto',
+                pointerEvents: isScrolling ? 'none' : 'auto',
               }}
               allow="autoplay; fullscreen; xr-spatial-tracking"
               onLoad={handleSplineLoad}
@@ -52,7 +78,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
       )}
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 text-center pointer-events-none">
+      <div className={`relative z-10 container mx-auto px-4 text-center ${isScrolling ? 'pointer-events-auto' : 'pointer-events-none'}`}>
         <div className="max-w-5xl mx-auto space-y-8">
           <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-white leading-tight tracking-tight">
             All Stories Studio
