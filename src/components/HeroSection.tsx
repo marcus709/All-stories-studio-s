@@ -22,7 +22,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   };
 
   return (
-    <div className="relative h-screen w-full flex items-center justify-center overflow-hidden">
+    <div className="relative min-h-screen w-full flex items-center justify-center">
       {isLoading && (
         <div className="absolute inset-0 z-50 flex items-center justify-center">
           <div className="text-white text-xl">Loading 3D Scene...</div>
