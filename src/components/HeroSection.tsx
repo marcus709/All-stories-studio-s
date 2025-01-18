@@ -38,7 +38,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
       ) : (
         <div className="absolute inset-0 w-full h-full">
           <iframe 
-            src="https://my.spline.design/vistafromagrotto-e98e8a331092b404bcceafa477420aa7/"
+            src="https://my.spline.design/theshipwreck-b47b3f5b7727762a0d6ad2efe92792ae/"
             frameBorder="0"
             width="100%"
             height="100%"
