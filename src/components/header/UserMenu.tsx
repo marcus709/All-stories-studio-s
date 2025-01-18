@@ -24,10 +24,9 @@ interface UserMenuProps {
   } | null;
   onSignOut: () => Promise<void>;
   onShowAuth: (view: "signin" | "signup") => void;
-  displayAbbreviation?: boolean;
 }
 
-export const UserMenu = ({ session, profile, onSignOut, onShowAuth, displayAbbreviation = false }: UserMenuProps) => {
+export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuProps) => {
   const { plan } = useSubscription();
   const navigate = useNavigate();
 
@@ -84,7 +83,7 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth, displayAbbre
               </AvatarFallback>
             </Avatar>
             <span className="text-sm font-mono text-white">
-              {displayAbbreviation ? "ASS" : (profile?.username || session.user.email?.split('@')[0])}
+              {profile?.username || session.user.email?.split('@')[0]}
             </span>
           </Button>
         </DropdownMenuTrigger>

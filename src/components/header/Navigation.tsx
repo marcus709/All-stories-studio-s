@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Menu, MenuItem, HoveredLink } from "@/components/ui/navbar-menu";
-import { useNavigate } from "react-router-dom";
 
 interface NavigationProps {
   onScrollToSection: (sectionId: string) => void;
@@ -9,12 +8,6 @@ interface NavigationProps {
 
 export const Navigation = ({ onScrollToSection, onCommunityClick }: NavigationProps) => {
   const [active, setActive] = useState<string | null>(null);
-  const navigate = useNavigate();
-
-  const handleDashboardClick = (path: string) => {
-    navigate(path);
-    setActive(null);
-  };
 
   return (
     <Menu setActive={setActive}>
@@ -58,9 +51,9 @@ export const Navigation = ({ onScrollToSection, onCommunityClick }: NavigationPr
       </MenuItem>
       <MenuItem setActive={setActive} active={active} item="Dashboard">
         <div className="flex flex-col space-y-4 text-sm">
-          <HoveredLink onClick={() => handleDashboardClick('/dashboard')}>Overview</HoveredLink>
-          <HoveredLink onClick={() => handleDashboardClick('/dashboard/stories')}>My Stories</HoveredLink>
-          <HoveredLink onClick={() => handleDashboardClick('/dashboard/characters')}>Characters</HoveredLink>
+          <HoveredLink to="/dashboard">Overview</HoveredLink>
+          <HoveredLink to="/dashboard/stories">My Stories</HoveredLink>
+          <HoveredLink to="/dashboard/characters">Characters</HoveredLink>
         </div>
       </MenuItem>
       <MenuItem setActive={setActive} active={active} item="Community">

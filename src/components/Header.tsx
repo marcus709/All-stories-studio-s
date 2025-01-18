@@ -1,7 +1,6 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { BookOpen } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { AuthModals } from "./auth/AuthModals";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./ui/use-toast";
@@ -15,32 +14,62 @@ export const Header = () => {
   const [authView, setAuthView] = useState<"signin" | "signup">("signin");
   const [profile, setProfile] = useState<Profile | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
   const session = useSession();
 
-  const handleShowAuth = (view: "signin" | "signup") => {
-    setAuthView(view);
-    setShowAuth(true);
+  useEffect(() => {
+    if (session?.user) {
+      fetchProfile(session.user.id);
+    } else {
+      setProfile(null);
+    }
+  }, [session]);
+
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select()
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return;
+      }
+      
+      setProfile(data);
+    } catch (error) {
+      console.error("Error in fetchProfile:", error);
+    }
   };
 
   const handleSignOut = async () => {
     try {
+      localStorage.clear();
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      toast({
-        title: "Success",
-        description: "You have been signed out successfully.",
-      });
+      
+      if (error) {
+        console.error("Error during sign out:", error);
+        toast({
+          title: "Warning",
+          description: "Sign out completed with some warnings. Please refresh the page.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "You have been signed out successfully.",
+        });
+      }
+      window.location.href = '/';
     } catch (error) {
-      console.error("Error signing out:", error);
-      toast({
-        title: "Error",
-        description: "There was a problem signing out.",
-        variant: "destructive",
-      });
+      console.error("Unexpected error during sign out:", error);
+      window.location.href = '/';
     }
   };
 
-  const handleScrollToSection = (sectionId: string) => {
+  const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
@@ -48,50 +77,43 @@ export const Header = () => {
   };
 
   const handleCommunityClick = () => {
-    // Handle community click
-    console.log('Community clicked');
+    if (!session) {
+      setAuthView("signin");
+      setShowAuth(true);
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to access the community.",
+      });
+      return;
+    }
+    navigate("/community");
+  };
+
+  const handleShowAuth = (view: "signin" | "signup") => {
+    setAuthView(view);
+    setShowAuth(true);
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 h-20 bg-black/20 backdrop-blur-[2px]">
+    <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 h-16">
       <div className="flex items-center space-x-12">
-        <Link to="/" className="flex items-center space-x-3">
-          <BookOpen className="h-6 w-6 text-white" />
-          <span className="text-xl font-semibold text-white">All Stories Studio</span>
+        <Link to="/" className="flex items-center space-x-2">
+          <BookOpen className="h-5 w-5 text-white" />
+          <span className="text-lg font-mono text-white">All Stories Studio</span>
         </Link>
+
         <Navigation 
-          onScrollToSection={handleScrollToSection}
+          onScrollToSection={scrollToSection}
           onCommunityClick={handleCommunityClick}
         />
       </div>
 
-      <div className="flex items-center space-x-4">
-        {session ? (
-          <UserMenu 
-            session={session}
-            profile={profile}
-            onSignOut={handleSignOut}
-            onShowAuth={handleShowAuth}
-            displayAbbreviation={true}
-          />
-        ) : (
-          <>
-            <Button
-              variant="ghost"
-              className="text-white hover:text-white/90"
-              onClick={() => handleShowAuth("signin")}
-            >
-              Sign In
-            </Button>
-            <Button
-              className="bg-pink-500 hover:bg-pink-600 text-white"
-              onClick={() => handleShowAuth("signup")}
-            >
-              Sign Up
-            </Button>
-          </>
-        )}
-      </div>
+      <UserMenu
+        session={session}
+        profile={profile}
+        onSignOut={handleSignOut}
+        onShowAuth={handleShowAuth}
+      />
 
       <AuthModals
         isOpen={showAuth}
