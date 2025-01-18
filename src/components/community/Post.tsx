@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
-import { Heart, MessageSquare, Share2, Trash2 } from "lucide-react";
+import { Heart, MessageSquare, Share2, Trash2, MoreHorizontal, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -143,13 +143,12 @@ export const Post = ({ post }: PostProps) => {
     addComment.mutate(newComment);
   };
 
-  // Get the username from the get_post_profiles function result
   const postUsername = post.get_post_profiles?.[0]?.username || "Anonymous";
   const postAvatarUrl = post.get_post_profiles?.[0]?.avatar_url;
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <div className="flex items-center justify-between mb-4">
+    <div className="bg-white rounded-3xl shadow-sm p-6">
+      <div className="flex items-start justify-between mb-4">
         <div 
           className="flex items-center gap-3 cursor-pointer hover:opacity-80"
           onClick={() => setSelectedProfile({ 
@@ -159,84 +158,106 @@ export const Post = ({ post }: PostProps) => {
             bio: null
           })}
         >
-          <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
             {postAvatarUrl ? (
               <img
                 src={postAvatarUrl}
                 alt={postUsername}
-                className="w-full h-full rounded-full object-cover"
+                className="w-full h-full object-cover"
               />
             ) : (
-              <span className="text-purple-600 font-medium">
+              <span className="text-gray-600 font-medium">
                 {postUsername[0]?.toUpperCase() || "A"}
               </span>
             )}
           </div>
           <div>
-            <h3 className="font-medium">@{postUsername}</h3>
+            <h3 className="font-semibold text-gray-900">{postUsername}</h3>
             <p className="text-sm text-gray-500">
-              {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+              @{postUsername.toLowerCase()} · {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
             </p>
           </div>
         </div>
-        {isOwnPost && (
+        {isOwnPost ? (
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={() => deletePost.mutate()}
-            className="text-red-500 hover:text-red-700"
+            className="text-gray-400 hover:text-red-500"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-5 w-5" />
+          </Button>
+        ) : (
+          <Button variant="ghost" size="icon" className="text-gray-400">
+            <MoreHorizontal className="h-5 w-5" />
           </Button>
         )}
       </div>
 
-      <p className="mb-4">{post.content}</p>
+      <p className="text-gray-800 mb-4 whitespace-pre-wrap">{post.content}</p>
 
-      <div className="flex items-center gap-4 mb-4">
+      {post.metadata?.link && (
+        <div className="mb-4 rounded-xl border border-gray-100 p-4 hover:bg-gray-50 cursor-pointer">
+          <div className="flex items-center gap-3">
+            <Link2 className="h-5 w-5 text-blue-500" />
+            <div>
+              <h4 className="font-medium text-gray-900">{post.metadata.link.title}</h4>
+              <p className="text-sm text-gray-500">{post.metadata.link.description}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-center gap-6 text-gray-500">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => toggleLike.mutate()}
-          className={`gap-2 ${isLiked ? "text-red-500" : "text-gray-500"}`}
+          className={`gap-2 hover:text-red-500 ${isLiked ? "text-red-500" : ""}`}
         >
-          <Heart className="h-4 w-4" />
-          {post.post_likes.length}
+          <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />
+          <span className="text-sm font-medium">{post.post_likes.length}</span>
         </Button>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setShowComments(!showComments)}
-          className="gap-2 text-gray-500"
+          className="gap-2 hover:text-blue-500"
         >
-          <MessageSquare className="h-4 w-4" />
-          {post.comments.length}
+          <MessageSquare className="h-5 w-5" />
+          <span className="text-sm font-medium">{post.comments.length}</span>
         </Button>
-        <Button variant="ghost" size="sm" className="gap-2 text-gray-500">
-          <Share2 className="h-4 w-4" />
-          Share
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="gap-2 hover:text-green-500"
+        >
+          <Share2 className="h-5 w-5" />
+          <span className="text-sm font-medium">Share</span>
         </Button>
       </div>
 
       {showComments && (
-        <div className="space-y-4">
-          <form onSubmit={handleComment}>
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          <form onSubmit={handleComment} className="mb-4">
             <Textarea
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder="Write a comment..."
-              className="mb-2"
+              className="mb-2 resize-none"
+              rows={2}
             />
             <Button
               type="submit"
               size="sm"
               disabled={!newComment.trim() || addComment.isPending}
+              className="bg-blue-500 hover:bg-blue-600"
             >
               Comment
             </Button>
           </form>
 
-          <div className="space-y-4 mt-4">
+          <div className="space-y-4">
             {post.comments.map((comment) => {
               const commentUsername = comment.get_comment_profiles?.[0]?.username || "Anonymous";
               const commentAvatarUrl = comment.get_comment_profiles?.[0]?.avatar_url;
@@ -244,7 +265,7 @@ export const Post = ({ post }: PostProps) => {
               return (
                 <div key={comment.id} className="flex gap-3">
                   <div 
-                    className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center shrink-0 cursor-pointer"
+                    className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0 cursor-pointer overflow-hidden"
                     onClick={() => setSelectedProfile({
                       id: comment.user_id,
                       username: commentUsername,
@@ -256,16 +277,16 @@ export const Post = ({ post }: PostProps) => {
                       <img
                         src={commentAvatarUrl}
                         alt={commentUsername}
-                        className="w-full h-full rounded-full object-cover"
+                        className="w-full h-full object-cover"
                       />
                     ) : (
-                      <span className="text-purple-600 text-sm font-medium">
+                      <span className="text-gray-600 text-sm font-medium">
                         {commentUsername[0]?.toUpperCase() || "A"}
                       </span>
                     )}
                   </div>
-                  <div>
-                    <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="flex-1">
+                    <div className="bg-gray-50 rounded-2xl p-3">
                       <p 
                         className="font-medium text-sm cursor-pointer hover:opacity-80"
                         onClick={() => setSelectedProfile({
@@ -275,11 +296,11 @@ export const Post = ({ post }: PostProps) => {
                           bio: null
                         })}
                       >
-                        @{commentUsername}
+                        {commentUsername}
                       </p>
-                      <p className="text-sm">{comment.content}</p>
+                      <p className="text-sm text-gray-800">{comment.content}</p>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-500 mt-1 ml-3">
                       {formatDistanceToNow(new Date(comment.created_at), {
                         addSuffix: true,
                       })}
