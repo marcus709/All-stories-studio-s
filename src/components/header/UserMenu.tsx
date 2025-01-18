@@ -88,16 +88,9 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent 
-          className="w-56 bg-white border border-gray-200" 
+          className="w-56 bg-white" 
           align="end" 
           forceMount
-          onMouseLeave={(e) => {
-            const target = e.target as HTMLElement;
-            const dropdown = target.closest('[role="menu"]');
-            if (dropdown) {
-              (dropdown as any)._closeDropdown?.();
-            }
-          }}
         >
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
