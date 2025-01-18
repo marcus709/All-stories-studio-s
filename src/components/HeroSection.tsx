@@ -21,7 +21,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   };
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center">
+    <div className="relative min-h-screen w-full flex items-center justify-center bg-black">
       {isLoading && (
         <div className="absolute inset-0 z-50 flex items-center justify-center">
           <div className="text-white text-xl">Loading 3D Scene...</div>
@@ -52,7 +52,8 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
               left: 0,
               width: '100%',
               height: '100%',
-              pointerEvents: 'none'
+              pointerEvents: 'none',
+              zIndex: 0
             }}
             allow="autoplay; fullscreen; xr-spatial-tracking"
           />
