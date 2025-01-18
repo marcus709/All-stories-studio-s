@@ -1,8 +1,5 @@
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
+import { Button } from "./ui/button";
 
 interface HeroSectionProps {
   onShowAuth: (view: "signin" | "signup") => void;
@@ -10,81 +7,145 @@ interface HeroSectionProps {
 
 export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   const [splineError, setSplineError] = useState(false);
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isScrolling, setIsScrolling] = useState(false);
+  const [lastMouseMove, setLastMouseMove] = useState(Date.now());
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [showScrollArea, setShowScrollArea] = useState(false);
+  let scrollTimeout: NodeJS.Timeout;
+  let mouseTimeout: NodeJS.Timeout;
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      return !!session;
+    const handleScroll = () => {
+      setIsScrolling(true);
+      
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+      
+      scrollTimeout = setTimeout(() => {
+        setIsScrolling(false);
+      }, 150);
     };
 
-    const handleGetStarted = async () => {
-      const isAuthenticated = await checkAuth();
-      if (isAuthenticated) {
-        navigate("/dashboard");
-      } else {
-        onShowAuth("signup");
+    const handleWheel = (e: WheelEvent) => {
+      const timeSinceLastMove = Date.now() - lastMouseMove;
+      if (timeSinceLastMove > 500) {
+        window.scrollBy(0, e.deltaY);
       }
     };
 
-    const getStartedButton = document.getElementById("get-started-button");
-    if (getStartedButton) {
-      getStartedButton.addEventListener("click", handleGetStarted);
-    }
+    const handleMouseMove = (e: MouseEvent) => {
+      setLastMouseMove(Date.now());
+      setMousePosition({ x: e.clientX, y: e.clientY });
+      setShowScrollArea(false);
+      
+      if (mouseTimeout) {
+        clearTimeout(mouseTimeout);
+      }
+      
+      mouseTimeout = setTimeout(() => {
+        setShowScrollArea(true);
+      }, 100);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('wheel', handleWheel, { passive: true });
+    window.addEventListener('mousemove', handleMouseMove);
 
     return () => {
-      const button = document.getElementById("get-started-button");
-      if (button) {
-        button.removeEventListener("click", handleGetStarted);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+      if (mouseTimeout) {
+        clearTimeout(mouseTimeout);
       }
     };
-  }, [navigate, onShowAuth]);
+  }, [lastMouseMove]);
+
+  const handleSplineLoad = () => {
+    setIsLoading(false);
+  };
+
+  const handleSplineError = () => {
+    setSplineError(true);
+    setIsLoading(false);
+  };
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 w-full h-full overflow-hidden">
-        <div
-          className="absolute inset-0 z-0"
-          style={{
-            background:
-              "linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.4) 100%)",
-          }}
-        />
+    <section className="relative min-h-screen flex items-center justify-center">
+      {/* Background with Spline */}
+      <div className="absolute inset-0 z-0">
         {!splineError ? (
           <div className="relative w-full h-full">
             <iframe
-              src="https://my.spline.design/theshipwreck-84ac0ec99510c6c542c4c33a494be4d8/"
+              src="https://my.spline.design/theshipwreck-bf9cd47c523a3d1014e08cb5b8e80639/"
               style={{
                 position: 'absolute',
                 width: '100%',
                 height: '100%',
-                border: 'none',
-                overflow: 'hidden'
+                backgroundColor: 'transparent',
+                zIndex: 0,
+                pointerEvents: Date.now() - lastMouseMove > 500 ? 'none' : 'auto',
               }}
-              onError={() => setSplineError(true)}
+              allow="autoplay; fullscreen; xr-spatial-tracking"
+              onLoad={handleSplineLoad}
+              onError={handleSplineError}
             />
           </div>
         ) : (
-          <div className="w-full h-full bg-gradient-to-b from-gray-900 to-gray-800" />
+          <div className="w-full h-full bg-gradient-to-br from-gray-900 to-gray-800" />
         )}
       </div>
 
-      <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-[1200px] mx-auto mt-16">
-        <h1 className="text-6xl sm:text-7xl md:text-8xl font-bold text-white mb-8 tracking-tight">
-          All Stories Studio
-        </h1>
-        <p className="text-2xl sm:text-3xl text-gray-200 mb-12 max-w-4xl mx-auto font-light">
-          Even a shipwreck tells a story. We're here to help you write yours!
-        </p>
-        <Button
-          id="get-started-button"
-          size="lg"
-          className="bg-pink-500 hover:bg-pink-600 text-white px-8 py-6 rounded-lg text-xl font-semibold transition-colors duration-200 h-auto"
-        >
-          Get Started →
-        </Button>
+      {/* Scroll Area under cursor */}
+      {showScrollArea && (
+        <div
+          style={{
+            position: 'fixed',
+            left: mousePosition.x - 20,
+            top: mousePosition.y - 20,
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            pointerEvents: 'none',
+            zIndex: 1,
+          }}
+        />
+      )}
+
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="absolute inset-0 bg-black/50 z-20 flex items-center justify-center pointer-events-none">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white" />
+        </div>
+      )}
+
+      {/* Content */}
+      <div className={`relative z-10 container mx-auto px-4 text-center ${isScrolling ? 'pointer-events-auto' : 'pointer-events-none'}`}>
+        <div className="max-w-5xl mx-auto space-y-8">
+          <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-white leading-tight tracking-tight">
+            All Stories Studio
+          </h1>
+          <p className="text-2xl md:text-3xl lg:text-4xl text-white/90 font-light max-w-3xl mx-auto leading-relaxed">
+            Even a shipwreck tells a story. We're here to help you write yours!
+          </p>
+          <div className="flex items-center justify-center gap-4 pt-8">
+            <div className="pointer-events-auto">
+              <Button
+                size="lg"
+                className="bg-white hover:bg-white/90 text-black text-lg px-8 py-6"
+                onClick={() => onShowAuth("signup")}
+              >
+                Get Started →
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   );
 };
