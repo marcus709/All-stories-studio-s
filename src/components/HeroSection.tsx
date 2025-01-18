@@ -33,20 +33,10 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
                 height: '100%',
                 backgroundColor: 'transparent',
                 zIndex: 0,
-                pointerEvents: 'none' // This allows scrolling through the iframe
               }}
               allow="autoplay; fullscreen; xr-spatial-tracking"
               onLoad={handleSplineLoad}
               onError={handleSplineError}
-            />
-            {/* Invisible overlay to handle 3D interactions */}
-            <div 
-              className="absolute inset-0"
-              style={{ pointerEvents: 'auto' }}
-              onWheel={(e) => {
-                // Allow page scrolling
-                e.stopPropagation();
-              }}
             />
           </div>
         ) : (
@@ -62,7 +52,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
       )}
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 text-center pointer-events-none">
+      <div className="relative z-10 container mx-auto px-4 text-center">
         <div className="max-w-5xl mx-auto space-y-8">
           <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-white leading-tight tracking-tight">
             All Stories Studio
@@ -73,7 +63,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
           <div className="flex items-center justify-center gap-4 pt-8">
             <Button
               size="lg"
-              className="bg-white hover:bg-white/90 text-black text-lg px-8 py-6 pointer-events-auto"
+              className="bg-white hover:bg-white/90 text-black text-lg px-8 py-6"
               onClick={() => onShowAuth("signup")}
             >
               Get Started →
