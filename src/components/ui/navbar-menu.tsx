@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const transition = {
   type: "spring",
@@ -22,10 +23,7 @@ export const MenuItem = ({
   children?: React.ReactNode;
 }) => {
   return (
-    <div 
-      onMouseEnter={() => setActive(item)}
-      className="relative"
-    >
+    <div onMouseEnter={() => setActive(item)} className="relative">
       <motion.p
         transition={{ duration: 0.3 }}
         className="cursor-pointer text-white hover:opacity-[0.9]"
@@ -39,21 +37,11 @@ export const MenuItem = ({
           transition={transition}
         >
           {active === item && (
-            <div 
-              className="absolute top-[calc(100%_+_1.2rem)] left-1/2 transform -translate-x-1/2 pt-4"
-              onMouseEnter={(e) => {
-                e.stopPropagation();
-                setActive(item);
-              }}
-            >
+            <div className="absolute top-[calc(100%_+_1.2rem)] left-1/2 transform -translate-x-1/2 pt-4">
               <motion.div
                 transition={transition}
                 layoutId="active"
-                className="bg-black/80 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/[0.2] shadow-xl"
-                onMouseLeave={(e) => {
-                  e.stopPropagation();
-                  setActive(null);
-                }}
+                className="bg-white backdrop-blur-sm rounded-2xl overflow-hidden border border-black/[0.2] shadow-xl"
               >
                 <motion.div
                   layout
@@ -78,7 +66,10 @@ export const Menu = ({
   children: React.ReactNode;
 }) => {
   return (
-    <nav className="relative flex justify-center space-x-4">
+    <nav
+      onMouseLeave={() => setActive(null)}
+      className="relative flex justify-center space-x-4"
+    >
       {children}
     </nav>
   );
@@ -88,7 +79,7 @@ export const HoveredLink = ({ children, onClick, ...rest }: any) => {
   return (
     <div
       onClick={onClick}
-      className="text-neutral-200 hover:text-white cursor-pointer"
+      className="text-neutral-700 hover:text-black cursor-pointer"
       {...rest}
     >
       {children}

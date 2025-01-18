@@ -12,7 +12,7 @@ export const Navigation = ({ onScrollToSection, onCommunityClick }: NavigationPr
   return (
     <Menu setActive={setActive}>
       <MenuItem setActive={setActive} active={active} item="Features">
-        <div className="flex flex-col space-y-4 text-sm bg-white text-black rounded-lg shadow-lg p-4">
+        <div className="flex flex-col space-y-4 text-sm">
           <HoveredLink onClick={() => onScrollToSection('features')}>
             Story Development
           </HoveredLink>
@@ -37,7 +37,7 @@ export const Navigation = ({ onScrollToSection, onCommunityClick }: NavigationPr
         </div>
       </MenuItem>
       <MenuItem setActive={setActive} active={active} item="Pricing">
-        <div className="flex flex-col space-y-4 text-sm bg-white text-black rounded-lg shadow-lg p-4">
+        <div className="flex flex-col space-y-4 text-sm">
           <HoveredLink onClick={() => onScrollToSection('pricing')}>
             Free Trial
           </HoveredLink>
@@ -50,14 +50,14 @@ export const Navigation = ({ onScrollToSection, onCommunityClick }: NavigationPr
         </div>
       </MenuItem>
       <MenuItem setActive={setActive} active={active} item="Dashboard">
-        <div className="flex flex-col space-y-4 text-sm bg-white text-black rounded-lg shadow-lg p-4">
+        <div className="flex flex-col space-y-4 text-sm">
           <HoveredLink to="/dashboard">Overview</HoveredLink>
           <HoveredLink to="/dashboard/stories">My Stories</HoveredLink>
           <HoveredLink to="/dashboard/characters">Characters</HoveredLink>
         </div>
       </MenuItem>
       <MenuItem setActive={setActive} active={active} item="Community">
-        <div className="flex flex-col space-y-4 text-sm bg-white text-black rounded-lg shadow-lg p-4">
+        <div className="flex flex-col space-y-4 text-sm">
           <HoveredLink onClick={onCommunityClick}>Writers Hub</HoveredLink>
           <HoveredLink onClick={onCommunityClick}>Story Sharing</HoveredLink>
           <HoveredLink onClick={onCommunityClick}>Collaborations</HoveredLink>
