@@ -48,7 +48,10 @@ export default function AppRoutes() {
             <Community />
           </AppLayout>
         }
-      />
+      >
+        <Route path="" element={<CommunityFeed />} />
+        <Route path="home" element={<CommunityHome />} />
+      </Route>
       <Route
         path="/invite/:inviteId"
         element={
