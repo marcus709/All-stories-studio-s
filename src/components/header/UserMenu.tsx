@@ -72,7 +72,7 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
           {plan} Plan
         </Badge>
       )}
-      <DropdownMenu>
+      <DropdownMenu modal={true}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="flex items-center space-x-2 px-2 hover:bg-purple-900/20">
             <Avatar className="h-8 w-8">
