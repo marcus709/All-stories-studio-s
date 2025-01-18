@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Spline from '@splinetool/react-spline';
 
 interface HeroSectionProps {
   onShowAuth?: (view: "signin" | "signup") => void;
@@ -8,14 +9,14 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
-  const handleIframeLoad = () => {
-    console.log("Iframe loaded successfully");
+  const handleSplineLoad = () => {
+    console.log("Spline scene loaded successfully");
     setIsLoading(false);
     setHasError(false);
   };
 
-  const handleIframeError = (error: any) => {
-    console.error("Iframe loading error:", error);
+  const handleSplineError = (error: any) => {
+    console.error("Spline loading error:", error);
     setIsLoading(false);
     setHasError(true);
   };
@@ -37,23 +38,15 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
         </div>
       ) : (
         <div className="absolute inset-0 w-full h-full">
-          <iframe 
-            src="https://my.spline.design/theshipwreck-b47b3f5b7727762a0d6ad2efe92792ae/"
-            frameBorder="0"
-            width="100%"
-            height="100%"
-            onLoad={handleIframeLoad}
-            onError={handleIframeError}
-            title="3D Scene"
+          <Spline
+            scene="https://prod.spline.design/kbIdKZrhiKaVR2bt/scene.splinecode"
+            onLoad={handleSplineLoad}
+            onError={handleSplineError}
             style={{ 
-              backgroundColor: 'transparent',
-              position: 'absolute',
-              top: 0,
-              left: 0,
               width: '100%',
-              height: '100%'
+              height: '100%',
+              backgroundColor: 'transparent'
             }}
-            allow="autoplay; fullscreen; xr-spatial-tracking"
           />
         </div>
       )}
