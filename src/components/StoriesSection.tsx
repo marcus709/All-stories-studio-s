@@ -26,13 +26,13 @@ const stories = [
 
 export const StoriesSection = () => {
   return (
-    <section className="py-24 px-4 bg-black">
+    <section className="py-24 px-4 bg-gray-50">
       <div className="container mx-auto max-w-7xl">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-6 font-mono text-white">
+          <h2 className="text-4xl font-bold mb-6 font-mono text-gray-900">
             Featured Stories
           </h2>
-          <p className="text-lg text-gray-400 max-w-2xl mx-auto font-light">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto font-light">
             Discover incredible stories crafted by our community of writers using AI-powered tools.
           </p>
         </div>
@@ -41,7 +41,7 @@ export const StoriesSection = () => {
           {stories.map((story, index) => (
             <Card 
               key={index}
-              className={`group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-zinc-900/50 backdrop-blur-sm ${
+              className={`group overflow-hidden border shadow-lg hover:shadow-xl transition-all duration-300 bg-white ${
                 story.isShared ? 'border-l-4 border-l-purple-500' : ''
               }`}
             >
@@ -60,7 +60,7 @@ export const StoriesSection = () => {
                     </Badge>
                   )}
                   <Badge 
-                    className="bg-zinc-800/60 text-purple-200 hover:bg-zinc-700/80 backdrop-blur-sm"
+                    className="bg-white/90 text-gray-700 hover:bg-white backdrop-blur-sm"
                   >
                     {story.category}
                   </Badge>
@@ -69,22 +69,22 @@ export const StoriesSection = () => {
               
               <CardContent className="relative p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-400">By {story.author}</span>
+                  <span className="text-sm text-gray-600">By {story.author}</span>
                   <div className="flex items-center space-x-1">
                     <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                    <span className="text-sm font-medium text-gray-300">{story.rating}</span>
+                    <span className="text-sm font-medium text-gray-700">{story.rating}</span>
                   </div>
                 </div>
                 
-                <h3 className="text-2xl font-semibold mb-3 group-hover:text-purple-400 transition-colors text-white">
+                <h3 className="text-2xl font-semibold mb-3 group-hover:text-purple-600 transition-colors text-gray-900">
                   {story.title}
                 </h3>
                 
-                <p className="text-gray-400 mb-4 line-clamp-2 font-light">
+                <p className="text-gray-600 mb-4 line-clamp-2 font-light">
                   {story.description}
                 </p>
                 
-                <div className="flex items-center text-purple-400">
+                <div className="flex items-center text-purple-600">
                   <BookOpen className="h-4 w-4" />
                 </div>
               </CardContent>
