@@ -51,7 +51,6 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
                 width: '100%',
                 height: '100%',
                 backgroundColor: 'transparent',
-                pointerEvents: 'none',
                 zIndex: 0
               }}
               allow="autoplay; fullscreen; xr-spatial-tracking"
