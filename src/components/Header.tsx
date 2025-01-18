@@ -40,14 +40,29 @@ export const Header = () => {
     }
   };
 
+  const handleScrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleCommunityClick = () => {
+    // Handle community click
+    console.log('Community clicked');
+  };
+
   return (
     <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 h-20 bg-black/20 backdrop-blur-[2px]">
       <div className="flex items-center space-x-12">
         <Link to="/" className="flex items-center space-x-3">
           <BookOpen className="h-6 w-6 text-white" />
-          <span className="text-xl font-semibold text-white">All Stories Studio</span>
+          <span className="text-xl font-semibold text-white">ASS</span>
         </Link>
-        <Navigation />
+        <Navigation 
+          onScrollToSection={handleScrollToSection}
+          onCommunityClick={handleCommunityClick}
+        />
       </div>
 
       <div className="flex items-center space-x-4">
