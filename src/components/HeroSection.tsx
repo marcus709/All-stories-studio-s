@@ -1,5 +1,4 @@
 import { useState } from "react";
-import Spline from "@splinetool/react-spline";
 import { Button } from "./ui/button";
 
 interface HeroSectionProps {
@@ -33,6 +32,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
                 height: '100%',
                 backgroundColor: 'transparent',
                 zIndex: 0,
+                pointerEvents: 'auto',
               }}
               allow="autoplay; fullscreen; xr-spatial-tracking"
               onLoad={handleSplineLoad}
@@ -46,13 +46,13 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
 
       {/* Loading Overlay */}
       {isLoading && (
-        <div className="absolute inset-0 bg-black/50 z-20 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black/50 z-20 flex items-center justify-center pointer-events-none">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white" />
         </div>
       )}
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 text-center">
+      <div className="relative z-10 container mx-auto px-4 text-center pointer-events-none">
         <div className="max-w-5xl mx-auto space-y-8">
           <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-white leading-tight tracking-tight">
             All Stories Studio
@@ -61,13 +61,15 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
             Create, collaborate, and bring your stories to life with our AI-powered writing studio
           </p>
           <div className="flex items-center justify-center gap-4 pt-8">
-            <Button
-              size="lg"
-              className="bg-white hover:bg-white/90 text-black text-lg px-8 py-6"
-              onClick={() => onShowAuth("signup")}
-            >
-              Get Started →
-            </Button>
+            <div className="pointer-events-auto">
+              <Button
+                size="lg"
+                className="bg-white hover:bg-white/90 text-black text-lg px-8 py-6"
+                onClick={() => onShowAuth("signup")}
+              >
+                Get Started →
+              </Button>
+            </div>
           </div>
         </div>
       </div>
