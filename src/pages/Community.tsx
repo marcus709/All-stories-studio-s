@@ -47,7 +47,7 @@ const Community = () => {
         <div className="container h-full mx-auto px-4">
           <div className="flex gap-8 h-full">
             {/* Sidebar */}
-            <div className="w-56 shrink-0">
+            <div className="w-64 shrink-0">
               <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg shadow-purple-100/50 p-6 transition-all duration-300 hover:shadow-purple-200/50">
                 <CommunitySidebar />
               </div>
