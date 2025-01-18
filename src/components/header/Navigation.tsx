@@ -11,6 +11,11 @@ export const Navigation = ({ onScrollToSection, onCommunityClick }: NavigationPr
   const [active, setActive] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  const handleNavigation = (path: string) => {
+    setActive(null);
+    navigate(path);
+  };
+
   return (
     <Menu setActive={setActive}>
       <MenuItem setActive={setActive} active={active} item="Features">
@@ -53,9 +58,9 @@ export const Navigation = ({ onScrollToSection, onCommunityClick }: NavigationPr
       </MenuItem>
       <MenuItem setActive={setActive} active={active} item="Dashboard">
         <div className="flex flex-col space-y-4 text-sm">
-          <HoveredLink onClick={() => navigate('/dashboard')}>Overview</HoveredLink>
-          <HoveredLink onClick={() => navigate('/dashboard/stories')}>My Stories</HoveredLink>
-          <HoveredLink onClick={() => navigate('/dashboard/characters')}>Characters</HoveredLink>
+          <HoveredLink onClick={() => handleNavigation('/dashboard')}>Overview</HoveredLink>
+          <HoveredLink onClick={() => handleNavigation('/dashboard/stories')}>My Stories</HoveredLink>
+          <HoveredLink onClick={() => handleNavigation('/dashboard/characters')}>Characters</HoveredLink>
         </div>
       </MenuItem>
       <MenuItem setActive={setActive} active={active} item="Community">
