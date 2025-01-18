@@ -82,7 +82,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
         {!splineError ? (
           <div className="relative w-full h-full">
             <iframe
-              src="https://my.spline.design/theshipwreck-bf9cd47c523a3d1014e08cb5b8e80639/"
+              src="https://my.spline.design/theshipwreck-84ac0ec99510c6c542c4c33a494be4d8/"
               style={{
                 position: 'absolute',
                 width: '100%',
