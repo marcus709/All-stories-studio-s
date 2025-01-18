@@ -24,19 +24,31 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
       {/* Background with Spline */}
       <div className="absolute inset-0 z-0">
         {!splineError ? (
-          <iframe
-            src="https://my.spline.design/theshipwreck-bf9cd47c523a3d1014e08cb5b8e80639/"
-            style={{
-              position: 'absolute',
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'transparent',
-              zIndex: 0
-            }}
-            allow="autoplay; fullscreen; xr-spatial-tracking"
-            onLoad={handleSplineLoad}
-            onError={handleSplineError}
-          />
+          <div className="relative w-full h-full">
+            <iframe
+              src="https://my.spline.design/theshipwreck-bf9cd47c523a3d1014e08cb5b8e80639/"
+              style={{
+                position: 'absolute',
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'transparent',
+                zIndex: 0,
+                pointerEvents: 'none' // This allows scrolling through the iframe
+              }}
+              allow="autoplay; fullscreen; xr-spatial-tracking"
+              onLoad={handleSplineLoad}
+              onError={handleSplineError}
+            />
+            {/* Invisible overlay to handle 3D interactions */}
+            <div 
+              className="absolute inset-0"
+              style={{ pointerEvents: 'auto' }}
+              onWheel={(e) => {
+                // Allow page scrolling
+                e.stopPropagation();
+              }}
+            />
+          </div>
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-gray-900 to-gray-800" />
         )}
