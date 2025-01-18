@@ -10,7 +10,10 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isScrolling, setIsScrolling] = useState(false);
   const [lastMouseMove, setLastMouseMove] = useState(Date.now());
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [showScrollArea, setShowScrollArea] = useState(false);
   let scrollTimeout: NodeJS.Timeout;
+  let mouseTimeout: NodeJS.Timeout;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,14 +30,23 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
 
     const handleWheel = (e: WheelEvent) => {
       const timeSinceLastMove = Date.now() - lastMouseMove;
-      // If mouse hasn't moved in the last 500ms, allow scrolling
       if (timeSinceLastMove > 500) {
         window.scrollBy(0, e.deltaY);
       }
     };
 
-    const handleMouseMove = () => {
+    const handleMouseMove = (e: MouseEvent) => {
       setLastMouseMove(Date.now());
+      setMousePosition({ x: e.clientX, y: e.clientY });
+      setShowScrollArea(false);
+      
+      if (mouseTimeout) {
+        clearTimeout(mouseTimeout);
+      }
+      
+      mouseTimeout = setTimeout(() => {
+        setShowScrollArea(true);
+      }, 100);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -47,6 +59,9 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
       window.removeEventListener('mousemove', handleMouseMove);
       if (scrollTimeout) {
         clearTimeout(scrollTimeout);
+      }
+      if (mouseTimeout) {
+        clearTimeout(mouseTimeout);
       }
     };
   }, [lastMouseMove]);
@@ -85,6 +100,22 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
           <div className="w-full h-full bg-gradient-to-br from-gray-900 to-gray-800" />
         )}
       </div>
+
+      {/* Scroll Area under cursor */}
+      {showScrollArea && (
+        <div
+          style={{
+            position: 'fixed',
+            left: mousePosition.x - 20,
+            top: mousePosition.y - 20,
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            pointerEvents: 'none',
+            zIndex: 1,
+          }}
+        />
+      )}
 
       {/* Loading Overlay */}
       {isLoading && (
