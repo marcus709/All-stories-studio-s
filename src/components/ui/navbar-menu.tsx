@@ -57,7 +57,7 @@ export const MenuItem = ({
         >
           {active === item && (
             <div 
-              className="absolute top-[calc(100%_-_0.5rem)] left-1/2 transform -translate-x-1/2"
+              className="absolute left-1/2 transform -translate-x-1/2"
               onMouseEnter={() => setActive(item)}
               onMouseLeave={handleMouseLeave}
             >
