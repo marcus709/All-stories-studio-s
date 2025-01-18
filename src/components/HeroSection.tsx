@@ -48,7 +48,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
           className="absolute inset-0 z-0"
           style={{
             background:
-              "linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.5) 50%, rgba(0, 0, 0, 0.7) 100%)",
+              "linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.4) 100%)",
           }}
         />
         {!splineError ? (
@@ -70,19 +70,19 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
         )}
       </div>
 
-      <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6">
+      <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-[1200px] mx-auto mt-16">
+        <h1 className="text-6xl sm:text-7xl md:text-8xl font-bold text-white mb-8 tracking-tight">
           All Stories Studio
         </h1>
-        <p className="text-xl sm:text-2xl text-gray-200 mb-8">
+        <p className="text-2xl sm:text-3xl text-gray-200 mb-12 max-w-4xl mx-auto font-light">
           Even a shipwreck tells a story. We're here to help you write yours!
         </p>
         <Button
           id="get-started-button"
           size="lg"
-          className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg text-lg font-semibold transition-colors duration-200"
+          className="bg-pink-500 hover:bg-pink-600 text-white px-8 py-6 rounded-lg text-xl font-semibold transition-colors duration-200 h-auto"
         >
-          Get Started
+          Get Started →
         </Button>
       </div>
     </div>
