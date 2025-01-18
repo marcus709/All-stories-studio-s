@@ -95,7 +95,7 @@ export const Header = () => {
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 h-16">
+    <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 h-16 bg-black/50 backdrop-blur-sm">
       <div className="flex items-center space-x-12">
         <Link to="/" className="flex items-center space-x-2">
           <BookOpen className="h-5 w-5 text-white" />
