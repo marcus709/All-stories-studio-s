@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, MenuItem, HoveredLink } from "@/components/ui/navbar-menu";
+import { Menu, MenuItem } from "@/components/ui/navbar-menu";
 import { useNavigate } from "react-router-dom";
 
 interface NavigationProps {
@@ -10,11 +10,6 @@ interface NavigationProps {
 export const Navigation = ({ onScrollToSection, onCommunityClick }: NavigationProps) => {
   const [active, setActive] = useState<string | null>(null);
   const navigate = useNavigate();
-
-  const handleNavigation = (path: string) => {
-    setActive(null);
-    navigate(path);
-  };
 
   return (
     <Menu setActive={setActive}>
@@ -56,20 +51,30 @@ export const Navigation = ({ onScrollToSection, onCommunityClick }: NavigationPr
           </HoveredLink>
         </div>
       </MenuItem>
-      <MenuItem setActive={setActive} active={active} item="Dashboard">
-        <div className="flex flex-col space-y-4 text-sm">
-          <HoveredLink onClick={() => handleNavigation('/dashboard')}>Overview</HoveredLink>
-          <HoveredLink onClick={() => handleNavigation('/dashboard/stories')}>My Stories</HoveredLink>
-          <HoveredLink onClick={() => handleNavigation('/dashboard/characters')}>Characters</HoveredLink>
-        </div>
-      </MenuItem>
-      <MenuItem setActive={setActive} active={active} item="Community">
-        <div className="flex flex-col space-y-4 text-sm">
-          <HoveredLink onClick={onCommunityClick}>Writers Hub</HoveredLink>
-          <HoveredLink onClick={onCommunityClick}>Story Sharing</HoveredLink>
-          <HoveredLink onClick={onCommunityClick}>Collaborations</HoveredLink>
-        </div>
-      </MenuItem>
+      <div 
+        className="cursor-pointer text-white hover:opacity-[0.9]"
+        onClick={() => navigate('/dashboard')}
+      >
+        Dashboard
+      </div>
+      <div 
+        className="cursor-pointer text-white hover:opacity-[0.9]"
+        onClick={onCommunityClick}
+      >
+        Community
+      </div>
     </Menu>
+  );
+};
+
+export const HoveredLink = ({ children, onClick, ...rest }: any) => {
+  return (
+    <div
+      onClick={onClick}
+      className="text-neutral-700 hover:text-black cursor-pointer"
+      {...rest}
+    >
+      {children}
+    </div>
   );
 };
