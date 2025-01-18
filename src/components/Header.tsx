@@ -95,35 +95,31 @@ export const Header = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-transparent backdrop-blur-md border-b border-white/5">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-12">
-            <Link to="/" className="flex items-center space-x-2">
-              <BookOpen className="h-5 w-5 text-white" />
-              <span className="text-lg font-mono text-white">All Stories Studio</span>
-            </Link>
+    <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 h-16">
+      <div className="flex items-center space-x-12">
+        <Link to="/" className="flex items-center space-x-2">
+          <BookOpen className="h-5 w-5 text-white" />
+          <span className="text-lg font-mono text-white">All Stories Studio</span>
+        </Link>
 
-            <Navigation 
-              onScrollToSection={scrollToSection}
-              onCommunityClick={handleCommunityClick}
-            />
-          </div>
-
-          <UserMenu
-            session={session}
-            profile={profile}
-            onSignOut={handleSignOut}
-            onShowAuth={handleShowAuth}
-          />
-        </div>
+        <Navigation 
+          onScrollToSection={scrollToSection}
+          onCommunityClick={handleCommunityClick}
+        />
       </div>
+
+      <UserMenu
+        session={session}
+        profile={profile}
+        onSignOut={handleSignOut}
+        onShowAuth={handleShowAuth}
+      />
 
       <AuthModals
         isOpen={showAuth}
         onClose={() => setShowAuth(false)}
         defaultView={authView}
       />
-    </header>
+    </div>
   );
 };
