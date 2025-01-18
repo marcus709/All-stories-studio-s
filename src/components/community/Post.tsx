@@ -40,6 +40,12 @@ interface Post {
   post_likes: PostLike[];
   comments: Comment[];
   get_post_profiles: PostProfile[];
+  metadata?: {
+    link?: {
+      title: string;
+      description: string;
+    };
+  } | null;
 }
 
 interface PostProps {
