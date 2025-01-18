@@ -131,7 +131,7 @@ export const HeroSection = ({ onShowAuth }: HeroSectionProps) => {
             All Stories Studio
           </h1>
           <p className="text-2xl md:text-3xl lg:text-4xl text-white/90 font-light max-w-3xl mx-auto leading-relaxed">
-            Your words are your art. We're just here to help you shape them into their fullest potential
+            Even a shipwreck tells a story. We're here to help you write yours!
           </p>
           <div className="flex items-center justify-center gap-4 pt-8">
             <div className="pointer-events-auto">
