@@ -10,19 +10,21 @@ import { StoryButtons } from "../stories/StoryButtons";
 import { Story } from "@/types/story";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
+type View = "home" | "story" | "characters" | "plot" | "dream" | "ideas" | "docs" | "logic";
 
 const navigationItems = [
-  { id: "home", icon: Home, label: "Home" },
-  { id: "story", icon: Book, label: "Brainstorm" },
-  { id: "characters", icon: Users, label: "Characters" },
-  { id: "plot", icon: LineChart, label: "Formatting" },
-  { id: "dream", icon: Rewind, label: "Plot Development" },
-  { id: "ideas", icon: Lightbulb, label: "World Builder" },
-  { id: "docs", icon: FileText, label: "Story Docs" },
-  { id: "logic", icon: AlertTriangle, label: "Story Logic" },
+  { id: "home" as View, icon: Home, label: "Home" },
+  { id: "story" as View, icon: Book, label: "Brainstorm" },
+  { id: "characters" as View, icon: Users, label: "Characters" },
+  { id: "plot" as View, icon: LineChart, label: "Formatting", comingSoon: true },
+  { id: "dream" as View, icon: Rewind, label: "Plot Development" },
+  { id: "ideas" as View, icon: Lightbulb, label: "World Builder", comingSoon: true },
+  { id: "docs" as View, icon: FileText, label: "Story Docs" },
+  { id: "logic" as View, icon: AlertTriangle, label: "Story Logic" },
 ] as const;
-
-type View = (typeof navigationItems)[number]["id"];
 
 interface DashboardSidebarProps {
   currentView: View;
@@ -94,18 +96,30 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
           <ChevronRight className="h-4 w-4" />
         </Button>
         <nav className="space-y-3">
-          {navigationItems.map(({ id, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setCurrentView(id)}
-              disabled={!selectedStory}
-              className={cn(
-                "w-10 h-10 flex items-center justify-center rounded-lg transition-colors",
-                currentView === id ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent"
-              )}
-            >
-              <Icon className="h-5 w-5" />
-            </button>
+          {navigationItems.map(({ id, icon: Icon, comingSoon }) => (
+            <Tooltip key={id} delayDuration={0}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => !comingSoon && setCurrentView(id)}
+                  disabled={!selectedStory || comingSoon}
+                  className={cn(
+                    "w-10 h-10 flex items-center justify-center rounded-lg transition-colors relative",
+                    currentView === id ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent",
+                    comingSoon && "opacity-50 cursor-not-allowed"
+                  )}
+                >
+                  <Icon className="h-5 w-5" />
+                  {comingSoon && (
+                    <div className="absolute -top-1 -right-1">
+                      <Badge variant="secondary" className="text-[10px] px-1 py-0">Soon</Badge>
+                    </div>
+                  )}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                <p>{comingSoon ? `${id} (Coming Soon)` : id}</p>
+              </TooltipContent>
+            </Tooltip>
           ))}
         </nav>
       </div>
@@ -161,20 +175,24 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
         {/* Navigation */}
         <ScrollArea className="flex-1 px-2">
           <nav className="space-y-1">
-            {navigationItems.map(({ id, icon: Icon, label }) => (
+            {navigationItems.map(({ id, icon: Icon, label, comingSoon }) => (
               <button
                 key={id}
-                onClick={() => setCurrentView(id)}
-                disabled={!selectedStory}
+                onClick={() => !comingSoon && setCurrentView(id)}
+                disabled={!selectedStory || comingSoon}
                 className={cn(
-                  "w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm font-medium",
+                  "w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm font-medium relative",
                   currentView === id 
                     ? "bg-primary/10 text-primary" 
-                    : "text-muted-foreground hover:bg-accent"
+                    : "text-muted-foreground hover:bg-accent",
+                  comingSoon && "opacity-50 cursor-not-allowed"
                 )}
               >
                 <Icon className="h-5 w-5" />
                 <span>{label}</span>
+                {comingSoon && (
+                  <Badge variant="secondary" className="ml-auto">Coming Soon</Badge>
+                )}
               </button>
             ))}
           </nav>
@@ -194,4 +212,4 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
       </div>
     </div>
   );
-}
+};
