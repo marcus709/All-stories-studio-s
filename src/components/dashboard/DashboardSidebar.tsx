@@ -13,7 +13,7 @@ import { format } from "date-fns";
 
 const navigationItems = [
   { id: "home", icon: Home, label: "Home" },
-  { id: "story", icon: Book, label: "Story Editor" },
+  { id: "story", icon: Book, label: "Brainstorm" },
   { id: "characters", icon: Users, label: "Characters" },
   { id: "plot", icon: LineChart, label: "Formatting" },
   { id: "dream", icon: Rewind, label: "Plot Development" },
