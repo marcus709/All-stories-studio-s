@@ -29,6 +29,7 @@ interface UserMenuProps {
 export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuProps) => {
   const { plan } = useSubscription();
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = React.useState(false);
 
   const getPlanColor = (planType: string) => {
     switch (planType) {
@@ -72,7 +73,7 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
           {plan} Plan
         </Badge>
       )}
-      <DropdownMenu modal={true}>
+      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="flex items-center space-x-2 px-2 hover:bg-purple-900/20">
             <Avatar className="h-8 w-8">
@@ -91,6 +92,7 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
           className="w-56 bg-white" 
           align="end" 
           forceMount
+          onMouseLeave={() => setIsOpen(false)}
         >
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
