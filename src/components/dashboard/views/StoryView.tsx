@@ -1,184 +1,111 @@
 import { useState, useEffect } from "react";
-import { BookOpen, LineChart, Wand, Settings, MessageSquare } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
+import { useNavigate } from "react-router-dom";
+import { Search, Plus, Tag, Clock, Pencil, Trash2, PanelLeftClose, PanelLeft, MessageSquare } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { useStory } from "@/contexts/StoryContext";
-import { useAI } from "@/hooks/useAI";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { AIConfigurationDialog } from "@/components/ai/AIConfigurationDialog";
-import { calculateReadability } from "@/utils/readability";
-import { useFeatureAccess } from "@/utils/subscriptionUtils";
-import { PaywallAlert } from "@/components/PaywallAlert";
+import { useStory } from "@/contexts/StoryContext";
 import { useSession } from "@supabase/auth-helpers-react";
-import { RichTextEditor } from "@/components/editor/RichTextEditor";
-import { RemoteCursor } from "@/components/docs/RemoteCursor";
-import { cn } from "@/lib/utils";
-
-interface Message {
-  role: 'user' | 'assistant';
-  content: string;
-}
-
-interface CursorPosition {
-  x: number;
-  y: number;
-  userId: string;
-  username: string;
-}
-
-const CURSOR_COLORS = [
-  "#FF5733", "#33FF57", "#3357FF", "#FF33F5",
-  "#33FFF5", "#F5FF33", "#FF3333", "#33FF33"
-];
+import { useAI } from "@/hooks/useAI";
+import { CreateStoryIdeaDialog } from "@/components/CreateStoryIdeaDialog";
+import { IdeaList } from "@/components/ideas/IdeaList";
+import { IdeaDialogs } from "@/components/ideas/IdeaDialogs";
 
 export const StoryView = () => {
-  const [wordCount, setWordCount] = useState(1);
-  const [readabilityScore, setReadabilityScore] = useState(0);
-  const [storyContent, setStoryContent] = useState("");
-  const [aiSuggestions, setAiSuggestions] = useState("");
-  const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false);
-  const [selectedConfig, setSelectedConfig] = useState<string>("");
-  const [configToEdit, setConfigToEdit] = useState<any>(null);
-  const [showPaywallAlert, setShowPaywallAlert] = useState(false);
-  const [isChatMode, setIsChatMode] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [ideas, setIdeas] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [ideaToDelete, setIdeaToDelete] = useState<any>(null);
+  const [editingIdea, setEditingIdea] = useState<any>(null);
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [isChatMode, setIsChatMode] = useState(true);
+  const [messages, setMessages] = useState<{ role: 'user' | 'assistant', content: string }[]>([]);
   const [currentMessage, setCurrentMessage] = useState('');
-  const { selectedStory } = useStory();
-  const { generateContent, isLoading } = useAI();
   const { toast } = useToast();
+  const { selectedStory } = useStory();
   const session = useSession();
-  const queryClient = useQueryClient();
-  const { currentLimits, getRequiredPlan } = useFeatureAccess();
-  const [cursors, setCursors] = useState<Record<string, CursorPosition>>({});
+  const { generateContent, isLoading } = useAI();
 
-  const { data: aiConfigurations = [] } = useQuery({
-    queryKey: ["aiConfigurations", session?.user?.id],
-    queryFn: async () => {
-      if (!session?.user?.id) return [];
-      
-      const { data, error } = await supabase
-        .from("ai_configurations")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: "Failed to fetch AI configurations",
-          variant: "destructive",
-        });
-        return [];
-      }
-
-      return data;
-    },
-    enabled: !!session?.user?.id,
-  });
-
-  useEffect(() => {
-    if (!selectedStory?.id || !session?.user) return;
-
-    const channel = supabase.channel(`story:${selectedStory.id}`)
-      .on('presence', { event: 'sync' }, () => {
-        const state = channel.presenceState();
-        const newCursors: Record<string, CursorPosition> = {};
-        
-        Object.keys(state).forEach((key) => {
-          const presence = state[key][0] as any;
-          if (presence.userId !== session.user?.id) {
-            newCursors[presence.userId] = presence;
-          }
-        });
-        
-        setCursors(newCursors);
-      })
-      .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          const container = window.document.querySelector('.story-container');
-          if (!container) return;
-
-          const trackCursor = (e: MouseEvent) => {
-            const rect = container.getBoundingClientRect();
-            channel.track({
-              userId: session.user?.id,
-              username: session.user?.email?.split('@')[0] || 'Anonymous',
-              x: e.clientX - rect.left,
-              y: e.clientY - rect.top,
-            });
-          };
-
-          container.addEventListener('mousemove', trackCursor);
-          return () => {
-            container.removeEventListener('mousemove', trackCursor);
-          };
-        }
-      });
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [selectedStory?.id, session?.user]);
-
-  const handleContentChange = (content: string) => {
+  const fetchIdeas = async () => {
     if (!selectedStory) return;
-    setStoryContent(content);
-    const words = content.replace(/<[^>]*>/g, '').trim().split(/\s+/);
-    setWordCount(content.trim() === "" ? 0 : words.length);
-    setReadabilityScore(calculateReadability(content));
-  };
 
-  const handleGetSuggestions = async () => {
-    if (!storyContent && !isChatMode) {
+    const { data, error } = await supabase
+      .from("story_ideas")
+      .select("*")
+      .eq("story_id", selectedStory.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
       toast({
-        title: "No content",
-        description: "Please write some content first to get AI suggestions.",
+        title: "Error",
+        description: "Failed to fetch story ideas",
         variant: "destructive",
       });
       return;
     }
 
-    if (currentLimits.ai_prompts === 0) {
-      setShowPaywallAlert(true);
+    setIdeas(data);
+  };
+
+  useEffect(() => {
+    fetchIdeas();
+  }, [selectedStory]);
+
+  const handleDelete = async () => {
+    if (!ideaToDelete) return;
+
+    const { error } = await supabase
+      .from("story_ideas")
+      .delete()
+      .eq("id", ideaToDelete.id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete story idea",
+        variant: "destructive",
+      });
       return;
     }
 
-    const selectedAIConfig = selectedConfig ? await supabase
-      .from("ai_configurations")
-      .select("*")
-      .eq("id", selectedConfig)
-      .single() : null;
+    toast({
+      title: "Success",
+      description: "Story idea deleted successfully",
+    });
 
-    const context = {
-      storyDescription: selectedStory?.description || "",
-      aiConfig: selectedAIConfig?.data,
-    };
-
-    const contentToAnalyze = isChatMode ? messages[messages.length - 1]?.content : storyContent;
-    const suggestions = await generateContent(contentToAnalyze, "suggestions", context);
-    
-    if (suggestions) {
-      if (isChatMode) {
-        setMessages([...messages, { role: 'assistant' as const, content: suggestions }]);
-      } else {
-        setAiSuggestions(suggestions);
-      }
-    }
+    setIdeaToDelete(null);
+    fetchIdeas();
   };
 
-  const handleSelectChange = (value: string) => {
-    if (value === "new") {
-      setIsConfigDialogOpen(true);
-    } else {
-      setSelectedConfig(value);
+  const handleUpdate = async () => {
+    if (!editingIdea) return;
+
+    const { error } = await supabase
+      .from("story_ideas")
+      .update({
+        title: editingIdea.title,
+        description: editingIdea.description,
+        tag: editingIdea.tag,
+      })
+      .eq("id", editingIdea.id);
+
+    if (error) {
       toast({
-        title: "AI Configuration Selected",
-        description: "The selected configuration will be used for generating suggestions.",
+        title: "Error",
+        description: "Failed to update story idea",
+        variant: "destructive",
       });
+      return;
     }
+
+    toast({
+      title: "Success",
+      description: "Story idea updated successfully",
+    });
+
+    setEditingIdea(null);
+    fetchIdeas();
   };
 
   const handleChatSubmit = async (e: React.FormEvent) => {
@@ -186,7 +113,7 @@ export const StoryView = () => {
     
     if (!currentMessage.trim()) return;
 
-    const newMessage: Message = { role: 'user', content: currentMessage };
+    const newMessage = { role: 'user' as const, content: currentMessage };
     const updatedMessages = [...messages, newMessage];
     setMessages(updatedMessages);
     setCurrentMessage('');
@@ -219,171 +146,150 @@ export const StoryView = () => {
     }
   };
 
+  const filteredIdeas = ideas.filter(
+    (idea) =>
+      idea.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      idea.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      idea.tag?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  if (!selectedStory) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-4rem)] text-gray-500">
+        Please select a story to continue
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-7xl mx-auto px-8 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">Your Story</h1>
-          <p className="text-gray-500 text-lg">Let your creativity flow</p>
+    <div className="h-[calc(100vh-4rem)] overflow-hidden">
+      <div className="flex items-center justify-between px-8 py-4 border-b">
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold">Story Editor</h1>
+          <p className="text-gray-500">Write and organize your story</p>
         </div>
-        <div className="flex items-center gap-8 text-base text-gray-600">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={isChatMode}
-                onCheckedChange={setIsChatMode}
-                className="data-[state=checked]:bg-purple-500"
-              />
-              <MessageSquare className="h-5 w-5" />
-              Chat Mode
-            </div>
-            <div className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5" />
-              {wordCount} words
-            </div>
-            {!isChatMode && (
-              <div className="flex items-center gap-2">
-                <LineChart className="h-5 w-5" />
-                Readability: {readabilityScore}
-              </div>
-            )}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={isChatMode}
+              onCheckedChange={setIsChatMode}
+              className="data-[state=checked]:bg-purple-500"
+            />
+            <MessageSquare className="h-4 w-4" />
+            Chat Mode
           </div>
+          {!isChatMode && (
+            <>
+              {!showSidebar && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowSidebar(true)}
+                  className="h-9 w-9"
+                >
+                  <PanelLeft className="h-5 w-5" />
+                </Button>
+              )}
+              <CreateStoryIdeaDialog onIdeaCreated={fetchIdeas} />
+            </>
+          )}
         </div>
       </div>
 
-      <div className="flex items-center gap-4 mb-4">
-        <Select value={selectedConfig} onValueChange={handleSelectChange}>
-          <SelectTrigger className="w-[250px]">
-            <SelectValue placeholder="Select AI Configuration" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>AI Configurations</SelectLabel>
-              {aiConfigurations.map((config) => (
-                <SelectItem key={config.id} value={config.id}>
-                  {config.name}
-                </SelectItem>
-              ))}
-              <SelectItem value="new">+ Create New Configuration</SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-        <Button
-          onClick={handleGetSuggestions}
-          disabled={isLoading || !selectedConfig}
-          className="gap-2"
-        >
-          <Wand className="h-4 w-4" />
-          Get AI Suggestions
-        </Button>
-      </div>
-
-      <div className={`story-container bg-white rounded-xl shadow-sm p-8 mt-6 relative ${!selectedStory ? "opacity-50" : ""}`}>
-        {!selectedStory && (
-          <div className="absolute inset-0 bg-transparent z-10" />
-        )}
-        
-        {isChatMode ? (
-          <div className="flex flex-col h-[calc(100vh-300px)] max-h-[700px]">
-            <div className="flex-1 overflow-y-auto mb-4 space-y-4 pr-4 scrollbar-thin scrollbar-thumb-gray-200 hover:scrollbar-thumb-gray-300 scrollbar-track-transparent">
-              {messages.map((message, index) => (
+      {isChatMode ? (
+        <div className="flex flex-col h-[calc(100vh-8rem)]">
+          <div className="flex-1 overflow-y-auto mb-4 space-y-4 p-6">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`flex w-full ${
+                  message.role === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
                 <div
-                  key={index}
-                  className={cn(
-                    "flex w-full",
-                    message.role === "user" ? "justify-end" : "justify-start"
-                  )}
+                  className={`max-w-[80%] rounded-2xl px-6 py-3 ${
+                    message.role === "user"
+                      ? "bg-purple-500 text-white ml-auto"
+                      : "bg-gray-100 text-gray-900"
+                  }`}
                 >
-                  <div
-                    className={cn(
-                      "max-w-[80%] rounded-2xl px-6 py-3 backdrop-blur-sm shadow-sm",
-                      message.role === "user"
-                        ? "bg-purple-500/90 text-white ml-auto"
-                        : "bg-gray-100/90 text-gray-900 border border-gray-200/50"
-                    )}
-                  >
-                    {message.content}
-                  </div>
+                  {message.content}
                 </div>
-              ))}
+              </div>
+            ))}
+          </div>
+          <form 
+            onSubmit={handleChatSubmit}
+            className="sticky bottom-0 bg-white p-4 border-t"
+          >
+            <div className="flex gap-2">
+              <Input
+                value={currentMessage}
+                onChange={(e) => setCurrentMessage(e.target.value)}
+                placeholder="Share your ideas or ask for writing suggestions..."
+                className="flex-1"
+              />
+              <Button
+                type="submit"
+                disabled={!currentMessage.trim() || isLoading}
+                className="bg-purple-500 hover:bg-purple-600"
+              >
+                Send
+              </Button>
             </div>
-            <form 
-              onSubmit={handleChatSubmit}
-              className="sticky bottom-0 bg-white/80 backdrop-blur-sm p-2 rounded-lg border border-gray-100"
-            >
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={currentMessage}
-                  onChange={(e) => setCurrentMessage(e.target.value)}
-                  placeholder="Share your ideas or ask for writing suggestions..."
-                  className="flex-1 rounded-full px-6 py-3 bg-gray-50/80 backdrop-blur-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                />
+          </form>
+        </div>
+      ) : (
+        <div className="flex h-[calc(100vh-8rem)]">
+          {showSidebar && (
+            <div className="w-72 border-r flex-shrink-0">
+              <div className="flex justify-between items-center p-4 border-b">
+                <h2 className="font-semibold">Ideas List</h2>
                 <Button
-                  type="submit"
-                  disabled={!currentMessage.trim() || isLoading}
-                  className="rounded-full bg-purple-500 hover:bg-purple-600 text-white px-6"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowSidebar(false)}
+                  className="h-8 w-8"
                 >
-                  <Wand className="h-5 w-5" />
+                  <PanelLeftClose className="h-4 w-4" />
                 </Button>
               </div>
-            </form>
-          </div>
-        ) : (
-          <div className="relative">
-            <RichTextEditor
-              content={storyContent}
-              onChange={handleContentChange}
-              className="min-h-[400px]"
-            />
-
-            {Object.entries(cursors).map(([userId, cursor], index) => (
-              <RemoteCursor
-                key={userId}
-                color={CURSOR_COLORS[index % CURSOR_COLORS.length]}
-                position={{ x: cursor.x, y: cursor.y }}
-                username={cursor.username}
-              />
-            ))}
-
-            {(isLoading || aiSuggestions) && (
-              <div className="bg-purple-50 rounded-lg p-6 relative mt-6">
-                <h3 className="text-xl font-semibold text-purple-900 mb-4">AI Suggestions</h3>
-                {isLoading ? (
-                  <div className="flex items-center gap-2 text-purple-600">
-                    <Wand className="h-5 w-5 animate-spin" />
-                    <span>Getting AI suggestions...</span>
-                  </div>
-                ) : (
-                  <div className="prose prose-purple max-w-none">
-                    {aiSuggestions.split("\n").map((paragraph, index) => (
-                      <p key={index} className="text-purple-800">{paragraph}</p>
-                    ))}
-                  </div>
-                )}
+              <div className="p-4">
+                <div className="relative mb-6">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input
+                    placeholder="Search ideas..."
+                    className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <IdeaList 
+                  ideas={filteredIdeas}
+                  onEdit={setEditingIdea}
+                  onDelete={setIdeaToDelete}
+                />
               </div>
-            )}
+            </div>
+          )}
+          
+          <div className="flex-1 p-6">
+            <div className="bg-white rounded-xl p-6 shadow-sm">
+              <h2 className="text-lg font-semibold mb-4">Idea Details</h2>
+              {/* Idea details content will be implemented later */}
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      <AIConfigurationDialog
-        isOpen={isConfigDialogOpen}
-        onClose={() => {
-          setIsConfigDialogOpen(false);
-          setConfigToEdit(null);
-        }}
-        configToEdit={configToEdit}
-        onConfigSaved={() => {
-          queryClient.invalidateQueries({ queryKey: ["aiConfigurations"] });
-        }}
-      />
-
-      <PaywallAlert
-        isOpen={showPaywallAlert}
-        onClose={() => setShowPaywallAlert(false)}
-        feature="AI writing suggestions"
-        requiredPlan={getRequiredPlan("ai_prompts") || "creator"}
+      <IdeaDialogs
+        ideaToDelete={ideaToDelete}
+        editingIdea={editingIdea}
+        onDeleteClose={() => setIdeaToDelete(null)}
+        onEditClose={() => setEditingIdea(null)}
+        onDelete={handleDelete}
+        onUpdate={handleUpdate}
+        onRefresh={fetchIdeas}
       />
     </div>
   );

@@ -17,7 +17,7 @@ const navigationItems = [
   { id: "characters", icon: Users, label: "Characters" },
   { id: "plot", icon: LineChart, label: "Formatting" },
   { id: "dream", icon: Rewind, label: "Plot Development" },
-  { id: "ideas", icon: Lightbulb, label: "Story Ideas" },
+  { id: "ideas", icon: Lightbulb, label: "Coming Soon", disabled: true },
   { id: "docs", icon: FileText, label: "Story Docs" },
   { id: "logic", icon: AlertTriangle, label: "Story Logic" },
 ] as const;
