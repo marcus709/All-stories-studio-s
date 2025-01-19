@@ -27,6 +27,10 @@ import {
   BookOpen,
   Languages,
   Sparkles,
+  Crown,
+  Scroll,
+  Coins,
+  Home,
 } from "lucide-react";
 import { useAI } from "@/hooks/useAI";
 import { useState } from "react";
@@ -37,6 +41,20 @@ export const StoryIdeasView = () => {
   const [aiSuggestions, setAiSuggestions] = useState("");
   const [selectedSection, setSelectedSection] = useState("society");
 
+  // Form state
+  const [governmentType, setGovernmentType] = useState("");
+  const [beliefs, setBeliefs] = useState("");
+  const [customs, setCustoms] = useState("");
+  const [economy, setEconomy] = useState("");
+  const [socialStructure, setSocialStructure] = useState("");
+  const [deities, setDeities] = useState("");
+  const [festivals, setFestivals] = useState("");
+  const [resources, setResources] = useState("");
+  const [familyStructure, setFamilyStructure] = useState("");
+  const [languageName, setLanguageName] = useState("");
+  const [phonetics, setPhonetics] = useState("");
+  const [grammar, setGrammar] = useState("");
+
   if (!selectedStory) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
@@ -45,11 +63,32 @@ export const StoryIdeasView = () => {
     );
   }
 
-  const handleGenerateSuggestions = async (section: string, prompt: string) => {
-    const suggestions = await generateContent(
-      `Generate suggestions for ${section}: ${prompt}`,
-      'suggestions'
-    );
+  const handleGenerateSuggestions = async (section: string) => {
+    let prompt = "";
+    switch (section) {
+      case "government":
+        prompt = `Given a ${governmentType} government type, suggest some typical laws, social hierarchies, and potential conflicts.`;
+        break;
+      case "beliefs":
+        prompt = `Based on these deities (${deities}) and festivals (${festivals}), suggest some religious customs and spiritual implications.`;
+        break;
+      case "customs":
+        prompt = `For a culture with these customs (${customs}), suggest related traditions and social norms.`;
+        break;
+      case "economy":
+        prompt = `Given these resources (${resources}) and economic structure, suggest trade relationships and social implications.`;
+        break;
+      case "social":
+        prompt = `For a society with this family structure (${familyStructure}) and social organization, suggest potential story conflicts and cultural dynamics.`;
+        break;
+      case "language":
+        prompt = `Based on the language name "${languageName}" and phonetic system (${phonetics}), suggest some sample words and phrases.`;
+        break;
+      default:
+        prompt = "Generate general cultural suggestions";
+    }
+
+    const suggestions = await generateContent(prompt, 'suggestions');
     if (suggestions) {
       setAiSuggestions(suggestions);
     }
@@ -60,12 +99,7 @@ export const StoryIdeasView = () => {
       {/* Dynamic Overview Pane (Left) */}
       <div className="w-64 border-r border-border/40 p-4 bg-background/60 backdrop-blur-xl">
         <ScrollArea className="h-full">
-          <Accordion
-            type="single"
-            collapsible
-            defaultValue="culture"
-            className="space-y-2"
-          >
+          <Accordion type="single" collapsible defaultValue="culture" className="space-y-2">
             <AccordionItem value="culture">
               <AccordionTrigger className="text-sm font-medium">
                 Culture
@@ -78,8 +112,8 @@ export const StoryIdeasView = () => {
                     className="w-full justify-start"
                     onClick={() => setSelectedSection("society")}
                   >
-                    <Users className="h-4 w-4 mr-2" />
-                    Society & Government
+                    <Crown className="h-4 w-4 mr-2" />
+                    Government
                   </Button>
                   <Button
                     variant="ghost"
@@ -87,8 +121,8 @@ export const StoryIdeasView = () => {
                     className="w-full justify-start"
                     onClick={() => setSelectedSection("beliefs")}
                   >
-                    <ScrollText className="h-4 w-4 mr-2" />
-                    Beliefs & Religion
+                    <Scroll className="h-4 w-4 mr-2" />
+                    Religion & Beliefs
                   </Button>
                   <Button
                     variant="ghost"
@@ -96,8 +130,8 @@ export const StoryIdeasView = () => {
                     className="w-full justify-start"
                     onClick={() => setSelectedSection("customs")}
                   >
-                    <Building className="h-4 w-4 mr-2" />
-                    Customs & Taboos
+                    <ScrollText className="h-4 w-4 mr-2" />
+                    Customs & Traditions
                   </Button>
                   <Button
                     variant="ghost"
@@ -105,8 +139,8 @@ export const StoryIdeasView = () => {
                     className="w-full justify-start"
                     onClick={() => setSelectedSection("economy")}
                   >
-                    <Globe className="h-4 w-4 mr-2" />
-                    Economy & Daily Life
+                    <Coins className="h-4 w-4 mr-2" />
+                    Economy
                   </Button>
                   <Button
                     variant="ghost"
@@ -114,7 +148,7 @@ export const StoryIdeasView = () => {
                     className="w-full justify-start"
                     onClick={() => setSelectedSection("social")}
                   >
-                    <Heart className="h-4 w-4 mr-2" />
+                    <Home className="h-4 w-4 mr-2" />
                     Social Structure
                   </Button>
                 </div>
@@ -133,7 +167,7 @@ export const StoryIdeasView = () => {
                     onClick={() => setSelectedSection("phonetics")}
                   >
                     <Languages className="h-4 w-4 mr-2" />
-                    Phonetics & Phonology
+                    Phonetics
                   </Button>
                   <Button
                     variant="ghost"
@@ -142,16 +176,7 @@ export const StoryIdeasView = () => {
                     onClick={() => setSelectedSection("grammar")}
                   >
                     <BookOpen className="h-4 w-4 mr-2" />
-                    Grammar & Morphology
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-start"
-                    onClick={() => setSelectedSection("lexicon")}
-                  >
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Lexicon & Words
+                    Grammar
                   </Button>
                 </div>
               </AccordionContent>
@@ -172,7 +197,7 @@ export const StoryIdeasView = () => {
             <div className="space-y-4">
               <div>
                 <Label>Government Type</Label>
-                <Select>
+                <Select value={governmentType} onValueChange={setGovernmentType}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select government type" />
                   </SelectTrigger>
@@ -181,14 +206,28 @@ export const StoryIdeasView = () => {
                     <SelectItem value="democracy">Democracy</SelectItem>
                     <SelectItem value="theocracy">Theocracy</SelectItem>
                     <SelectItem value="clan">Clan-based</SelectItem>
+                    <SelectItem value="oligarchy">Oligarchy</SelectItem>
+                    <SelectItem value="tribal">Tribal Council</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <Label>Beliefs & Religion</Label>
+                <Label>Deities & Religious Figures</Label>
                 <Textarea 
-                  placeholder="Describe the religious beliefs and practices..."
+                  value={deities}
+                  onChange={(e) => setDeities(e.target.value)}
+                  placeholder="Describe the major deities, their domains, and relationships..."
+                  className="h-24"
+                />
+              </div>
+
+              <div>
+                <Label>Festivals & Ceremonies</Label>
+                <Textarea 
+                  value={festivals}
+                  onChange={(e) => setFestivals(e.target.value)}
+                  placeholder="Describe important festivals, ceremonies, and their significance..."
                   className="h-24"
                 />
               </div>
@@ -196,13 +235,35 @@ export const StoryIdeasView = () => {
               <div>
                 <Label>Customs & Traditions</Label>
                 <Textarea 
-                  placeholder="Describe important customs and traditions..."
+                  value={customs}
+                  onChange={(e) => setCustoms(e.target.value)}
+                  placeholder="Describe daily customs, social norms, and taboos..."
+                  className="h-24"
+                />
+              </div>
+
+              <div>
+                <Label>Resources & Economy</Label>
+                <Textarea 
+                  value={resources}
+                  onChange={(e) => setResources(e.target.value)}
+                  placeholder="Describe main resources, trade goods, and economic system..."
+                  className="h-24"
+                />
+              </div>
+
+              <div>
+                <Label>Family & Social Structure</Label>
+                <Textarea 
+                  value={familyStructure}
+                  onChange={(e) => setFamilyStructure(e.target.value)}
+                  placeholder="Describe family units, social classes, and hierarchies..."
                   className="h-24"
                 />
               </div>
 
               <Button 
-                onClick={() => handleGenerateSuggestions("culture", "Generate cultural elements based on the provided information")}
+                onClick={() => handleGenerateSuggestions(selectedSection)}
                 disabled={isLoading}
               >
                 Generate Suggestions
@@ -214,33 +275,35 @@ export const StoryIdeasView = () => {
             <div className="space-y-4">
               <div>
                 <Label>Language Name</Label>
-                <Input placeholder="Enter the name of the language" />
+                <Input 
+                  value={languageName}
+                  onChange={(e) => setLanguageName(e.target.value)}
+                  placeholder="Enter the name of the language" 
+                />
               </div>
 
               <div>
                 <Label>Phonetic System</Label>
                 <Textarea 
-                  placeholder="Describe the sounds and phonetic rules..."
+                  value={phonetics}
+                  onChange={(e) => setPhonetics(e.target.value)}
+                  placeholder="Describe the sounds, phonetic rules, and pronunciation patterns..."
                   className="h-24"
                 />
               </div>
 
               <div>
                 <Label>Grammar Structure</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select basic word order" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="svo">Subject-Verb-Object (SVO)</SelectItem>
-                    <SelectItem value="sov">Subject-Object-Verb (SOV)</SelectItem>
-                    <SelectItem value="vso">Verb-Subject-Object (VSO)</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Textarea 
+                  value={grammar}
+                  onChange={(e) => setGrammar(e.target.value)}
+                  placeholder="Describe grammar rules, word order, and special linguistic features..."
+                  className="h-24"
+                />
               </div>
 
               <Button 
-                onClick={() => handleGenerateSuggestions("language", "Generate language elements based on the provided structure")}
+                onClick={() => handleGenerateSuggestions("language")}
                 disabled={isLoading}
               >
                 Generate Suggestions
@@ -251,7 +314,7 @@ export const StoryIdeasView = () => {
       </div>
 
       {/* AI Suggestions Pane (Right) */}
-      <div className="w-80 border-l border-border/40 p-4 bg-background/60 backdrop-blur-xl">
+      <div className="w-96 border-l border-border/40 p-4 bg-background/60 backdrop-blur-xl">
         <div className="space-y-4">
           <h3 className="font-semibold">AI Suggestions</h3>
           <ScrollArea className="h-[calc(100vh-10rem)]">
@@ -260,7 +323,7 @@ export const StoryIdeasView = () => {
                 <div dangerouslySetInnerHTML={{ __html: aiSuggestions }} />
               ) : (
                 <p className="text-muted-foreground">
-                  Click "Generate Suggestions" to get AI-powered recommendations for your world building.
+                  Fill in the details in the main editor and click "Generate Suggestions" to get AI-powered recommendations for your world building.
                 </p>
               )}
             </div>
