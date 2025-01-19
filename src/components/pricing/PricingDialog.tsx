@@ -110,7 +110,7 @@ export function PricingDialog({ isOpen, onClose }: PricingDialogProps) {
         body: { 
           priceId,
           successUrl: `${window.location.origin}/payment/success`,
-          cancelUrl: `${window.location.origin}/?scrollTo=pricing`
+          cancelUrl: `${window.location.origin}/pricing`
         }
       });
 
@@ -145,14 +145,14 @@ export function PricingDialog({ isOpen, onClose }: PricingDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[850px]">
+      <DialogContent className="sm:max-w-[850px] p-0 bg-transparent border-none">
         <PricingTable
           features={features}
           plans={plans}
           defaultPlan="pro"
           defaultInterval="monthly"
           onPlanSelect={handlePlanSelect}
-          containerClassName="py-8"
+          containerClassName="py-8 rounded-lg bg-white dark:bg-gray-900"
           buttonClassName={`${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
         />
       </DialogContent>

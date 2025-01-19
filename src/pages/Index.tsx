@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { AuthModals } from "@/components/auth/AuthModals";
 import { useLocation } from "react-router-dom";
 import { PricingDialog } from "@/components/pricing/PricingDialog";
-import { useSession } from "@supabase/auth-helpers-react";
+import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 
 const Index = () => {
   const [showAuth, setShowAuth] = useState(false);
@@ -14,14 +14,32 @@ const Index = () => {
   const [authView, setAuthView] = useState<"signin" | "signup">("signup");
   const location = useLocation();
   const session = useSession();
+  const supabase = useSupabaseClient();
 
   useEffect(() => {
-    // Show pricing dialog when user first signs up
-    if (session?.user && !localStorage.getItem('pricingShown')) {
-      setShowPricing(true);
-      localStorage.setItem('pricingShown', 'true');
-    }
-  }, [session]);
+    const checkNewUser = async () => {
+      if (!session?.user) return;
+
+      try {
+        // Check if user has any previous activity
+        const { data: existingActivity } = await supabase
+          .from('user_activity_counts')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .single();
+
+        // Only show pricing for new users (no activity record)
+        if (!existingActivity && !localStorage.getItem('pricingShown')) {
+          setShowPricing(true);
+          localStorage.setItem('pricingShown', 'true');
+        }
+      } catch (error) {
+        console.error('Error checking user activity:', error);
+      }
+    };
+
+    checkNewUser();
+  }, [session, supabase]);
 
   const handleShowAuth = (view: "signin" | "signup") => {
     setAuthView(view);
