@@ -12,7 +12,18 @@ import { InviteMembersInput } from "./InviteMembersInput";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { GroupGoalsTab } from "./GroupGoalsTab";
-import { GroupMember } from "@/integrations/supabase/types/tables.types";
+
+interface GroupMemberWithProfile {
+  id: string;
+  role: string;
+  group_id: string;
+  created_at: string;
+  user: {
+    id: string;
+    username: string | null;
+    avatar_url: string | null;
+  } | null;
+}
 
 interface GroupSettingsDialogProps {
   group: {
@@ -42,7 +53,7 @@ export const GroupSettingsDialog = ({
   const [userSearchQuery, setUserSearchQuery] = useState("");
 
   // Query for group members
-  const { data: members } = useQuery<GroupMember[]>({
+  const { data: members } = useQuery<GroupMemberWithProfile[]>({
     queryKey: ["group-members", group.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -50,6 +61,8 @@ export const GroupSettingsDialog = ({
         .select(`
           id,
           role,
+          group_id,
+          created_at,
           user:profiles!group_members_user_id_fkey_profiles (
             id,
             username,
