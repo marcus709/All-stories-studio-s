@@ -6,13 +6,23 @@ import { StoryIdeasView } from "@/components/StoryIdeasView";
 import { StoryDocsView } from "@/components/docs/StoryDocsView";
 import { StoryLogicView } from "@/components/story-logic/StoryLogicView";
 import { HomeView } from "./views/HomeView";
-import { ComingSoonView } from "@/components/ComingSoonView";
+import { AlertTriangle } from "lucide-react";
 
 type View = "home" | "story" | "characters" | "plot" | "dream" | "ideas" | "docs" | "logic";
 
 interface DashboardContentProps {
   currentView: View;
 }
+
+const ComingSoonView = ({ feature }: { feature: string }) => {
+  return (
+    <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] text-gray-500 space-y-4">
+      <AlertTriangle className="w-12 h-12 text-yellow-500" />
+      <h2 className="text-2xl font-semibold">{feature} - Coming Soon</h2>
+      <p>We're working hard to bring you this feature. Stay tuned!</p>
+    </div>
+  );
+};
 
 export const DashboardContent = ({ currentView }: DashboardContentProps) => {
   const renderContent = () => {
@@ -24,21 +34,15 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
       case "characters":
         return <CharactersView />;
       case "plot":
-        return <ComingSoonView 
-          title="World Builder" 
-          description="The World Builder feature will help you create and organize your story's universe, including locations, cultures, magic systems, and more."
-        />;
+        return <ComingSoonView feature="Formatting" />;
       case "dream":
         return <PlotDevelopmentView />;
       case "ideas":
-        return <StoryIdeasView />;
+        return <ComingSoonView feature="World Builder" />;
       case "docs":
         return <StoryDocsView />;
       case "logic":
-        return <ComingSoonView 
-          title="Formatting" 
-          description="Advanced formatting tools are coming soon to help you prepare your story for publication."
-        />;
+        return <StoryLogicView />;
       default:
         return <HomeView />;
     }
