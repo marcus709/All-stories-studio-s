@@ -11,6 +11,7 @@ import { StoryDocsView } from "./components/docs/StoryDocsView";
 import { CommunityFeed } from "./components/community/CommunityFeed";
 import { CommunityHome } from "./components/community/CommunityHome";
 import Pricing from "./pages/Pricing";
+import PricingPreview from "./pages/PricingPreview";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -76,6 +77,14 @@ export default function AppRoutes() {
         element={
           <AppLayout>
             <Pricing />
+          </AppLayout>
+        }
+      />
+      <Route
+        path="/pricing-preview"
+        element={
+          <AppLayout>
+            <PricingPreview />
           </AppLayout>
         }
       />
