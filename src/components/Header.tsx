@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { BookOpen } from "lucide-react";
 import { AuthModals } from "./auth/AuthModals";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +16,10 @@ export const Header = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const session = useSession();
+  const location = useLocation();
+
+  // Determine if we're on the landing page
+  const isLandingPage = location.pathname === '/';
 
   useEffect(() => {
     if (session?.user) {
@@ -98,8 +102,8 @@ export const Header = () => {
     <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 h-16">
       <div className="flex items-center space-x-12">
         <Link to="/" className="flex items-center space-x-2">
-          <BookOpen className="h-5 w-5 text-white" />
-          <span className="text-lg font-mono text-white">All Stories Studio</span>
+          <BookOpen className={`h-5 w-5 ${isLandingPage ? 'text-white' : 'text-black'}`} />
+          <span className={`text-lg font-mono ${isLandingPage ? 'text-white' : 'text-black'}`}>All Stories Studio</span>
         </Link>
 
         <Navigation 
