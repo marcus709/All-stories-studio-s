@@ -26,7 +26,7 @@ const Index = () => {
           .from('user_activity_counts')
           .select('*')
           .eq('user_id', session.user.id)
-          .single();
+          .maybeSingle();
 
         // Only show pricing for new users (no activity record)
         if (!existingActivity && !localStorage.getItem('pricingShown')) {
