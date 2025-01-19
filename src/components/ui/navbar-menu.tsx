@@ -16,11 +16,13 @@ export const MenuItem = ({
   active,
   item,
   children,
+  className,
 }: {
   setActive: (item: string) => void;
   active: string | null;
   item: string;
   children?: React.ReactNode;
+  className?: string;
 }) => {
   let closeTimeout: ReturnType<typeof setTimeout>;
 
@@ -45,7 +47,7 @@ export const MenuItem = ({
     >
       <motion.p
         transition={{ duration: 0.3 }}
-        className="cursor-pointer text-white hover:opacity-[0.9]"
+        className={`cursor-pointer hover:opacity-[0.9] ${className || 'text-white'}`}
       >
         {item}
       </motion.p>
