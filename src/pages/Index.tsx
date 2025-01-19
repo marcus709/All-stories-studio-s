@@ -7,7 +7,6 @@ import { AuthModals } from "@/components/auth/AuthModals";
 import { useLocation } from "react-router-dom";
 import { PricingDialog } from "@/components/pricing/PricingDialog";
 import { useSession } from "@supabase/auth-helpers-react";
-import { HeroHighlightDemo } from "@/components/ui/hero-highlight.demo";
 
 const Index = () => {
   const [showAuth, setShowAuth] = useState(false);
@@ -35,7 +34,6 @@ const Index = () => {
         <Header />
         <main className="relative">
           <HeroSection onShowAuth={handleShowAuth} />
-          <HeroHighlightDemo />
           <FeaturesSection />
           <StoriesSection />
         </main>
