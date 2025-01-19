@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
-import { MessageSquare, Users, Hash, Bookmark, Settings, UserPlus, PenLine, Target, Home } from "lucide-react";
+import { MessageSquare, Users, Hash, Bookmark, Settings, UserPlus, PenLine, Target } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AddFriendsDialog } from "./AddFriendsDialog";
@@ -14,7 +14,6 @@ import { GoalsDialog } from "./GoalsDialog";
 import { useToast } from "@/hooks/use-toast";
 
 const navItems = [
-  { icon: Home, label: "Home", href: "/community/home" },
   { icon: MessageSquare, label: "Feed", href: "/community" },
   { icon: Users, label: "My Groups", href: "/community/groups" },
   { icon: Hash, label: "Topics", href: "/community/topics" },
@@ -247,3 +246,4 @@ export const CommunitySidebar = () => {
     </div>
   );
 };
+

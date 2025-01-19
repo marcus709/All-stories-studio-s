@@ -9,7 +9,6 @@ import { CharactersView } from "./components/CharactersView";
 import { FormattingView } from "./components/FormattingView";
 import { StoryDocsView } from "./components/docs/StoryDocsView";
 import { CommunityFeed } from "./components/community/CommunityFeed";
-import { CommunityHome } from "./components/community/CommunityHome";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -52,7 +51,6 @@ export default function AppRoutes() {
         }
       >
         <Route path="" element={<CommunityFeed />} />
-        <Route path="home" element={<CommunityHome />} />
       </Route>
       <Route
         path="/invite/:inviteId"
