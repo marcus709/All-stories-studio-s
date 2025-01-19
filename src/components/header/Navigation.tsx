@@ -18,7 +18,7 @@ export const Navigation = ({ onScrollToSection, onCommunityClick }: NavigationPr
 
   return (
     <Menu setActive={setActive}>
-      <MenuItem setActive={setActive} active={active} item="Features">
+      <MenuItem setActive={setActive} active={active} item="Features" className={textColorClass}>
         <div className="flex flex-col space-y-4 text-sm">
           <HoveredLink onClick={() => onScrollToSection('features')}>
             Story Development
@@ -43,7 +43,7 @@ export const Navigation = ({ onScrollToSection, onCommunityClick }: NavigationPr
           </HoveredLink>
         </div>
       </MenuItem>
-      <MenuItem setActive={setActive} active={active} item="Pricing">
+      <MenuItem setActive={setActive} active={active} item="Pricing" className={textColorClass}>
         <div className="flex flex-col space-y-4 text-sm">
           <HoveredLink onClick={() => onScrollToSection('pricing')}>
             Free Trial
