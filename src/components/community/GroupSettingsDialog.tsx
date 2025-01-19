@@ -19,21 +19,12 @@ interface GroupSettingsDialogProps {
     name: string;
     description: string;
     image_url?: string;
+    group_type: 'social' | 'writing';
   };
   isCreator: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-type GroupMember = {
-  id: string;
-  role: string;
-  user: {
-    id: string;
-    username: string | null;
-    avatar_url: string | null;
-  } | null;
-};
 
 export const GroupSettingsDialog = ({
   group,
@@ -89,33 +80,6 @@ export const GroupSettingsDialog = ({
     enabled: !!userSearchQuery,
   });
 
-  const updateGroupMutation = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase
-        .from("groups")
-        .update({ name, description, image_url: imageUrl })
-        .eq("id", group.id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["my-groups"] });
-      toast({
-        title: "Success",
-        description: "Group settings updated successfully",
-      });
-      onOpenChange(false);
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to update group settings",
-        variant: "destructive",
-      });
-      console.error("Error updating group:", error);
-    },
-  });
-
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       if (!e.target.files || e.target.files.length === 0) return;
@@ -152,6 +116,33 @@ export const GroupSettingsDialog = ({
     }
   };
 
+  const updateGroupMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("groups")
+        .update({ name, description, image_url: imageUrl })
+        .eq("id", group.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-groups"] });
+      toast({
+        title: "Success",
+        description: "Group settings updated successfully",
+      });
+      onOpenChange(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update group settings",
+        variant: "destructive",
+      });
+      console.error("Error updating group:", error);
+    },
+  });
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -163,7 +154,9 @@ export const GroupSettingsDialog = ({
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="members">Members</TabsTrigger>
-            <TabsTrigger value="goals">Goals</TabsTrigger>
+            {group.group_type === 'writing' && (
+              <TabsTrigger value="goals">Goals</TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="details">
@@ -236,9 +229,22 @@ export const GroupSettingsDialog = ({
             {isCreator && (
               <>
                 <DialogDescription>
-                  Invite new members to join your group
+                  {group.group_type === 'writing' ? (
+                    <>
+                      Invite members to join your writing group (max 6 members)
+                      {members && members.length >= 6 && (
+                        <p className="text-red-500 text-sm mt-1">
+                          Member limit reached (6/6)
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    "Invite new members to join your group"
+                  )}
                 </DialogDescription>
-                <InviteMembersInput groupId={group.id} />
+                {(!members || members.length < 6 || group.group_type === 'social') && (
+                  <InviteMembersInput groupId={group.id} />
+                )}
               </>
             )}
 
@@ -292,9 +298,11 @@ export const GroupSettingsDialog = ({
             </div>
           </TabsContent>
 
-          <TabsContent value="goals">
-            <GroupGoalsTab groupId={group.id} isCreator={isCreator} />
-          </TabsContent>
+          {group.group_type === 'writing' && (
+            <TabsContent value="goals">
+              <GroupGoalsTab groupId={group.id} isCreator={isCreator} />
+            </TabsContent>
+          )}
         </Tabs>
       </DialogContent>
     </Dialog>

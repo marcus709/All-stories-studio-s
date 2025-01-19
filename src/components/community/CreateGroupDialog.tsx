@@ -34,6 +34,10 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
   useEffect(() => {
     if (groupType === "writing") {
       setPrivacy("private");
+      toast({
+        title: "Writing Group Info",
+        description: "Writing groups are limited to 6 members and are always private to protect shared content.",
+      });
     }
   }, [groupType]);
 
