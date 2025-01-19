@@ -152,12 +152,13 @@ export const PricingSection = () => {
     setProcessingPlanId(priceId);
     
     try {
+      const baseUrl = window.location.origin.replace(/:\/$/, ''); // Remove trailing :/ if present
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
         body: { 
           priceId,
           promotionCode: promotionCode.trim() || undefined,
-          successUrl: `${window.location.origin}/payment/success`,
-          cancelUrl: `${window.location.origin}/?scrollTo=pricing`
+          successUrl: `${baseUrl}/payment/success`,
+          cancelUrl: `${baseUrl}/?scrollTo=pricing`
         }
       });
 
