@@ -1,9 +1,3 @@
-export type GroupMember = {
-  id: string;
-  role: string;
-  user: {
-    id: string;
-    username: string | null;
-    avatar_url: string | null;
-  } | null;
-};
+export * from "./database.types";
+export * from "./tables.types";
+export * from "./enums.types";
