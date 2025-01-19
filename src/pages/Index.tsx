@@ -2,27 +2,26 @@ import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { StoriesSection } from "@/components/StoriesSection";
-import { PricingSection } from "@/components/PricingSection";
 import { useState, useEffect } from "react";
 import { AuthModals } from "@/components/auth/AuthModals";
 import { useLocation } from "react-router-dom";
+import { PricingDialog } from "@/components/pricing/PricingDialog";
+import { useSession } from "@supabase/auth-helpers-react";
 
 const Index = () => {
   const [showAuth, setShowAuth] = useState(false);
+  const [showPricing, setShowPricing] = useState(false);
   const [authView, setAuthView] = useState<"signin" | "signup">("signup");
   const location = useLocation();
+  const session = useSession();
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const scrollTo = searchParams.get('scrollTo');
-    
-    if (scrollTo === 'pricing') {
-      const pricingSection = document.getElementById('pricing');
-      if (pricingSection) {
-        pricingSection.scrollIntoView({ behavior: 'smooth' });
-      }
+    // Show pricing dialog when user first signs up
+    if (session?.user && !localStorage.getItem('pricingShown')) {
+      setShowPricing(true);
+      localStorage.setItem('pricingShown', 'true');
     }
-  }, [location]);
+  }, [session]);
 
   const handleShowAuth = (view: "signin" | "signup") => {
     setAuthView(view);
@@ -37,13 +36,16 @@ const Index = () => {
           <HeroSection onShowAuth={handleShowAuth} />
           <FeaturesSection />
           <StoriesSection />
-          <PricingSection />
         </main>
       </div>
       <AuthModals
         isOpen={showAuth}
         onClose={() => setShowAuth(false)}
         defaultView={authView}
+      />
+      <PricingDialog 
+        isOpen={showPricing} 
+        onClose={() => setShowPricing(false)} 
       />
     </div>
   );
