@@ -1,18 +1,23 @@
 import { useState, useEffect } from "react";
-import { Bot, X, Send, Sparkles } from "lucide-react";
+import { Bot, X, Send, Sparkles, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAI } from "@/hooks/useAI";
 import { useToast } from "@/hooks/use-toast";
 import { useSession } from "@supabase/auth-helpers-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Character } from "@/types/character";
+import { useStory } from "@/contexts/StoryContext";
 
 type MessageRole = "assistant" | "user";
 type Message = {
   role: MessageRole;
   content: string;
+  saveable?: {
+    type: "character" | "timeline" | "document" | "idea";
+    data: any;
+  };
 };
 
 export const StudioAssistant = () => {
@@ -24,6 +29,8 @@ export const StudioAssistant = () => {
   const session = useSession();
   const [isDragging, setIsDragging] = useState(false);
   const [height, setHeight] = useState(500);
+  const { selectedStory } = useStory();
+  const queryClient = useQueryClient();
 
   const { data: characters } = useQuery({
     queryKey: ["characters", session?.user?.id],
@@ -39,6 +46,120 @@ export const StudioAssistant = () => {
     enabled: !!session?.user?.id,
   });
 
+  const saveCharacterMutation = useMutation({
+    mutationFn: async (characterData: any) => {
+      const { error } = await supabase
+        .from("characters")
+        .insert({
+          ...characterData,
+          story_id: selectedStory?.id,
+          user_id: session?.user?.id,
+        });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["characters"] });
+      toast({
+        title: "Success",
+        description: "Character saved successfully",
+      });
+    },
+  });
+
+  const saveTimelineMutation = useMutation({
+    mutationFn: async (timelineData: any) => {
+      const { error } = await supabase
+        .from("timeline_events")
+        .insert({
+          ...timelineData,
+          story_id: selectedStory?.id,
+          position: 0,
+        });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["timeline-events"] });
+      toast({
+        title: "Success",
+        description: "Timeline event saved successfully",
+      });
+    },
+  });
+
+  const saveDocumentMutation = useMutation({
+    mutationFn: async (documentData: any) => {
+      const { error } = await supabase
+        .from("documents")
+        .insert({
+          ...documentData,
+          story_id: selectedStory?.id,
+          user_id: session?.user?.id,
+        });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+      toast({
+        title: "Success",
+        description: "Document saved successfully",
+      });
+    },
+  });
+
+  const saveIdeaMutation = useMutation({
+    mutationFn: async (ideaData: any) => {
+      const { error } = await supabase
+        .from("story_ideas")
+        .insert({
+          ...ideaData,
+          story_id: selectedStory?.id,
+          user_id: session?.user?.id,
+        });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["story-ideas"] });
+      toast({
+        title: "Success",
+        description: "Story idea saved successfully",
+      });
+    },
+  });
+
+  const handleSaveContent = async (message: Message) => {
+    if (!message.saveable || !selectedStory?.id) {
+      toast({
+        title: "Error",
+        description: "Please select a story first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      switch (message.saveable.type) {
+        case "character":
+          await saveCharacterMutation.mutateAsync(message.saveable.data);
+          break;
+        case "timeline":
+          await saveTimelineMutation.mutateAsync(message.saveable.data);
+          break;
+        case "document":
+          await saveDocumentMutation.mutateAsync(message.saveable.data);
+          break;
+        case "idea":
+          await saveIdeaMutation.mutateAsync(message.saveable.data);
+          break;
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save content. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim() || isLoading) return;
@@ -50,20 +171,28 @@ export const StudioAssistant = () => {
     try {
       const context = {
         characters: JSON.stringify(characters),
+        storyId: selectedStory?.id,
         aiConfig: {
           temperature: 0.7,
           max_tokens: 150,
           model_type: "gpt-4o-mini" as const,
           system_prompt: `You are a friendly and helpful writing assistant. You have access to the user's characters and their traits. 
           Keep your responses concise and engaging. Feel free to ask follow-up questions to better understand the user's needs.
-          When discussing characters, reference their specific traits and characteristics to provide personalized advice.`
+          When discussing characters, reference their specific traits and characteristics to provide personalized advice.
+          After brainstorming content, offer to save it in the appropriate feature (characters, timeline, documents, or ideas).`
         }
       };
 
       const response = await generateContent(message, 'suggestions', context);
       
       if (response) {
-        const assistantMessage: Message = { role: "assistant", content: response };
+        // Check if the response contains saveable content
+        const saveableContent = extractSaveableContent(response);
+        const assistantMessage: Message = { 
+          role: "assistant", 
+          content: response,
+          ...(saveableContent && { saveable: saveableContent })
+        };
         setConversation([...newConversation, assistantMessage]);
       }
     } catch (error) {
@@ -75,6 +204,19 @@ export const StudioAssistant = () => {
     }
     
     setMessage("");
+  };
+
+  const extractSaveableContent = (response: string) => {
+    // This is a simple example - you might want to make this more sophisticated
+    if (response.includes("character:")) {
+      const characterData = {
+        name: "New Character",
+        description: response,
+      };
+      return { type: "character" as const, data: characterData };
+    }
+    // Add similar logic for timeline, documents, and ideas
+    return null;
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -155,7 +297,20 @@ export const StudioAssistant = () => {
                       : 'bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 text-white rounded-tr-sm'}`}
                 >
                   {msg.role === 'assistant' && (
-                    <Sparkles className="h-4 w-4 mb-2 text-violet-500" />
+                    <div className="flex items-center justify-between mb-2">
+                      <Sparkles className="h-4 w-4 text-violet-500" />
+                      {msg.saveable && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSaveContent(msg)}
+                          className="ml-2 text-xs"
+                        >
+                          <Save className="h-3 w-3 mr-1" />
+                          Save {msg.saveable.type}
+                        </Button>
+                      )}
+                    </div>
                   )}
                   <div className="text-sm leading-relaxed">{msg.content}</div>
                 </div>
