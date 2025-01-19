@@ -6,6 +6,7 @@ import { StoryIdeasView } from "@/components/StoryIdeasView";
 import { StoryDocsView } from "@/components/docs/StoryDocsView";
 import { StoryLogicView } from "@/components/story-logic/StoryLogicView";
 import { HomeView } from "./views/HomeView";
+import { ComingSoonView } from "@/components/ComingSoonView";
 
 type View = "home" | "story" | "characters" | "plot" | "dream" | "ideas" | "docs" | "logic";
 
@@ -23,7 +24,10 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
       case "characters":
         return <CharactersView />;
       case "plot":
-        return <FormattingView />;
+        return <ComingSoonView 
+          title="World Builder" 
+          description="The World Builder feature will help you create and organize your story's universe, including locations, cultures, magic systems, and more."
+        />;
       case "dream":
         return <PlotDevelopmentView />;
       case "ideas":
@@ -31,7 +35,10 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
       case "docs":
         return <StoryDocsView />;
       case "logic":
-        return <StoryLogicView />;
+        return <ComingSoonView 
+          title="Formatting" 
+          description="Advanced formatting tools are coming soon to help you prepare your story for publication."
+        />;
       default:
         return <HomeView />;
     }
