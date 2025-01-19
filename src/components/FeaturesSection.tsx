@@ -14,7 +14,7 @@ export const FeaturesSection = () => {
               <h2 className="text-3xl md:text-5xl tracking-tighter max-w-xl font-regular text-left">
                 Powerful Features for Every Writer
               </h2>
-              <p className="text-lg max-w-xl lg:max-w-lg leading-relaxed tracking-tight text-muted-foreground text-left">
+              <p className="text-lg max-w-xl lg:max-w-lg leading-relaxed tracking-tight text-gray-600 text-left">
                 Enhance your writing journey with our comprehensive suite of tools designed to bring your stories to life.
               </p>
             </div>
@@ -23,17 +23,17 @@ export const FeaturesSection = () => {
             <div className="bg-muted rounded-md h-full lg:col-span-2 p-6 aspect-square lg:aspect-auto flex justify-between flex-col">
               <Brain className="w-8 h-8 stroke-1" />
               <div className="flex flex-col">
-                <h3 className="text-xl tracking-tight">Character-Aware AI Enhancement</h3>
-                <p className="text-muted-foreground max-w-xs text-base">
-                  Our AI understands and adapts to your characters, providing contextually relevant writing suggestions.
+                <h3 className="text-xl tracking-tight text-gray-800">Vibrant Writing Community</h3>
+                <p className="text-gray-600 max-w-xs text-base">
+                  Join a thriving community of writers, share experiences, and get inspired. Collaborate, receive feedback, and grow together.
                 </p>
               </div>
             </div>
             <div className="bg-muted rounded-md aspect-square p-6 flex justify-between flex-col">
               <Users className="w-8 h-8 stroke-1" />
               <div className="flex flex-col">
-                <h3 className="text-xl tracking-tight">Dynamic Character Development</h3>
-                <p className="text-muted-foreground max-w-xs text-base">
+                <h3 className="text-xl tracking-tight text-gray-800">Dynamic Character Development</h3>
+                <p className="text-gray-600 max-w-xs text-base">
                   Create deep, memorable characters that seamlessly integrate with our AI writing assistant.
                 </p>
               </div>
@@ -41,17 +41,17 @@ export const FeaturesSection = () => {
             <div className="bg-muted rounded-md aspect-square p-6 flex justify-between flex-col">
               <MessageSquare className="w-8 h-8 stroke-1" />
               <div className="flex flex-col">
-                <h3 className="text-xl tracking-tight">Vibrant Writing Community</h3>
-                <p className="text-muted-foreground max-w-xs text-base">
-                  Connect with fellow writers, share characters and stories, and get inspired by our thriving community.
+                <h3 className="text-xl tracking-tight text-gray-800">Plot Development Tools</h3>
+                <p className="text-gray-600 max-w-xs text-base">
+                  Craft engaging storylines with our intuitive plot development tools. Structure your narrative and track story arcs effortlessly.
                 </p>
               </div>
             </div>
             <div className="bg-muted rounded-md h-full lg:col-span-2 p-6 aspect-square lg:aspect-auto flex justify-between flex-col">
               <Target className="w-8 h-8 stroke-1" />
               <div className="flex flex-col">
-                <h3 className="text-xl tracking-tight">Story Logic & Historical Analysis</h3>
-                <p className="text-muted-foreground max-w-xs text-base">
+                <h3 className="text-xl tracking-tight text-gray-800">Story Logic & Historical Analysis</h3>
+                <p className="text-gray-600 max-w-xs text-base">
                   Ensure historical accuracy and narrative consistency with our advanced analysis tools.
                 </p>
               </div>
