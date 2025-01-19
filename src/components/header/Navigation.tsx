@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Menu, MenuItem } from "@/components/ui/navbar-menu";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface NavigationProps {
   onScrollToSection: (sectionId: string) => void;
@@ -10,6 +10,11 @@ interface NavigationProps {
 export const Navigation = ({ onScrollToSection, onCommunityClick }: NavigationProps) => {
   const [active, setActive] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Determine if we're on the landing page
+  const isLandingPage = location.pathname === '/';
+  const textColorClass = isLandingPage ? 'text-white' : 'text-black';
 
   return (
     <Menu setActive={setActive}>
@@ -52,13 +57,13 @@ export const Navigation = ({ onScrollToSection, onCommunityClick }: NavigationPr
         </div>
       </MenuItem>
       <div 
-        className="cursor-pointer text-white hover:opacity-[0.9]"
+        className={`cursor-pointer ${textColorClass} hover:opacity-[0.9]`}
         onClick={() => navigate('/dashboard')}
       >
         Dashboard
       </div>
       <div 
-        className="cursor-pointer text-white hover:opacity-[0.9]"
+        className={`cursor-pointer ${textColorClass} hover:opacity-[0.9]`}
         onClick={onCommunityClick}
       >
         Community
