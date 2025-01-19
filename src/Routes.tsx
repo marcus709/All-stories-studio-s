@@ -10,7 +10,6 @@ import { FormattingView } from "./components/FormattingView";
 import { StoryDocsView } from "./components/docs/StoryDocsView";
 import { CommunityFeed } from "./components/community/CommunityFeed";
 import { CommunityHome } from "./components/community/CommunityHome";
-import Pricing from "./pages/Pricing";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -68,14 +67,6 @@ export default function AppRoutes() {
         element={
           <AppLayout>
             <ProfileSettings />
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/pricing"
-        element={
-          <AppLayout>
-            <Pricing />
           </AppLayout>
         }
       />

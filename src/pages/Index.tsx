@@ -2,11 +2,12 @@ import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { StoriesSection } from "@/components/StoriesSection";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { AuthModals } from "@/components/auth/AuthModals";
 import { useLocation } from "react-router-dom";
 import { PricingDialog } from "@/components/pricing/PricingDialog";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
+import { PricingSection } from "@/components/PricingSection";
 
 const Index = () => {
   const [showAuth, setShowAuth] = useState(false);
@@ -54,6 +55,7 @@ const Index = () => {
           <HeroSection onShowAuth={handleShowAuth} />
           <FeaturesSection />
           <StoriesSection />
+          <PricingSection />
         </main>
       </div>
       <AuthModals
