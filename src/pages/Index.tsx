@@ -2,7 +2,7 @@ import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { StoriesSection } from "@/components/StoriesSection";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AuthModals } from "@/components/auth/AuthModals";
 import { useLocation } from "react-router-dom";
 import { PricingDialog } from "@/components/pricing/PricingDialog";
