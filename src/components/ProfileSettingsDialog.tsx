@@ -1,24 +1,16 @@
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Dialog, DialogContent } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AvatarUpload } from "./profile/AvatarUpload";
 import { ProfileForm } from "./profile/ProfileForm";
-import { CreditCard } from "lucide-react";
-import { FriendsManagement } from "./profile/FriendsManagement";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { AtSign, Copy, Instagram, Link, Mail } from "lucide-react";
 import { Json } from "@/integrations/supabase/types/database.types";
 
 interface ProfileSettingsDialogProps {
   onClose?: () => void;
-}
-
-interface PinnedWork {
-  title: string | null;
-  content: string | null;
-  link: string | null;
 }
 
 interface SocialLinks {
@@ -37,13 +29,9 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
     bio: "",
     avatar_url: "",
     background_url: "",
-    genres: [] as string[],
-    skills: [] as string[],
-    pinned_work: {
-      title: null,
-      content: null,
-      link: null,
-    } as PinnedWork,
+    title: "",
+    location: "",
+    available: false,
     social_links: {
       website: null,
       twitter: null,
@@ -62,13 +50,11 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("username, bio, avatar_url, background_url, genres, skills, pinned_work, social_links")
+        .select("username, bio, avatar_url, background_url, title, location, available, social_links")
         .eq("id", session?.user?.id)
         .maybeSingle();
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       if (!data) {
         const { error: insertError } = await supabase
@@ -85,13 +71,9 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
           bio: "",
           avatar_url: "",
           background_url: "",
-          genres: [],
-          skills: [],
-          pinned_work: {
-            title: null,
-            content: null,
-            link: null,
-          },
+          title: "",
+          location: "",
+          available: false,
           social_links: {
             website: null,
             twitter: null,
@@ -101,14 +83,6 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
         });
         return;
       }
-
-      const pinnedWork = (typeof data.pinned_work === 'object' && data.pinned_work !== null) 
-        ? data.pinned_work as unknown as PinnedWork 
-        : {
-            title: null,
-            content: null,
-            link: null,
-          };
 
       const socialLinks = (typeof data.social_links === 'object' && data.social_links !== null)
         ? data.social_links as unknown as SocialLinks
@@ -124,9 +98,9 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
         bio: data.bio || "",
         avatar_url: data.avatar_url || "",
         background_url: data.background_url || "",
-        genres: data.genres || [],
-        skills: data.skills || [],
-        pinned_work: pinnedWork,
+        title: data.title || "",
+        location: data.location || "",
+        available: data.available || false,
         social_links: socialLinks,
       });
     } catch (error) {
@@ -147,9 +121,9 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
       const updateData = {
         username: profile.username,
         bio: profile.bio,
-        genres: profile.genres,
-        skills: profile.skills,
-        pinned_work: profile.pinned_work as unknown as Json,
+        title: profile.title,
+        location: profile.location,
+        available: profile.available,
         social_links: profile.social_links as unknown as Json,
         background_url: profile.background_url,
       };
@@ -181,93 +155,138 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
     setProfile((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleManageSubscription = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('create-portal-session');
-      
-      if (error) throw error;
-      
-      if (data?.url) {
-        window.location.href = data.url;
-      }
-    } catch (error) {
-      console.error('Error:', error);
+  const handleCopyEmail = async () => {
+    if (session?.user?.email) {
+      await navigator.clipboard.writeText(session.user.email);
       toast({
-        title: "Error",
-        description: "Failed to open subscription management portal",
-        variant: "destructive",
+        title: "Success",
+        description: "Email copied to clipboard",
       });
     }
   };
 
   return (
     <Dialog open={true} onOpenChange={() => onClose?.()}>
-      <DialogContent className="sm:max-w-[800px] max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold mb-6">
-            Profile Settings
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-[800px] max-h-[85vh] overflow-y-auto bg-white">
+        <div className="flex flex-col items-center text-center p-6">
+          <div className="mb-6">
+            <AvatarUpload
+              avatarUrl={profile.avatar_url}
+              backgroundUrl={profile.background_url}
+              onAvatarChange={(url) =>
+                setProfile((prev) => ({ ...prev, avatar_url: url }))
+              }
+              onBackgroundChange={(url) =>
+                setProfile((prev) => ({ ...prev, background_url: url }))
+              }
+            />
+          </div>
 
-        <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="profile" className="text-lg py-3">Profile</TabsTrigger>
-            <TabsTrigger value="friends" className="text-lg py-3">Friends</TabsTrigger>
-          </TabsList>
+          <form onSubmit={handleSubmit} className="w-full max-w-lg space-y-6">
+            <div className="space-y-4">
+              <input
+                type="text"
+                value={profile.username}
+                onChange={(e) => handleProfileChange("username", e.target.value)}
+                placeholder="Your name"
+                className="text-2xl font-semibold text-center w-full bg-transparent border-none focus:outline-none"
+              />
+              
+              <input
+                type="text"
+                value={profile.title}
+                onChange={(e) => handleProfileChange("title", e.target.value)}
+                placeholder="Your title"
+                className="text-gray-500 text-center w-full bg-transparent border-none focus:outline-none"
+              />
 
-          <TabsContent value="profile">
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="mb-12">
-                <AvatarUpload
-                  avatarUrl={profile.avatar_url}
-                  backgroundUrl={profile.background_url}
-                  onAvatarChange={(url) =>
-                    setProfile((prev) => ({ ...prev, avatar_url: url }))
-                  }
-                  onBackgroundChange={(url) =>
-                    setProfile((prev) => ({ ...prev, background_url: url }))
-                  }
+              <div className="flex items-center justify-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={profile.available}
+                  onChange={(e) => handleProfileChange("available", e.target.checked)}
+                  className="rounded border-gray-300"
                 />
+                <span className="text-gray-600">Available for new opportunities</span>
               </div>
 
-              <div className="space-y-6">
-                <ProfileForm profile={profile} onChange={handleProfileChange} />
+              <div className="flex justify-center gap-4 my-4">
+                {profile.social_links.twitter && (
+                  <a href={profile.social_links.twitter} target="_blank" rel="noopener noreferrer">
+                    <AtSign className="h-6 w-6 text-gray-400 hover:text-gray-600" />
+                  </a>
+                )}
+                {profile.social_links.website && (
+                  <a href={profile.social_links.website} target="_blank" rel="noopener noreferrer">
+                    <Link className="h-6 w-6 text-gray-400 hover:text-gray-600" />
+                  </a>
+                )}
+                {profile.social_links.instagram && (
+                  <a href={profile.social_links.instagram} target="_blank" rel="noopener noreferrer">
+                    <Instagram className="h-6 w-6 text-gray-400 hover:text-gray-600" />
+                  </a>
+                )}
+              </div>
 
+              <div className="flex justify-center gap-4">
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full"
-                  onClick={handleManageSubscription}
+                  className="flex items-center gap-2"
+                  onClick={() => window.location.href = `mailto:${session?.user?.email}`}
                 >
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  Manage Subscription
+                  <Mail className="h-4 w-4" />
+                  Contact me
                 </Button>
-
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => onClose?.()}
-                    className="px-6 py-2"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className="px-6 py-2 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600"
-                  >
-                    Save Changes
-                  </Button>
-                </div>
+                <span className="text-gray-400 flex items-center">or</span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex items-center gap-2"
+                  onClick={handleCopyEmail}
+                >
+                  <Copy className="h-4 w-4" />
+                  Copy email
+                </Button>
               </div>
-            </form>
-          </TabsContent>
 
-          <TabsContent value="friends">
-            <FriendsManagement />
-          </TabsContent>
-        </Tabs>
+              <input
+                type="text"
+                value={profile.location}
+                onChange={(e) => handleProfileChange("location", e.target.value)}
+                placeholder="Location (e.g., NYC, USA)"
+                className="text-gray-500 text-center w-full bg-transparent border-none focus:outline-none"
+              />
+
+              <div className="mt-6">
+                <h3 className="text-lg font-medium mb-2 text-left">About</h3>
+                <textarea
+                  value={profile.bio}
+                  onChange={(e) => handleProfileChange("bio", e.target.value)}
+                  placeholder="Tell us about yourself"
+                  className="w-full min-h-[150px] p-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onClose?.()}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                >
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
