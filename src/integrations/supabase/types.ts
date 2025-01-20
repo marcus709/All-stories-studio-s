@@ -1453,36 +1453,45 @@ export type Database = {
       }
       profiles: {
         Row: {
+          available: boolean | null
           avatar_url: string | null
           background_url: string | null
           bio: string | null
           genres: string[] | null
           id: string
+          location: string | null
           pinned_work: Json | null
           skills: string[] | null
           social_links: Json | null
+          title: string | null
           username: string | null
         }
         Insert: {
+          available?: boolean | null
           avatar_url?: string | null
           background_url?: string | null
           bio?: string | null
           genres?: string[] | null
           id: string
+          location?: string | null
           pinned_work?: Json | null
           skills?: string[] | null
           social_links?: Json | null
+          title?: string | null
           username?: string | null
         }
         Update: {
+          available?: boolean | null
           avatar_url?: string | null
           background_url?: string | null
           bio?: string | null
           genres?: string[] | null
           id?: string
+          location?: string | null
           pinned_work?: Json | null
           skills?: string[] | null
           social_links?: Json | null
+          title?: string | null
           username?: string | null
         }
         Relationships: []
@@ -2104,14 +2113,17 @@ export type Database = {
           comment_row: unknown
         }
         Returns: {
+          available: boolean | null
           avatar_url: string | null
           background_url: string | null
           bio: string | null
           genres: string[] | null
           id: string
+          location: string | null
           pinned_work: Json | null
           skills: string[] | null
           social_links: Json | null
+          title: string | null
           username: string | null
         }[]
       }
@@ -2120,14 +2132,17 @@ export type Database = {
           message_row: unknown
         }
         Returns: {
+          available: boolean | null
           avatar_url: string | null
           background_url: string | null
           bio: string | null
           genres: string[] | null
           id: string
+          location: string | null
           pinned_work: Json | null
           skills: string[] | null
           social_links: Json | null
+          title: string | null
           username: string | null
         }[]
       }
@@ -2136,14 +2151,17 @@ export type Database = {
           post_row: unknown
         }
         Returns: {
+          available: boolean | null
           avatar_url: string | null
           background_url: string | null
           bio: string | null
           genres: string[] | null
           id: string
+          location: string | null
           pinned_work: Json | null
           skills: string[] | null
           social_links: Json | null
+          title: string | null
           username: string | null
         }[]
       }
