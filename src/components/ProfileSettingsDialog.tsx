@@ -5,9 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AvatarUpload } from "./profile/AvatarUpload";
-import { ProfileForm } from "./profile/ProfileForm";
-import { AtSign, Copy, Instagram, Link, Mail } from "lucide-react";
-import { Json } from "@/integrations/supabase/types/database.types";
+import { AtSign, Copy, Instagram, Link, Mail, MapPin, Twitter } from "lucide-react";
 
 interface ProfileSettingsDialogProps {
   onClose?: () => void;
@@ -124,7 +122,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
         title: profile.title,
         location: profile.location,
         available: profile.available,
-        social_links: profile.social_links as unknown as Json,
+        social_links: profile.social_links,
         background_url: profile.background_url,
       };
 
@@ -167,29 +165,40 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
 
   return (
     <Dialog open={true} onOpenChange={() => onClose?.()}>
-      <DialogContent className="sm:max-w-[800px] max-h-[85vh] overflow-y-auto bg-white">
+      <DialogContent className="sm:max-w-[800px] max-h-[85vh] overflow-y-auto bg-white p-0">
         <div className="flex flex-col items-center text-center p-6">
-          <div className="mb-6">
-            <AvatarUpload
-              avatarUrl={profile.avatar_url}
-              backgroundUrl={profile.background_url}
-              onAvatarChange={(url) =>
-                setProfile((prev) => ({ ...prev, avatar_url: url }))
-              }
-              onBackgroundChange={(url) =>
-                setProfile((prev) => ({ ...prev, background_url: url }))
-              }
-            />
+          <div className="relative w-full">
+            <div className="h-48 w-full bg-gray-100 rounded-t-lg overflow-hidden">
+              {profile.background_url && (
+                <img
+                  src={profile.background_url}
+                  alt="Profile Background"
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </div>
+            <div className="absolute left-1/2 -bottom-16 transform -translate-x-1/2">
+              <AvatarUpload
+                avatarUrl={profile.avatar_url}
+                backgroundUrl={profile.background_url}
+                onAvatarChange={(url) =>
+                  setProfile((prev) => ({ ...prev, avatar_url: url }))
+                }
+                onBackgroundChange={(url) =>
+                  setProfile((prev) => ({ ...prev, background_url: url }))
+                }
+              />
+            </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="w-full max-w-lg space-y-6">
+          <form onSubmit={handleSubmit} className="w-full max-w-2xl mt-20 space-y-8">
             <div className="space-y-4">
               <input
                 type="text"
                 value={profile.username}
                 onChange={(e) => handleProfileChange("username", e.target.value)}
                 placeholder="Your name"
-                className="text-2xl font-semibold text-center w-full bg-transparent border-none focus:outline-none"
+                className="text-3xl font-semibold text-center w-full bg-transparent border-none focus:outline-none"
               />
               
               <input
@@ -197,38 +206,41 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
                 value={profile.title}
                 onChange={(e) => handleProfileChange("title", e.target.value)}
                 placeholder="Your title"
-                className="text-gray-500 text-center w-full bg-transparent border-none focus:outline-none"
+                className="text-xl text-gray-500 text-center w-full bg-transparent border-none focus:outline-none"
               />
 
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-2 text-gray-500">
                 <input
                   type="checkbox"
                   checked={profile.available}
                   onChange={(e) => handleProfileChange("available", e.target.checked)}
                   className="rounded border-gray-300"
+                  id="available"
                 />
-                <span className="text-gray-600">Available for new opportunities</span>
+                <label htmlFor="available" className="text-sm">
+                  Available for new opportunities
+                </label>
               </div>
 
-              <div className="flex justify-center gap-4 my-4">
+              <div className="flex justify-center gap-6 my-6">
                 {profile.social_links.twitter && (
                   <a href={profile.social_links.twitter} target="_blank" rel="noopener noreferrer">
-                    <AtSign className="h-6 w-6 text-gray-400 hover:text-gray-600" />
+                    <Twitter className="h-5 w-5 text-gray-400 hover:text-gray-600" />
                   </a>
                 )}
                 {profile.social_links.website && (
                   <a href={profile.social_links.website} target="_blank" rel="noopener noreferrer">
-                    <Link className="h-6 w-6 text-gray-400 hover:text-gray-600" />
+                    <Link className="h-5 w-5 text-gray-400 hover:text-gray-600" />
                   </a>
                 )}
                 {profile.social_links.instagram && (
                   <a href={profile.social_links.instagram} target="_blank" rel="noopener noreferrer">
-                    <Instagram className="h-6 w-6 text-gray-400 hover:text-gray-600" />
+                    <Instagram className="h-5 w-5 text-gray-400 hover:text-gray-600" />
                   </a>
                 )}
               </div>
 
-              <div className="flex justify-center gap-4">
+              <div className="flex justify-center items-center gap-4">
                 <Button
                   type="button"
                   variant="outline"
@@ -238,7 +250,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
                   <Mail className="h-4 w-4" />
                   Contact me
                 </Button>
-                <span className="text-gray-400 flex items-center">or</span>
+                <span className="text-gray-400">or</span>
                 <Button
                   type="button"
                   variant="outline"
@@ -250,25 +262,28 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
                 </Button>
               </div>
 
-              <input
-                type="text"
-                value={profile.location}
-                onChange={(e) => handleProfileChange("location", e.target.value)}
-                placeholder="Location (e.g., NYC, USA)"
-                className="text-gray-500 text-center w-full bg-transparent border-none focus:outline-none"
-              />
+              <div className="flex items-center justify-center gap-2 text-gray-500 mt-6">
+                <MapPin className="h-4 w-4" />
+                <input
+                  type="text"
+                  value={profile.location}
+                  onChange={(e) => handleProfileChange("location", e.target.value)}
+                  placeholder="Location (e.g., NYC, USA • 40.6892° N, 74.0445° W)"
+                  className="text-center w-full bg-transparent border-none focus:outline-none"
+                />
+              </div>
 
-              <div className="mt-6">
-                <h3 className="text-lg font-medium mb-2 text-left">About</h3>
+              <div className="mt-8">
+                <h3 className="text-lg font-medium mb-4 text-left">About</h3>
                 <textarea
                   value={profile.bio}
                   onChange={(e) => handleProfileChange("bio", e.target.value)}
                   placeholder="Tell us about yourself"
-                  className="w-full min-h-[150px] p-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full min-h-[200px] p-4 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-4">
+              <div className="flex justify-end gap-2 pt-6">
                 <Button
                   type="button"
                   variant="outline"
