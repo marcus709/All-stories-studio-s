@@ -11,12 +11,13 @@ interface ProfileSettingsDialogProps {
   onClose?: () => void;
 }
 
-interface SocialLinks {
+type SocialLinks = {
+  [key: string]: string | null;
   website: string | null;
   twitter: string | null;
   instagram: string | null;
   newsletter: string | null;
-}
+};
 
 export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
   const session = useSession();
@@ -83,7 +84,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
       }
 
       const socialLinks = (typeof data.social_links === 'object' && data.social_links !== null)
-        ? data.social_links as unknown as SocialLinks
+        ? data.social_links as SocialLinks
         : {
             website: null,
             twitter: null,
