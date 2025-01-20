@@ -116,19 +116,17 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
     setLoading(true);
 
     try {
-      const updateData = {
-        username: profile.username,
-        bio: profile.bio,
-        title: profile.title,
-        location: profile.location,
-        available: profile.available,
-        social_links: profile.social_links,
-        background_url: profile.background_url,
-      };
-
       const { error } = await supabase
         .from("profiles")
-        .update(updateData)
+        .update({
+          username: profile.username,
+          bio: profile.bio,
+          title: profile.title,
+          location: profile.location,
+          available: profile.available,
+          social_links: profile.social_links,
+          background_url: profile.background_url,
+        })
         .eq("id", session?.user?.id);
 
       if (error) throw error;
@@ -168,7 +166,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
       <DialogContent className="sm:max-w-[800px] max-h-[85vh] overflow-y-auto bg-white p-0">
         <div className="flex flex-col items-center text-center p-6">
           <div className="relative w-full">
-            <div className="h-48 w-full bg-gray-100 rounded-t-lg overflow-hidden">
+            <div className="h-48 w-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-t-lg overflow-hidden">
               {profile.background_url && (
                 <img
                   src={profile.background_url}
@@ -198,7 +196,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
                 value={profile.username}
                 onChange={(e) => handleProfileChange("username", e.target.value)}
                 placeholder="Your name"
-                className="text-3xl font-semibold text-center w-full bg-transparent border-none focus:outline-none"
+                className="text-3xl font-semibold text-center w-full bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-lg px-4 py-2"
               />
               
               <input
@@ -206,7 +204,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
                 value={profile.title}
                 onChange={(e) => handleProfileChange("title", e.target.value)}
                 placeholder="Your title"
-                className="text-xl text-gray-500 text-center w-full bg-transparent border-none focus:outline-none"
+                className="text-xl text-gray-500 text-center w-full bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-lg px-4 py-2"
               />
 
               <div className="flex items-center justify-center gap-2 text-gray-500">
@@ -214,7 +212,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
                   type="checkbox"
                   checked={profile.available}
                   onChange={(e) => handleProfileChange("available", e.target.checked)}
-                  className="rounded border-gray-300"
+                  className="rounded border-gray-300 focus:ring-purple-500"
                   id="available"
                 />
                 <label htmlFor="available" className="text-sm">
@@ -223,28 +221,22 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
               </div>
 
               <div className="flex justify-center gap-6 my-6">
-                {profile.social_links.twitter && (
-                  <a href={profile.social_links.twitter} target="_blank" rel="noopener noreferrer">
-                    <Twitter className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  </a>
-                )}
-                {profile.social_links.website && (
-                  <a href={profile.social_links.website} target="_blank" rel="noopener noreferrer">
-                    <Link className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  </a>
-                )}
-                {profile.social_links.instagram && (
-                  <a href={profile.social_links.instagram} target="_blank" rel="noopener noreferrer">
-                    <Instagram className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  </a>
-                )}
+                <button type="button" className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                  <Twitter className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                </button>
+                <button type="button" className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                  <Link className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                </button>
+                <button type="button" className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                  <Instagram className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                </button>
               </div>
 
               <div className="flex justify-center items-center gap-4">
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 hover:bg-gray-100"
                   onClick={() => window.location.href = `mailto:${session?.user?.email}`}
                 >
                   <Mail className="h-4 w-4" />
@@ -254,7 +246,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 hover:bg-gray-100"
                   onClick={handleCopyEmail}
                 >
                   <Copy className="h-4 w-4" />
@@ -269,7 +261,7 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
                   value={profile.location}
                   onChange={(e) => handleProfileChange("location", e.target.value)}
                   placeholder="Location (e.g., NYC, USA • 40.6892° N, 74.0445° W)"
-                  className="text-center w-full bg-transparent border-none focus:outline-none"
+                  className="text-center w-full bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-lg px-4 py-2"
                 />
               </div>
 
@@ -288,13 +280,14 @@ export function ProfileSettingsDialog({ onClose }: ProfileSettingsDialogProps) {
                   type="button"
                   variant="outline"
                   onClick={() => onClose?.()}
+                  className="hover:bg-gray-100"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600"
                 >
                   Save Changes
                 </Button>
