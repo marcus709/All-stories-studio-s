@@ -60,10 +60,10 @@ const Index = () => {
       </div>
 
       {/* Feedback Button */}
-      <div className="fixed bottom-4 left-4 z-50">
+      <div className="fixed bottom-4 left-4 z-[100]">
         <Button
           onClick={() => setShowFeedback(true)}
-          className="rounded-full px-4 py-2 bg-purple-600 hover:bg-purple-700"
+          className="rounded-full px-4 py-2 bg-purple-600 hover:bg-purple-700 shadow-lg"
         >
           <MessageSquarePlus className="mr-2 h-4 w-4" />
           Feedback
