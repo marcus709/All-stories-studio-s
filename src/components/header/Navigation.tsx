@@ -18,31 +18,6 @@ export const Navigation = ({ onScrollToSection, onCommunityClick }: NavigationPr
 
   return (
     <Menu setActive={setActive}>
-      <MenuItem setActive={setActive} active={active} item="Features" className={textColorClass}>
-        <div className="flex flex-col space-y-4 text-sm">
-          <HoveredLink onClick={() => onScrollToSection('features')}>
-            Story Development
-          </HoveredLink>
-          <HoveredLink onClick={() => onScrollToSection('features')}>
-            Character Creation
-          </HoveredLink>
-          <HoveredLink onClick={() => onScrollToSection('features')}>
-            AI Assistance
-          </HoveredLink>
-          <HoveredLink onClick={() => onScrollToSection('features')}>
-            Character-Aware AI
-          </HoveredLink>
-          <HoveredLink onClick={() => onScrollToSection('features')}>
-            Dynamic Characters
-          </HoveredLink>
-          <HoveredLink onClick={() => onScrollToSection('features')}>
-            Writing Community
-          </HoveredLink>
-          <HoveredLink onClick={() => onScrollToSection('features')}>
-            Story Logic Analysis
-          </HoveredLink>
-        </div>
-      </MenuItem>
       <div 
         className={`cursor-pointer ${textColorClass} hover:opacity-[0.9]`}
         onClick={() => navigate('/dashboard')}
