@@ -35,32 +35,8 @@ export const supabase = createClient<Database>(
       }
     },
     // Add retry configuration
-    fetch: (url, options) => {
-      return fetch(url, {
-        ...options,
-        headers: {
-          ...options?.headers,
-          'Cache-Control': 'no-cache',
-        },
-      }).then(async (response) => {
-        if (!response.ok) {
-          console.error('Supabase fetch error:', {
-            status: response.status,
-            statusText: response.statusText,
-            url,
-          });
-          
-          // Try to get more error details from response
-          try {
-            const errorData = await response.json();
-            console.error('Error details:', errorData);
-          } catch (e) {
-            // Ignore json parse errors
-          }
-        }
-        return response;
-      });
-    }
+    retryAttempts: 3,
+    retryInterval: 1000
   }
 );
 
