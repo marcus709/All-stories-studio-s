@@ -6,7 +6,6 @@ import { DashboardContent } from "@/components/dashboard/DashboardContent";
 import { StoryProvider } from "@/contexts/StoryContext";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useToast } from "@/hooks/use-toast";
-import { StudioAssistant } from "@/components/ai/StudioAssistant";
 
 type View = "story" | "characters" | "plot" | "dream" | "ideas" | "docs" | "logic";
 
@@ -46,7 +45,6 @@ function DashboardLayout() {
           <DashboardContent currentView={currentView} />
         )}
       </div>
-      <StudioAssistant />
     </div>
   );
 }
