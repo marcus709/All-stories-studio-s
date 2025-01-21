@@ -1,18 +1,14 @@
 import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
-import { FeaturesSection } from "@/components/FeaturesSection";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { AuthModals } from "@/components/auth/AuthModals";
-import { useLocation } from "react-router-dom";
 import { PricingDialog } from "@/components/pricing/PricingDialog";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
-import { PricingSection } from "@/components/PricingSection";
 
 const Index = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const [authView, setAuthView] = useState<"signin" | "signup">("signup");
-  const location = useLocation();
   const session = useSession();
   const supabase = useSupabaseClient();
 
@@ -50,8 +46,6 @@ const Index = () => {
         <Header />
         <main className="relative">
           <HeroSection onShowAuth={handleShowAuth} />
-          <FeaturesSection />
-          <PricingSection />
         </main>
       </div>
 
