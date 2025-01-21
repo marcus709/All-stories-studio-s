@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { Profile } from "@/integrations/supabase/types/tables.types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { UserProfileDialog } from "./UserProfileDialog";
 import { InviteLinkGenerator } from "./InviteLinkGenerator";
+import { useNavigate } from "react-router-dom";
 
 interface FriendshipWithProfile {
   id: string;
@@ -18,9 +18,10 @@ interface FriendshipWithProfile {
 
 export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) => {
   const session = useSession();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
+  const [isOpen, setIsOpen] = useState(true);
 
   const { data: friends, isError } = useQuery({
     queryKey: ["friends", session?.user?.id],
@@ -70,18 +71,12 @@ export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) =>
   });
 
   const handleUserSelect = (user: Profile) => {
-    const completeUser: Profile = {
-      id: user.id,
-      username: user.username,
-      avatar_url: user.avatar_url,
-      bio: user.bio,
-      website: user.website || null,
-    };
-    setSelectedUser(completeUser);
+    setIsOpen(false);
+    navigate(`/community/profile/${user.id}`);
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -176,14 +171,6 @@ export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) =>
           </div>
         </div>
       </DialogContent>
-      
-      {selectedUser && (
-        <UserProfileDialog
-          user={selectedUser}
-          isOpen={!!selectedUser}
-          onClose={() => setSelectedUser(null)}
-        />
-      )}
     </Dialog>
   );
 };

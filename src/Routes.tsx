@@ -9,6 +9,7 @@ import { CharactersView } from "./components/CharactersView";
 import { FormattingView } from "./components/FormattingView";
 import { StoryDocsView } from "./components/docs/StoryDocsView";
 import { CommunityFeed } from "./components/community/CommunityFeed";
+import { UserProfileView } from "./components/community/chat/UserProfileView";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -51,6 +52,7 @@ export default function AppRoutes() {
         }
       >
         <Route path="" element={<CommunityFeed />} />
+        <Route path="profile/:userId" element={<UserProfileView />} />
       </Route>
       <Route
         path="/invite/:inviteId"
