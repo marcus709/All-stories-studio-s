@@ -1,6 +1,6 @@
 import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AuthModals } from "@/components/auth/AuthModals";
 import { PricingDialog } from "@/components/pricing/PricingDialog";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
