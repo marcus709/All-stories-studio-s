@@ -193,3 +193,4 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
       </div>
     </div>
   );
+};
