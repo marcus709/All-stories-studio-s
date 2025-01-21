@@ -59,14 +59,21 @@ const Index = () => {
         </main>
       </div>
 
-      {/* Feedback Button */}
-      <div className="fixed bottom-4 left-4 z-[100]">
+      {/* Feedback Button - Now positioned over the tutorial button */}
+      <div className="fixed bottom-4 left-4 z-[100] flex flex-col gap-2">
         <Button
           onClick={() => setShowFeedback(true)}
           className="rounded-full px-4 py-2 bg-purple-600 hover:bg-purple-700 shadow-lg"
         >
           <MessageSquarePlus className="mr-2 h-4 w-4" />
           Feedback
+        </Button>
+        <Button
+          variant="secondary"
+          className="rounded-full px-4 py-2 bg-zinc-800/90 text-white hover:bg-zinc-700/90 shadow-lg"
+        >
+          <span className="mr-2">✨</span>
+          Tutorial
         </Button>
       </div>
 
