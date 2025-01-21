@@ -30,7 +30,7 @@ export const SubscriptionProvider = ({ children }: { children: React.ReactNode }
   const supabase = useSupabaseClient();
   const { toast } = useToast();
 
-  // Query to check trial status
+  // Query to check trial status - now just checks if trial exists
   const { data: trialData } = useQuery({
     queryKey: ["trial-status", session?.user?.id],
     queryFn: async () => {
@@ -87,25 +87,9 @@ export const SubscriptionProvider = ({ children }: { children: React.ReactNode }
         // If user has an active paid subscription, use that
         if (data.plan !== 'free') {
           setPlan(data.plan);
-          setIsTrialExpired(false);
-        } else {
-          // Check trial status
-          if (trialData) {
-            const now = new Date();
-            const trialEnd = new Date(trialData.trial_end_date);
-            const isExpired = now > trialEnd && trialData.is_active;
-            
-            setIsTrialExpired(isExpired);
-            
-            if (isExpired) {
-              toast({
-                title: "Trial Expired",
-                description: "Your free trial has ended. Please upgrade to continue using premium features.",
-                variant: "destructive",
-              });
-            }
-          }
         }
+        // Trial is now always active
+        setIsTrialExpired(false);
       } catch (error) {
         console.error('Error checking subscription:', error);
         toast({
@@ -122,10 +106,7 @@ export const SubscriptionProvider = ({ children }: { children: React.ReactNode }
   }, [session, supabase, toast, trialData]);
 
   const checkFeatureAccess = (feature: keyof typeof featureMatrix.free): boolean => {
-    // If trial is expired and user is on free plan, deny access to premium features
-    if (isTrialExpired && plan === 'free') {
-      return false;
-    }
+    // Trial is now always active, so we only need to check the feature matrix
     return !!featureMatrix[plan][feature];
   };
 
