@@ -10,6 +10,7 @@ import { useCreateStory } from "@/hooks/useCreateStory";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { useSession } from "@supabase/auth-helpers-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 
 interface StoriesDialogProps {
@@ -28,6 +29,7 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
   const createStory = useCreateStory();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const session = useSession();
 
   const [newStory, setNewStory] = useState({
     title: "",
@@ -37,14 +39,13 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
   const { data: isGroupAdmin } = useQuery({
     queryKey: ["groupRole", selectedStory?.shared_group_id],
     queryFn: async () => {
-      if (!selectedStory?.shared_group_id) return false;
+      if (!selectedStory?.shared_group_id || !session?.user?.id) return false;
       
-      const { data: { user } } = await supabase.auth.getUser();
       const { data: memberData, error } = await supabase
         .from("group_members")
         .select("role")
         .eq("group_id", selectedStory.shared_group_id)
-        .eq("user_id", user?.id)
+        .eq("user_id", session.user.id)
         .maybeSingle();
 
       if (error) {
@@ -54,17 +55,18 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
 
       return memberData?.role === "admin";
     },
-    enabled: !!selectedStory?.shared_group_id,
+    enabled: !!selectedStory?.shared_group_id && !!session?.user?.id,
   });
 
   const { data: userEditingRights = {} } = useQuery({
     queryKey: ["userEditingRights"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      if (!session?.user?.id) return {};
+      
       const { data: memberData, error } = await supabase
         .from("group_members")
         .select("group_id, editing_rights")
-        .eq("user_id", user?.id);
+        .eq("user_id", session.user.id);
 
       if (error) {
         console.error("Error fetching editing rights:", error);
@@ -76,17 +78,18 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
         return acc;
       }, {}) || {};
     },
-    enabled: true,
+    enabled: !!session?.user?.id,
   });
 
   const { data: userGroupMemberships = [] } = useQuery({
     queryKey: ["userGroupMemberships"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      if (!session?.user?.id) return [];
+      
       const { data: memberships, error } = await supabase
         .from("group_members")
         .select("group_id")
-        .eq("user_id", user?.id);
+        .eq("user_id", session.user.id);
 
       if (error) {
         console.error("Error fetching group memberships:", error);
@@ -95,7 +98,7 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
 
       return memberships.map(m => m.group_id);
     },
-    enabled: true,
+    enabled: !!session?.user?.id,
   });
 
   const visibleStories = stories.filter(async story => {
@@ -109,10 +112,19 @@ export function StoriesDialog({ open, onOpenChange, onStorySelect }: StoriesDial
   });
 
   const handleCreateStory = async () => {
+    if (!session?.user?.id) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to create a story",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const formData = {
         ...newStory,
-        user_id: (await supabase.auth.getUser()).data.user?.id,
+        user_id: session.user.id,
       };
       const createdStory = await createStory.mutateAsync(formData);
       setShowNewStory(false);
