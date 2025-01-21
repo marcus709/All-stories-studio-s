@@ -17,12 +17,24 @@ export const supabase = createClient<Database>(
       autoRefreshToken: true,
       detectSessionInUrl: true,
       flowType: 'pkce',
+      storage: window.localStorage,
+      storageKey: 'supabase.auth.token',
+      debug: true
     },
     global: {
       headers: {
         'x-client-info': 'lovable-app',
       },
     },
+    // Add retry configuration
+    db: {
+      schema: 'public'
+    },
+    realtime: {
+      params: {
+        eventsPerSecond: 10
+      }
+    }
   }
 );
 
@@ -41,6 +53,13 @@ window.fetch = async (...args) => {
     return response;
   } catch (error) {
     console.error('Network error:', error);
-    throw error;
+    // Retry the request once after a short delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      return await originalFetch(...args);
+    } catch (retryError) {
+      console.error('Retry failed:', retryError);
+      throw retryError;
+    }
   }
 };
