@@ -25,9 +25,10 @@ interface UserMenuProps {
   } | null;
   onSignOut: () => Promise<void>;
   onShowAuth: (view: "signin" | "signup") => void;
+  isLandingPage: boolean;
 }
 
-export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuProps) => {
+export const UserMenu = ({ session, profile, onSignOut, onShowAuth, isLandingPage }: UserMenuProps) => {
   const { plan } = useSubscription();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -49,7 +50,7 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
         <Button 
           variant="ghost"
           onClick={() => onShowAuth("signin")}
-          className="text-purple-200 hover:text-purple-100 hover:bg-purple-900/20 font-mono"
+          className={`${isLandingPage ? 'text-purple-200 hover:text-purple-100 hover:bg-purple-900/20' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'} font-mono`}
         >
           Sign In
         </Button>
@@ -76,7 +77,7 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
       )}
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="flex items-center space-x-2 px-2 hover:bg-purple-900/20">
+          <Button variant="ghost" className={`flex items-center space-x-2 px-2 ${isLandingPage ? 'hover:bg-purple-900/20' : 'hover:bg-gray-100'}`}>
             <Avatar className="h-8 w-8">
               <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.username || undefined} />
               <AvatarFallback>
@@ -84,7 +85,7 @@ export const UserMenu = ({ session, profile, onSignOut, onShowAuth }: UserMenuPr
                  session.user.email?.[0]?.toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <span className="text-sm font-mono text-white">
+            <span className={`text-sm font-mono ${isLandingPage ? 'text-white' : 'text-black'}`}>
               {profile?.username || session.user.email?.split('@')[0]}
             </span>
           </Button>

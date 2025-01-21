@@ -117,6 +117,7 @@ export const Header = () => {
         profile={profile}
         onSignOut={handleSignOut}
         onShowAuth={handleShowAuth}
+        isLandingPage={isLandingPage}
       />
 
       <AuthModals
