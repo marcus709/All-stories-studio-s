@@ -43,19 +43,6 @@ export const Navigation = ({ onScrollToSection, onCommunityClick }: NavigationPr
           </HoveredLink>
         </div>
       </MenuItem>
-      <MenuItem setActive={setActive} active={active} item="Pricing" className={textColorClass}>
-        <div className="flex flex-col space-y-4 text-sm">
-          <HoveredLink onClick={() => onScrollToSection('pricing')}>
-            Free Trial
-          </HoveredLink>
-          <HoveredLink onClick={() => onScrollToSection('pricing')}>
-            Creator Plan
-          </HoveredLink>
-          <HoveredLink onClick={() => onScrollToSection('pricing')}>
-            Professional Plan
-          </HoveredLink>
-        </div>
-      </MenuItem>
       <div 
         className={`cursor-pointer ${textColorClass} hover:opacity-[0.9]`}
         onClick={() => navigate('/dashboard')}
