@@ -5,10 +5,9 @@ import { PlotDevelopmentView } from "@/components/PlotDevelopmentView";
 import { StoryIdeasView } from "@/components/StoryIdeasView";
 import { StoryDocsView } from "@/components/docs/StoryDocsView";
 import { StoryLogicView } from "@/components/story-logic/StoryLogicView";
-import { HomeView } from "./views/HomeView";
 import { AlertTriangle } from "lucide-react";
 
-type View = "home" | "story" | "characters" | "plot" | "dream" | "ideas" | "docs" | "logic";
+type View = "story" | "characters" | "plot" | "dream" | "ideas" | "docs" | "logic";
 
 interface DashboardContentProps {
   currentView: View;
@@ -27,8 +26,6 @@ const ComingSoonView = ({ feature }: { feature: string }) => {
 export const DashboardContent = ({ currentView }: DashboardContentProps) => {
   const renderContent = () => {
     switch (currentView) {
-      case "home":
-        return <HomeView />;
       case "story":
         return <StoryView />;
       case "characters":
@@ -44,7 +41,7 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
       case "logic":
         return <StoryLogicView />;
       default:
-        return <HomeView />;
+        return <StoryView />;
     }
   };
 

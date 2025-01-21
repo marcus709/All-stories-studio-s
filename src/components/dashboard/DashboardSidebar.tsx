@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Home, Book, Users, LineChart, Lightbulb, FileText, AlertTriangle, Rewind, ChevronLeft, ChevronRight } from "lucide-react";
+import { Book, Users, LineChart, Lightbulb, FileText, AlertTriangle, Rewind, ChevronLeft, ChevronRight } from "lucide-react";
 import { StoriesDialog } from "../StoriesDialog";
 import { useStory } from "@/contexts/StoryContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,10 +11,9 @@ import { Story } from "@/types/story";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
-type View = "home" | "story" | "characters" | "plot" | "dream" | "ideas" | "docs" | "logic";
+type View = "story" | "characters" | "plot" | "dream" | "ideas" | "docs" | "logic";
 
 const navigationItems = [
-  { id: "home" as View, icon: Home, label: "Home" },
   { id: "story" as View, icon: Book, label: "Brainstorm" },
   { id: "characters" as View, icon: Users, label: "Characters" },
   { id: "plot" as View, icon: LineChart, label: "Formatting" },
@@ -194,4 +193,3 @@ export const DashboardSidebar = ({ currentView, setCurrentView, isCollapsed, onT
       </div>
     </div>
   );
-};
