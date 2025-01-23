@@ -146,7 +146,11 @@ export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) =>
                 {friends.map((friendship) => {
                   const friend = friendship.friend;
                   return (
-                    <div key={friend.id} className="flex items-center gap-3 rounded-lg border p-3">
+                    <div 
+                      key={friend.id} 
+                      className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-gray-50"
+                      onClick={() => handleUserSelect(friend)}
+                    >
                       <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
                         {friend.avatar_url ? (
                           <img
