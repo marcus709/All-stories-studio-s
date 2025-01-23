@@ -21,7 +21,7 @@ export const AddFriendsDialog = ({ children }: { children: React.ReactNode }) =>
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   const { data: friends, isError } = useQuery({
     queryKey: ["friends", session?.user?.id],
