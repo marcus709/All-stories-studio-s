@@ -7,8 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { UserProfileDialog } from "./UserProfileDialog";
 import { Profile } from "@/integrations/supabase/types/tables.types";
+import { useNavigate } from "react-router-dom";
 
 interface PostLike {
   id: string;
@@ -58,7 +58,7 @@ export const Post = ({ post }: PostProps) => {
   const queryClient = useQueryClient();
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("");
-  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
+  const navigate = useNavigate();
 
   const isLiked = post.post_likes.some(
     (like) => like.user_id === session?.user?.id
@@ -149,6 +149,10 @@ export const Post = ({ post }: PostProps) => {
     addComment.mutate(newComment);
   };
 
+  const handleProfileClick = (userId: string) => {
+    navigate(`/community/profile/${userId}`);
+  };
+
   const postUsername = post.get_post_profiles?.[0]?.username || "Anonymous";
   const postAvatarUrl = post.get_post_profiles?.[0]?.avatar_url;
 
@@ -157,12 +161,7 @@ export const Post = ({ post }: PostProps) => {
       <div className="flex items-start justify-between mb-4">
         <div 
           className="flex items-center gap-3 cursor-pointer hover:opacity-80"
-          onClick={() => setSelectedProfile({ 
-            id: post.user_id, 
-            username: postUsername,
-            avatar_url: postAvatarUrl,
-            bio: null
-          })}
+          onClick={() => handleProfileClick(post.user_id)}
         >
           <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
             {postAvatarUrl ? (
@@ -272,12 +271,7 @@ export const Post = ({ post }: PostProps) => {
                 <div key={comment.id} className="flex gap-3">
                   <div 
                     className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0 cursor-pointer overflow-hidden"
-                    onClick={() => setSelectedProfile({
-                      id: comment.user_id,
-                      username: commentUsername,
-                      avatar_url: commentAvatarUrl,
-                      bio: null
-                    })}
+                    onClick={() => handleProfileClick(comment.user_id)}
                   >
                     {commentAvatarUrl ? (
                       <img
@@ -295,12 +289,7 @@ export const Post = ({ post }: PostProps) => {
                     <div className="bg-gray-50 rounded-2xl p-3">
                       <p 
                         className="font-medium text-sm cursor-pointer hover:opacity-80"
-                        onClick={() => setSelectedProfile({
-                          id: comment.user_id,
-                          username: commentUsername,
-                          avatar_url: commentAvatarUrl,
-                          bio: null
-                        })}
+                        onClick={() => handleProfileClick(comment.user_id)}
                       >
                         {commentUsername}
                       </p>
@@ -317,14 +306,6 @@ export const Post = ({ post }: PostProps) => {
             })}
           </div>
         </div>
-      )}
-
-      {selectedProfile && (
-        <UserProfileDialog
-          user={selectedProfile}
-          isOpen={!!selectedProfile}
-          onClose={() => setSelectedProfile(null)}
-        />
       )}
     </div>
   );

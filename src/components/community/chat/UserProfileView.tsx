@@ -138,7 +138,7 @@ export function UserProfileView() {
               <p className="mt-2 text-gray-600">{profile.bio}</p>
             )}
           </div>
-          {!isFriend && session?.user?.id !== userId && (
+          {session?.user?.id !== userId && !isFriend && (
             <Button
               onClick={handleAddFriend}
               disabled={isPending}
