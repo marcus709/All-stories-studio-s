@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { Book, Users, LineChart, Lightbulb, FileText, AlertTriangle, Rewind, ChevronLeft, ChevronRight } from "lucide-react";
+import { Book, Users, Rewind, Lightbulb, FileText, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
 import { StoriesDialog } from "../StoriesDialog";
 import { useStory } from "@/contexts/StoryContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,7 +17,6 @@ type View = "story" | "characters" | "plot" | "dream" | "ideas" | "docs" | "logi
 const navigationItems = [
   { id: "story" as View, icon: Book, label: "Brainstorm" },
   { id: "characters" as View, icon: Users, label: "Characters" },
-  { id: "plot" as View, icon: LineChart, label: "Formatting" },
   { id: "dream" as View, icon: Rewind, label: "Plot Development" },
   { id: "ideas" as View, icon: Lightbulb, label: "World Builder" },
   { id: "docs" as View, icon: FileText, label: "Story Docs" },
