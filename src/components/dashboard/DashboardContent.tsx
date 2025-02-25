@@ -1,6 +1,6 @@
+
 import { StoryView } from "./views/StoryView";
 import { CharactersView } from "@/components/CharactersView";
-import { FormattingView } from "@/components/FormattingView";
 import { PlotDevelopmentView } from "@/components/PlotDevelopmentView";
 import { StoryIdeasView } from "@/components/StoryIdeasView";
 import { StoryDocsView } from "@/components/docs/StoryDocsView";
@@ -31,11 +31,11 @@ export const DashboardContent = ({ currentView }: DashboardContentProps) => {
       case "characters":
         return <CharactersView />;
       case "plot":
-        return <ComingSoonView feature="Formatting" />;
+        return <PlotDevelopmentView />;
       case "dream":
         return <PlotDevelopmentView />;
       case "ideas":
-        return <ComingSoonView feature="World Builder" />;
+        return <StoryIdeasView />;
       case "docs":
         return <StoryDocsView />;
       case "logic":

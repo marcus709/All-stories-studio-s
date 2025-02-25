@@ -1,3 +1,4 @@
+
 import { Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Community from "./pages/Community";
@@ -6,7 +7,6 @@ import { Header } from "./components/Header";
 import Dashboard from "./pages/Dashboard";
 import { ProfileSettings } from "./pages/ProfileSettings";
 import { CharactersView } from "./components/CharactersView";
-import { FormattingView } from "./components/FormattingView";
 import { StoryDocsView } from "./components/docs/StoryDocsView";
 import { CommunityFeed } from "./components/community/CommunityFeed";
 import { UserProfileView } from "./components/community/chat/UserProfileView";
@@ -40,7 +40,6 @@ export default function AppRoutes() {
         }
       >
         <Route path="characters" element={<CharactersView />} />
-        <Route path="formatting" element={<FormattingView />} />
         <Route path="docs" element={<StoryDocsView />} />
       </Route>
       <Route
