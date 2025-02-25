@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
@@ -111,23 +112,8 @@ export function ProfileSettings() {
     setProfile((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleManageSubscription = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('create-portal-session');
-      
-      if (error) throw error;
-      
-      if (data?.url) {
-        window.location.href = data.url;
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to open subscription management portal",
-        variant: "destructive",
-      });
-    }
+  const handleManageSubscription = () => {
+    window.location.href = "https://billing.stripe.com/p/login/5kA9C61OTad2cJa5kk";
   };
 
   return (
