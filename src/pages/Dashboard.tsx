@@ -1,19 +1,25 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
+
+import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
+import { DashboardContent } from "@/components/dashboard/DashboardContent";
+import { useState } from "react";
+
+type View = "story" | "characters" | "plot" | "dream" | "ideas" | "docs" | "logic";
 
 export default function Dashboard() {
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  const [currentView, setCurrentView] = useState<View>("story");
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
-  useEffect(() => {
-    toast({
-      title: "Coming Soon",
-      description: "The dashboard feature is currently under development. Stay tuned!",
-      variant: "default",
-    });
-    navigate("/");
-  }, [navigate, toast]);
-
-  return null;
+  return (
+    <div className="flex">
+      <DashboardSidebar
+        currentView={currentView}
+        setCurrentView={setCurrentView}
+        isCollapsed={isCollapsed}
+        onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
+      />
+      <main className={`flex-1 transition-all duration-200 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
+        <DashboardContent currentView={currentView} />
+      </main>
+    </div>
+  );
 }
