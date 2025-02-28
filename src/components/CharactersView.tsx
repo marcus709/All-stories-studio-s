@@ -1,3 +1,4 @@
+
 import { Plus, MessageSquare, Network } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
@@ -153,7 +154,7 @@ export const CharactersView = () => {
       ) : viewMode === 'dialog' ? (
         <DialogAssistant characters={characters || []} />
       ) : (
-        <CharacterDynamics />
+        <CharacterDynamics characters={characters || []} />
       )}
 
       <CreateCharacterDialog 

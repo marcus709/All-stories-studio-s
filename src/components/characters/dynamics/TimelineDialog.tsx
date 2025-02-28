@@ -1,35 +1,62 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface TimelineDialogProps {
   isOpen: boolean;
   onClose: () => void;
   storyId: string;
-  onEventAdded: () => void;
+  onEventAdded?: () => void;
 }
 
 export const TimelineDialog = ({ isOpen, onClose, storyId, onEventAdded }: TimelineDialogProps) => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [year, setYear] = useState("");
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [year, setYear] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title) {
+      toast({
+        title: "Error",
+        description: "Please provide a title for the event",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
+      // Get last position to place new event at the end
+      const { data: lastEvents } = await supabase
+        .from('timeline_events')
+        .select('position')
+        .eq('story_id', storyId)
+        .order('position', { ascending: false })
+        .limit(1);
+
+      const nextPosition = lastEvents && lastEvents.length > 0 
+        ? lastEvents[0].position + 1 
+        : 0;
+
       const { error } = await supabase
-        .from("timeline_events")
+        .from('timeline_events')
         .insert({
           story_id: storyId,
           title,
-          description,
-          year,
-          position: 0, // You'll need to calculate this based on existing events
+          description: description || null,
+          year: year || null,
+          position: nextPosition
         });
 
       if (error) throw error;
@@ -39,58 +66,89 @@ export const TimelineDialog = ({ isOpen, onClose, storyId, onEventAdded }: Timel
         description: "Timeline event added successfully",
       });
 
-      onEventAdded();
+      // Reset form
+      setTitle('');
+      setDescription('');
+      setYear('');
+      
+      // Notify parent
+      if (onEventAdded) onEventAdded();
+      
+      // Close dialog
       onClose();
     } catch (error) {
+      console.error('Error adding timeline event:', error);
       toast({
         title: "Error",
         description: "Failed to add timeline event",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
           <DialogTitle>Add Timeline Event</DialogTitle>
+          <DialogDescription>
+            Create a new event for your story timeline. These events will help map character positions and relationships over time.
+          </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
+
+        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+          <div className="space-y-2">
             <Label htmlFor="title">Event Title</Label>
-            <Input
+            <Input 
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter event title"
+              placeholder="Battle of Winterfell"
+              required
             />
           </div>
-          <div className="grid gap-2">
+
+          <div className="space-y-2">
             <Label htmlFor="year">Year/Period</Label>
-            <Input
+            <Input 
               id="year"
               value={year}
               onChange={(e) => setYear(e.target.value)}
-              placeholder="Enter year or time period"
+              placeholder="302 AC"
             />
           </div>
-          <div className="grid gap-2">
+
+          <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
-            <Textarea
+            <Textarea 
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter event description"
+              placeholder="Describe what happens in this event..."
+              rows={4}
             />
           </div>
-        </div>
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit}>Add Event</Button>
-        </div>
+
+          <div className="flex justify-end gap-3 pt-4">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onClose}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="submit"
+              disabled={isSubmitting || !title}
+              className="bg-purple-500 hover:bg-purple-600"
+            >
+              {isSubmitting ? 'Adding...' : 'Add Event'}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

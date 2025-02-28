@@ -1,3 +1,4 @@
+
 import { useCallback, useState } from 'react';
 import {
   ReactFlow,
@@ -76,22 +77,6 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
     enabled: !!selectedStory?.id,
   });
 
-  // Analyze timeline events
-  const { data: timelineAnalysis } = useQuery({
-    queryKey: ['timeline-analysis', selectedStory?.id],
-    queryFn: async () => {
-      if (!selectedStory?.id) return null;
-
-      const { data, error } = await supabase.functions.invoke('analyze-timeline-events', {
-        body: { storyId: selectedStory.id }
-      });
-
-      if (error) throw error;
-      return data.analysis;
-    },
-    enabled: !!selectedStory?.id,
-  });
-
   const getNodePositions = (chars: Character[], layout: LayoutType) => {
     if (!chars || chars.length === 0) {
       return [DEFAULT_POSITION];
@@ -157,9 +142,9 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
       type: rel.relationship_type,
       strength: rel.strength,
       notes: rel.description,
-      trust: rel.trust,
-      conflict: rel.conflict,
-      chemistry: rel.chemistry,
+      trust: rel.trust || 50,
+      conflict: rel.conflict || 20,
+      chemistry: getChemistryLabel(rel.trust, rel.conflict),
       id: rel.id,
       source: rel.character1_id,
       target: rel.character2_id,
@@ -285,68 +270,7 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
       prevNodes.map((node, index) => ({
         ...node,
         position: newPositions[index] || node.position || DEFAULT_POSITION,
-        data: {
-          ...node.data,
-          psychology: node.data.psychology || {
-            fears: [],
-            mental_health: null,
-            coping_mechanisms: [],
-            emotional_tendencies: []
-          },
-          values_and_morals: node.data.values_and_morals || {
-            honesty: 50,
-            loyalty: 50,
-            alignment: {
-              lawful_chaotic: 0,
-              selfless_selfish: 0
-            },
-            risk_taking: 50
-          },
-          skills: node.data.skills || [],
-          flaws: node.data.flaws || [],
-          archetype: node.data.archetype || null,
-          psychological_traits: node.data.psychological_traits || {
-            trust: 50,
-            resilience: 50,
-            impulsiveness: 50,
-            emotional_intelligence: 50
-          },
-          internal_motivations: node.data.internal_motivations || [],
-          external_goals: node.data.external_goals || [],
-          core_beliefs: node.data.core_beliefs || [],
-          social_masks: node.data.social_masks || [],
-          group_roles: node.data.group_roles || [],
-          behavioral_quirks: node.data.behavioral_quirks || [],
-          body_language: node.data.body_language || null,
-          cultural_background: node.data.cultural_background || {
-            taboos: [],
-            traditions: [],
-            religious_beliefs: []
-          },
-          life_events: node.data.life_events || {
-            losses: [],
-            formative: [],
-            turning_points: []
-          },
-          ancestry: node.data.ancestry || null,
-          skill_trees: node.data.skill_trees || [],
-          expertise: node.data.expertise || {
-            areas: [],
-            limitations: []
-          },
-          training_history: node.data.training_history || [],
-          dialogue_style: node.data.dialogue_style || {
-            tone: [],
-            patterns: [],
-            formality: "neutral"
-          },
-          iconic_phrases: node.data.iconic_phrases || [],
-          linguistic_traits: node.data.linguistic_traits || {
-            accent: null,
-            quirks: [],
-            languages: []
-          }
-        }
+        data: { ...node.data }
       }))
     );
   };
@@ -421,19 +345,14 @@ export const CharacterDynamicsFlow = ({ characters, relationships }: CharacterDy
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gray-800 border-t border-gray-700 p-4">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-white font-medium">Timeline</h3>
-            {timelineAnalysis && (
-              <div className="text-sm text-gray-400">
-                AI Analysis Available
-              </div>
-            )}
           </div>
           <div className="relative h-16">
             {timelineEvents.map((event) => (
               <div
                 key={event.id}
                 className="absolute top-0 bg-purple-500 px-2 py-1 rounded text-white text-xs cursor-pointer hover:bg-purple-600 transition-colors"
-                style={{ left: `${(event.position / timelineEvents.length) * 100}%` }}
-                title={`${event.title} (${event.year})`}
+                style={{ left: `${(event.position / (timelineEvents.length + 1)) * 100}%` }}
+                title={`${event.title} (${event.year || 'Unknown year'})`}
               >
                 {event.title}
               </div>
@@ -471,8 +390,19 @@ function getRelationshipColor(type: string): string {
       return '#f59e0b';
     case 'student':
       return '#6366f1';
+    case 'romantic':
+      return '#ec4899';
     default:
       return '#94a3b8';
   }
 }
 
+function getChemistryLabel(trust: number = 50, conflict: number = 20): string {
+  if (trust > 75 && conflict < 30) return "Strong positive";
+  if (trust > 60 && conflict < 40) return "Positive";
+  if (trust < 30 && conflict > 60) return "Strong negative";
+  if (trust < 40 && conflict > 50) return "Negative";
+  if (Math.abs(trust - conflict) < 20) return "Complex";
+  if (trust > conflict) return "Mostly positive";
+  return "Mostly negative";
+}
