@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
@@ -33,10 +34,7 @@ export const supabase = createClient<Database>(
       params: {
         eventsPerSecond: 10
       }
-    },
-    // Add retry configuration
-    retryAttempts: 3,
-    retryInterval: 1000
+    }
   }
 );
 
