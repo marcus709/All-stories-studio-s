@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useStory } from "@/contexts/StoryContext";
@@ -14,6 +13,8 @@ import { Character } from "@/types/character";
 import { useToast } from "@/hooks/use-toast";
 import { Slider } from "@/components/ui/slider";
 
+type RelationshipType = "friend" | "ally" | "rival" | "enemy" | "family" | "mentor" | "student" | "romantic";
+
 interface CharacterDynamicsProps {
   characters: Character[];
 }
@@ -23,7 +24,7 @@ export const CharacterDynamics = ({ characters }: CharacterDynamicsProps) => {
   const [addRelationshipOpen, setAddRelationshipOpen] = useState(false);
   const [character1, setCharacter1] = useState<string>("");
   const [character2, setCharacter2] = useState<string>("");
-  const [relationshipType, setRelationshipType] = useState<string>("friend");
+  const [relationshipType, setRelationshipType] = useState<RelationshipType>("friend");
   const [strength, setStrength] = useState<number>(50);
   const [trust, setTrust] = useState<number>(50);
   const [conflict, setConflict] = useState<number>(20);
@@ -183,7 +184,10 @@ export const CharacterDynamics = ({ characters }: CharacterDynamicsProps) => {
 
             <div className="space-y-2">
               <Label className="text-white">Relationship Type</Label>
-              <Select value={relationshipType} onValueChange={setRelationshipType}>
+              <Select 
+                value={relationshipType} 
+                onValueChange={(value: RelationshipType) => setRelationshipType(value)}
+              >
                 <SelectTrigger className="bg-gray-800 border-gray-700">
                   <SelectValue placeholder="Select relationship type" />
                 </SelectTrigger>
