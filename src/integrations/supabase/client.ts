@@ -37,29 +37,3 @@ export const supabase = createClient<Database>(
     }
   }
 );
-
-// Add error handling for fetch operations
-const originalFetch = window.fetch;
-window.fetch = async (...args) => {
-  try {
-    const response = await originalFetch(...args);
-    if (!response.ok) {
-      console.error('Fetch error:', {
-        status: response.status,
-        statusText: response.statusText,
-        url: args[0]
-      });
-    }
-    return response;
-  } catch (error) {
-    console.error('Network error:', error);
-    // Retry the request once after a short delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    try {
-      return await originalFetch(...args);
-    } catch (retryError) {
-      console.error('Retry failed:', retryError);
-      throw retryError;
-    }
-  }
-};

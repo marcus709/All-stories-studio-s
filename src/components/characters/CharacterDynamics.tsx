@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useStory } from "@/contexts/StoryContext";
@@ -13,7 +14,7 @@ import { Character } from "@/types/character";
 import { useToast } from "@/hooks/use-toast";
 import { Slider } from "@/components/ui/slider";
 
-type RelationshipType = "friend" | "ally" | "rival" | "enemy" | "family" | "mentor" | "student" | "romantic";
+type RelationshipType = "friend" | "ally" | "rival" | "enemy" | "family" | "mentor" | "student" | "lover" | "neutral";
 
 interface CharacterDynamicsProps {
   characters: Character[];
@@ -199,7 +200,7 @@ export const CharacterDynamics = ({ characters }: CharacterDynamicsProps) => {
                   <SelectItem value="family">Family</SelectItem>
                   <SelectItem value="mentor">Mentor</SelectItem>
                   <SelectItem value="student">Student</SelectItem>
-                  <SelectItem value="romantic">Romantic</SelectItem>
+                  <SelectItem value="lover">Romantic</SelectItem>
                 </SelectContent>
               </Select>
             </div>
