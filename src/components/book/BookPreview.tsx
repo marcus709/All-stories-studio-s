@@ -8,6 +8,13 @@ interface BookPreviewProps {
   onDocumentSelect: (id: string) => void;
 }
 
+interface PlotEvent {
+  id: string;
+  title: string;
+  description: string;
+  order_index: number;
+}
+
 export const BookPreview = ({
   selectedDocument,
   onDocumentSelect,
@@ -22,7 +29,7 @@ export const BookPreview = ({
         .eq("document_id", selectedDocument)
         .order("order_index");
       if (error) throw error;
-      return data;
+      return data as PlotEvent[];
     },
     enabled: !!selectedDocument,
   });

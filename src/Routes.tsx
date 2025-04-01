@@ -10,6 +10,7 @@ import { CharactersView } from "./components/CharactersView";
 import { StoryDocsView } from "./components/docs/StoryDocsView";
 import { CommunityFeed } from "./components/community/CommunityFeed";
 import { UserProfileView } from "./components/community/chat/UserProfileView";
+import { useState } from "react";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -21,6 +22,9 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 }
 
 export default function AppRoutes() {
+  // Temporary implementation - in a real app this would be handled with a proper router state
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+
   return (
     <Routes>
       <Route
@@ -51,7 +55,15 @@ export default function AppRoutes() {
         }
       >
         <Route path="" element={<CommunityFeed />} />
-        <Route path="profile/:userId" element={<UserProfileView />} />
+        <Route 
+          path="profile/:userId" 
+          element={
+            <UserProfileView 
+              user={selectedUser} 
+              onClose={() => setSelectedUser(null)} 
+            />
+          } 
+        />
       </Route>
       <Route
         path="/invite/:inviteId"
